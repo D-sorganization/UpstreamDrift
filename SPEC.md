@@ -2754,6 +2754,478 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-27 | #15841 | Deliver five historical golfer model bundles and catalog-driven batch previews |
+| 2026-11-27 | #15839 | Acquire and document private reference clips for five historical golf legends |
+| 2026-11-27 | #15838 | Add a visual-only straw hat to the shared golfer head |
+| 2026-11-27 | #15840 | Add source-attributed appearance candidates for five golf legends |
+| 2026-11-27 | #15827 | Bind explicitly styled native definitions to their exact MuJoCo XML |
+| 2026-11-27 | #15826 | Add a visual flat-cap appearance style |
+| 2026-11-27 | #15823 | Calibrate native player stature with bounded torso scaling |
+| 2026-11-27 | #15831 | Deliver portable player models and hash-bound native review views |
+| 2026-11-27 | #15820 | Record historical player reference video source provenance |
+| 2026-11-27 | #15828 | Build source-attributed Tiger Woods and Ben Hogan skins and current-model candidates |
+| 2026-11-27 | #15818 | Add bounded visual head morphology without changing golfer physics |
+| 2026-11-27 | #15812 | New audit_root_wrench (WP-0a) checks all six unexplained root-wrench components against the WP-1 gates (2% body weight, 2% body weight x height, outside impact). It ranks which cause to refit first and returns JSON-ready output. |
+| 2026-11-27 | #15810 | Canonical-v2 solution bundles can record a preregistered admission block: controller, interval, per-frame validity, and separate torque channels. |
+| 2026-11-27 | #15796 | Implement immutable serializable SimulationOutput (#15731) and DynamicsQuery interface (WP B2, Panel th_bd39271e0dc6) |
+| 2026-11-27 | #15791 | Extend SimulationOutput with GRF/CoP/CoG contract fields and add deterministic frame-level replay harness (WP-1) |
+| 2026-11-27 | #15778 | Remove the duplicate certifi floor from pyproject runtime dependencies and add a duplicate-dependency test |
+| 2026-11-27 | #15807 | Fail closed on simulation WebSocket auth, the LocalUser ADMIN bypass, and legacy REST prefixes |
+| 2026-11-27 | #15806 | CI Standard runs workflow pushes, code-quality failures fail the job, and OSV crashes are no longer swallowed |
+| 2026-11-27 | #15804 | Keep advertised engines out of unsupported_engines when a qualification receipt is missing |
+| 2026-11-27 | #15781 | Compose: container-native PATH, drop obsolete version key, move dev --reload to docker-compose.override.yml, add hygiene test |
+| 2026-11-27 | #15782 | Dockerfile: install a pinned, SHA-256-verified rustup-init instead of running the unverified sh.rustup.rs script, and test Dockerfiles for pipe-to-shell |
+| 2026-11-27 | #15803 | install.sh runs only after a full parse, and tagged releases publish its SHA-256 checksum instead of an unpinned curl-to-bash from main |
+| 2026-11-27 | #15772 | Fail-closed manifest.json verifier, resume key and atomic publish for swing report packages (SRP-6 slice 1) |
+| 2026-11-27 | #15742 | Add the engine-agnostic SimulationOutput contract and the analytic hand-load null-space solvers |
+| 2026-11-27 | #15761 | Encode the hand-load comparison grid to an H.264 MP4 with imageio and ffmpeg |
+| 2026-11-27 | #15760 | Add the face-on 2D tip-to-tail still for midhands ZTCF plus ZVCF equals Total |
+| 2026-11-27 | #15774 | Swing report package window model: ticks become CLI flags and the plan preview reuses the command line's parser and planner (no Qt) |
+| 2026-11-27 | #15773 | Swing report package runner: a failed render reports the exporter's own error line and keeps its stderr in render.log. |
+| 2026-11-27 | #15775 | Swing report package launcher window and tile: pick bundle, package and items, preview the plan, run and stream progress |
+| 2026-11-27 | #15755 | Swing report package executor: renders each planned video in its own temporary folder behind a free-disk guard, composes grids and phase sheets, records a resumable manifest, and marks videos the exporter does not accept yet as unavailable before any render (SRP-5 slice 1; CLI and launcher tile follow) |
+| 2026-11-27 | #15771 | Swing report package command line: python3 -m src.tools.swing_report_package lists the catalog, dry-runs or runs a default, named or custom package with key phases from the bundle (SRP-5 slice 2) |
+| 2026-11-27 | #15727 | Swing report package: catalog of package items (videos, case grids, phase sheets) with a default package and request files that include, exclude and override |
+| 2026-11-27 | #15747 | Swing report package: key-phase grid and freeze-frame sheets composited from rendered clips (SRP-3) |
+| 2026-11-27 | #15736 | Exported clips write a frame-times sidecar; HUD explains withheld shading at ball contact; colour key rows get solid swatches |
+| 2026-11-27 | #15726 | Swing report package: key swing phases (address, shaft parallel, top, lead arm parallel, impact, follow-through) detected from body positions, rules in settings |
+| 2026-11-27 | #15759 | Native viewer export: --ztcf-zvcf-hands midhands draws both hands' load on the club as one equivalent force plus couple at the hand midpoint, per ZTCF/ZVCF case |
+| 2026-11-27 | #15715 | Dashboard and web ZVCF now plot applied-control acceleration with pointwise ZTCF plus ZVCF closure. |
+| 2026-11-27 | #15713 | Make MuJoCo capability probes safe under headless Windows xdist and use CPU-only MuJoCo mode for GUI tests |
+| 2026-11-27 | #15699 | Procedure doc: forces and torques for a new best match with the kinetic match |
+| 2026-11-27 | #15706 | Native export: --ztcf-arrow-gain lengthens only the tip-to-tail hand-force arrows, and the legend states the gain |
+| 2026-11-27 | #15700 | Native export draws the ZTCF/ZVCF hand-on-club force tip to tail (--ztcf-zvcf-hand-force) |
+| 2026-11-27 | #15687 | Shared builders for the ZTCF/ZVCF hand-on-club force: a pointwise world-frame drift/control split (hand_force_split) and tip-to-tail arrow glyphs (tip_to_tail). |
+| 2026-11-27 | #15695 | Kinetic match K1: forces and torques for a kinematic best match by closure-projected inverse dynamics and allocation, with a configured plausibility gate |
+| 2026-11-27 | #15701 | Kinetic match closes each pose onto the hand-on-club weld before inverse dynamics; an open weld turned the grip force into a fake external moment (driver peak grip 14.5 kN to 74 N) |
+| 2026-11-27 | #15707 | Kinetic-match bundles declare replay_mode inverse_dynamics, so export clips label them honestly instead of Unknown Replay Mode |
+| 2026-11-27 | #15686 | The current golfer model (full_body_skinned_flex_v2) carries the flexible Stiff chain shaft by default; rigid is a logged ballpark fallback and the canonical gate refuses it; reference specs regenerated. |
+| 2026-11-27 | #15704 | Flex sweep reports the peak shaft bend up to impact; the extrapolated window after impact gave about 300 mm instead of about 105 mm |
+| 2026-11-27 | #15698 | Add grip-driven shaft head-kinematics simulation for the flex study |
+| 2026-11-27 | #15696 | Add club_fitting grip-driven flexible-shaft simulation (same hand motion, settings in club_fitting.json) |
+| 2026-11-27 | #15702 | Add club_fitting flex sweep and CLI (same hand motion, every flex) |
+| 2026-11-27 | #15683 | mirror_spec_to_left_handed reflects a right-handed full-body spec through the sagittal x-z plane; the right hand carries the club |
+| 2026-11-27 | #15680 | The Model Explorer demo swing (trunk_visuals/driver_v2_bundle.npz) no longer falls over about 0.8 s in. Its v2 spec now carries the run's hip, ankle, shank and ground calibration (carry_calibration), so the pelvis stays within 2.3 cm (height) of the run's target. The evidence generator's repository root is fixed as well. |
+| 2026-11-27 | #15668 | Canonical golfer gate refuses capsule, loft and unrevised specs before simulation; Solution Bundles carry a plant/controller/solver model lock and unlocked bundles are replay-only |
+| 2026-11-27 | #15656 | Pose the skinned hand pair from the spec's grip_config (strength, hand spacing, style, palm diagonal, lead thumb); owner grip unchanged without one |
+| 2026-11-27 | #15677 | The spec builder moves specs with physical grip picks to the current golfer model, posing the skinned hands from subject.grip_config; only left-handed specs keep the deprecated fallback. |
+| 2026-11-27 | #15705 | Spec builder writes left-handed golfers on the current model as the exact sagittal mirror of the right-handed spec (--handedness left); an unmirrored left label is refused |
+| 2026-11-27 | #15655 | Left-handed club and skinned hand pair: the right-handed ones mirrored in the swing plane (slice 1) |
+| 2026-11-27 | #15658 | Ratchet test: committed specs and bundles on a deprecated golfer model part may only leave src/config/golfer_model_legacy_assets.json, never join it. |
+| 2026-11-27 | #15653 | Resolve four mypy arg-type and operator errors in cross_engine_replay.py that blocked pre-push hooks |
+| 2026-11-27 | #15678 | Current-model driver and 7-iron reference specs: a hash-pinned overlay on the legacy specs, read with golfer_reference_specs.reference_spec and listed in the golfer model registry. |
+| 2026-11-27 | #15651 | Golfer model registry names the skinned hands and body as current and deprecates capsule hands and loft body |
+| 2026-11-27 | #15657 | build_anthropometric_spec writes right-handed specs on the current golfer model (skinned hand wrists, skinned body); left-handed specs log the deprecated fallback until left-handed skinned hands land. |
+| 2026-11-27 | #15541 | Wait for async results load without spinning the Qt event loop (#15539) |
+| 2026-11-27 | #15542 | Project playback ball overlay using the view look-at (#15538) |
+| 2026-11-27 | #15589 | Require SEPARATED termination as well as completed contact before releasing an audited post-impact state |
+| 2026-11-27 | #15626 | Add an impact-zone slow-motion toggle to the results PlaybackBar: disabled until the run has an impact window, emits impact_zone_slow_toggled, and unchecks itself when availability is lost, and availability resets whenever a different session is bound. |
+| 2026-11-27 | #15548 | Normalize impact-factor club speed before building playback shot summaries; cover real metric and imperial cards, missed contact, and unavailable speed. |
+| 2026-11-27 | #15572 | Add a Qt-free ImpactZoneClock that plays the results playback slower around the contact instant, clamped to the run, rebase-safe on start and speed changes. |
+| 2026-11-27 | #15615 | Qt-free ImpactZonePlayback switch: toggle impact-zone slow motion live without jumping the frame or changing speed |
+| 2026-11-27 | #15598 | Derive the impact-zone slow-motion window from a qualified contact-window summary, failing closed otherwise. |
+| 2026-11-27 | #15581 | Preserve the simulation time origin when exporting contact-interval playback frames. |
+| 2026-11-27 | #15596 | Classify ground-first iron strikes from sampled sole-height traces |
+| 2026-11-27 | #15606 | Export strict JSON iron divot diagnostics with explicit heuristic status and null no-contact offsets. |
+| 2026-11-27 | #15583 | Apply optional pre-ball divot speed and spin retention in the swing-to-flight pipeline |
+| 2026-11-27 | #15617 | Pin the iron divot model to its closed-form pre-ball energy integral, clean/fat boundary and linear scaling with tests |
+| 2026-11-27 | #15545 | Add iron divot model with fat-shot pre-ball turf contact (physics/divot_model.py) |
+| 2026-11-27 | #15608 | Add headless QTest E2E coverage of the Unified Physics Dashboard with a real MuJoCo hinge; clear pause state on reset and stop the simulation thread on close. |
+| 2026-11-27 | #15644 | Cover the Training Controller dashboard with headless QTest E2E (submit, run, pause/resume/cancel, close) and surface submit-dialog validation and scheduler errors in the dialog instead of only the log. |
+| 2026-11-27 | #15607 | Exercise Tour Matching Viewer archive loading, model rendering, playback, error recovery and close cleanup with native headless QTest. |
+| 2026-11-27 | #15591 | Exercise all Terrain Engine presets with headless QTest and synchronize query bounds with custom loaded terrain extents. |
+| 2026-11-27 | #15639 | Add native headless QTest launcher E2E coverage for Swing Objective Lab selection, shared budgets, real comparison workers, result tables and disposal. |
+| 2026-11-27 | #15588 | Add headless QTest launch, preset, engine-selector, run, unit-switch and window coverage for the swing-to-flight pipeline GUI. |
+| 2026-11-27 | #15638 | Cover Golf Model Suite launcher routing and recovery with headless QTest; repair consolidated module entry points. |
+| 2026-11-27 | #15627 | Add native headless QTest coverage for Starting-Pose Matcher transforms, export, rotation locks and CSV playback; stop standalone playback on close. |
+| 2026-11-27 | #15605 | Add headless QTest receipt-to-load-heatmap E2E coverage for Spine Viewer and clear stale study results after rejected runs. |
+| 2026-11-27 | #15579 | Exercise the Simulation Backends launcher with headless QTest and stop active physics workers on window close. |
+| 2026-11-27 | #15599 | Add native headless QTest launch, seven-model comparison, preset/edit/rerun, clear and modal-warning recovery coverage for the Multi-Model Shot Tracer launcher. |
+| 2026-11-27 | #15601 | Add headless native QTest coverage of Shot Pattern Analysis using its real physics child process, saved carry results and previews, invalid-output rejection and recovery; clear stale presentation when starting a new analysis. |
+| 2026-11-27 | #15645 | Headless PyQt6 QTest launch-and-interact E2E for the Shadow Tracker review workbench (#15522) |
+| 2026-11-27 | #15643 | Cover Rate of Closure Impact Explorer input-to-metrics flows with headless QTest |
+| 2026-11-27 | #15563 | Exercise the putting GUI with real headless QTest interactions and keep playback usable without OpenGL. |
+| 2026-11-27 | #15612 | Exercise Pose Studio with headless QTest and rebind the viewport when switching physics engines. |
+| 2026-11-27 | #15636 | Add headless QTest E2E for the Pinocchio Golf window; fix its launch crash (meshcat Visualizer) and stop the physics timer on close. |
+| 2026-11-27 | #15561 | Add headless QTest launch, simulation, analysis, playback and reset coverage for double/triple pendulums; publish completed trajectories before notifying GUI consumers. |
+| 2026-11-27 | #15637 | Exercise the engine Driven Pendulum Explorer with headless QTest and fix the Triple model view crash. |
+| 2026-11-27 | #15621 | Add headless QTest E2E for the MyoSuite dashboard (probe click, failure surfacing, read-only usage pane, close cleanup) and fix its submodule check looking above the repo root. |
+| 2026-11-27 | #15618 | Exercise native MuJoCo Advanced Golf Analysis with headless QTest and release simulation resources on window close |
+| 2026-11-27 | #15649 | Add headless QTest end-to-end flows (typed search, combo keys, row clicks, GIF playback buttons, receipt dialog) for the Matched Swing Results Browser. |
+| 2026-11-27 | #15614 | Exercise the lower-body MuJoCo panel with headless QTest and stop physics and telemetry on close. |
+| 2026-11-27 | #15640 | Add headless QTest E2E coverage of the JaxSim dashboard: real main() launch, capability indicators, read-only click/key interaction and phone-width docking. |
+| 2026-11-27 | #15628 | Exercise native MuJoCo Humanoid Launcher controls, configuration, process streaming and shutdown with headless QTest; preserve selected control mode and stop the owned worker on close. |
+| 2026-11-27 | #15593 | Add headless QTest E2E for the Grip Wrench Plots tool: JSON open, couple-frame toggle, typed frames, Run/Cancel clicks, failure and cleanup. |
+| 2026-11-27 | #15630 | Exercise the Golfer Upper Body model with native headless QTest and preserve polynomial torque presets |
+| 2026-11-27 | #15641 | Headless QTest launch-and-click E2E for the Golf Suite Launcher (MuJoCo/Drake/Pinocchio buttons). |
+| 2026-11-27 | #15622 | Add headless native QTest launcher flows for Golf Environment Viewer, course dimensions and trajectory cleanup |
+| 2026-11-27 | #15634 | Add native headless QTest launch and interaction coverage for the Exercise Dashboard and cross-engine lift receipt panel. |
+| 2026-11-27 | #15633 | Add native headless QTest launch, edit/run, re-run, refusal and reopen coverage for the Cross-Engine Perturbation Comparison Dashboard, and release the theme singleton's reference to a closed dashboard so reopening no longer raises RuntimeError. |
+| 2026-11-27 | #15647 | Headless QTest E2E for the Config Setup Wizard widget (#15522) |
+| 2026-11-27 | #15568 | Add headless QTest launch-and-interact coverage for BunkerShot3D and clear stale evaluations after invalid input. |
+| 2026-11-27 | #15574 | Add headless QTest end-to-end tests for the Impact Parameters panel; disable the explorer button on a freshly launched empty panel |
+| 2026-11-27 | #15577 | Add headless QTest E2E for the Putting Analytics window: typed inputs, study selection, Run click, busy/done/rejected states. |
+| 2026-11-27 | #15631 | Add headless QTest E2E for the OpenSim Golf GUI (launch, load, run, help) |
+| 2026-11-27 | #15543 | Add headless Qt end-to-end tests driving the Ball Flight GUI Simulate click through real physics |
+| 2026-11-27 | #15586 | Render guarded flight and green rollout plots in web workbench results |
+| 2026-11-27 | #15623 | Validate bunker flight integration time steps before simulator construction |
+| 2026-11-27 | #15629 | Reject refused or incoherent flight visualization traces when loading saved workbench evaluations |
+| 2026-11-27 | #15597 | Reject flight visualization outcomes with refused shot or carry verdicts |
+| 2026-11-27 | #15604 | Explain missing bunker flight and green rollout traces at the model boundary |
+| 2026-11-27 | #15590 | Reject malformed bunker flight and rollout traces before visualization |
+| 2026-11-27 | #15619 | Derive display-neutral apex, descent, rollout and lateral readout numbers from a BunkerFlight |
+| 2026-11-27 | #15559 | Desktop ball-flight, landing and green-rollout view in the bunker workbench |
+| 2026-11-27 | #15512 | Connect bunker release to ball flight and exploratory green rollout |
+| 2026-11-27 | #15555 | Expose digest-covered bunker flight and rollout traces in workbench API records |
+| 2026-11-27 | #15562 | Add sampled torque-history margin validation (limits, slew, work) for feasible strategies. |
+| 2026-11-27 | #15569 | Add hash-verified export manifest for synchronized null-space strategy replay bundles (Slice C) |
+| 2026-11-27 | #15741 | Add the invariant hand-load allocation dashboard with unavailable-data and provenance checks |
+| 2026-11-27 | #15751 | Fixture-driven baseline versus least-force comparison frames with a ZTCF, ZVCF and Total grid |
+| 2026-11-27 | #15611 | Add sampled feasible component-range classification (model invariant, prior-constrained narrow, unmoved, variable) with tolerance dependence (Slice B) |
+| 2026-11-27 | #15750 | Add fixture-driven 3D tip-to-tail stills for midhands ZTCF plus ZVCF equals Total |
+| 2026-11-27 | #15600 | Reject solution bundles without a recorded interval or with impact outside its time support |
+| 2026-11-27 | #15552 | Add sampled total applied torque and slew feasibility margins for controller-based swing optimization. |
+| 2026-11-27 | #15565 | Require explicit per-quantity replay tolerances and matching runtime pins |
+| 2026-11-27 | #15573 | Add fresh-backend closed-loop candidate replay orchestration with fixed-rate ZOH controls |
+| 2026-11-27 | #15625 | Add a recorded Solution Bundle CLI for canonical total applied torque and sampled slew margins, with explicit joint limits and machine-readable violations. |
+| 2026-11-27 | #15624 | Add bracketed approaching signed-distance contact root and finite missed-contact penalty |
+| 2026-11-27 | #15595 | Compare recorded optimization bundles with explicit missing evidence and separate rollout metrics |
+| 2026-11-27 | #15564 | Add versioned Solution Bundle schema and strict JSON+NPZ codec for replayable optimized swings (Slice 2). |
+| 2026-11-27 | #15550 | Regression test and citation tightening for wind consumers in the flight shortcomings register (#15482 review) |
+| 2026-11-27 | #15534 | Codex #15464 review follow-up: tip-slope regression and narrow acceptance reference |
+| 2026-11-27 | #15525 | Normalize MuJoCo geom_rgba ndarrays before MeshCat material binding (#15444). |
+| 2026-11-27 | #15749 | Runout bounce is now Penner's (2002) spin-aware first bounce with cited coefficients in src/config/runout_bounce.json (model sg_runout_v2); the wedge run/carry strict xfail stays, since the landing simulator clamps every skill's spin to the driver envelope. |
+| 2026-11-27 | #15496 | Shot-shape views aim at the finish: plan view, side figure and wide-view ground line run from the ball to where the ball finishes; --aim-line address keeps the target line |
+| 2026-11-27 | #15475 | Shot dispersion figure and record: distance labels in yards by default (display_units) with --distance-unit; JSON keeps SI values plus unit names |
+| 2026-11-27 | #15486 | Shortcomings register: wind entry names both consumers that set wind (ball flight GUI and shot-model landing simulator); the native export flight runs calm. |
+| 2026-11-27 | #15646 | Shot card gear spin uses the rigid-contact law with per-club head inertia settings |
+| 2026-11-27 | #15502 | Replace from-memory flight reference rows with values read from the published Trackman tour-average tables and add 5 more rows |
+| 2026-11-27 | #15506 | Refit the zero-spin drag crisis of the Rust flight kernel and the Python fallback to Choi et al. 2006 (centre Re 7.59e4, width 0.065, floor 0.187, recovery 2.81e5; rms 0.008), re-derived in a test from the wind-tunnel fixture; physics revision 3 |
+| 2026-11-27 | #15454 | Native export labels distances in yards by default (display_units settings) and shows the model smash factor on the impact card and factors panel |
+| 2026-11-27 | #15468 | Native export flight takes head mass, inertia and COR from the struck club and passes the strike offset to the impact model |
+| 2026-11-27 | #15466 | Launch-spin validity envelope per club class from ball_flight_validity_settings.json, so irons and wedges are no longer refused by the driver cap |
+| 2026-11-27 | #15757 | Landing simulator passes each skill's club to the flight pipeline, so long iron to wedge use their own launch spin caps instead of the driver's 3500 rpm; wedge run/carry now falls below the short iron's |
+| 2026-11-27 | #15490 | Label flight registry presets as not the published models (F6) |
+| 2026-11-27 | #15748 | Iron COR follows the sourced ball-on-rigid-plate law e = 0.86 - 0.0029 v_n (Penner 2001, Am. J. Phys. 69, 563, Eq. 5) evaluated per strike, replacing the unsourced driver 0.83 |
+| 2026-11-27 | #15499 | Hole view honours the aim line: with the finish aim the tee-to-finish line runs along the hole centre line, sides and the title report the aim. |
+| 2026-11-27 | #15492 | Hole view draws the roll to the rest point and labels carry, side, roll and total at the landing |
+| 2026-11-27 | #15474 | Hole length presets (par 3/4/5) and display-unit labels (yards by default, --distance-unit) in the shots-on-a-hole figure |
+| 2026-11-27 | #15744 | Hold the older driver flight benchmarks to the sourced PGA tour carry and apex bands; three alternative models are strict xfails (F7) |
+| 2026-11-27 | #15473 | Guard the optional Rust flight kernel with a PHYSICS_REVISION attribute (minimum 2) so a pre-#15460 wheel falls back to Python with a warning |
+| 2026-11-27 | #15460 | Flight kernel drag is now spin-dependent: Cd(Re, S) = Reynolds crisis curve on a 0.20 production-ball floor (Lyu et al. 2018) plus 0.18 per unit spin ratio (Smits & Smith 1994); Rust kernel, Python fallback and enhanced engine changed together |
+| 2026-11-27 | #15488 | Flight inset draws the roll after landing to the rest point, with carry, roll and total labels kept clear of the plot titles. |
+| 2026-11-27 | #15489 | Fix spring-damper impact model: COR-derived damping and Coulomb spin (F5) |
+| 2026-11-27 | #15501 | F1 drag-law investigation: digitised wind-tunnel drag data (Choi 2006, Bearman and Harvey 1976, Lyu 2018 check) and held-out launch-monitor results in the shortcomings register; no wind-tunnel fit clears the wedge carry band without breaking the 6-iron, so the kernel is unchanged |
+| 2026-11-27 | #15500 | Export Clips dialog gains distance and speed unit combo boxes; REST and MCP unit options pinned by tests |
+| 2026-11-27 | #15770 | Add the showcase clip assumptions and known shortcomings README (epic child 9) |
+| 2026-11-27 | #15482 | Add the flight and impact shortcomings register (what the pipeline does not model) |
+| 2026-11-27 | #15498 | Add spin-versus-spin-loft regression table and closed-form oblique-impact check for the impact models |
+| 2026-11-27 | #15450 | Add reference-shot regression for the ball-flight model: published driver/iron/wedge launches with carry, apex and descent bands; rows the model misses are strict xfails with measured errors |
+| 2026-11-27 | #15544 | S4 angmom independent oracle; ball excluded from whole-body H; root_body_id deprecated |
+| 2026-11-27 | #15527 | Reject non-finite flight inset positives; pin headless native verification clip |
+| 2026-11-27 | #15431 | dE/dt diverging segment shading, interface transfer glyphs, swing-derived limits |
+| 2026-11-27 | #15409 | S4: straight angular-momentum arrows (whole-body + groups, fixed scale) for MuJoCo/MeshCat |
+| 2026-11-27 | #15400 | Engine-agnostic segment angular-momentum frame and MuJoCo provider (about whole-body COM, world frame) |
+| 2026-11-27 | #15427 | Segment kinetic-energy surface shading (cividis, fixed limits); demote KE globes to KE proxy debug overlay |
+| 2026-11-27 | #15403 | Generalize segment tension/compression shading into quantity-agnostic scalar series and colour scale |
+| 2026-11-27 | #15393 | Robertson–Winter interface power (F·v + M·ω), per-segment balance residual, MuJoCo adapter |
+| 2026-11-27 | #15391 | Segment kinetic-energy globes, per-frame KE time series API, and translational/rotational split |
+| 2026-11-27 | #15392 | Measure native skinned body in showpiece lighting checks |
+| 2026-11-27 | #15537 | Bundle adjustment FC-011 guards, feasible tangent projection, bounded FD, and positive prior sigmas |
+| 2026-11-27 | #15530 | Guard degenerate GP radius window in compute_correlation_dimension |
+| 2026-11-27 | #15531 | Guard hysteresis, bound power durations, defensive work-metrics cache copies |
+| 2026-11-27 | #15513 | Require a list for subject.dropped_markers in marker_selection; dict, int, bool, tuple and stringified values now raise ValueError |
+| 2026-11-27 | #15334 | C3D viewer embed loader registers the tool again when the registry was reset after the first import |
+| 2026-11-27 | #15362 | Set metacarpal arch for the skinned hand: per hand and ray, flexion and lean of a metacarpal about its base within cited joint ranges, never about its own length; nothing set as shipped, so every hand is drawn as before (appearance only) |
+| 2026-11-27 | #15377 | Fifth selectable trail-hand seat covered_square: palm kept over the lead thumb (40.0 mm from its base joint, crown gap 1.9 mm) with the middle and ring curl planes 19.8 and 28.5 degrees off square (48.4 and 47.7 on the default); a hand may now abduct named knuckles toward the little finger, held inside the flexion-dependent sideways range (side_close.knuckle_abduction_deg, none set); default seat unchanged (appearance only) |
+| 2026-11-27 | #15368 | The posable grip hand (_GripHand, _straight_angles, flat_hand_landmarks and their constants) moves out of skinned_human into grip_hand; skinned_human imports them back under the same names (pure move, no behaviour change) |
+| 2026-11-27 | #15364 | Fourth selectable trail-hand seat arched_square: the club 20 degrees across the hand with the middle, ring and little metacarpals leaned toward the little finger (curl planes 11.5 and 18.4 degrees off square, knuckles 3.0 and 4.0 mm off the shaft line; lead thumb tip left bare by 12.6 mm); a seat may now set metacarpal_arch; default seat unchanged (appearance only) |
+| 2026-11-27 | #15372 | A hand may be given a thumb target of its own (thumb.toward_index_target_of, none set): the trail thumb can close a V on its forefinger while the lead thumb keeps its azimuth. A hand's thumb may be held flexed, a short thumb (thumb.held_flexion_deg_of, none set): tried for the lead thumb under the squarer trail seats and not set, because the raised knuckle lifts the trail palm off the thumb (crown gap 12.6 to 15.3-17.9 mm); drawn hands unchanged (appearance only) |
+| 2026-11-27 | #15556 | Pelvis skin map scales lateral hip spacing to match subject hip_half_spacing |
+| 2026-11-27 | #15311 | Skinned-hand forearm ends at the wrist joint over a wrist ball on the hand, meets the upper arm at the elbow, and flat textures are one colour (appearance only) |
+| 2026-11-27 | #15326 | Widen the drawn pelvis at the belt line to the measured body and the belt markers, and hang the trouser legs with ease below a fitted thigh; visual only |
+| 2026-11-27 | #15305 | Skinned-hand forearm tapers to a wrist of human girth at the wrist joint (appearance only) |
+| 2026-11-27 | #15363 | Skinned body: the forearm keeps its depth behind a turned hand; the wrist blend is shortened from 70 to 35 mm (whole from 12 mm) so a twisted or bent wrist no longer wrings the forearm thin, with a depth check at swing wrist poses |
+| 2026-11-27 | #15349 | Skinned CC0 body: surface checks at swing-like poses (folded and stretched faces within bounds) and a shared-infrastructure entry |
+| 2026-11-27 | #15339 | Skinned CC0 body: each limb fitted to its own side and the forearm shaped to lie 2 mm under the skinned hand's wrist section |
+| 2026-11-27 | #15341 | Skinned CC0 body clothes: chest evened and shirt pulled taut so no pectoral relief shows, softened sleeve caps, straight trouser legs |
+| 2026-11-27 | #15347 | Skinned CC0 body: a slim build stored as a vertex offset in the asset and mixed in by the slim_share fit setting (showpiece profile: 1) |
+| 2026-11-27 | #15379 | Skinned body: the drawn hand ends in a sleeve on the forearm skin's end ring (at most 2 mm proud, was 3.7 mm with a ring line), with no wrist ball (appearance only) |
+| 2026-11-27 | #15369 | Drape the CC0 body skin's trousers over the tucked shirt by a named waist gap so the shirt no longer comes through at swing poses, and taper the trouser leg tube |
+| 2026-11-27 | #15353 | Skinned body: the forearm's end follows the hand on the club, so the wrist stays closed at any bend; trail wrist ring unmirrored |
+| 2026-11-27 | #15360 | Skinned body clothes: a smooth collar line measured from the exact skin crossing, and sleeve hems held 5 mm off the arm |
+| 2026-11-27 | #15385 | Skinned CC0 body: the head model's neck stub is held on the head base's ellipse up to a tilted jaw-line plane (export_settings.json head_base jaw_height_m, jaw_slope, flare_m; narrower ellipse) and the neck's end is drawn 20 mm in, so stub and neck skin no longer cut each other in a ragged line under the jaw; loft backend unchanged |
+| 2026-11-27 | #15376 | Skinned CC0 body: the bare skin carries the shirt's hem lines (collar, sleeves) as edges of its own (dress_settings.json, hem_seam), so a hem's rim and the skin under it are the same vertices and no longer part at a swing pose; see-through pixels at the collar in the showpiece neck close-ups 32 to 2 (none at the neck) |
+| 2026-11-27 | #15356 | Skinned body: the head model's base is held in an ellipse inside the skinned neck and drawn down it, with turn and join checks; a slit behind the jaw remains |
+| 2026-11-27 | #15375 | Skinned CC0 body: a second, setting-controlled smoothing of the thorax, clavicle, shoulder and upper-arm weights round the shoulder joint (pose_settings.json), so a turned arm shears the shirt's armpit web less; bone count unchanged, 0 switches it off |
+| 2026-11-27 | #15371 | Skinned CC0 body: the skin's ragged ankle rim is drawn down to one level and the trouser leg cut below the ankle joint (dress_settings.json ankle_end_fraction, trouser_end_fraction 1.05), so the hem hangs over the shoe with no strip of bare ankle; loft backend unchanged |
+| 2026-11-27 | #15365 | Skinned CC0 body: the skin's neck end is drawn in under the jaw and closed by a plug that follows it (dress_settings.json neck_cap), so no camera sees between neck and head model; loft backend unchanged |
+| 2026-11-27 | #15307 | Size the drawn CC0 head from the subject's stature (menton to vertex 0.132 of stature); visual only, the old size stays one setting away |
+| 2026-11-27 | #15386 | Skinned body's shirt bridges the armpit fold instead of crossing itself there, so no cloth face is inside out behind the armpit (appearance only) |
+| 2026-11-27 | #15308 | Shared MakeHuman reader for the hand, head and body builders, with a morph target reader and macro mix |
+| 2026-11-27 | #15370 | MuJoCo scene lights and shadow quality now come from scene_lighting.json: only the key light casts a shadow, a larger shadow map with a set extent and depth range removes the saw-tooth fringes on lit skin, and lower light levels stop the skin clipping to white (appearance only) |
+| 2026-11-27 | #15336 | Re-seat the drawn thigh on the hip joint and add a buttock to the pelvis (visual only) |
+| 2026-11-27 | #15313 | Pose-independent cross-sections of the MakeHuman skin along each bone axis, chosen by skin weight |
+| 2026-11-27 | #15338 | MuJoCo export of the skinned CC0 body behind subject.body_visual_backend (default off) |
+| 2026-11-27 | #15328 | Mesh steps for the body skin layers: normals, open edges, relaxation and a level-set cut |
+| 2026-11-27 | #15309 | Draw the thighs and shins at the girths of the CC0 athletic male body: stature-scaled leg radii, a calf behind the shin, quadriceps ahead of the thigh, a knee held to the joint; visual only |
+| 2026-11-27 | #15310 | Golfer torso second pass: chest forward of the trunk axis (less hunch), deeper chest, fuller waist, and yokes and deltoids derived from the neck and shoulder joints (visual only) |
+| 2026-11-27 | #15303 | Golfer thorax: upper back slopes into the neck (no hump at address), chest as wide as the hips with a waist taper, and measured trunk acceptance bands (visual only) |
+| 2026-11-27 | #15366 | Golfer face: eyeballs seated behind the CC0 head's open lids, thin arched brows, and a haircut cut on a refined scalp with a corner-free hairline and smooth shading |
+| 2026-11-27 | #15367 | Golf-shoe shape of the procedural foot: toe spring, sole with heel, shank and welt ledge, saddle, heel counter, laces and toe-cap seam from shoe_settings.json (appearance only) |
+| 2026-11-27 | #15316 | Committed MakeHuman body section table (numbers only) with source hashes, licence notice and contract tests |
+| 2026-11-27 | #15331 | Clothing layers of the body skin: skin, shirt and trousers cut on level sets, with a clean wrist ring |
+| 2026-11-27 | #15384 | CC0 head hair: coarse hidden lining frees triangles for a finer combed crown, softer fringe and nape (appearance only); Grow the golfer's hair on a refined scalp (edge-length midpoint splits, a setting) under the owner-approved 32,000 head triangle budget, with outline, hairline and comb-ridge checks |
+| 2026-11-27 | #15314 | Build script and settings that turn the MakeHuman body into loft section tables (torso, neck, limbs, shoulder, head) for a neutral and a male athletic mix |
+| 2026-11-27 | #15335 | Body skin bones for native skinning: group-to-body shares and bind poses |
+| 2026-11-27 | #15321 | Add the runtime fit of the CC0 body skin to a subject's joint centres, with named hip and shoulder anchor corrections (opt-in, no default uses it) |
+| 2026-11-27 | #15317 | Add the continuous CC0 body skin asset (athletic MakeHuman trunk, arms and legs as one weighted surface) with its build script, provenance and tests; not yet used by any appearance |
+| 2026-11-27 | #15324 | Add linear blend skinning of the CC0 body skin with a continuous shoulder: relaxed weights over thorax, girdle link and upper arm, tested on the girdle poses (opt-in, no default uses it) |
+| 2026-11-27 | #15325 | Add a chest depth scale and a thigh-front shift to the CC0 body skin fit as named settings, neutral by default and set by the showpiece profile; Add named profiles to the CC0 body skin fit settings, with a showpiece profile that raises the shoulder anchor 25 mm (opt-in by name, default fit unchanged); Body skin asset keeps the neck 90 mm above the neck joint in its own skin groups; Skinned neck shares a head turn between thorax and head |
+| 2026-11-27 | #15312 | Thigh, shank and hip spacing as optional subject-preset settings; tour-average preset gets symmetric 441 mm thighs with the trunk re-split |
+| 2026-11-27 | #15358 | Soft stance anchor of the full-capture solve: settable slide weight and slide allowance, off by default |
+| 2026-11-27 | #15315 | Pipeline fit honours the subject preset's leg marker seeds and dropped markers (--leg-seeds), with a reproducible preset fit receipt |
+| 2026-11-27 | #15330 | Opt-in swing-solve settings: iteration cap, spin prior weight, free stance slide, shoulder-girdle range; neutral address bounds skip coordinates the model lacks |
+| 2026-11-27 | #15318 | Opt-in knee axial rotation setting (knee_axial_rotation_deg, default off): one bounded tibial rotation coordinate per knee, carried by the MuJoCo, Drake, Pinocchio and OpenSim emitters and refused by name-mapped consumers |
+| 2026-11-27 | #15348 | Opt-in --bundle-adjust stage in the fit pipeline with held-out markers and a receipt block |
+| 2026-11-27 | #15354 | Fit-path record of the bundle-adjust stage, the bundle-adjusted runs, the shoulder-girdle excursion and the term-by-term comparison with the experiment |
+| 2026-11-27 | #15332 | Engine-agnostic multi-frame marker-offset bundle adjustment core (opt-in wiring follows) |
+| 2026-11-27 | #15337 | Bundle adjustment solves by frame-wise elimination with exact offset derivatives, an optional caller pose Jacobian and constraint residuals; converges at driver-fit size |
+| 2026-11-27 | #15346 | Bundle adjustment lane adapter: frame selection, sigma table, weld and ground terms, receipt block |
+| 2026-11-27 | #15340 | Bundle adjustment core: held offsets and coordinates, frame-indexed constraint, per-frame pose settling, offset reach cap, marker weights and progress log |
+| 2026-11-27 | #15351 | Bundle-adjust stage settings: start poses, address repeats, pose prior, offset reach, held markers, lane weights, plant penalty, seed-free held-out scatter |
+| 2026-11-27 | #15361 | Address pose prior of the bundle stage and soft-anchored consistency re-solve, off by default; fit-path record of the soft stance anchor and address pose prior |
+| 2026-11-27 | #15320 | Address ground pin is the club sole stated in the document (club.sole_point_m from the subject preset's address lie), not the club-body origin; documents without it are unchanged; execution.driver honours --address-only |
+| 2026-11-27 | #15304 | Add the tour_average_driver subject preset (--subject-preset), a shoulder drop setting and a butt to sole club length; the default build is unchanged |
+| 2026-11-27 | #15302 | Add a selectable club-only driver club marker registration (club_only); the default driver.json and the committed documents are unchanged |
+| 2026-11-27 | #15294 | Visual neck solid for the CC0 head and neutral trunk-profile options (slant, squareness, forward shift, fine rings); no change to the trunk geometry |
+| 2026-11-27 | #15300 | Neck dome, collar squareness, forward shift and neck shape settings for the golfer (visual only) |
+| 2026-11-27 | #15298 | Slanted crew-neck collar and shoulder caps lowered below the neck point (trunk, yoke and upper-arm geometry) |
+| 2026-11-27 | #15281 | Hide contact spheres by default, light golf shoes with dark sole, tapered legs |
+| 2026-11-27 | #15283 | Upper-body builder can take the clavicle link mass out of the upper trunk so the shoulder girdle is not counted twice |
+| 2026-11-27 | #15282 | Trunk solids follow a waist-to-neck profile and shoulders are a yoke with a deltoid, not eggs and balls |
+| 2026-11-27 | #15290 | Shoulder caps sit lower and smaller so the shoulders read as shoulders, not pads |
+| 2026-11-27 | #15287 | Golfer head: dirty blonde short-crop hair with a natural taper, eyes, brows and mouth |
+| 2026-11-27 | #15284 | Add per-frame swing wrist and forearm readout (flexion/extension, radial/ulnar deviation, pronation/supination) and 3-row plot script |
+| 2026-11-27 | #15248 | Remove unused numpy import from motion_pipeline resample preprocessing (ruff F401) |
+| 2026-11-27 | #15247 | Conflict Disarm starts again: pass only the secrets the pinned provider declares |
+| 2026-11-27 | #15570 | Derive matched swing qualification ladder from AcceptanceGates + ledger receipts |
+| 2026-11-27 | #15243 | Preserve JSON recording files on serialization or publication failure by reusing the atomic text writer. |
+| 2026-11-27 | #15242 | Honor package anchors in safe_import relative module resolution |
+| 2026-11-27 | #15239 | Split positive and negative work and impulse at the zero crossing instead of clipping the trapezoid |
+| 2026-11-27 | #15237 | Reject unsupported analysis report formats before creating directories or capturing provenance, preserving JSON and HTML exports. |
+| 2026-11-27 | #15560 | Unify spatial_algebra jcalc on Featherstone passive X_J for revolute and prismatic joints |
+| 2026-11-27 | #15234 | Motion Pipeline Resample Keeps the 1/target_fps Step and Rejects Invalid target_fps |
+| 2026-11-27 | #15567 | Fix replay impact_to_send_latency_ms (replay quantization plus detect-to-send overhead) |
+| 2026-11-27 | #15230 | RQA determinism counts diagonal lines in both triangles and excludes the main diagonal by its content |
+| 2026-11-27 | #15229 | compare_scalars no longer reports 0% for opposite-sign or NaN values |
+| 2026-11-27 | #15228 | Pair Tools cache count-pressure correction while preserving integrity and minimum-age checks |
+| 2026-11-27 | #15224 | SwingComparator no longer scores 100 when the reference peak speed, club head speed or tempo ratio is zero. |
+| 2026-11-27 | #15222 | Handle overflow through safe numeric conversion fallback and strict contracts |
+| 2026-11-27 | #15220 | Preserve fresh caller defaults after JSON and YAML load failures |
+| 2026-11-27 | #15217 | Floor grid indices so points just below the raster origin are off-grid |
+| 2026-11-27 | #15575 | Adopt Tools cumulative integral initial offset via coherent provider pin and consumer regressions |
+| 2026-11-27 | #15215 | compute_screw_axis refuses non-finite twists, bad thresholds and bad endpoint lengths instead of returning NaN screw axes. |
+| 2026-11-27 | #15211 | Reject NaN environment floats when numeric bounds are supplied; pair Tools#6083 |
+| 2026-11-27 | #15210 | Spectral arc length now uses the adaptive cut-off from Balasubramanian 2015, so it no longer depends on fc |
+| 2026-11-27 | #15235 | Capture an independent deep snapshot of provenance parameters so caller mutations cannot rewrite run metadata or later export headers. |
+| 2026-11-27 | #15208 | Use transverse spin in the Python Magnus/lift force laws (BallFlightSimulator, LiftModel/MagnusModel, ODE flight models) as #15042 did for Rust. |
+| 2026-11-27 | #15207 | Reject zero-row CSV frames and trajectory arrays before reporting successful loads |
+| 2026-11-27 | #15203 | Preserve exact NumPy integer values and JSON integer types in output exports |
+| 2026-11-27 | #15201 | Stage legacy launcher configuration copies so partial failures remain retryable |
+| 2026-11-27 | #15198 | Validate JSON and YAML serialization before changing destination files |
+| 2026-11-27 | #15195 | Resolve dotted import names and version checks on the requested module |
+| 2026-11-27 | #15194 | Reject invalid seed types before mutating global RNG state |
+| 2026-11-27 | #15190 | Report filesystem errors through async and background save callbacks |
+| 2026-11-27 | #15188 | Refresh the Full-Source Mypy Diagnostic Baseline and Mark Its Regression Test |
+| 2026-11-27 | #15743 | ZTCF/ZVCF hand arrows draw each hand in its own colours from a settings file, with the colour key naming Lead and Trail |
+| 2026-11-27 | #15709 | ZTCF-only, ZVCF-only and total arrow views (force and torque) and a drawn colour key panel for the drift/control renders (Track Z, Z3a) |
+| 2026-11-27 | #15503 | with_shaft_model resolves a named club through the document's club record, so a subject-preset club length no longer fails with 'club body does not carry the rigid driver solids' (C21) |
+| 2026-11-27 | #15708 | Two-hand ZTCF/ZVCF split: lead and trail hand force and torque on the club, drift (gravity, momentum, passive) and control (applied torques alone) parts, with the club load summed over flexible-shaft links (Track Z, Z2) |
+| 2026-11-27 | #15359 | Third selectable trail-hand seat square_on_thumb: square_wrap with the palm rolled 22 degrees round the grip back onto the lead thumb (crown gap 4.8 mm against 19.0, curl planes 25 and 30 degrees off square); a seat may now set palm_centre_wrap_deg; default seat unchanged (appearance only) |
+| 2026-11-27 | #15355 | Trail-hand seat on the grip is a named setting (owner_trail_seat): palm_on_thumb stays the default and draws as before; square_wrap wraps the middle and ring fingers 29 degrees off square (48 before) with the knuckles on the shaft line, and gives up the palm's cover of the lead thumb's base (appearance only) |
+| 2026-11-27 | #15350 | Trail-hand grip at address is measured (wrist arch, finger squareness, knuckles on the shaft line, heel on the lead thumb); the owner's targets are recorded as settings and are not yet met (appearance QA only, nothing drawn changes) |
+| 2026-11-27 | #15416 | Tracer launches from the contact-instant state and time; wide flight view fills more of the frame, extends the ground, and lays out HUD text and panels from text sizes |
+| 2026-11-27 | #15717 | Torque arrows in the ZTCF/ZVCF part views use the N m visibility floor, not the force floor |
+| 2026-11-27 | #15505 | Split OverlayFeed and default_glyph_style out of native_viewer_export core.py into overlay_feed.py (pure refactor, file-size budget) |
+| 2026-11-27 | #15301 | Spec builder passes the shoulder_girdle_mass rule through (kwarg and --shoulder-girdle-mass); default spec unchanged |
+| 2026-11-27 | #15729 | Slim arrow style: thinner force arrows from a named setting (--arrow-style), shared by MuJoCo glyphs and the native viewer export |
+| 2026-11-27 | #15404 | Skin pieces: three segments in one face now meet where their three weights are equal, not at the face centroid (review of #15388) |
+| 2026-11-27 | #15388 | Skin pieces are cut along the line of equal segment weight (piece_settings.json border_method iso_line; neighbour_majority kept), so the borders between coloured segments are smooth lines instead of saw-teeth; the drawn surface is unchanged at every pose |
+| 2026-11-27 | #15382 | Skin load shading settings: impact blanking on or off, root-segment load alias, materials that keep their colour |
+| 2026-11-27 | #15442 | Native viewer export: showpiece lighting retuned (settings values only) - key above the ambient term so the shirt and skin keep form without clipping, key raised to 52 degrees with tighter copies for one short cast shadow; default studio look unchanged |
+| 2026-11-27 | #15419 | Shot tracer respects scene depth, landing marker with carry label, ball record reports the contact instant |
+| 2026-11-27 | #15451 | Shot dispersion core: ten replays with small random club roll and ball position, per-shot impact factors and flight, summary and joint-fit sensitivity (plot and CLI follow) |
+| 2026-11-27 | #15459 | Shot dispersion figure and CLI: overlaid plan view and side profile of the shots, zoomed landing points with the one-sigma ellipse, summary table (shot_dispersion_cli writes dispersion.json and dispersion.png) |
+| 2026-11-27 | #15197 | Shared hand_backends registry and conformance test every hand visual backend must pass |
+| 2026-11-27 | #15737 | Shaft torsion from a torque rating (--shaft-torque-rating, degrees under 1 ft lbf) instead of the bending flex (C17) |
+| 2026-11-27 | #15801 | Shaft report shows the single-mode bend-rate check (C18): clear or flagged line with peak bend rate, single-mode limit and ratio, plus a centrifugal-loading note when flagged |
+| 2026-11-27 | #15777 | Shaft report (C12): per-flex lead/droop page, impact and flight table, from the flex sweep |
+| 2026-11-27 | #15679 | Add an opt-in tip_slope_exact shaft lumping rule (--shaft-lumping) that makes the chain tip slope and twist exact at the same link count; midpoint stays the default |
+| 2026-11-27 | #15780 | Shaft loads in the ZTCF/ZVCF split (Z9): axial force, shear, torsion and bending moment at each flexible-shaft joint, per part, from the existing split solve |
+| 2026-11-27 | #15463 | Shaft flex rating, stiffness scale and link count as spec and same-input bundle settings (--shaft-flex, --shaft-stiffness-scale, --shaft-links); defaults unchanged, refused with a rigid club |
+| 2026-11-27 | #15675 | Move flex-rating cpm to a settings file at the cited mid-range of two driver tables (Stiff 280 to 258 cpm at 45 in) with the cited length slope (C19) |
+| 2026-11-27 | #15380 | Shade per-segment MuJoCo skin pieces by axial load, with a skin opacity setting |
+| 2026-11-27 | #15425 | Settings, layout and geometry half of the native flight inset (side profile and plan view); nothing is drawn yet and the inset ships disabled |
+| 2026-11-27 | #15712 | Research reference: ZVCF is the applied torques alone (control part, gravity counted once in the ZTCF); the gravity-only quantity is the zero-velocity, zero-torque acceleration (Track Z, Z1) |
+| 2026-11-27 | #15378 | Redact a private capture directory name from four development-log reconciliation evidence files and refresh their recorded hashes |
+| 2026-11-27 | #15477 | Read tile maturity in the launcher loader and filter by one min_maturity setting in the loader, the native launcher and the API; one ordered maturity scale (E7, slice G13) |
+| 2026-11-27 | #15514 | PyQt6 playback labels: plain replay title, file-name-only source label, platform-derived runtime badge, discoverable Model Explorer tile |
+| 2026-11-27 | #15511 | PyQt6 Model Explorer opens the user-configured default matched swing from the launcher, lists matched swings under File > Open Matched Swing (labelled demo fallback), and an offscreen launcher-to-playback pipeline test covers it |
+| 2026-11-27 | #15480 | PyQt6 launcher tiles draw a fixed-height maturity chip (G13) |
+| 2026-11-27 | #15536 | Model Explorer teardown flushes only queued signals, so deleting an explorer no longer leaks the widgets and timers deleted after it (fixes the unit-gate shard 2 failure on main) |
+| 2026-11-27 | #15553 | Standalone Model Explorer opens the default matched swing on launch |
+| 2026-11-27 | #15529 | Model Explorer Results Playback docks a Shot card beside the playback: the native exporter's impact factors (club speed, face to path, attack angle), launch (ball speed, launch angle, spin rate, spin axis) and flight (carry, total, apex, side) in yd/m and mph/m/s; no contact and a missing flight wheel are stated, never shown as numbers |
+| 2026-11-27 | #15557 | Model Explorer caches built golfer scenes on disk (content key plus a dependency manifest of loaded repository modules, their data files and the declared asset and grip configuration), so a reopened matched swing skips the grip-hand solve; the status bar says whether the scene is being built or read from the cache |
+| 2026-11-27 | #15547 | Model Explorer gains Tools > Run Simulation: a dock showing engine availability and the pinned sim_run golden cases (golf shot, ZTCF) that runs them in a background QThread through the same service as the MCP tools, shows the result summary and auto-plays any returned results archive |
+| 2026-11-27 | #15566 | Register the Model Explorer Run Simulation dock in the parity and capability ledgers |
+| 2026-11-27 | #15540 | Model Explorer Results Playback hides the segment editor and Properties docks and gives the render about 70% of the panel height, with sizes from playback_view_settings.json |
+| 2026-11-27 | #15549 | Model Explorer playback camera sits closer (golfer about 75% of the render height) and the render follows the view label's aspect, re-rendered on a debounced resize, so no grey side gutters |
+| 2026-11-27 | #15642 | Model Explorer club-speed plot titles and marks the Shot card's impact speed |
+| 2026-11-27 | #15516 | Model Explorer loads matched swings in a background QThread with a status-bar busy indicator; first frame shows before club-head speed, which joins the plot when ready |
+| 2026-11-27 | #15730 | Plant the feet in the ZTCF/ZVCF split: GroundedProvider adds per-foot ground weld rows after the hand-club closure so drift and control each carry their own ground reaction |
+| 2026-11-27 | #15752 | Plant the feet as reactions in the export's ZTCF/ZVCF hand split (split_provider, split_glyphs) and add MujocoOverlaySource.closure_from_multiplier (Track Z, Z5) |
+| 2026-11-27 | #15785 | Pinocchio shaft stations and per-link loads for the Z9 shaft-load split, checked against RNEA at every shaft joint |
+| 2026-11-27 | #15745 | Pin that club roll, ball placement, the impact card and the ball flight read the bent chain-shaft tip, not the rigid club root (C4) |
+| 2026-11-27 | #15508 | Pin SHAFT_FLEX_DATA cpm against a cited driver frequency source; R/S/X means are 14/22/29 cpm high, recorded as strict xfail pending a refit (C19) |
+| 2026-11-27 | #15440 | Native viewer export: opt-in showpiece lighting for the MuJoCo scene (--lighting showpiece or --lighting-settings PATH) from a validated settings file; display only, default studio look unchanged |
+| 2026-11-27 | #15430 | Opt-in flight inset for native flight clips: side profile and plan view of the ball flight, revealed with the tracer, placed clear of the panels and HUD |
+| 2026-11-27 | #15405 | Opt-in face roll calibration mode that sets the club head roll from the design loft at address |
+| 2026-11-27 | #15406 | Opt-in club head seat that draws the head with its sole where the shaft axis meets the ground |
+| 2026-11-27 | #15414 | Opt-in club face score lines and face colour of the drawn head (club_face_marking) |
+| 2026-11-27 | #15792 | Open-loop replay horizon search backward from impact (D2): earliest start whose open-loop delivery keeps face, path and head speed within tolerance, with a non-contiguous check |
+| 2026-11-27 | #15438 | Flight inset is not drawn on a clip too short to show the flight (impact-window clips), so it no longer hides the clubhead |
+| 2026-11-27 | #15504 | No contact draws no ball flight: the factors panel and the flight share one contact verdict; a failed strike placement records the address-ball fallback. |
+| 2026-11-27 | #15756 | Native viewer: --segment-shading-part shades the segments by the ZTCF drift, ZVCF control or total section loads (feet planted, hands re-solved) with a HUD note (Track Z, Z4b) |
+| 2026-11-27 | #15461 | Native viewer exporter request schema derived from its parser, with group maturity and path sandboxing, describe and validate functions; shaft options listed as bundle-build stage (G7, C11) |
+| 2026-11-27 | #15467 | Native viewer exporter describe and validate exposed through the agent capability layer: MCP tools on ud-sim-mcp and REST /tools/agent-sim-run/native-export/* with remote-mode Bearer auth (G8) |
+| 2026-11-27 | #15517 | Native viewer export: shared prepare_shot, shot-shape club roll, public aim paint, near-plane clip for tracer lines, spin axis in the flight report, and GolferPlayback scene hooks for the live playback overlays |
+| 2026-11-27 | #15769 | Native viewer export: --force-part {recorded,total,ztcf,zvcf} draws one ZTCF/ZVCF case's net planted-foot ground reaction at its centre of pressure in the hand case colour, keeping only that case's force kinds (Z4c) |
+| 2026-11-27 | #15718 | Native viewer export draws the ZTCF/ZVCF hand forces of both hands with part views (ZTCF, ZVCF, total, tip to tail), torque arrows and a drawn colour key |
+| 2026-11-27 | #15418 | native viewer export: a rendered frame on the exact contact instant (HUD, panel and tracer count from it, held N frames in the impact window) and a directional sun that lights the far ground |
+| 2026-11-27 | #15509 | Native viewer export: a chain shaft draws its links and head on their own bodies in the plain MeshCat scene, and the hands close-up reads the club-body grip, not the bent tip link (C4) |
+| 2026-11-27 | #15483 | Native flight export reports roll and total after the carry from the existing sg_runout_v1 flat-fairway model (HUD, inset ground track, manifest), labelled as a model assumption (#15443) |
+| 2026-11-27 | #15779 | Native export writes a schema-versioned model card (replay kind, fit error, golfer, club and shaft, shot setup, impact model, each tagged measured, fitted, assumed or unknown with its source) into every clip manifest (E2) |
+| 2026-11-27 | #15401 | Native export: optional fixed-size impact factors panel, frozen at impact and kept to the end of the clip |
+| 2026-11-27 | #15453 | Native export: opt-in --shot-shape {straight,draw,fade} solves the club roll in the hands from the flight model, with a Setup HUD line |
+| 2026-11-27 | #15484 | Native export: opt-in --hole-view writes a plan-view hole still of the flight (fairway, green, trace, landing, carry) reusing golf_environment |
+| 2026-11-27 | #15469 | Native export: model smash factor row on the impact card and factors panel, --distance-unit/--speed-unit flags, unit names in the flight manifest |
+| 2026-11-27 | #15790 | native export: model card drawn on request in the clip (--model-card-panel, off by default; E2) |
+| 2026-11-27 | #15424 | Native export: a kinematic replay (all efforts zero) draws no effort or contact force vectors unless asked, with a HUD note |
+| 2026-11-27 | #15410 | Native export: --impact-factors flags, live pre-impact mode and the closest approach, no contact label of the impact factors panel |
+| 2026-11-27 | #15426 | Native export ellipsoids: per-point display scale, nested alpha and minimum semi-axis settings so every point shows both kinds |
+| 2026-11-27 | #15420 | Native export ellipsoids are evaluated at the pose of the frame they are drawn on (they were read at the source state of the same index), a feed that cannot follow a clip is refused, and long HUD lines wrap to the frame width |
+| 2026-11-27 | #15421 | Native export: ellipsoid values move from wrapped HUD rows to a compact side panel opposite the impact factors panel |
+| 2026-11-27 | #15799 | Native export draws the chain shaft's internal bending moment or shear at each shaft joint (--shaft-loads, --shaft-loads-part; Z9c) |
+| 2026-11-27 | #15433 | Native export: carry label returns on the 2x2 grid tile (suppressed only where the flight inset is drawn); Impact Parameters reasons wrap instead of ending in an ellipsis |
+| 2026-11-27 | #15402 | Native export: ball flight playback from the swing's own impact state (model prediction) and validated tracer settings |
+| 2026-11-27 | #15411 | Native export: --ball-flight draws the model-predicted ball flight with a shot tracer, holds the clip until landing; wide down_the_line_flight view |
+| 2026-11-27 | #15455 | MuJoCo render applies a textured garment colour once: the material rgba is white and the texture carries the colour |
+| 2026-11-27 | #15387 | MuJoCo native export shades a skinned body by segment axial load: skins cut per segment, load alias, hair and face details kept |
+| 2026-11-27 | #15408 | MuJoCo hand mobility and capacity ellipsoids agree with Drake and Pinocchio again: the mobility closure is a rigid weld where the grip sites are apart, and torque limits are paired with their own degrees of freedom (acceleration- and force-capacity ellipsoids were computed with 24 of 44 limits on the wrong joint) |
+| 2026-11-27 | #15470 | Monolith register rows for physics_engine.py and native export core.py match their line counts on main |
+| 2026-11-27 | #15532 | Model Explorer: waiting on a results load polls its state, so a load that finished before the wait began no longer stalls until the timeout |
+| 2026-11-27 | #15519 | Model Explorer: Qt-free Shot card rows (impact factors, carry, total, apex, side) computed through the exporter's shared shot preparation, with units and no-contact handling |
+| 2026-11-27 | #15526 | Model Explorer playback opens behind the golfer (default_view setting) and behind views can aim along the ball-to-feet midpoint line |
+| 2026-11-27 | #15528 | Model Explorer live playback draws the export's ball at address, ball flight with straight/draw/fade shot shape and finish aim line (Ball, Ball flight, Aim line, Shot controls; flight off by default and computed only when checked; disabled with the reason without the Rust flight wheel) |
+| 2026-11-27 | #15520 | Model Explorer: live ball overlay module (ball at address, background flight trace per shot shape, finish aim line) reusing the exporter's shot preparation; flight solved only on request |
+| 2026-11-27 | #15533 | Model Explorer behind views now centre on the run's ball-to-feet midpoint, computed during the background load |
+| 2026-11-27 | #15422 | Landing readability in the wide flight clip: optional ground track, drop line and carry label (settings in flight_tracer_settings.json) |
+| 2026-11-27 | #15719 | Kinetic match solves the passive flexible-shaft rows before allocating the applied torques (Z6b) |
+| 2026-11-27 | #15728 | Kinetic match: shaft_source reference keeps the measured shaft bend and reports the shaft rows' torque mismatch instead of writing it as an effort (Z6c) |
+| 2026-11-27 | #15784 | Kinetic match over REST (POST /tools/agent-sim-run/kinetic-match) and the MCP tool kinetic_match, both delegating to run_kinetic_match, the function the CLI calls (D10) |
+| 2026-11-27 | #15464 | Kinematic shaft-bend fit: solve chain-shaft bend coordinates so the club head markers match while the shaft markers stay matched (C10) |
+| 2026-11-27 | #15434 | Impact panel shows the full failure reason, wrapped |
+| 2026-11-27 | #15415 | Impact card reads toe and high along the head's own heel-to-toe and crown axes, not axes across the shaft (34 deg off on the driver) |
+| 2026-11-27 | #15412 | Impact card reads the club where its face reaches the ball (pre-contact fit, not a sample early or across the strike) and keeps its target line when the drawn head roll changes |
+| 2026-11-27 | #15739 | Impact card and flight read the contact state from samples before the recorded strike, so club path no longer steps when the ball moves forward |
+| 2026-11-27 | #15716 | Hands' club load (ZTCF/ZVCF split) excludes the hand solids welded into the club body; chain clubs pass the partition mass check |
+| 2026-11-27 | #15436 | Grid exports place the impact panel in one tile's corner at HUD text size and keep the carry label inside its tile, off the golfer (settings in impact_factors_settings.json and flight_tracer_settings.json) |
+| 2026-11-27 | #15456 | Golf environment tile: wrap ground triangle soups as faces so pyqtgraph draws them; declare pyqtgraph and PyOpenGL in gui-tools |
+| 2026-11-27 | #15457 | Golf environment: shots CLI that computes model flights through the exporter and writes the hole figure |
+| 2026-11-27 | #15449 | Golf environment: model shots on a hole, headless hole figure |
+| 2026-11-27 | #15374 | Docs and the tour_average_driver preset name the marker placement review generically, with no capture-system name; Add marker attachment seeds from the marker placement review and the dropped marker list to the tour_average_driver subject preset (marker_seed_overrides, dropped_markers); the default build is unchanged |
+| 2026-11-27 | #15437 | Ball flight: the flying ball is shaded as a lit sphere (settings ball_shading in flight_tracer_settings.json; off gives the flat disc) |
+| 2026-11-27 | #15428 | Flight inset plot geometry: profile and plan plots sharing a down-range scale, curve fitted inside by construction (not drawn yet) |
+| 2026-11-27 | #15714 | Flexible shaft is passive in the force adapters: shaft springs and dampers enter the Pinocchio and MuJoCo bias (drift, ZTCF) and the MuJoCo allocator no longer actuates the shaft (Track Z, Z6a) |
+| 2026-11-27 | #15795 | Flex sweep records the shaft chain shape at impact in a shared club frame (shapes key in flex_sweep.json); the flex comparison sheet draws lead and droop centrelines per flex with a deflection exaggeration setting (C5b) |
+| 2026-11-27 | #15487 | Feature-parity registry: exempt entries for the setup wizard, the pose subscriber demo and the sibling-repository tiles (with capability migration rows) replace the test allow-list; native export entry notes the Model Explorer Export Clips dialog. |
+| 2026-11-27 | #15478 | Feature parity registry: add the golf environment tile (gap) and record the native viewer exporter as a web gap with its REST describe and validate surface |
+| 2026-11-27 | #15740 | Exporter colour key names tension and compression shading in their colours instead of hex codes in the HUD |
+| 2026-11-27 | #15753 | Export hole still draws the --dispersion-traces samples thin beneath the shot; the shot_dispersion_cli --hole still emphasises the nominal (base setup) shot over its samples; warn when no requested view shows the sample traces |
+| 2026-11-27 | #15754 | Export clips: the flying ball is drawn at least 5 px in radius (min_ball_radius_px) and the grid impact panel text scales with tile height (grid_font_tile_fraction, 16 px floor) |
+| 2026-11-27 | #15746 | Export clips draw all dispersion sample flights thin and translucent beneath the nominal tracer on the wide view, with the carry and side spread in the HUD (--dispersion-traces) |
+| 2026-11-27 | #15481 | Export Clips dialog in the PyQt6 Model Explorer: pure request mapping, queue submit and status polling (G11) |
+| 2026-11-27 | #15515 | Export Clips dialog generates one collapsible control group per request-schema group and pre-fills bundle and swing from the loaded run (G6) |
+| 2026-11-27 | #15465 | Export camera flags --camera-lookat, --camera-height and --camera-distance; default look-at height moved to a settings file |
+| 2026-11-27 | #15407 | Mobility and force ellipsoids on the skinned golfer: wrist points sit on their specification frames (lead wrist was drawn 1.07 m away), the clubhead is a selectable point, unknown point bodies are rejected, and --ellipsoid-color-by kind tells mobility from effective mass (off by default) |
+| 2026-11-27 | #15413 | Ellipsoid feet group resolves both feet from contact spheres; empty point groups now raise ValueError |
+| 2026-11-27 | #15432 | Driver head: rounded body (Taubin, face pinned) and a blended hosel that reaches the heel and meets the shaft tip; face frame, seat, mass unchanged |
+| 2026-11-27 | #15417 | Draw a slim tee from the ground to a lifted native-export ball (visual only, settings in ball_tee_settings.json) |
+| 2026-11-27 | #15510 | Down-the-line views put the camera behind the golfer on a line midway between the ball and the feet at address (configurable fraction, per bundle) |
+| 2026-11-27 | #15681 | The grip-roll wording guard treats the yearly development log archives as history, like DEVELOPMENT_LOG.md, so archiving log entries no longer fails it. |
+| 2026-11-27 | #15798 | D2: MuJoCo same-input adapter and horizon CLI for the open-loop replay horizon search |
+| 2026-11-27 | #15802 | D2: a diverged open-loop replay is a failed horizon candidate with a reason; the horizon command defaults to a cross-engine replay and flags a self-replay as exact by construction |
+| 2026-11-27 | #15381 | Cut MuJoCo skins into one piece per segment with straightened borders (body_skin_pieces) |
+| 2026-11-27 | #15479 | Cover the remaining models.yaml launcher tiles in the feature-parity registry (E9) |
+| 2026-11-27 | #15394 | Decorative ball of a replayed swing is drawn where the face centre passes (strike placement, settings in model_appearance/ball_strike_settings.json); impact card reads the strike point where the travelling face meets the ball |
+| 2026-11-27 | #15674 | Label every native-viewer clip (HUD and manifest) as kinematic replay, feedback-tracked dynamics, open-loop dynamics or unknown replay mode (D3) |
+| 2026-11-27 | #15458 | C6: validate the chain shaft against Euler-Bernoulli statics, flex clamp frequencies, RK4 stability, energy and Saint-Venant torsion |
+| 2026-11-27 | #15789 | C5 flex comparison sheet: every flex's ball flight overlaid on a side and plan view with a head speed, ball speed, carry, side and face table; the sweep now stores flight series (club_fitting --comparison) |
+| 2026-11-27 | #15783 | C23: apply_shaft_chain re-attaches the shaft markers to chain link 0 (ClubheadShaft frame) so a bend past joint 0 no longer carries them with the head |
+| 2026-11-27 | #15797 | C18: the full-body chain run's near-impact bend rise is the bend vector turning through zero under real loads (butt Newton check within 0.33 of 43 N m, ball not in the window); new bend_rate_check flags a bend faster than one mode at the rated frequency can reach, so a peak is load-checked before it is quoted |
+| 2026-11-27 | #15472 | Bound the combined per-plane shaft-bend tip slope, not each shape amplitude, in fit_shaft_bend |
+| 2026-11-27 | #15738 | Ball position in the stance: sweep CLI reporting impact factors, flight and straight club roll per ball position |
+| 2026-11-27 | #15423 | Ball flight marker is depth-tested per pixel, so the club hides the part of it that is nearer the camera |
+| 2026-11-27 | #15758 | B1: dispersion sample/nominal key on clips and hole stills, sample traces cut at the hole bounds, nominal-only hole still when no sample flies |
+| 2026-11-27 | #15476 | Asynchronous native viewer export: native_export_run queues a validated request and returns a job id, native_export_status reports the state and clip manifest, over REST and MCP (G8) |
+| 2026-11-27 | #15192 | ADR-0057 amendment: shared hand_backends interface, registry API and conformance contract |
+| 2026-11-27 | #15441 | Add opt-in club roll in the hands and ball position shift to the native viewer export |
+| 2026-11-27 | #15507 | Add a dispersion-on-the-hole still (--hole, --hole-preset) to the shot dispersion CLI |
+| 2026-11-27 | #15288 | Skinned human hand visual backend: MakeHuman CC0 rig and weights, hierarchical LBS, shared curl-to-contact posing, EGL evidence renders.; Skinned human hands selectable on the golfer's club, squared to the clubface (subject.hand_visual_backend); Spec revision that moves the golfer's wrist joints to the skinned hands' wrists; skinned club hands cut and capped at the wrist; Arm refit that returns the club to its pose after the wrist joints move to the skinned hands, with optional trunk coordinates; Arm scale estimated from capture marker distances with stated skin-to-joint offsets; Draw the forearm as one continuous tapered shape across its rotation joint, so the golfer no longer appears to have two elbows; Size the forearm's wrist end from the skinned hand's wrist when the skinned hands are drawn; Rest the trail palm on the lead thumb: owner trail cross angle, thumb contact check; Skinned hand: palm fold joint so the trail palm closes on the lead thumb; Skinned hand: typed landmarks and joint frames export for the other hand tracks; Arm refit takes posture targets; address posture is a neutral lumbar joint with a slight thoracic bend; Knuckle sideways range as a setting (off by default): a bent knuckle's sideways swing is held to a range that shrinks with flexion; Thumb joints no longer bend back past straight on either hand: lower limit of the second thumb joint 0 (was -10), floor checked on the posed bones; Trail forefinger is a trigger finger, held apart up to 30 degrees and brought back until its tip seats; Trail thumb set 40 degrees to the target side of the shaft (was 20) |
+| 2026-11-27 | #15147 | Calibrate MyoHand anatomical contact solver, bilateral mirroring, skeleton JSON export, and 74% Z-buffer framing |
+| 2026-11-27 | #15139 | HRG-GB1b: per-hand shaft roll on grip attachment via apply_shaft_roll and cross-engine parity. |
+| 2026-11-27 | #15132 | Local desktop API app requires the launcher capability token on API requests |
+| 2026-11-27 | #15136 | HRG-GB5b: offline grip-loss evaluator with configurable hysteresis and committed-series prediction reports. |
+| 2026-11-27 | #15137 | HRG-GB2 engine-free flat-hand curl builder and build receipt stacked on GB-1 GripSpec; HRG-GB3 palm wrap, thumb press, trail overlap/interlock/ten-finger linking, golden checksums |
+| 2026-11-27 | #15133 | HRG-GB1: versioned engine-free GripSpec, GripPose projection, force/contact providers, ADR-0057 Proposed addendum. |
+| 2026-11-27 | #15357 | Pragmatic Programmer review 2026-11-20 of grip epic #15122: three curl-to-contact solvers, grip_build unconsumed with drifted copies; pathways proposed to the Board (docs only) |
+| 2026-11-27 | #15352 | Fleet Critic 2026-11-20: grip epic critique (builder capsule clearance uses max not min; grip-loss shear estimate drops axial pull; near-circular null result). |
+| 2026-11-27 | #15119 | Record the reviewed GAAI policy-test retirement for merge-group CI; Remove the retired vendored GAAI framework tree, its launcher and slash commands; .claude/ is now the canonical agent configuration root |
+| 2026-11-27 | #15110 | Prune dead testpaths/LEGACY_SRC_TEST_DIRS, enable green tests/* suites in unit-test-gate, and enforce unrun suite exclusions (#15106) |
+| 2026-11-27 | #15157 | Guard drain_process_streams against infinite MagicMock readline loops in launcher pipe drains |
+| 2026-11-27 | #15168 | Guard pytest makereport and teardown against leaked os.name patches |
+| 2026-11-27 | #15167 | Restore per-workflow Docker CI concurrency groups and per-run image tags in docker-smoke (fix-forward). |
+| 2026-11-27 | #15162 | Wave-0 budget expiry cohort closure tests; confirm gates past 2026-11-30. |
+| 2026-11-27 | #15163 | Close #15022 — conformance template registry test after #15073 landed FastMCP |
+| 2026-11-27 | #15170 | Align two_window_fit pelvis-yaw metrics with replay_metrics (NaN when unmeasured). |
+| 2026-11-27 | #15171 | Document --shooting-fit as pelvis ILC passes; add --pelvis-ilc-passes alias. |
+| 2026-11-27 | #15178 | Prefix-fit returns NaN and fail-closed acceptance when terminal markers or pelvis-yaw are unmeasured. |
+| 2026-11-27 | #15172 | Pelvis yaw error pct uses a fixed 90° reference; G1 5% gate is 4.5°. |
+| 2026-11-27 | #15160 | Archive run-102 evidence with source-path probes and script early exit. |
+| 2026-11-27 | #15173 | Archive native evidence run 101 with manifest and script early exit. |
+| 2026-11-27 | #15078 | Align GATES.md with AcceptanceGates, disambiguate A..G order, and add --pelvis-ilc-passes |
+| 2026-11-27 | #15088 | Guard cross-repo humanoid_character_builder imports, update anthropometrics docs, distinguish intrinsic-XYZ vs Drake RPY, and document 6 Hz apply_filter default |
+| 2026-11-27 | #15159 | Pin Dempster/Zatsiorsky coarse-table masses; drop legacy segment_name_map footgun. |
+| 2026-11-27 | #15156 | Document strokes-to-green MDP scope and distinct Broadie shot-pattern putting curve versus SG logistic; add #15013 regression tests. |
+| 2026-11-27 | #15060 | Pin-only strategy view labels expected strokes to the pin cell, not the green |
+| 2026-11-27 | #15084 | Reconcile ball-flight, aerodynamics, and impact-model docs/metadata with runtime physics, local temperature, rotational friction mass, and illustrative presets |
+| 2026-11-27 | #15580 | Bind trunk evidence migration to the input bundle embedded source spec and record lineage hashes. |
+| 2026-11-27 | #15576 | Report unavailable instead of a perfect 0.0 for empty-mask tour metrics (strict-JSON null at persistence), and refuse all-invalid captures. |
+| 2026-11-27 | #15578 | Step-size convergence now rejects non-finite q/qd and supports an opt-in qd tolerance; default q threshold unchanged (#14756 P7) |
+| 2026-11-27 | #15602 | render_best_matches binds each ledger row to the verified input hashes and rejects a same-engine wrong-run ledger; SUMMARY records the binding (#14756 P3) |
+| 2026-11-27 | #15594 | Preserve original tracking targets and clocks separately from same-input rollout evidence. |
+| 2026-11-27 | #15613 | Label supplied-pose parity reports as forward kinematics in JSON and Markdown; preserve unspecified operations for legacy reports and state replay and physical-acceptance limits |
+| 2026-11-27 | #15587 | Bind parity-report candidate fingerprints to full candidate provenance and array evidence. |
+| 2026-11-27 | #15373 | Drake/Pinocchio tree-equivalence CI fixture: DOF/floating-base order, inertia frames, gravity, damping, wrenches, ADR-0059 coupling and the #10350 negative. |
+| 2026-11-27 | #15165 | Cross-engine replay parity reports use aligned marker trajectories, not aggregate RMSE deltas. |
+| 2026-11-27 | #15176 | Record first green scheduled CI Optional Stack after launcher processes fix (#15089) |
+| 2026-11-27 | #15158 | Refresh Optional Stack runbook and CI contract tests with Nov 2026 scheduled-run evidence |
+| 2026-11-27 | #14999 | Retire Jules push/PR noise workflows and use FLEET_GENERAL_AGENT App credentials for fleet policy gates. |
+| 2026-11-27 | #15319 | Unit-test gate runs in three shards; leg two of two was cancelled at its 35 minute limit |
+| 2026-11-27 | #15554 | Correct the GS3DX design report: the committed Simscape golfer ships a rigid shaft, and a test pins the claim to the model. |
+| 2026-11-27 | #15571 | Preserve smooth CC0 hair shading in shared native-viewer OBJ exports, matching MuJoCo's hair selection |
+| 2026-11-27 | #15174 | Regression: 16 anatomical torque-capacity slots are VERIFIED or ASSUMED with rationale.; Wave-0 architecture_budget rows cite issue #15029 via structured issue field. |
 | 2026-11-15 | #15118 | Desktop UI sends the launcher capability token on backend API requests through one shared fetch helper |
 | 2026-11-15 | #15116 | Local API app applies the shared allowed-host policy |
 | 2026-11-15 | #15114 | Fail closed on per-crate maturin build errors in Dockerfile and enforce in check_dockerfile_contracts.py. |
