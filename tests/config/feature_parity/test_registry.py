@@ -151,10 +151,51 @@ class TestLauncherTileCoverage:
             "Add or extend a registry entry listing these tile ids in 'tiles'."
         )
 
+    @pytest.mark.unit
+    def test_golf_environment_tile_in_models_yaml_is_covered(
+        self, registry: FeatureParityRegistry
+    ) -> None:
+        """models.yaml tiles of the golf-environment family need an entry.
+
+        The manifest-tile test above reads launcher_manifest.json only, so a
+        tile that exists solely in models.yaml escaped the gate (#15150).
+        """
+        import yaml
+
+        with open(REPO_ROOT / "src/config/models.yaml", encoding="utf-8") as f:
+            tile_ids = {t["id"] for t in yaml.safe_load(f)["models"]}
+        family = {"golf_environment"}
+        assert family <= tile_ids, f"tile left models.yaml: {sorted(family - tile_ids)}"
+        uncovered = sorted(family - registry.covered_tile_ids)
+        assert not uncovered, f"models.yaml tiles with no registry entry: {uncovered}"
+
+    @pytest.mark.unit
+    def test_every_visible_models_yaml_tile_is_covered(
+        self, registry: FeatureParityRegistry
+    ) -> None:
+        """Every non-hidden models.yaml tile needs a registry entry (#15150)."""
+        import yaml
+
+        with open(REPO_ROOT / "src/config/models.yaml", encoding="utf-8") as f:
+            tiles = yaml.safe_load(f)["models"]
+        uncovered = sorted(
+            t["id"]
+            for t in tiles
+            if not t.get("hidden") and t["id"] not in registry.covered_tile_ids
+        )
+        assert not uncovered, (
+            f"models.yaml tiles with no feature_parity.json entry: {uncovered}. "
+            "Add or extend an entry listing them in 'tiles'."
+        )
+
     def test_covered_tiles_reference_real_manifest_ids(
         self, registry: FeatureParityRegistry, manifest_tiles: list
     ) -> None:
-        manifest_ids = {t.id for t in manifest_tiles}
+        import yaml
+
+        with open(REPO_ROOT / "src/config/models.yaml", encoding="utf-8") as f:
+            models_yaml_ids = {t["id"] for t in yaml.safe_load(f)["models"]}
+        manifest_ids = {t.id for t in manifest_tiles} | models_yaml_ids
         unknown = sorted(registry.covered_tile_ids - manifest_ids)
         assert not unknown, f"Registry references unknown launcher tile ids: {unknown}"
 

@@ -1,12 +1,13 @@
 {
-  "sources": "Illustrative only, not a surveyed course: a 380 m par 4 with a 35 m fairway and a 15 m green radius so that driver carries of about 170 to 210 m land on the fairway. Colours are chosen for contrast on the fairway green; trace and figure sizes are display choices.",
+  "sources": "Illustrative only, not surveyed courses. Par 4: 380 m with a 35 m fairway and a 15 m green radius so that driver carries of about 170 to 210 m land on the fairway. Par 3: 160 m (about 175 yd), 30 m fairway and a 12 m green radius, reached by a 7-iron carrying 155 to 165 m on the matched iron swing with the club rolled about 10 degrees closed in the hands. Par 5: 480 m, 35 m fairway, 15 m green radius. Lengths are metres (--hole-length takes the display unit). Colours are chosen for contrast on the fairway green; trace and figure sizes are display choices. Roll segment and landing label (#15443): the roll is drawn in a colour apart from every shot colour and the fairway, the label is two short lines placed beside the rest point at the first candidate offset that stays inside the axes and clears the legend and other labels; the candidate offsets are in points and are display choices, and the label wording abbreviates left and right to keep it short.",
   "hole": {
-    "name": "Illustrative Par 4",
-    "par": 4,
-    "length_m": 380.0,
+    "default": "par4",
     "metres_per_yard": 0.9144,
-    "fairway_width_m": 35.0,
-    "green_radius_m": 15.0
+    "presets": {
+      "par3": {"name": "Illustrative Par 3", "par": 3, "length_m": 160.0, "fairway_width_m": 30.0, "green_radius_m": 12.0},
+      "par4": {"name": "Illustrative Par 4", "par": 4, "length_m": 380.0, "fairway_width_m": 35.0, "green_radius_m": 15.0},
+      "par5": {"name": "Illustrative Par 5", "par": 5, "length_m": 480.0, "fairway_width_m": 35.0, "green_radius_m": 15.0}
+    }
   },
   "shot_colours_rgba": [
     [0.85, 0.1, 0.1, 1.0],
@@ -15,7 +16,6 @@
     [0.9, 0.5, 0.0, 1.0],
     [0.55, 0.1, 0.7, 1.0]
   ],
-  "decimals": 0,
   "figure": {
     "width_in": 12.0,
     "height_in": 8.0,
@@ -33,6 +33,18 @@
     "fairway_rgb": [0.55, 0.78, 0.45],
     "green_rgb": [0.3, 0.68, 0.32],
     "tee_rgb": [0.2, 0.2, 0.2],
-    "pin_rgb": [0.9, 0.1, 0.1]
+    "pin_rgb": [0.9, 0.1, 0.1],
+    "roll_rgb": [0.85, 0.62, 0.0],
+    "roll_marker_size": 7.0,
+    "label_font_size": 9.0,
+    "label_box_alpha": 0.85,
+    "label_edge_pad_px": 4.0
+  },
+  "landing_label": {
+    "lines": ["Carry {carry}, Side {side}", "Roll {roll}, Total {total} (model)"],
+    "side_left": "L",
+    "side_right": "R",
+    "on_line": "on line",
+    "offsets_pt": [[10, -34], [-10, -34], [10, 12], [-10, 12], [-14, -6], [14, -6], [10, -70], [-10, -70], [10, 46], [-10, 46], [10, -104], [-10, -104]]
   }
 }

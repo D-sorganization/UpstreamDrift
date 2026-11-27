@@ -141,6 +141,17 @@ pipeline lane. The fit commands take it as an opt-in stage after the leg
 calibration; a run without `--bundle-adjust` is unchanged. Its receipt block is
 `address.bundle_adjustment`.
 
+The data-only offset-information report projects out the span of feasible
+pose tangents, including inward motion at active box bounds. Only equal
+pose bounds remove a coordinate from that span; an empty span leaves the
+offset information unchanged. FK and constraint differences cap probes to
+the available interval and assign zero slope to fixed coordinates. Pose-prior
+sigmas must be positive; positive infinity disables an individual prior.
+The synthetic regressions in
+`tests/unit/motion_matching/pipeline/test_bundle_adjustment.py` cover these
+contracts (run with `python3 -m pytest` and `-m "not slow"`). These local
+linearised information diagnostics do not establish physical acceptance.
+
 | Flag | Default | Meaning |
 | ---- | ------- | ------- |
 | `--bundle-adjust` | off | Run the stage; the swing solve uses its attachments |

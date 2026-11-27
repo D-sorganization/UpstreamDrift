@@ -19,6 +19,8 @@ REFERENCE = json.loads((fit.ASSET_DIR / "skin_settings.json").read_text())[
 #: Hip midpoint to the shoulder line and to the neck joint of the same export.
 TRUNK_MM = {"shoulder_height": 528.0, "neck_height": 623.0}
 RESIDUAL_M = 1.0e-4  # the fit is exact by construction; 0.1 mm is the contract
+# Pelvis lateral map must match the subject hip spacing (#15322; was ~19.5 mm off).
+PELVIS_HIP_RESIDUAL_M = 2.0e-4
 SEGMENTS = (
     ("thigh", "hip", "knee", "thigh"),
     ("shank", "knee", "ankle", "shank"),
@@ -71,6 +73,20 @@ def test_fitted_joints_have_the_subject_segment_lengths() -> None:
     _assert_subject_lengths(
         fit.fit_body_skin(SKIN, _subject(), fit.load_fit_settings()).joints
     )
+
+
+def test_pelvis_map_honors_hip_half_spacing() -> None:
+    """Pelvis vertices carry hip landmarks onto subject hip joints (#15322)."""
+    fitted = fit.fit_body_skin(SKIN, _subject(), PLAIN)
+    marks = SKIN.landmarks
+    for side in ("l", "r"):
+        name = f"hip_{side}"
+        image = fitted.map_points("pelvis", marks[name][None])[0]
+        residual = float(np.linalg.norm(image - fitted.joints[name]))
+        assert residual <= PELVIS_HIP_RESIDUAL_M, (name, residual)
+        thigh = fitted.map_points(f"thigh_proximal_{side}", marks[name][None])[0]
+        gap = float(np.linalg.norm(image - thigh))
+        assert gap <= PELVIS_HIP_RESIDUAL_M, (name, gap)
 
 
 def test_each_segment_carries_its_landmarks_onto_the_joints() -> None:

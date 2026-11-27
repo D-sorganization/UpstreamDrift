@@ -38,12 +38,16 @@ from src.shared.python.motion_matching.club_models import (
     SOLE_POINT_SOURCE,
     ClubSpec,
     checked_sole_point_m,
+    recorded_club,
 )
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
+    add_shaft_arguments,
     apply_shaft_chain,
     build_shaft_chain,
+    checked_shaft_options,
+    shaft_options,
 )
 from src.shared.python.motion_matching.execution.assets import (
     get_candidate_geometry_spec,
@@ -67,16 +71,14 @@ from src.shared.python.motion_matching.execution.osim_leg_lengths import (
     scale_leg_lengths,
 )
 from src.shared.python.motion_matching.execution.grip_selection import (
-    GripOverrides,
     add_grip_arguments,
-    apply_grip_selection,
-    apply_visual_picks,
     overrides_from_args,
 )
-from src.shared.python.model_appearance.appearance_selection import (
-    resolve_appearance,
+from src.shared.python.motion_matching.execution.spec_revisions import (
+    with_current_golfer_model,
+    with_grip_revision,
+    write_grip_sidecar,
 )
-from src.shared.python.model_appearance.schema import appearance_path_for
 from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_spec import (
     BodySpec,
@@ -786,24 +788,32 @@ def _annotate_document(
 
 
 def with_shaft_model(
-    document: dict[str, Any], club: str | ClubSpec, shaft_model: str | None
+    document: dict[str, Any],
+    club: str | ClubSpec,
+    shaft_model: str | None,
+    options: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply the ``club.shaft.model`` flag (#12686); ``"rigid"`` is the default.
 
     ``"rigid"`` (or ``None``) returns ``document`` itself, unchanged, so the
     default spec stays byte-identical; ``"chain"`` returns the flexible-shaft
-    copy built by :func:`club_shaft_chain.apply_shaft_chain`.
+    copy built by :func:`club_shaft_chain.apply_shaft_chain`. ``options``
+    (#15150) are the ``build_shaft_chain`` flex, stiffness scale and link
+    count (``checked_shaft_options``); empty gives the default chain, and the
+    chain records them in ``club.shaft``.
 
     Raises:
-        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``.
+        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``, or the
+            options are unknown, invalid or given for a rigid club.
     """
     model = DEFAULT_SHAFT_MODEL if shaft_model is None else shaft_model
     if model not in SHAFT_MODELS:
         raise ValueError(f"shaft_model must be one of {SHAFT_MODELS}, got {model!r}")
+    chosen = checked_shaft_options(model, options)
     if model == "rigid":
         return document
-    spec = CLUBS[club] if isinstance(club, str) else club
-    return apply_shaft_chain(document, build_shaft_chain(spec))
+    spec = recorded_club(document, club) if isinstance(club, str) else club
+    return apply_shaft_chain(document, build_shaft_chain(spec, **chosen))
 
 
 @dataclass(frozen=True)
@@ -870,6 +880,22 @@ def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
         upper["club"]["sole_point_source"] = SOLE_POINT_SOURCE
     if kwargs.get("dropped_markers"):
         upper["subject"]["dropped_markers"] = sorted(kwargs["dropped_markers"])
+
+
+def _apply_kwarg_model_options(
+    document: Any, club_spec: Any, kwargs: dict[str, Any]
+) -> Any:
+    """Shaft model, tibial torsion and knee axial rotation from ``kwargs``.
+
+    Without a ``shaft_model`` the composed club stays rigid here and
+    :func:`with_current_golfer_model` gives it the current flexible shaft.
+    """
+    if kwargs.get("shaft_model") is not None:
+        document = with_shaft_model(
+            document, club_spec, kwargs["shaft_model"], kwargs.get("shaft_options")
+        )
+    document = _apply_kwarg_tibial_torsion(document, kwargs)
+    return apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
 
 
 def compose_anthropometric_document(
@@ -962,39 +988,13 @@ def compose_anthropometric_document(
         ),
     )
     _annotate_document(document, upper, kwargs.get("mirror_arm", True))
-    document = with_shaft_model(document, club_spec, kwargs.get("shaft_model"))
-    document = _apply_kwarg_tibial_torsion(document, kwargs)
-    document = apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
+    document = _apply_kwarg_model_options(document, club_spec, kwargs)
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
         hip_half_m=hip_half,
         hub_height_m=hub_h,
         notes=notes,
-    )
-
-
-def _with_grip_revision(
-    built: AnthropometricDocument, overrides: GripOverrides | None
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    """The document and receipt subject after the physical grip picks (GR4).
-
-    Physical picks make a GR2 spec revision (a refit is needed); picture-only
-    picks do not touch the spec (they belong in an appearance sidecar).
-    """
-    if overrides is None or not overrides.has_physical:
-        return built.document, built.subject
-    document, _grip = apply_grip_selection(built.document, overrides)
-    return document, {**built.subject, **document["subject"]}
-
-
-def _write_grip_sidecar(spec_path: Path, overrides: GripOverrides | None) -> None:
-    """Write the picture-only grip picks beside the spec (never physical ones)."""
-    if overrides is None or not overrides.has_visual:
-        return
-    sidecar = resolve_appearance(None, apply_visual_picks({}, overrides.visual_only()))
-    appearance_path_for(spec_path).write_text(
-        json.dumps(sidecar, indent=2) + "\n", encoding="utf-8"
     )
 
 
@@ -1009,7 +1009,11 @@ def build_anthropometric_spec(
     club: str = "driver",
     **kwargs: Any,
 ) -> tuple[Path, Path]:
-    """Build candidate spec and receipt, writing both to output_dir."""
+    """Build candidate spec and receipt, writing both to output_dir.
+
+    ``handedness="left"`` writes the sagittal mirror of the right-handed
+    current-model spec (#15652).
+    """
     name = kwargs.get("name")
     spec_name = name or f"full_body_spec_anthro_{club}"
     built = compose_anthropometric_document(
@@ -1022,7 +1026,14 @@ def build_anthropometric_spec(
         **kwargs,
     )
     club_markers = get_club_markers(club, kwargs.get("club_markers_path"))
-    document, subject = _with_grip_revision(built, kwargs.get("grip_overrides"))
+    document, subject = with_current_golfer_model(
+        *with_grip_revision(
+            built.document, built.subject, kwargs.get("grip_overrides")
+        ),
+        shaft_model=kwargs.get("shaft_model"),
+        shaft_options=kwargs.get("shaft_options"),
+        handedness=kwargs.get("handedness") or "right",
+    )
     paths = _write_outputs(
         document=document,
         output_dir=output_dir,
@@ -1034,7 +1045,7 @@ def build_anthropometric_spec(
         hub_h=built.hub_height_m,
         notes=built.notes,
     )
-    _write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
+    write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
     return paths
 
 
@@ -1057,6 +1068,7 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
     parser.add_argument("--arm-scale", type=float, default=1.0)
     parser.add_argument("--shoulder-scale", type=float, default=1.0)
     parser.add_argument("--club", choices=sorted(CLUBS), default="driver")
+    parser.add_argument("--handedness", choices=("right", "left"), default="right")
     parser.add_argument(
         "--grip-roll", type=float, default=0.0, help="hand roll about the shaft, deg"
     )
@@ -1082,9 +1094,13 @@ def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentPa
     parser.add_argument(
         "--shaft-model",
         choices=SHAFT_MODELS,
-        default=DEFAULT_SHAFT_MODEL,
-        help="club.shaft.model: rigid (default) or the chain flexible shaft (#12686)",
+        default=None,
+        help=(
+            "club.shaft.model; default: the current golfer model's flexible "
+            "chain shaft (#15684); rigid is a ballpark fallback only"
+        ),
     )
+    add_shaft_arguments(parser)
     parser.add_argument(
         "--tibial-torsion",
         type=float,
@@ -1160,6 +1176,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         name=args.name,
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
+        shaft_options=shaft_options(args),
+        handedness=args.handedness,
         tibial_torsion_offset_deg=args.tibial_torsion,
         shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),

@@ -144,7 +144,7 @@ def _can_import(module_name: str) -> bool:
         if importlib.util.find_spec(module_name) is None:
             return False
         importlib.import_module(module_name)
-    except (ImportError, ModuleNotFoundError, OSError) as exc:
+    except (ImportError, ModuleNotFoundError, OSError, RuntimeError) as exc:
         logger.debug("Optional module %r unavailable: %s", module_name, exc)
         return False
     return True

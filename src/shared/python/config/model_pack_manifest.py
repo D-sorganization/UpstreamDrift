@@ -14,6 +14,7 @@ from typing import Any
 
 import yaml
 
+from src.shared.python.config.maturity_scale import validate_level
 from src.shared.python.contracts import ContractChecker, ensure, require
 
 _CAPABILITY_ALIASES = {
@@ -378,6 +379,7 @@ class LauncherPresentationMetadata:
     web_route: str | None = None
     default_launch: str = "tab"
     categories: tuple[str, ...] = ()
+    maturity: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherPresentationMetadata:
@@ -457,6 +459,11 @@ class LauncherPresentationMetadata:
             ),
             default_launch=default_launch,
             categories=categories,
+            maturity=(
+                validate_level(data["maturity"])
+                if data.get("maturity") is not None
+                else None
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -471,6 +478,8 @@ class LauncherPresentationMetadata:
             data["categories"] = list(self.categories)
         if self.web_route:
             data["web_route"] = self.web_route
+        if self.maturity:
+            data["maturity"] = self.maturity
         return data
 
 

@@ -76,9 +76,12 @@ STATE_LAST_SAMPLE = "last_sample_before_impact_time"
 @dataclass(frozen=True)
 class ModelClubSeries(ClubheadSeries):
     """Face series of a model; ``target_normal`` is the world normal of its
-    address-square head at the first state, which the target line follows."""
+    address-square head at the first state, which the target line follows.
+    ``strike_time_s`` is the bundle's recorded impact (``None`` without one):
+    :func:`impact_state.series_at_contact` fits no sample from it on."""
 
     target_normal: tuple[float, float, float] | None = None
+    strike_time_s: float | None = None
 
 
 def _club_series(swing: SwingInput) -> ClubheadSeries:
@@ -104,8 +107,10 @@ def _club_series(swing: SwingInput) -> ClubheadSeries:
     centre = np.array([f.centre_m for f in faces])
     address = dict(zip(names, map(float, swing.q[0]), strict=True))
     square_x, square_y, square_z = model.address_square_normal_world(address).tolist()
+    strike = swing.impact_time_s if swing.has_impact_provenance else None
     return ModelClubSeries(
         target_normal=(square_x, square_y, square_z),
+        strike_time_s=strike,
         times_s=times,
         face_center_m=centre,
         velocity_mps=np.gradient(centre, times, axis=0),
@@ -238,8 +243,12 @@ def card_from_series(
     series: ClubheadSeries,
     impact_time_s: float,
     ball: BallPlacement | None = None,
+    speed_unit: str | None = None,
 ) -> ImpactCard:
     """Card of ``series`` at ``impact_time_s`` (last sample before it).
+
+    ``speed_unit`` (mph or m/s; default: the display units settings) is the
+    unit of the speed rows; ``ValueError`` for another.
 
     With a ``ball`` the rows are read where the face reaches it
     (:func:`impact_state.series_at_contact`), never across the strike; the
@@ -271,7 +280,7 @@ def card_from_series(
     else:
         params = _parameters_at_contact(*moved, frame, ball)
     card = build_impact_card(
-        _on_face_only(params), units=load_display_units().speed_unit
+        _on_face_only(params), units=speed_unit or load_display_units().speed_unit
     )
     card.extras["impact_state"] = STATE_AT_CONTACT if moved else STATE_LAST_SAMPLE
     card.extras["target_source"] = TARGET_SOURCE
@@ -295,6 +304,7 @@ def impact_card_for(
     swing: SwingInput,
     impact_time_s: float,
     ball: BallPlacement | None = None,
+    speed_unit: str | None = None,
 ) -> ImpactCard | str:
     """Impact card of ``swing`` at ``impact_time_s``, or the reason it is unavailable.
 
@@ -308,6 +318,6 @@ def impact_card_for(
     if not math.isfinite(impact_time_s):
         raise ValueError(f"impact_time_s must be finite, got {impact_time_s}")
     try:
-        return card_from_series(_club_series(swing), impact_time_s, ball)
+        return card_from_series(_club_series(swing), impact_time_s, ball, speed_unit)
     except _EXPECTED_ERRORS as exc:
         return f"impact card unavailable: {exc}"

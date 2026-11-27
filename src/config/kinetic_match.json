@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "description": "Kinetic match settings (#15685): forces and torques for a kinematic best match by inverse dynamics and allocation. One minimum-effort solution in the null space of the closed arm loop, never a unique answer.",
+  "method": "inverse_dynamics_allocation",
+  "engine": "mujoco",
+  "cutoff_hz": 20.0,
+  "stride": 2,
+  "regularisation_grip": 1.0,
+  "root_penalty_weight": 10000.0,
+  "root_residual_limit_n": 50.0,
+  "max_grip_force_n": 1500.0,
+  "max_joint_torque_n_m": 500.0,
+  "closure_tolerance_m": 1e-10,
+  "passive_substep_s": 0.0001,
+  "shaft_source": "response",
+  "limits_note": "Plausibility limits, not acceptance: published driver swings report hand-on-club forces under about 1 kN and joint torques of a few hundred N m. A result above them is reported implausible with its reasons. closure_tolerance_m is the hand-on-club pose residual each frame is projected to before inverse dynamics; an open weld turns the grip force into a fake external moment. passive_substep_s is the integration step for passive coordinates (a flexible shaft): their rows carry no actuator and no closure force, so they are replaced by their response to the prescribed motion; the Stiff driver chain's highest clamped mode is about 350 Hz, and semi-implicit Euler needs a step well under 2/omega (0.9 ms). shaft_source is where a flexible shaft's bend comes from: \"response\" integrates it from the grip motion; \"reference\" keeps the bundle's bend (fitted to the club markers) and reports the torque its rows need beyond the spring and damper as shaft_mismatch_n_m. A rigid-club fit's grip already carries the head where the markers put it, so integrating a flexible shaft on top of it counts the kick twice (#15150 Z6c)."
+}

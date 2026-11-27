@@ -45,3 +45,8 @@ records; public docs do not describe that surface.
 | :--- | :---: | :--- |
 | `run_counterfactual_ztcf_golden` | available | — |
 | `run_golf_simulator_golden_shot` | available | — |
+| `native_export_describe` | available | — |
+| `native_export_validate` | available | — |
+| `native_export_run` | available | — |
+| `native_export_status` | available | — |
+| `kinetic_match` | available | — |

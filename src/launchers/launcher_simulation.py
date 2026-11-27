@@ -938,6 +938,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
         """Launch the URDF generator / Model Explorer application."""
         # Try to load embedded URDF Generator (Model Explorer) first
         from src.shared.python.launcher_embed import get_embeddable_tool
+        from src.tools.model_explorer.default_match import schedule_default_match
 
         tool = get_embeddable_tool("model_explorer")
         if tool:
@@ -953,6 +954,7 @@ except (RuntimeError, TypeError, AttributeError) as e:
                     attach_tile_help(ui_widget, getattr(tool, "tool_id", None))
                     ui_widget.destroyed.connect(tool.cleanup)
                     self.dock_widget_as_tab(ui_widget, "Model Explorer")
+                    schedule_default_match(ui_widget)  # #15150: open best match
                     self.show_toast("Model Explorer loaded as tab.", "success")
                     self.lbl_status.setText("> Model Explorer Running")
                     self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)

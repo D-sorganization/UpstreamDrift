@@ -56,7 +56,7 @@ _ARMS = (
     "forearm",
 )
 
-# Bodies excluded from the five-group partition (still counted in whole-body H).
+# Bodies excluded from the five-group partition and whole-body COM / H reference.
 GROUP_EXCLUSIONS: frozenset[str] = frozenset(
     {"ball", "golf_ball", "club_ball", "world"}
 )

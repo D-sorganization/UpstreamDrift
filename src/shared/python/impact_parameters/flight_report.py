@@ -35,6 +35,9 @@ from src.shared.python.physics.swing_ball_flight_pipeline import (
     SwingState,
 )
 
+from src.shared.python.physics.impact_model.types import ImpactParameters
+
+from .club_impact import ClubImpact, rigid_gear_head_for
 from .clubhead_series import ClubheadSeries
 from .conditions import ImpactConditions
 from .target_frame import TargetFrame
@@ -62,6 +65,23 @@ class FlightSummary:
     invalid_reason: str = ""
     #: seconds after launch of each ``trajectory_m`` point (``None``: not recorded)
     times_s: np.ndarray | None = None
+    #: launch spin-axis tilt, degrees, + = right (``None``: not reported)
+    spin_axis_deg: float | None = None
+
+
+def spin_axis_tilt_deg(axis: np.ndarray) -> float:
+    """Tilt of a launch spin axis from pure backspin, degrees, + = right.
+
+    ``axis`` is in the pipeline frame (x down-range, y left, z up), where pure
+    backspin is about -y; an axis dipped below horizontal on the right
+    (negative z) curves the ball right, the launch-monitor sign. Raises
+    ``ValueError`` for an axis that is zero or not finite.
+    """
+    vec = np.asarray(axis, dtype=float)
+    norm = float(np.linalg.norm(vec))
+    if vec.shape != (3,) or not math.isfinite(norm) or norm <= 0.0:
+        raise ValueError(f"spin axis must be a finite non-zero 3-vector, got {axis}")
+    return math.degrees(math.asin(max(-1.0, min(1.0, -float(vec[2]) / norm))))
 
 
 def _invalid_reason(path: np.ndarray) -> str:
@@ -70,12 +90,19 @@ def _invalid_reason(path: np.ndarray) -> str:
 
 
 def swing_state_from_series(
-    series: ClubheadSeries, index: int, frame: TargetFrame
+    series: ClubheadSeries,
+    index: int,
+    frame: TargetFrame,
+    club: ClubImpact | None = None,
+    impact_offset_m: tuple[float, float] | None = None,
 ) -> SwingState:
     """Clubhead state at sample ``index`` in the pipeline frame.
 
     Raises:
         ValueError: ``index`` out of range or the face normal is unobservable.
+
+    ``club`` sets head mass and inertia (``None``: pipeline defaults);
+    ``impact_offset_m`` is the strike (toe, high) from the face centre.
     """
     require(0 <= index < len(series), "index out of range", index)
     face_normals = series.face_normal
@@ -84,12 +111,21 @@ def swing_state_from_series(
     velocity = np.asarray(frame.components(series.velocity_mps[index]), dtype=float)
     normal = np.asarray(frame.components(face_normals[index]), dtype=float)
     normal /= np.linalg.norm(normal)
+    extra: dict[str, object] = {}
+    if club is not None:
+        extra = {
+            "clubhead_mass": club.head_mass_kg,
+            "clubhead_moi": club.head_moi_kg_m2,
+        }
+    if impact_offset_m is not None:
+        extra["impact_offset"] = np.asarray(impact_offset_m, dtype=float)
     return SwingState(
         clubhead_velocity=velocity,
         clubhead_angular_velocity=np.zeros(3),
         clubhead_orientation=normal,
         clubhead_loft_deg=math.degrees(math.asin(float(normal[2]))),
         engine_name="mujoco",
+        **extra,  # type: ignore[arg-type]
     )
 
 
@@ -115,16 +151,31 @@ def spin_envelope_reason(
 
 
 def flight_for_impact(
-    series: ClubheadSeries, index: int, frame: TargetFrame, club: str | None = None
+    series: ClubheadSeries,
+    index: int,
+    frame: TargetFrame,
+    club: str | None = None,
+    club_impact: ClubImpact | None = None,
+    impact_offset_m: tuple[float, float] | None = None,
 ) -> FlightSummary:
     """Carry flight of the impact state at ``index`` (impact solver + aerodynamics).
 
     ``club`` names the club; its class sets the launch-spin validity envelope
-    (``None``: the driver envelope).
+    (``None``: the driver envelope). ``club_impact`` and ``impact_offset_m`` as
+    in :func:`swing_state_from_series`; the club's COR, evaluated at the
+    face's normal approach speed (ball at rest), replaces the pipeline
+    default. An off-centre strike's gear spin uses the rigid-contact law with
+    the club's head from :func:`club_impact.rigid_gear_head_for` (#15443).
     """
-    result = SwingBallFlightPipeline().run(
-        swing_state_from_series(series, index, frame), club=club
-    )
+    state = swing_state_from_series(series, index, frame, club_impact, impact_offset_m)
+    cor: dict[str, float] = {}
+    if club_impact is not None:
+        normal_speed = float(
+            np.dot(state.clubhead_velocity, state.clubhead_orientation)
+        )
+        cor = {"cor": club_impact.cor_at(max(normal_speed, 0.0))}
+    params = ImpactParameters(**cor, rigid_gear_head=rigid_gear_head_for(club))
+    result = SwingBallFlightPipeline(impact_params=params).run(state, club=club)
     path = np.array([p.position for p in result.trajectory], dtype=float)
     launch = result.launch_conditions
     meta = result.metadata
@@ -146,6 +197,7 @@ def flight_for_impact(
         trajectory_m=path,
         valid=not reason,
         invalid_reason=reason,
+        spin_axis_deg=spin_axis_tilt_deg(launch.spin_axis),
         times_s=np.array([p.time for p in result.trajectory], dtype=float),
     )
     ensure(math.isfinite(summary.carry_m), "carry must be finite", summary.carry_m)

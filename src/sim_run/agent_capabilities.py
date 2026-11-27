@@ -10,17 +10,47 @@ from typing import Any, Literal
 
 from .counterfactual_run import execute_golden_ztcf
 from .golf_simulator_run import execute_golden_golf_shot
+from .kinetic_match_capability import run_kinetic_match_capability
+from .native_export_jobs import export_status, submit_export
 from .payload_bounds import bound_payload, canonical_json
 from .store import SimulationRunStore
 from .worker import get_repo_sha
 
-CapabilityId = Literal["counterfactual_ztcf_golden", "golf_simulator_golden_shot"]
+CapabilityId = Literal[
+    "counterfactual_ztcf_golden",
+    "golf_simulator_golden_shot",
+    "native_export_describe",
+    "native_export_validate",
+    "native_export_run",
+    "native_export_status",
+    "kinetic_match",
+]
 
 CapabilityExecutor = Callable[[dict[str, Any] | None], dict[str, Any]]
+
+
+def _native_export_describe(request: dict[str, Any] | None) -> dict[str, Any]:
+    """Exporter request schema (#15150 G8); imported lazily (exporter deps)."""
+    from src.tools.native_viewer_export.request_schema import describe
+
+    return describe(request)
+
+
+def _native_export_validate(request: dict[str, Any] | None) -> dict[str, Any]:
+    """Checked exporter request and its command line (#15150 G8)."""
+    from src.tools.native_viewer_export.request_schema import validate
+
+    return validate(request or {})
+
 
 _EXECUTORS: dict[CapabilityId, CapabilityExecutor] = {
     "counterfactual_ztcf_golden": execute_golden_ztcf,
     "golf_simulator_golden_shot": execute_golden_golf_shot,
+    "native_export_describe": _native_export_describe,
+    "native_export_validate": _native_export_validate,
+    "native_export_run": submit_export,
+    "native_export_status": export_status,
+    "kinetic_match": run_kinetic_match_capability,
 }
 
 

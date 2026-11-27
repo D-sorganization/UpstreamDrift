@@ -342,6 +342,16 @@ def test_clip_decision_does_not_change_with_the_frame() -> None:
         assert shown["down_the_line_flight"] is frame
 
 
+@pytest.mark.parametrize(
+    "field",
+    ("unit_scale", "font_scale", "min_lateral_half_span_m", "font_height_fraction"),
+)
+@pytest.mark.parametrize("value", (float("nan"), float("inf"), float("-inf")))
+def test_positive_float_fields_reject_non_finite(field: str, value: float) -> None:
+    with pytest.raises(ValueError, match=field):
+        replace(ON, **{field: value})
+
+
 def test_min_flight_fraction_shown_is_validated(tmp_path: Path) -> None:
     assert 0.0 < ON.min_flight_fraction_shown <= 1.0
     for bad in (0.0, -0.1, 1.5, float("nan"), True, "0.5"):

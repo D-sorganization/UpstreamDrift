@@ -57,6 +57,7 @@ from bunkershot3d.provenance.hashing import canonical_json, config_hash
 from bunkershot3d.solvers import EnvelopeStatus, FidelityTier
 from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_bytes
 
+from .flight_record import validate_saved_flight
 from .outcomes import DesignEvaluation
 from .report import evaluation_sources, validity_stamp
 
@@ -476,7 +477,9 @@ def load_workbench_evaluation(path: Path | str) -> dict[str, Any]:
 
     Fails closed on missing file, corrupted JSON, missing or unknown schema,
     tampered payload where the digest no longer covers the body, or an evaluation
-    claiming to be predictive.
+    claiming to be predictive. Optional flight traces must be coherent and
+    qualified by non-refused shot/carry verdicts before a view can consume them.
+    Legacy records without flight traces remain loadable.
 
     Args:
         path: The JSON evaluation file.
@@ -523,6 +526,10 @@ def load_workbench_evaluation(path: Path | str) -> dict[str, Any]:
             "the evaluation claims to be predictive; no workbench result is (#9239)"
         )
 
+    try:
+        validate_saved_flight(record)
+    except ValueError as exc:
+        raise ExportIntegrityError(f"invalid saved flight: {exc}") from exc
     return record
 
 

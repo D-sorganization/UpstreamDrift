@@ -68,7 +68,7 @@ def test_flight_launches_from_the_contact_state_and_time(monkeypatch) -> None:
     series, ball = _struck()
     seen = {}
 
-    def fake(series_in, index, frame, club=None):
+    def fake(series_in, index, frame, *_extra):
         seen.update(series=series_in, index=index)
         return _flight()
 
@@ -140,3 +140,21 @@ def test_panels_never_cover_the_view_label(position: str) -> None:
     for box in (card, panel):
         apart = box[1] >= label[3] or box[0] >= label[2] or box[2] <= label[0]
         assert apart, (position, box, label)
+
+
+def test_flight_passes_club_and_strike_offset(monkeypatch) -> None:
+    from src.shared.python.impact_parameters.club_impact import club_impact_for
+
+    series, ball = _struck()
+    seen = {}
+
+    def fake(series_in, index, frame, club=None, club_impact=None, offset=None):
+        seen.update(club=club, club_impact=club_impact, offset=offset)
+        return _flight()
+
+    monkeypatch.setattr(tracer, "flight_for_impact", fake)
+    iron = club_impact_for("iron7")
+    tracer.playback_from_series(series, 0.1, ball, DEFAULTS, "7-Iron", iron)
+    assert seen["club"] == "7-Iron"
+    assert seen["club_impact"] is iron
+    assert seen["offset"] is None or len(seen["offset"]) == 2

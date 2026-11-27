@@ -1,0 +1,34 @@
+{
+  "aim_line": "auto",
+  "finish_text": "Aim: finish line",
+  "address_text": "Aim: address line",
+  "line_color_rgba": [
+    255,
+    255,
+    255,
+    255
+  ],
+  "line_width_px": 3,
+  "overshoot_fraction": 0.1,
+  "min_finish_distance_m": 1.0,
+  "line_width_fraction": 0.0055,
+  "outline_color_rgba": [
+    10,
+    20,
+    40,
+    230
+  ],
+  "outline_extra_px": 2,
+  "sources": {
+    "aim_line": "Reference line of the shot-shape views: finish (ball to where the ball finishes, the rest point when a roll is modelled, so a draw or fade that ends on target reads as on target), address (the address target line) or auto (finish when --shot-shape was asked for, address otherwise; without a shot shape the picture is unchanged). --aim-line overrides it.",
+    "finish_text": "HUD and plan-view label when the finish line is the reference.",
+    "address_text": "HUD and plan-view label when the address target line is the reference.",
+    "line_color_rgba": "Colour and opacity of the aim line drawn on the ground of the fixed views: opaque white over a dark halo, which reads against the green turf and the yellow ground track and stays distinct from the light-blue roll track of the flight inset (flight_inset_settings.json roll_color_rgba).",
+    "line_width_px": "Narrowest width of the aim line in pixels; the width grows with the frame (line_width_fraction).",
+    "overshoot_fraction": "How far the drawn aim line runs past the finish point, as a fraction of the ball-to-finish distance, so the finish does not sit on the line's end.",
+    "min_finish_distance_m": "Shortest ball-to-finish distance (metres) that defines a direction; a ball that finishes closer keeps the address line, since its direction is noise.",
+    "line_width_fraction": "Aim line width as a fraction of the tile height (0.0055 is 3 px at the 544 px preview and 6 px at 1080 px), so the line keeps its weight at every resolution.",
+    "outline_color_rgba": "Dark halo drawn under the aim line so it keeps contrast on light turf and over the yellow ground track.",
+    "outline_extra_px": "Pixels the halo is wider than the aim line (total, both sides together)."
+  }
+}

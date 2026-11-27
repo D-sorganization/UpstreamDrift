@@ -11,12 +11,12 @@ All lengths are head-length units; ``brim_length`` is the user setting.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.model_appearance.geometry import Array, Mesh
+from src.shared.python.model_appearance.geometry import Array, Mesh, ellipsoid_mesh
 from src.shared.python.model_appearance.schema import CAP_BRIM_RANGE
 from src.shared.python.model_appearance.head_hair import (
     HairCrop,
@@ -49,6 +49,7 @@ class CapCrop:
     brim_root_inset: float = 0.030  # brim starts this far inside the cap line
     brim_thickness: float = 0.010
     brim_droop: float = 0.12  # tip drop per unit of brim length
+    front_overhang: float = 0.0  # smooth forward crown projection, head lengths
     hair_under: HairCrop = field(
         default_factory=lambda: HairCrop(
             top_thickness=0.028,
@@ -57,6 +58,68 @@ class CapCrop:
             heavy_side_gain=0.0,
         )
     )
+
+
+def flat_cap_crop() -> CapCrop:
+    """Return a close fitting, low crown with a short, broad flat-cap peak.
+
+    The reduced crown stand-off and the matching short-hair crop keep hair
+    under the shell. The higher cap line lowers the crown edge, while the peak
+    has less forward rake than the baseball-cap default.
+    """
+    return CapCrop(
+        line=(
+            (0.0, 0.80),
+            (0.90, 0.76),
+            (1.80, 0.69),
+            (2.60, 0.65),
+            (math.pi, 0.64),
+        ),
+        offset=0.034,
+        brim_half_angle=0.93,
+        brim_forward=0.68,
+        brim_end_taper=0.34,
+        front_overhang=0.12,
+        hair_under=HairCrop(
+            top_thickness=0.020,
+            fringe_thickness=0.0,
+            comb_amplitude=0.0,
+            heavy_side_gain=0.0,
+        ),
+    )
+
+
+def newsboy_cap_crop() -> CapCrop:
+    """Return a fuller period crown over the same closely cropped hair."""
+    return replace(flat_cap_crop(), offset=0.085, front_overhang=0.16)
+
+
+def build_period_cap(
+    skin: Mesh, length: float, crop: CapCrop
+) -> list[tuple[str, Mesh]]:
+    """Add a small crown-to-peak snap to the closed flat-cap assembly."""
+    parts = build_cap(skin, length, crop)
+    crown_mesh, brim_mesh = (part for _, part in parts)
+    crown, brim = crown_mesh.vertices, brim_mesh.vertices
+    central_crown = crown[(np.abs(crown[:, 1]) < 0.035) & (crown[:, 0] > 0.3)]
+    central_brim = brim[(np.abs(brim[:, 1]) < 0.035) & (brim[:, 0] > 0.3)]
+    # Long configurable bills retain a bounded pull; short bills join at the tip.
+    eligible = central_brim[central_brim[:, 0] <= central_crown[:, 0].max() + 0.05]
+    target = eligible[eligible[:, 0].argmax()]
+    anchor = central_crown[np.linalg.norm(central_crown - target, axis=1).argmin()]
+    delta = target - anchor
+    weight = np.exp(
+        -np.sum(((crown - anchor) / np.array([0.18, 0.18, 0.15])) ** 2, axis=1)
+    )
+    crown = crown + weight[:, None] * delta
+    parts[0] = ("cap_crown", Mesh(crown, crown_mesh.faces))
+    snap = ellipsoid_mesh(
+        target,
+        np.array([0.002, 0.012, 0.006]),
+        np.array([0.0, 0.0, 1.0]),
+        width_hint=np.array([1.0, 0.0, 0.0]),
+    )
+    return [*parts, ("cap_snap", snap)]
 
 
 def cap_line_height(crop: CapCrop, azimuth: Array) -> Array:
@@ -96,6 +159,7 @@ def _brim(rim: Array, crop: CapCrop, length: float) -> Mesh:
         r: NDArray[np.int64],
         s: NDArray[np.int64],
     ) -> NDArray[np.int64]:
+        """Triangulate the ordered row-to-row plate cells."""
         return np.concatenate(
             [
                 np.stack([p, q, r], -1).reshape(-1, 3),
@@ -145,12 +209,88 @@ def build_cap(
     crown = closed_shell(
         v, n, faces, np.full(len(v), cfg.wall), cfg.offset - cfg.wall, cfg.wall
     )
+    if cfg.front_overhang:
+        # Move both shell surfaces together toward the forehead, preserving
+        # their stand-off. Smooth gates leave the cap line and crown apex fixed.
+        crown_vertices = crown.vertices.copy()
+        z = crown_vertices[:, 2]
+        front = np.clip((crown_vertices[:, 0] - cfg.centre_x) / 0.24, 0.0, 1.0)
+        rise = np.clip((z - 0.79) / 0.09, 0.0, 1.0)
+        apex = np.clip((0.99 - z) / 0.07, 0.0, 1.0)
+        front, rise, apex = (
+            gate * gate * (3.0 - 2.0 * gate) for gate in (front, rise, apex)
+        )
+        crown_vertices[:, 0] += cfg.front_overhang * front * rise * apex
+        crown = Mesh(crown_vertices, crown.faces)
     rim = open_rim(faces)
     pts = v[rim] + (cfg.offset) * n[rim]
     az = np.arctan2(pts[:, 1], pts[:, 0] - cfg.centre_x)
-    front = np.abs(az) <= cfg.brim_half_angle
-    order = np.argsort(az[front])
-    brim_pts = pts[front][order]
+    front_mask = np.abs(az) <= cfg.brim_half_angle
+    order = np.argsort(az[front_mask])
+    brim_pts = pts[front_mask][order]
     if len(brim_pts) < 3:
         raise ValueError("cap line leaves no front rim for the brim")
     return [("cap_crown", crown), ("cap_brim", _brim(brim_pts, cfg, brim_length))]
+
+
+def straw_hat_crop() -> CapCrop:
+    """Return a rounded straw crown with clearance for short cropped hair."""
+    return CapCrop(
+        line=((0.0, 0.73), (math.pi, 0.73)),
+        offset=0.075,
+        hair_under=HairCrop(
+            top_thickness=0.020,
+            fringe_thickness=0.0,
+            comb_amplitude=0.0,
+            heavy_side_gain=0.0,
+        ),
+    )
+
+
+def _straw_crown_shape(mesh: Mesh, rise: float) -> Mesh:
+    """Raise the upper crown or band together into a broad flat top."""
+    vertices = mesh.vertices.copy()
+    t = np.clip((vertices[:, 2] - 0.82) / rise, 0.0, 1.0)
+    high = vertices[:, 2] > 0.82
+    vertices[high, 2] = 0.82 + rise * (0.15 * t[high] + 0.85 * (1 - (1 - t[high]) ** 3))
+    return Mesh(vertices, mesh.faces)
+
+
+def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
+    """Build closed rounded crown, circumferential brim and narrow dark band.
+
+    Dimensions are artistic head-length fractions; all are visual only.
+    The brim extends 0.32 radially from the crown and is 0.012 thick.
+    """
+    cfg = straw_hat_crop()
+    rounded = build_cap(skin, 0.3, cfg)[0][1]
+    rise = rounded.vertices[:, 2].max() - 0.82
+    crown = _straw_crown_shape(rounded, rise)
+    v0, n0 = skin.vertices, _vertex_normals(skin)
+    v, n, faces = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.73)
+    rim = open_rim(faces)
+    pts = v[rim] + cfg.offset * n[rim]
+    angle = np.arctan2(pts[:, 1], pts[:, 0] - cfg.centre_x)
+    pts, angle = pts[np.argsort(angle)], np.sort(angle)
+    radial = np.column_stack((np.cos(angle), np.sin(angle), np.zeros(len(angle))))
+    inner = pts.copy()
+    outer = pts + 0.32 * radial
+    outer[:, 2] -= 0.025
+    upper = np.array([0.0, 0.0, 0.006])
+    rings = np.stack((inner + upper, outer + upper, outer - upper, inner - upper))
+    count = len(pts)
+    faces_list: list[NDArray[np.int64]] = []
+    for i in range(4):
+        a = np.arange(count) + i * count
+        b = np.roll(np.arange(count), -1) + i * count
+        c = np.roll(np.arange(count), -1) + ((i + 1) % 4) * count
+        d = np.arange(count) + ((i + 1) % 4) * count
+        faces_list.extend((np.stack((a, b, c), axis=1), np.stack((a, c, d), axis=1)))
+    mesh = Mesh(rings.reshape(-1, 3), np.concatenate(faces_list))
+    if mesh.volume() < 0:
+        mesh = Mesh(mesh.vertices, mesh.faces[:, ::-1].copy())
+    vb, nb, fb = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.76)
+    vb, nb, fb = _clip_above(vb, nb, fb, 0.80 - vb[:, 2])
+    band = closed_shell(vb, nb, fb, np.full(len(vb), 0.006), cfg.offset, 0.006)
+    band = _straw_crown_shape(band, rise)
+    return [("straw_crown", crown), ("straw_brim", mesh), ("straw_band", band)]

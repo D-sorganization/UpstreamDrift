@@ -5,6 +5,16 @@ footage, source-bound models, fits and authored driving profiles. The native til
 and React route recall the same configured store. New players are data records
 that use these shared workflows.
 
+## Native Appearance Binding
+
+A full-body definition may explicitly contain an `appearance` object using the
+`appearance-v1` schema. Binding and authored-range extraction reconstruct the
+styled MuJoCo XML and verify its exact registered SHA-256, including appearance.
+A definition without that key retains the legacy physics-only export. The native
+plant uses the same physical specification; styling does not establish a player
+match, contact, or forward-dynamics qualification. No sidecar is discovered
+implicitly, and changing either physics or appearance requires a new bound hash.
+
 ## Source Review and Modeling
 
 Recall original frames with observed landmarks, compare stored native fits and

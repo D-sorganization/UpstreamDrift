@@ -30,11 +30,14 @@ from src.shared.python.physics.flight_models import (
     UnifiedLaunchConditions,
 )
 from src.shared.python.physics.rust_kernel import is_rust_available
+from tests.unit.physics.reference_bands import band_m, reference_row
 
 pytestmark = [pytest.mark.unit, pytest.mark.scientific]
 
 YARDS_TO_METERS = 0.9144
 GRAVITY = 9.80665
+#: published Trackman PGA Tour driver row and its +-5 % carry band (#15443 F7)
+DRIVER_ROW = "pga_tour_driver_2019"
 
 
 def _launch(
@@ -98,13 +101,14 @@ def test_driver_trackman_window(
     name: str,
     factory: Callable[[], BallFlightSimulator | EnhancedBallFlightSimulator],
 ) -> None:
-    analysis = _analysis(factory, _launch(167.0, 10.9, 2686.0))
-    carry_yd = analysis["carry_distance"] / YARDS_TO_METERS
-
-    assert 238.0 <= carry_yd <= 290.0, f"{name} carry={carry_yd:.1f} yd"
-    assert 25.0 <= analysis["max_height"] <= 40.0, (
-        f"{name} apex={analysis['max_height']:.1f} m"
-    )
+    row = reference_row(DRIVER_ROW)
+    launch = _launch(row["ball_speed_mph"], row["launch_deg"], row["spin_rpm"])
+    analysis = _analysis(factory, launch)
+    carry_m, apex_m = analysis["carry_distance"], analysis["max_height"]
+    low, high = band_m(DRIVER_ROW, "carry")
+    assert low <= carry_m <= high, f"{name} carry={carry_m / YARDS_TO_METERS:.1f} yd"
+    low, high = band_m(DRIVER_ROW, "apex")
+    assert low <= apex_m <= high, f"{name} apex={apex_m:.1f} m"
     assert 5.5 <= analysis["flight_time"] <= 7.5, (
         f"{name} time={analysis['flight_time']:.2f} s"
     )

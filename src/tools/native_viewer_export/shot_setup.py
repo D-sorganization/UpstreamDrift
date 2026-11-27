@@ -156,11 +156,13 @@ def shift_ball(swing: SwingInput, ball: BallPlacement, shift_m: float) -> BallPl
 
 
 def solve_straight_roll(
-    side_m: Callable[[float], float], limits: ShotSetupSettings
+    side_m: Callable[[float], float],
+    limits: ShotSetupSettings,
+    centre_deg: float = 0.0,
 ) -> tuple[float, float]:
     """The roll (degrees) where ``side_m`` is zero, and the side found there.
 
-    Bracketed false position (Illinois) on ``[-solve_span_deg, +solve_span_deg]``
+    Bracketed false position (Illinois) on ``centre_deg +- solve_span_deg``
     with at most ``max_solve_steps`` evaluations, ending when
     ``|side| <= straight_tolerance_m``. Postcondition: the returned roll lies in
     the bracket. Raises ``ValueError`` for a non-finite side, a bracket without
@@ -176,15 +178,18 @@ def solve_straight_roll(
             raise ValueError(f"landing side must be finite, got {value} at {roll} deg")
         return value
 
-    lo, hi = -limits.solve_span_deg, limits.solve_span_deg
+    if not math.isfinite(centre_deg):
+        raise ValueError(f"centre_deg must be finite, got {centre_deg}")
+    lo, hi = centre_deg - limits.solve_span_deg, centre_deg + limits.solve_span_deg
     f_lo, f_hi = probe(lo), probe(hi)
     for roll, value in ((lo, f_lo), (hi, f_hi)):
         if abs(value) <= limits.straight_tolerance_m:
             return roll, value
     if f_lo * f_hi > 0.0:
         raise ValueError(
-            f"no sign change of the landing side in +-{limits.solve_span_deg:g} deg "
-            f"of roll ({f_lo:.1f} m at {lo:g}, {f_hi:.1f} m at {hi:g})"
+            f"no sign change of the landing side in {centre_deg:g} "
+            f"+-{limits.solve_span_deg:g} deg of roll ({f_lo:.1f} m at {lo:g}, "
+            f"{f_hi:.1f} m at {hi:g})"
         )
     last = 0
     while steps < limits.max_solve_steps:
@@ -215,8 +220,17 @@ def roll_for_shape(
     """
     validate_shot_setup(0.0, 0.0, shape)
     straight, side = solve_straight_roll(side_m, limits)
-    roll = straight + _SHAPE_SIGN[shape] * limits.shape_roll_step_deg
-    return roll, straight, side
+    return shape_roll(shape, straight, limits), straight, side
+
+
+def shape_roll(shape: str, straight_deg: float, limits: ShotSetupSettings) -> float:
+    """Club roll (degrees) of ``shape`` given the solved straight roll.
+
+    ``draw`` / ``fade`` are ``straight_deg`` minus / plus
+    ``shape_roll_step_deg``; ``ValueError`` for an unknown ``shape``.
+    """
+    validate_shot_setup(0.0, 0.0, shape)
+    return straight_deg + _SHAPE_SIGN[shape] * limits.shape_roll_step_deg
 
 
 def lateral_of_flight(flight: Any) -> float:

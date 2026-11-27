@@ -679,7 +679,10 @@ class WaterlooPennerModel(BallFlightModel):
     @property
     def description(self) -> str:
         """Return the Waterloo/Penner model description."""
-        return "Waterloo quadratic Cd with Penner spin-ratio lift fit"
+        return (
+            "Waterloo quadratic Cd with Penner spin-ratio lift fit; "
+            "cd1 and the lift cap are a constant-spin TrackMan calibration"
+        )
 
     @property
     def reference(self) -> str:
@@ -776,7 +779,11 @@ class MacDonaldHanzelyModel(BallFlightModel):
     @property
     def description(self) -> str:
         """Return the MacDonald-Hanzely model description."""
-        return "ODE model with exponential spin decay"
+        return (
+            "Constant Cd/Cl ODE with exponential spin decay, labelled with the "
+            "MacDonald and Hanzely name; not the published 1991 model "
+            "(its coefficients are illustrative, not taken from the paper)"
+        )
 
     @property
     def reference(self) -> str:
@@ -869,6 +876,20 @@ class ConstantCoefficientSpec:
     cd: float
     cl: float
     spin_decay: float
+
+
+def _preset_description(label: str, decay: str) -> str:
+    """Describe a constant Cd/Cl preset that only borrows a researcher's name.
+
+    Preconditions: ``label`` and ``decay`` are non-empty strings.
+    Postconditions: the text states the preset is not the published model.
+    """
+    if not label or not decay:
+        raise ValueError("label and decay must be non-empty")
+    return (
+        f"Constant Cd/Cl preset ({decay}) labelled {label}; "
+        f"not the published {label} model, coefficients are illustrative"
+    )
 
 
 class ConstantCoefficientModel(BallFlightModel):
@@ -1003,7 +1024,7 @@ class FlightModelRegistry:
         cls._models[FlightModelType.NATHAN] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Nathan",
-                description="Constant Cd/Cl model with spin decay",
+                description=_preset_description("Nathan", "spin decay 0.03/s"),
                 reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.22,
                 cl=0.24,
@@ -1013,7 +1034,7 @@ class FlightModelRegistry:
         cls._models[FlightModelType.BALLANTYNE] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Ballantyne",
-                description="Constant Cd/Cl model for steady spin",
+                description=_preset_description("Ballantyne", "spin decay 0.02/s"),
                 reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.20,
                 cl=0.18,
@@ -1023,7 +1044,7 @@ class FlightModelRegistry:
         cls._models[FlightModelType.JCOLE] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="J. Cole",
-                description="Constant Cd/Cl model with moderate decay",
+                description=_preset_description("J. Cole", "spin decay 0.04/s"),
                 reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.23,
                 cl=0.22,
@@ -1033,7 +1054,7 @@ class FlightModelRegistry:
         cls._models[FlightModelType.ROSPIE_DL] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Rospie DL",
-                description="Constant Cd/Cl model tuned for driver launch",
+                description=_preset_description("Rospie DL", "spin decay 0.03/s"),
                 reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.21,
                 cl=0.19,
@@ -1043,7 +1064,7 @@ class FlightModelRegistry:
         cls._models[FlightModelType.CHARRY_L3] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Charry L3",
-                description="Constant Cd/Cl model with higher drag",
+                description=_preset_description("Charry L3", "spin decay 0.05/s"),
                 reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.24,
                 cl=0.21,

@@ -27,6 +27,21 @@ Format 299 is 1080p50 video only; format 140 was downloaded separately and both
 were remuxed without transcoding into t_J6Vik3Tss-with-audio.mp4. Analyze the
 original video-only bytes identified in the catalog; muxing changes file identity.
 
+The November 26, 2026 linked-source acquisition, file hashes, metadata sidecars,
+container timing observations, and source-alignment limitations are recorded in
+the [player reference acquisition receipt](historical_capture/player-reference-acquisition-2026-11-26.json).
+Reproduction steps are in the [acquisition commands](historical_capture/player-reference-acquisition-commands-2026-11-26.md).
+The USGA 3250–3295 presentation interval has separate preserved and forced-cut
+variants; the receipt explains that the initial section-file PTS was not mapped
+independently to the full-source PTS. No physical recording clock or training
+result is claimed.
+
+The Seve Ballesteros, Jack Nicklaus, Bobby Jones, Sam Snead, and Byron Nelson
+linked-source acquisitions have a separate [legend footage receipt](historical_capture/legend-reference-acquisition-2026-11-26.json)
+and [reproduction commands](historical_capture/legend-reference-acquisition-commands-2026-11-26.md).
+Their source identities, date claims, presentation-clock limits, unknown rights,
+and private-only media status are recorded there; no training result is claimed.
+
 ## Install and Run
 
 Use Python 3.11+ and the exact Tools gitlink. Install the historical-capture extra

@@ -183,6 +183,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-26.md`                 |
 | 2026-03-27 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-27.md`                 |
 | 2026-04-05 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-05.md`                 |
+| 2026-11-20 | Pragmatic Programmer Review: Grip Epic   | `docs/assessments/pragmatic/2026-11-20-work.md`                               |
 
 ---
 

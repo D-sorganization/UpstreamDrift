@@ -112,6 +112,8 @@ _PATCHED_MODULE_NAMES = [
 _saved_modules: dict[str, ModuleType | None] = {
     name: sys.modules.get(name) for name in _PATCHED_MODULE_NAMES
 }
+_PENDULUM_PREFIX = "src.shared.python.pendulum_simulator"
+_preexisting_modules = set(sys.modules)
 
 _install_fake_simulation_modules()
 _install_fake_perturbation_modules()
@@ -130,6 +132,16 @@ finally:
         else:
             sys.modules[_name] = _original
     del _name, _original
+    # Pendulum modules first imported while the fakes were installed (e.g.
+    # panel_builders itself) bound the fake SimulationPanel. Evict them so a
+    # later real import (the GUI E2E suites) rebuilds them; this module keeps
+    # its own reference to panel_builders.
+    for _name in [
+        n
+        for n in sys.modules
+        if n.startswith(_PENDULUM_PREFIX) and n not in _preexisting_modules
+    ]:
+        sys.modules.pop(_name, None)
 
 
 class _FakeResult:

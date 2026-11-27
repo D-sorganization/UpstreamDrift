@@ -12,7 +12,7 @@
     255,
     255
   ],
-  "min_ball_radius_px": 2,
+  "min_ball_radius_px": 5,
   "ball_shading": {
     "shaded": true,
     "light_dir": [
@@ -90,7 +90,7 @@
     "tracer_width_px": "Tracer line width in pixels of one view tile.",
     "fade_after_s": "Seconds of flight after which the older part of the tracer is no longer drawn; null keeps the whole trace to the end of the clip.",
     "ball_color_rgb": "Colour of the ball in flight (the ball on the tee is the scene's own ball).",
-    "min_ball_radius_px": "Smallest drawn ball radius, so a distant ball stays visible; a nearer ball is drawn at its projected size.",
+    "min_ball_radius_px": "Smallest drawn ball radius in pixels of one view tile, so a distant ball stays visible; a nearer ball is drawn at its projected size (the larger of the two is drawn, with the ball_shading lighting). 5 px (a 10 px wide ball): the first-pass down-the-line flight clip review (#15150) found the ball, drawn at the former 2 px floor, only 3 to 4 px across in the wide view and hard to follow.",
     "ball_shading": "Object (null turns it off): lights the flying ball as a sphere instead of a flat disc; the pixels it covers and the scene occlusion are unchanged. shaded false gives the flat disc. light_dir is the direction toward the light in the image frame (x right, y down, z toward the viewer; any non-zero length); ambient 0-1 is the brightness fraction on the unlit side (the colour is multiplied by ambient + (1 - ambient) * Lambert term); highlight_strength 0-1 adds white at the specular spot (0 = none) and highlight_size (0-1] is its angular radius as a fraction of 90 degrees.",
     "fov_y_deg": "Vertical field of view of the viewer camera the overlay is projected through. 45 is the MuJoCo free-camera default the native export uses; another viewer needs its own value or the overlay will not line up.",
     "near_clip_m": "Points closer to the camera plane than this are not drawn.",

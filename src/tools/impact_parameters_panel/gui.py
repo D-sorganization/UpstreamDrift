@@ -113,6 +113,8 @@ class ImpactParametersWidget(QWidget):
         self._card: ImpactCard | None = None
         self._value_labels: dict[str, QLabel] = {}
         self._build_ui()
+        # Empty state: nothing to hand to Impact Explorer until a series is set.
+        self.explorer_button.setEnabled(False)
 
     # ------------------------------------------------------------------ UI --
     def _build_ui(self) -> None:

@@ -59,6 +59,22 @@ class PlaybackClock:
         self._wall0 = float(now_s)
         self._offset0 = float(self._time[frame] - self._time[0])
 
+    def media_time_at(self, now_s: float) -> float:
+        """The run time shown at wall time ``now_s`` (looping)."""
+        return float(self._time[0]) + self._offset_at(now_s)
+
+    def start_at_time(self, media_s: float, now_s: float) -> None:
+        """Rebase on a run time reported by :meth:`media_time_at`.
+
+        Unlike ``start(frame)``, this can resume on the terminal frame: a time
+        inside the last sample interval stays there instead of wrapping to 0.
+        """
+        t0, t1 = float(self._time[0]), float(self._time[-1])
+        if not (math.isfinite(media_s) and t0 <= media_s <= t1):
+            raise ValueError(f"media time {media_s} is outside the run ({t0}..{t1})")
+        self._wall0 = float(now_s)
+        self._offset0 = min(media_s - t0, math.nextafter(self._duration, 0.0))
+
     def set_speed(self, speed: float, now_s: float) -> None:
         """Change speed without moving: the current frame stays current."""
         speed = _check_speed(speed)

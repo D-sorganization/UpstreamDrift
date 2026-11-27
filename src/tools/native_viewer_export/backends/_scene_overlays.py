@@ -23,6 +23,7 @@ from src.shared.python.body_part_viz.mujoco_force_colors import (
     apply_mujoco_scene_colors,
 )
 from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.tools.native_viewer_export.arrow_style import head_span_shaft_radii
 
 __all__ = ["apply_scene_overlays"]
 
@@ -50,6 +51,8 @@ def apply_scene_overlays(
         )
     if glyph_sets is not None:
         frame = glyph_sets[position]
-        add_glyphs_to_scene(scene, frame)
+        add_glyphs_to_scene(
+            scene, frame, arrow_head_shaft_radii=head_span_shaft_radii()
+        )
         if frame.ellipsoids:
             add_ellipsoids_to_scene(scene, frame.ellipsoids)

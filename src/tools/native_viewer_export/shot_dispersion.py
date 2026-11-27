@@ -102,6 +102,8 @@ class SampleOutcome:
     notes: Mapping[str, str] = field(default_factory=dict)
     path_m: np.ndarray | None = None
     times_s: np.ndarray | None = None
+    roll_m: float | None = None  # model roll after the carry, with its offset
+    roll_offset_m: tuple[float, float] | None = None  # (down-range, left) [m]
 
     @property
     def available(self) -> bool:
@@ -143,6 +145,11 @@ def sample_setups(settings: DispersionSettings) -> list[ShotSetup]:
     return [ShotSetup(float(r), float(s)) for r, s in zip(rolls, shifts, strict=True)]
 
 
+def nominal_setup(settings: DispersionSettings) -> ShotSetup:
+    """The base setup the samples vary around (the nominal shot of a run)."""
+    return ShotSetup(settings.base_club_roll_deg, settings.base_ball_shift_m)
+
+
 def _row_values(card: Any) -> dict[str, float | None]:
     if isinstance(card, str) or not getattr(card, "available", False):
         return {}
@@ -173,8 +180,19 @@ def _outcome(setup: ShotSetup, flight: Any, card: Any) -> SampleOutcome:
     if not values:
         notes["impact_card"] = card if isinstance(card, str) else "unavailable"
     trace = _target_trace(flight)
+    roll = getattr(flight, "rollout", None)
     return SampleOutcome(
-        setup, None, metrics, trace, notes, flight.path_m, flight.times_s
+        setup,
+        None,
+        metrics,
+        trace,
+        notes,
+        flight.path_m,
+        flight.times_s,
+        None if roll is None else float(roll.roll_m),
+        None
+        if roll is None
+        else (float(roll.end_offset_m[0]), float(roll.end_offset_m[1])),
     )
 
 
