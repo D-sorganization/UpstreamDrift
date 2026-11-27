@@ -6,15 +6,20 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `pinocchio_models-squat` | Squat | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/squat` | `tests/config/test_launcher_registry_parity.py` |
+| `pinocchio_models_shared` | Pinocchio Models | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `Pinocchio_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `realtime_ws` | Realtime WebSocket | `service` | `simulation` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `robotics_module` | Robotics Module | `library` | `simulation` | — | `core` | 🟢 active_feature | `src/robotics/__init__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `settings.desktop_only_tabs` | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `settings.preferences` | Settings/preferences surface + persistence | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `simulation.ball_flight_simulator` | Ball Flight Simulator tool | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/ball_flight_gui/gui.py` | `tests/api/test_routes_ball_flight.py` |
 | `simulation.controls_wiring` | Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls) | `feature` | `simulation` | — | `core` | 🔵 planned | `src/launchers/launcher_simulation.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `simulation.golf_suite_batch` | Golf Simulation Suite (parameter sweeps, batch runs) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/golf_simulation_suite/__main__.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `simulation.realtime_ws_stream` | Live simulation data over WebSocket pub-sub | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/launcher_simulation.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `simulation.swing_flight_pipeline` | Swing-to-flight pipeline tool | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/swing_flight_pipeline/gui.py` | `tests/tools/swing_flight_pipeline/test_async_actions.py` |
 | `simulation_backends` | Simulation Backends | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/simulation_backends_launcher/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `terrain_engine` | Terrain Engine | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/terrain_engine/gui.py` | `tests/config/test_launcher_registry_parity.py` |
+| `tools.golf_environment` | Golf Environment | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_environment/gui.py` | `tests/config/feature_parity/test_registry.py` |
 | `tools.golf_simulator` | Golf Simulator capability-aware controls and replay submission | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulator/gui.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.matlab_suite` | MATLAB/Simscape model suite | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.native_viewer_export` | Native per-engine viewer video export (CLI) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |

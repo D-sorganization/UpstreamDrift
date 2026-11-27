@@ -43,6 +43,7 @@ _LARGE_HAND_SCALE = 1.15
 
 
 def _apply_xf(mesh: Mesh, xf: Array) -> Mesh:
+    """Return ``mesh`` transformed by the 4x4 matrix ``xf``."""
     return Mesh(mesh.vertices @ xf[:3, :3].T + xf[:3, 3], mesh.faces)
 
 
@@ -64,6 +65,7 @@ def _welded_vertex_normals(mesh: Mesh) -> Array:
 
 
 def _camera_basis(view_name: str, roll0_xf: Array) -> tuple[Array, Array, Array]:
+    """Camera right, up and forward for a named view of the unrolled grip."""
     top = roll0_xf[:3, 0]
     target = roll0_xf[:3, 1]
     shaft = roll0_xf[:3, 2]
@@ -93,6 +95,7 @@ def _rasterize_batches(
     w_ss: int,
     h_ss: int,
 ) -> tuple[NDArray[np.uint64], NDArray[np.float64]]:
+    """Rasterise shaded triangle batches into an RGB image."""
     active = np.flatnonzero(tri_mask)
     best = np.zeros(w_ss * h_ss, dtype=np.uint64)
     if len(active) == 0:
@@ -271,6 +274,7 @@ def _write_evidence_receipt(
     base: GripSpec,
     records: list[dict[str, object]],
 ) -> None:
+    """Write the evidence receipt next to the rendered frames."""
     s_lead = solve_shadow_hand_qpos(
         Hand.LEAD, base.lead, grip_spec=base, grip_radius_m=cfg.grip_radius_nominal_m
     )
@@ -314,6 +318,7 @@ def _write_evidence_receipt(
 
 
 def main() -> None:
+    """Render the Shadow grip evidence frames."""
     cfg = visual_settings()
     base = GripSpec.legacy()
     club = ClubAssembly(

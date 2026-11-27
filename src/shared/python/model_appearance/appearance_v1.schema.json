@@ -63,6 +63,24 @@
         "enabled": { "type": "boolean" },
         "headwear": { "enum": ["none", "hair", "cap"] },
         "model": { "enum": ["parametric", "cc0_mesh"] },
+        "hair_style": { "enum": ["short_crop", "dome"] },
+        "hair_part": { "enum": ["left", "right", "none"] },
+        "eye_color": { "enum": ["blue_grey", "hazel", "brown"] },
+        "cap_style": { "enum": ["none", "baseball_cap", "flat_cap", "straw_hat"] },
+        "cap_material": { "$ref": "#/$defs/name" },
+        "cap_brim": { "type": "number", "minimum": 0.1, "maximum": 0.8 },
+        "sizing": { "enum": ["stature", "segment_length"] },
+        "height_over_stature": { "type": "number", "minimum": 0.1, "maximum": 0.16 },
+        "morph": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "width": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "jaw": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "nose": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "mouth": { "type": "number", "minimum": -0.2, "maximum": 0.2 },
+            "eyes": { "type": "number", "minimum": -0.2, "maximum": 0.2 }
+          }
+        },
         "headwear_material": { "$ref": "#/$defs/name" },
         "scale": { "type": "number", "minimum": 0.5, "maximum": 2 },
         "forward_axis": { "enum": ["+x", "-x", "+y", "-y", "+z", "-z"] },

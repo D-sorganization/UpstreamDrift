@@ -14,6 +14,7 @@ from src.shared.python.core.physics_constants import (
 from .types import ImpactModelType, ImpactParameters, PostImpactState, PreImpactState
 from .contact_kinematics import (
     impact_offset_vector_3d,
+    normal_effective_inverse_mass,
     pre_impact_contact_relative_velocity,
     reduced_normal_effective_mass,
 )
@@ -36,6 +37,33 @@ from .utils import compute_effective_club_mass
 # Ref: classic rigid-body collision of a sphere, e.g. Cross, "Grip-slip
 # behavior of a bouncing ball", Am. J. Phys. 70, 1093 (2002).
 SPHERE_ROLLING_CAP_FACTOR = 2.0 / 7.0
+
+
+def kelvin_voigt_damping_for_cor(
+    stiffness: float, reduced_mass: float, cor: float
+) -> float:
+    """Damping coefficient c [N*s/m] giving a Kelvin-Voigt contact a given COR.
+
+    For the linear oscillator ``mu*x'' + c*x' + k*x = 0`` released at first
+    contact, the restitution is ``e = exp(-pi*zeta/sqrt(1 - zeta**2))`` with
+    damping ratio ``zeta = c / (2*sqrt(k*mu))``. Inverting gives
+    ``zeta = -ln(e) / sqrt(pi**2 + ln(e)**2)`` (Lankarani and Nikravesh,
+    "A contact force model with hysteresis damping", Nonlinear Dyn. 5, 1994;
+    Marhefka and Orin, "A compliant contact model with nonlinear damping",
+    ICRA 1996).
+
+    Preconditions:
+        ``stiffness > 0``, ``reduced_mass > 0`` and ``0 < cor < 1``.
+    Postconditions:
+        Returns ``c > 0``; ``c`` grows as ``cor`` falls.
+    """
+    if stiffness <= 0.0 or reduced_mass <= 0.0:
+        raise ValueError("stiffness and reduced_mass must be positive")
+    if not 0.0 < cor < 1.0:
+        raise ValueError(f"cor must lie strictly between 0 and 1, got {cor}")
+    ln_e = math.log(cor)
+    zeta = -ln_e / math.sqrt(math.pi**2 + ln_e**2)
+    return 2.0 * zeta * math.sqrt(stiffness * reduced_mass)
 
 
 class ImpactModel(ABC):
@@ -110,7 +138,12 @@ class RigidBodyImpactModel(ImpactModel):
             return np.zeros(3)
         inverse_effective_mass = (
             1.0 / GOLF_BALL_MASS_KG
-            + 1.0 / pre_state.clubhead_mass
+            + normal_effective_inverse_mass(
+                pre_state.clubhead_mass,
+                float(pre_state.clubhead_moi),
+                impact_offset_vector_3d(pre_state),
+                slip / slip_mag,
+            )
             + GOLF_BALL_RADIUS_M**2 / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
         )
         j_tangent = min(
@@ -206,6 +239,8 @@ class RigidBodyImpactModel(ImpactModel):
             params.friction_coefficient,
         )
         impulse = j * n + j_tangent
+        # Linear momentum conservation uses full clubhead_mass for CM translation;
+        # off-center rotational compliance enters clubhead angular velocity via r x (-J).
         v_ball_post = pre_state.ball_velocity + impulse / GOLF_BALL_MASS_KG
         v_club_post = pre_state.clubhead_velocity - impulse / pre_state.clubhead_mass
         ball_spin = pre_state.ball_angular_velocity + (
@@ -244,6 +279,16 @@ class SpringDamperImpactModel(ImpactModel):
 
     Uses semi-implicit integration of spring-damper contact to
     compute force and velocity evolution during impact.
+
+    The damping is derived from ``params.cor`` (see
+    :func:`kelvin_voigt_damping_for_cor`), so the model honours the same
+    restitution as the rigid-body model; ``params.contact_damping`` is not
+    used. The old fixed default of 1e3 N*s/m gave a damping ratio near 2.6
+    (over-damped, COR near 0, smash 0.83). Tangential friction is applied as
+    one Coulomb impulse sized by the integrated normal impulse and shares
+    ``RigidBodyImpactModel._compute_friction_impulse`` (no-slip capped), so
+    spin matches the rigid-body model; the contact itself is not
+    time-resolved in the tangent plane.
     """
 
     @precondition(
@@ -261,7 +306,7 @@ class SpringDamperImpactModel(ImpactModel):
         self.dt = dt
 
     @precondition(
-        lambda self, x_ball, v_ball, x_club, v_club, n, m_club, penetration, params: (
+        lambda self, x_ball, v_ball, x_club, v_club, n, m_club, penetration, gains: (
             m_club > 0
         ),
         "Clubhead mass must be positive",
@@ -275,13 +320,17 @@ class SpringDamperImpactModel(ImpactModel):
         n: np.ndarray,
         m_club: float,
         penetration: float,
-        params: ImpactParameters,
+        gains: tuple[float, float],
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """Advance positions and velocities during one contact time step."""
+        """Advance positions and velocities during one contact time step.
+
+        ``gains`` is ``(stiffness [N/m], damping [N*s/m])``.
+        """
+        stiffness, damping = gains
         max_force = 1e5  # [N] max contact force
         v_rel_normal = np.dot(v_ball - v_club, n)
-        f_spring = params.contact_stiffness * penetration
-        f_damper = -params.contact_damping * v_rel_normal
+        f_spring = stiffness * penetration
+        f_damper = -damping * v_rel_normal
         f_magnitude = max(0.0, min(f_spring + f_damper, max_force))
         f_contact = f_magnitude * n
         a_ball = f_contact / GOLF_BALL_MASS_KG
@@ -291,6 +340,34 @@ class SpringDamperImpactModel(ImpactModel):
         x_b = x_ball + v_b * self.dt
         x_c = x_club + v_c * self.dt
         return x_b, v_b, x_c, v_c
+
+    @staticmethod
+    def _apply_friction(
+        pre_state: PreImpactState,
+        params: ImpactParameters,
+        n: np.ndarray,
+        v_ball: np.ndarray,
+        v_club: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Tangential Coulomb impulse sized by the integrated normal impulse.
+
+        Returns the ball and club velocities and the ball spin after the impulse.
+        """
+        m_ball, m_club = GOLF_BALL_MASS_KG, pre_state.clubhead_mass
+        j_normal = float(np.dot(v_ball - pre_state.ball_velocity, n)) * m_ball
+        v_rel = pre_impact_contact_relative_velocity(pre_state)
+        j_tangent = RigidBodyImpactModel()._compute_friction_impulse(
+            pre_state,
+            v_rel,
+            float(np.dot(v_rel, n)),
+            n,
+            j_normal,
+            params.friction_coefficient,
+        )
+        spin = pre_state.ball_angular_velocity + (
+            GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
+        ) * np.cross(j_tangent, n)
+        return v_ball + j_tangent / m_ball, v_club - j_tangent / m_club, spin
 
     @precondition(
         lambda self, pre_state, params: params.contact_stiffness > 0,
@@ -331,6 +408,14 @@ class SpringDamperImpactModel(ImpactModel):
         x_club: np.ndarray = np.zeros(3)
         v_club: np.ndarray = pre_state.clubhead_velocity.copy()
 
+        gains = (
+            params.contact_stiffness,
+            kelvin_voigt_damping_for_cor(
+                params.contact_stiffness,
+                m_ball * m_club / (m_ball + m_club),
+                params.cor,
+            ),
+        )
         contact_time = 0.0
         max_time = 0.005  # 5 ms max contact time [s]
         max_steps = int(max_time / self.dt)
@@ -347,7 +432,7 @@ class SpringDamperImpactModel(ImpactModel):
                     n,
                     m_club,
                     -gap,
-                    params,
+                    gains,
                 )
                 contact_time += self.dt
             elif contact_time > 0:
@@ -362,6 +447,10 @@ class SpringDamperImpactModel(ImpactModel):
                 if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M < 0:
                     continue
 
+        v_ball, v_club, ball_spin = self._apply_friction(
+            pre_state, params, n, v_ball, v_club
+        )
+
         # Energy calculation
         ke_ball_pre = (
             0.5 * m_ball * np.dot(pre_state.ball_velocity, pre_state.ball_velocity)
@@ -371,7 +460,7 @@ class SpringDamperImpactModel(ImpactModel):
 
         return PostImpactState(
             ball_velocity=v_ball,
-            ball_angular_velocity=pre_state.ball_angular_velocity.copy(),
+            ball_angular_velocity=ball_spin,
             clubhead_velocity=v_club,
             clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
             contact_duration=contact_time,
@@ -381,10 +470,11 @@ class SpringDamperImpactModel(ImpactModel):
 
 
 class FiniteTimeImpactModel(ImpactModel):
-    """Finite-time impulse-momentum model.
+    """Instantaneous impulse-momentum model with stamped contact duration.
 
-    Computes impact over a specified contact duration using
-    momentum conservation and gradual force application.
+    Computes the instantaneous ``RigidBodyImpactModel`` impulse jump and stamps
+    ``params.contact_duration`` as metadata. Use ``SpringDamperImpactModel``
+    for time-stepped contact force integration.
     """
 
     def solve(

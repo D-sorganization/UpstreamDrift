@@ -263,11 +263,17 @@ class NonlinearDynamicsMixin:
             return None
 
         # Use the ndarray reduction directly to avoid general dispatch overhead.
-        n_recurrence_points = int(recurrence_matrix.sum()) - N
+        # Exclude the main diagonal by its actual content: cross-recurrence
+        # matrices need not have ones there.
+        n_recurrence_points = int(recurrence_matrix.sum()) - int(
+            np.trace(recurrence_matrix)
+        )
         rr = n_recurrence_points / (N * N - N) if N > 1 else 0.0
 
         diagonal_lengths: list[int] = []
-        for k in range(1, N):
+        # Both triangles: the denominator counts points on both sides of the
+        # main diagonal, so counting lines on one side caps DET at 0.5.
+        for k in (*range(1, N), *range(-(N - 1), 0)):
             diag = np.diagonal(recurrence_matrix, offset=k)
             d = np.concatenate((np.array([0]), diag, np.array([0])))
             diffs = np.diff(d)
@@ -313,6 +319,13 @@ class NonlinearDynamicsMixin:
     ) -> float:
         """Estimate Correlation Dimension (D2) using Grassberger-Procaccia algorithm.
 
+        Design by Contract:
+            Preconditions:
+                - tau >= 1
+                - dim >= 1
+            Postcondition:
+                - result is finite
+
         Args:
             data: Time series
             tau: Time delay
@@ -323,6 +336,8 @@ class NonlinearDynamicsMixin:
         """
         if data is None:
             raise ValueError("data must be provided")
+        require(tau >= 1, "tau must be >= 1", tau)
+        require(dim >= 1, "dim must be >= 1", dim)
         N = len(data)
         M = N - (dim - 1) * tau
         if M < 20:
@@ -341,24 +356,36 @@ class NonlinearDynamicsMixin:
             return 0.0
 
         min_r, max_r = np.min(dists), np.max(dists)
+        if not (np.isfinite(min_r) and np.isfinite(max_r)) or min_r <= 0.0:
+            return 0.0
+        # Spike outliers can make min_r*2 exceed max_r*0.5: an empty / inverted
+        # scaling window that would feed log(0) and NaN slopes (FC-012, #15344).
+        if min_r * 2 >= max_r * 0.5:
+            return 0.0
+
         radii = np.geomspace(min_r * 2, max_r * 0.5, 20)
-        c_r = []
+        c_r = np.array(
+            [
+                np.count_nonzero(dists < r) / len(dists) for r in radii
+            ]  # ⚡ Bolt: np.count_nonzero is ~30% faster than np.sum() for boolean arrays
+        )
+        positive = c_r > 0.0
+        if positive.sum() < 2:
+            return 0.0
 
-        for r in radii:
-            count = np.count_nonzero(
-                dists < r
-            )  # ⚡ Bolt: np.count_nonzero is ~30% faster than np.sum() for boolean arrays
-            c_r.append(count / len(dists))
-
-        log_r = np.log(radii)
-        log_c = np.log(c_r)
+        log_r = np.log(radii[positive])
+        log_c = np.log(c_r[positive])
 
         n_points = len(log_r)
         start = n_points // 4
         end = 3 * n_points // 4
+        if end - start < 2:
+            return 0.0
 
         slope, _ = np.polyfit(log_r[start:end], log_c[start:end], 1)
-        return float(slope)
+        result = float(slope)
+        ensure(np.isfinite(result), "correlation dimension must be finite", result)
+        return result
 
     def estimate_lyapunov_exponent(  # noqa: C901
         self,

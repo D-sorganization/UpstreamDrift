@@ -54,6 +54,8 @@ fn rk4_decay_matches_python_reference_fixture() {
 /// Pure backspin on a level **+X** shot is **−Y** and yields upward (**+Z**) Magnus.
 #[test]
 fn aerodynamics_forces_match_python_reference_fixture() {
+    // Drag anchors from `_python_fallback_total` under spin drag and the Choi
+    // 2006 drag-crisis refit (#15443).
     let velocity = Vector3::new(62.0, -4.0, 18.0);
     let spin = Vector3::new(12.0, 265.0, -35.0);
     let forces = compute_aero_forces(
@@ -63,9 +65,9 @@ fn aerodynamics_forces_match_python_reference_fixture() {
         &AirProperties::default(),
     );
 
-    assert_close(forces.drag.x, -0.896_370_706_135_275_8, 1e-12, "drag.x");
-    assert_close(forces.drag.y, 0.057_830_368_137_759_73, 1e-12, "drag.y");
-    assert_close(forces.drag.z, -0.260_236_656_619_918_8, 1e-12, "drag.z");
+    assert_close(forces.drag.x, -0.837_977_867_045_501_9, 1e-12, "drag.x");
+    assert_close(forces.drag.y, 0.054_063_088_196_484, 1e-12, "drag.y");
+    assert_close(forces.drag.z, -0.243_283_896_884_177_98, 1e-12, "drag.z");
     assert_close(forces.lift.x, 0.0, 1e-12, "lift.x");
     assert_close(forces.lift.y, 0.0, 1e-12, "lift.y");
     assert_close(forces.lift.z, 0.0, 1e-12, "lift.z");
@@ -77,6 +79,8 @@ fn aerodynamics_forces_match_python_reference_fixture() {
 /// Ball-flight anchor uses `spin_axis = [0, 1, 0]` (pure **+Y** rotation) with
 /// mostly **+X** velocity — **topspin** in the documented frame, hence downward
 /// Magnus early in flight. This fixture pins integration parity, not backspin sign.
+/// Regenerated for spin drag and the Choi 2006 drag-crisis refit (#15443) by a
+/// Python RK4 over the fallback.
 #[test]
 fn ball_flight_matches_python_reference_fixture() {
     let config = IntegratorConfig {
@@ -100,9 +104,9 @@ fn ball_flight_matches_python_reference_fixture() {
 
     assert!(result.completed);
     let final_point = result.points.last().expect("trajectory has a final point");
-    assert_eq!(result.steps, 126);
-    assert_close(final_point.t, 2.519_458_517_113_387, 1e-12, "landing time");
-    assert_close(final_point.x, 65.388_199_926_238_3, 1e-10, "landing x");
-    assert_close(final_point.y, 1.009_934_125_807_955, 1e-12, "landing y");
+    assert_eq!(result.steps, 127);
+    assert_close(final_point.t, 2.538_137_944_177_894, 1e-12, "landing time");
+    assert_close(final_point.x, 67.766_879_507_553, 1e-10, "landing x");
+    assert_close(final_point.y, 1.044_095_320_107_701, 1e-12, "landing y");
     assert_close(final_point.z, 0.0, 1e-12, "landing z");
 }

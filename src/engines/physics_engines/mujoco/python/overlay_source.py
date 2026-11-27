@@ -142,21 +142,39 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
             _, multiplier = self.solve_with_multipliers(
                 coordinates, rates, primitive_efforts
             )
-            site_a, site_b = self._closure
-            mj, model = self._mj, self.model
-            body_a, body_b = (
-                mj.mj_id2name(model, mj.mjtObj.mjOBJ_BODY, int(model.site_bodyid[s]))
-                for s in (site_a, site_b)
-            )
-            return GripClosure.from_multiplier(
-                body_a=body_a,
-                body_b=body_b,
-                point_a_m=self.data.site_xpos[site_a],
-                point_b_m=self.data.site_xpos[site_b],
-                multiplier=multiplier,
-            )
+            return self._closure_pair(multiplier)
         except (KeyError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
             return GripClosure.unavailable(f"closure solve failed: {exc}")
+
+    def closure_from_multiplier(
+        self, coordinates: Mapping[str, float], multiplier: Sequence[float]
+    ) -> GripClosure:
+        """The grip-weld wrench pair of a given world multiplier at a pose.
+
+        ``multiplier`` is ``[force; torque]`` in the convention of
+        :meth:`closure_wrench` (``+`` on the hand side, ``-`` on the club).
+        Used to inject a reaction solved elsewhere, e.g. one part of the
+        ZTCF/ZVCF split (#15150 Z4b). Raises ``ValueError`` for a multiplier
+        that is not a finite 6-vector.
+        """
+        self._forward(coordinates)
+        return self._closure_pair(multiplier)
+
+    def _closure_pair(self, multiplier: Any) -> GripClosure:
+        """The +/- pair at the weld sites of the current model state."""
+        site_a, site_b = self._closure
+        mj, model = self._mj, self.model
+        body_a, body_b = (
+            mj.mj_id2name(model, mj.mjtObj.mjOBJ_BODY, int(model.site_bodyid[s]))
+            for s in (site_a, site_b)
+        )
+        return GripClosure.from_multiplier(
+            body_a=body_a,
+            body_b=body_b,
+            point_a_m=self.data.site_xpos[site_a],
+            point_b_m=self.data.site_xpos[site_b],
+            multiplier=multiplier,
+        )
 
     def club_frame_world(
         self,
@@ -266,6 +284,17 @@ class MujocoOverlaySource(NativeMujocoFullBodyModel):
                 (float(anchor[0]), float(anchor[1]), float(anchor[2])),
                 (float(axis[0]), float(axis[1]), float(axis[2])),
             )
+        return out
+
+    def body_positions_m(
+        self, coordinates: Mapping[str, float], names: Sequence[str]
+    ) -> dict[str, Vec3]:
+        """World position of each named body; ``KeyError`` for an unknown name."""
+        self._forward(coordinates)
+        out: dict[str, Vec3] = {}
+        for name in names:
+            p = self.data.xpos[self.model.body(name).id]
+            out[name] = (float(p[0]), float(p[1]), float(p[2]))
         return out
 
     def center_of_mass_m(self, coordinates: Mapping[str, float]) -> Vec3:

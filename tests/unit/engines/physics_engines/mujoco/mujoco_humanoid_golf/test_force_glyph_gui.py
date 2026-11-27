@@ -20,6 +20,9 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyph_
     build_overlay_glyphs,
     overlay_style,
 )
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_angmom_mixin import (  # noqa: E402
+    SimAngMomMixin,
+)
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_rendering_mixin import (  # noqa: E402
     SimRenderingMixin,
 )
@@ -74,8 +77,9 @@ class _FakeEngine:
         return _frame()
 
 
-class _Widget(SimRenderingMixin):
+class _Widget(SimAngMomMixin, SimRenderingMixin):
     def __init__(self, force: bool, torque: bool, scale: float = 1e-3) -> None:
+        self._init_angmom_overlay_state()
         self.engine = _FakeEngine()
         self.show_force_vectors = force
         self.show_torque_vectors = torque

@@ -10,6 +10,7 @@ used during humanoid golf simulations.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -23,6 +24,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 
 from ..._camera_presets import CAMERA_PRESETS, camera_preset
+from .visualization_tab_scalar_overlays_mixin import VisualizationTabScalarOverlaysMixin
 
 if TYPE_CHECKING:
     from ...sim_widget import MuJoCoSimWidget
@@ -37,7 +39,7 @@ FORCE_SCALE_MODE_LABELS: tuple[tuple[str, str], ...] = (
 )
 
 
-class VisualizationTab(QtWidgets.QWidget):
+class VisualizationTab(VisualizationTabScalarOverlaysMixin, QtWidgets.QWidget):
     """Tab for visualization settings and camera controls."""
 
     def __init__(
@@ -78,6 +80,7 @@ class VisualizationTab(QtWidgets.QWidget):
         force_group, ellipsoid_group = self._setup_force_torque_controls()
         viz_layout.addWidget(ellipsoid_group)
         viz_layout.addWidget(force_group)
+        viz_layout.addWidget(self._setup_angular_momentum_controls())
         viz_layout.addWidget(self._setup_matrix_analysis())
         viz_layout.addWidget(self._setup_body_appearance())
 
@@ -361,24 +364,92 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_torque_scale_controls(force_layout)
         self._create_force_scale_controls(force_layout)
         self._create_grf_style_controls(force_layout)
+        self._create_stored_ke_shading_controls(force_layout)
+        self._create_segment_ke_globe_controls(force_layout)
+        self._create_net_power_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
 
         self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
-        self._connect_force_legend_to_status_bar()
+        self._connect_overlay_legends_to_status_bar()
 
         ellipsoid_group = self._create_ellipsoid_group()
 
         return force_group, ellipsoid_group
 
-    def _connect_force_legend_to_status_bar(self) -> None:
-        """Show the force overlay legend line in the status bar while it is on."""
-        status_bar = getattr(self.window(), "statusBar", None)
-        signal = getattr(self.sim_widget, "force_legend_changed", None)
-        if status_bar is None or signal is None:
-            return
-        signal.connect(lambda text: status_bar().showMessage(text))
+    def _setup_angular_momentum_controls(self) -> QtWidgets.QGroupBox:
+        from src.shared.python.body_part_viz.angular_momentum_glyphs import (
+            DEFAULT_MAX_LENGTH_M,
+            DEFAULT_SCALE_M_PER_NMS,
+            AngularMomentumArrowStyle,
+        )
+
+        style = getattr(self.sim_widget, "angmom_arrow_style", None)
+        if not isinstance(style, AngularMomentumArrowStyle):
+            style = AngularMomentumArrowStyle()
+
+        group = QtWidgets.QGroupBox("Angular Momentum (H)")
+        layout = QtWidgets.QVBoxLayout(group)
+        self.show_angmom_cb = QtWidgets.QCheckBox(
+            "Show angular-momentum arrows (about whole-body COM)"
+        )
+        self.show_angmom_cb.setToolTip(
+            "Straight vectors for H in the world frame; default shows whole-body "
+            "plus five segment groups."
+        )
+        self._restore_checkbox(
+            self.show_angmom_cb,
+            getattr(self.sim_widget, "show_angular_momentum_arrows", None),
+        )
+        layout.addWidget(self.show_angmom_cb)
+
+        form = QtWidgets.QFormLayout()
+        self.angmom_mode_combo = QtWidgets.QComboBox()
+        for mode, label in (
+            ("groups", "Whole-body + groups (default)"),
+            ("per_segment", "Per-segment (threshold / top-N)"),
+            ("spin_only", "Spin only (Iω, with arc sense)"),
+        ):
+            self.angmom_mode_combo.addItem(label, mode)
+        mode_idx = self.angmom_mode_combo.findData(style.display_mode)
+        if mode_idx >= 0:
+            self.angmom_mode_combo.setCurrentIndex(mode_idx)
+        form.addRow("Display:", self.angmom_mode_combo)
+
+        self.angmom_scale_spin = QtWidgets.QDoubleSpinBox()
+        self.angmom_scale_spin.setDecimals(6)
+        self.angmom_scale_spin.setRange(1e-6, 0.05)
+        self.angmom_scale_spin.setSingleStep(5e-4)
+        self.angmom_scale_spin.setValue(
+            style.scale_m_per_nms or DEFAULT_SCALE_M_PER_NMS
+        )
+        self.angmom_scale_spin.setToolTip(
+            "Fixed metres per (N·m·s); held for the swing"
+        )
+        form.addRow("Scale (m / N·m·s):", self.angmom_scale_spin)
+
+        self.angmom_max_len_spin = QtWidgets.QDoubleSpinBox()
+        self.angmom_max_len_spin.setRange(0.1, 5.0)
+        self.angmom_max_len_spin.setDecimals(2)
+        self.angmom_max_len_spin.setSuffix(" m")
+        self.angmom_max_len_spin.setValue(style.max_length_m or DEFAULT_MAX_LENGTH_M)
+        form.addRow("Length cap:", self.angmom_max_len_spin)
+
+        layout.addLayout(form)
+
+        self.show_angmom_spin_cb = QtWidgets.QCheckBox("Also draw spin component (Iω)")
+        self.show_angmom_spin_cb.setChecked(style.show_spin_component)
+        layout.addWidget(self.show_angmom_spin_cb)
+
+        self.show_angmom_cb.stateChanged.connect(self.on_angmom_overlay_changed)
+        self.angmom_mode_combo.currentIndexChanged.connect(
+            self.on_angmom_overlay_changed
+        )
+        self.angmom_scale_spin.valueChanged.connect(self.on_angmom_overlay_changed)
+        self.angmom_max_len_spin.valueChanged.connect(self.on_angmom_overlay_changed)
+        self.show_angmom_spin_cb.stateChanged.connect(self.on_angmom_overlay_changed)
+        return group
 
     def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
@@ -862,6 +933,30 @@ class VisualizationTab(QtWidgets.QWidget):
         self.sim_widget.set_torque_visualization(
             self.show_torques_cb.isChecked(),
             scale * 0.01,
+        )
+
+    def on_angmom_overlay_changed(self, *_args: object) -> None:
+        require(self.sim_widget is not None, "sim_widget is set")
+        from typing import cast
+
+        from src.shared.python.body_part_viz.angular_momentum_glyphs import (
+            AngularMomentumArrowStyle,
+            DisplayMode,
+        )
+
+        base = getattr(self.sim_widget, "angmom_arrow_style", None)
+        if not isinstance(base, AngularMomentumArrowStyle):
+            base = AngularMomentumArrowStyle()
+        style = replace(
+            base,
+            scale_m_per_nms=self.angmom_scale_spin.value(),
+            max_length_m=self.angmom_max_len_spin.value(),
+            display_mode=cast(DisplayMode, self.angmom_mode_combo.currentData()),
+            show_spin_component=self.show_angmom_spin_cb.isChecked(),
+        )
+        self.sim_widget.set_angular_momentum_overlay(
+            enabled=self.show_angmom_cb.isChecked(),
+            style=style,
         )
 
     def on_show_forces_changed(self, state: int) -> None:

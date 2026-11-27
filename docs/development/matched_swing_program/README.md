@@ -1,16 +1,13 @@
 # Matched Swing Program — Single Source of Truth
 
-## Continuation Review Warning
+## Continuation Authority
 
-The 2026-09-18 source review found that this document's `acceptance_contract.py`
-reference does not exist on reviewed main. The implemented evaluator is
-`src/shared/python/motion_matching/acceptance.py`: G1 is the 0–0.85 s dynamic
-horizon (whole 25 mm, early 12 mm, terminal 35 mm), not a 30 mm full-capture IK
-milestone. Historical tables below conflict with that evaluator and epic
-#10363 and MUST NOT be used to accept a run. MS-100 (#10374) must reconcile
-and version the complete contract; do not change thresholds during fitting.
-Read the [continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
-The review does not qualify the evaluator or replace missing physical evidence.
+The single source of truth for physical acceptance evaluation is `AcceptanceGates`
+and `evaluate` in `src/shared/python/motion_matching/acceptance.py`, and
+[`GATES.md`](GATES.md) is tested directly against those thresholds (`g1_whole_rmse_m`
+is 25 mm over 0–0.85 s, `g1_early_rmse_m` is 12 mm, and `g1_terminal_rmse_m` is
+35 mm). Do not relax thresholds during fitting; read the
+[continuation prompt](AGENT_CONTINUATION_PROMPT.md) and exact receipts.
 
 **Program Lead:** Dieter Olson (`agent:local`)  
 **Governing Epic:** [#10363](https://github.com/D-sorganization/UpstreamDrift/issues/10363)  
@@ -36,7 +33,7 @@ The **Matched Swing Program** delivers a physically realistic, cross-engine matc
 
 ### Core Mandates:
 
-- **No Threshold Relaxation:** Numerical tolerances are fixed. G1 kinematic fit is an engineering milestone ($\le 30$ mm IK), not dynamic match or product release.
+- **No Threshold Relaxation:** Numerical tolerances are fixed (`AcceptanceGates` sets G1 `0–0.85 s` whole-horizon marker RMSE `<= 25 mm`). Partial or strength-limited states do not qualify.
 - **Fail-Closed Gate Evaluation:** Missing files, missing sensor channels, unverified SHA-256 hashes, or non-finite outputs fail closed.
 - **Dual-Club Full-Swing Coverage:** G3 professional release requires verified driver and 7-iron captures across all engines. Partial or strength-limited states do not qualify.
 - **Path-Anchored Numbers:** Every metric cited in documentation must anchor directly to a verified receipt JSON field.
@@ -151,14 +148,20 @@ Auto-generated from committed run ledger (`reports/matched_swing_ledger.json`, 1
 
 ### 2. Full-Swing Qualification Ladder (Fail-Closed Gates)
 
+Derived from `AcceptanceGates` + `evaluate()` on committed ledger receipts (fail-closed; superseded widened-bound results are historical only).
+
 Per Owner-Authorized Contract Revision (MS-100 #10374 / MS-104 #10378 / MS-106 #10380):
 Partial, reduced-model, and strength-limited outcomes do not satisfy G3 release. All six engines remain required.
 
 | Gate | Criterion | MuJoCo | Pinocchio | Drake | OpenSim | Simscape | MyoSuite | Gate Status |
 |---|---|---|---|---|---|---|---|---|
-| **G1: Kinematic Fit** | Whole-swing marker RMS $\le 30$ mm, 0 RoM violations | ✅ Passed (27.3 mm) | 🔄 In Progress | 🔄 In Progress | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **G1 Milestone Active** |
-| **G2: Dynamic Ground Support** | GRF in support polygon, floating root tracked | ✅ Passed (74.6 mm) | 🔄 In Progress | ⏳ Pending | ⏳ Pending | 🏛️ Baseline | ❌ Blocked | **Partial (MuJoCo only)** |
-| **G3: Professional Release** | Dual-club (driver+iron), all 6 engines, cross-engine verified | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ⏳ Pending | ❌ Blocked | **Open (Blocks Release)** |
+| **G1: Kinematic Fit** | Whole marker RMSE $\le 25$ mm (`g1_whole_rmse_m`); contact & integrity gates via `evaluate()` | ❌ Failed (51.2 mm > 25 mm) | ❌ Failed (26.8 mm > 25 mm) | ❌ Failed (capture_provenance) | ❌ Failed (78.5 mm > 25 mm) | ❌ Failed (terminal_marker_rmse_m) | ❌ Failed (185.7 mm > 25 mm) | **G1 Milestone Active** |
+| **G2: Dynamic Ground Support** | Whole marker RMSE $\le 40$ mm (`g2_whole_rmse_m`); GRF, penetration, support polygon | ❌ Failed (51.2 mm > 40 mm) | ❌ Failed (terminal_marker_rmse_m) | ❌ Failed (capture_provenance) | ❌ Failed (78.5 mm > 40 mm) | ⚠️ Unverified (max_normal_force_n missing) | ❌ Failed (185.7 mm > 40 mm) | **In Progress** |
+| **G3: Professional Release** | Driver whole swing $\le 60$ mm (`g3_whole_driver_rmse_m`); dual-club all six engines | ❌ Failed (max_normal_force_n) | ❌ Failed (pelvis_yaw_error_pct) | ❌ Failed (capture_provenance) | ❌ Failed (78.5 mm > 60 mm) | ⚠️ Unverified (max_normal_force_n missing) | ❌ Failed (185.7 mm > 60 mm) | **Open (Blocks Release)** |
+
+#### Historical (Superseded Widened-Bound Receipts)
+
+Pre-HO-8 MuJoCo tour-driver receipts under widened leg bounds recorded **27.3 mm** IK and **74.6 mm** dynamics RMS. Those figures used non-current bounds and RoM violations (#11044); they **do not** pass today's `AcceptanceGates` and must not appear as active Passed ladder cells. See `anthro_driver_shoot_g025/receipt.json` and README evidence prose above the generated fence.
 
 ### 3. Matched Swing Release Issues Roadmap
 

@@ -71,3 +71,22 @@ def test_runtime_mode_help_button_click_opens_dialog(qt_app) -> None:
         assert any("Engine Runtime" in t for t in title_calls), (
             f"expected 'Engine Runtime' in dialog title; got {title_calls!r}"
         )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("platform", "expected"),
+    [("win32", "Windows"), ("linux", "Linux"), ("darwin", "macOS")],
+)
+def test_native_runtime_name_follows_the_platform(platform, expected) -> None:
+    from src.launchers.runtime_mode_help import native_runtime_name
+
+    assert native_runtime_name(platform) == expected
+
+
+@pytest.mark.unit
+def test_native_runtime_name_rejects_empty_platform() -> None:
+    from src.launchers.runtime_mode_help import native_runtime_name
+
+    with pytest.raises(ValueError, match="platform"):
+        native_runtime_name("")

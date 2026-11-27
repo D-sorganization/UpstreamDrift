@@ -1,0 +1,50 @@
+% Standalone research and visual reference, not the engineering design manual.
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{xurl}
+\title{Straw Hat Visual Geometry}
+\date{Issue \#15834}
+\begin{document}
+\maketitle
+\section{Geometry and Assumptions}
+The shared CC0 head frame has $x$ forward, $y$ left and $z$ up, with all
+construction coordinates expressed in head lengths $L$. This visual
+interpretation is inspired by a traditional straw golf hat; it is not a
+measured replica or a claim about the player's anatomy. The shell is clipped
+from the existing CC0 skin at $z=0.73L$ and offset by $0.075L$ along the skin
+normals, with a $0.006L$ wall. Its hair crop has top thickness $0.020L$ and
+no fringe; sampled outward rays check that the crown covers the cropped hair.
+
+The circumferential brim follows the clipped crown rim in azimuth order. At
+azimuth $\theta$, the outer point is $p_{\rm rim}+0.32L(\cos\theta,\sin\theta,0)
+-0.025L\hat z$. Top and bottom faces are separated by $0.012L$, and their
+inner and outer boundaries are joined to form a closed mesh. The dark band is
+a closed normal-offset shell between $z=0.76L$ and $0.82L$, $0.006L$ thick.
+The existing bounded visual head morph is applied identically to all parts.
+
+The MuJoCo visual geoms carry zero mass and no collision; the physical model,
+frames and joint coordinates are unchanged. Geometric tests check positive
+oriented volume, closed edges, hair clearance, and existing cap identity;
+native tests compare mass, inertia and dynamics at the same state. Stills at
+1280 by 960 and 390 by 844 are visual evidence, not physical qualification.
+Reproduce from the repository root with:
+\begin{quote}\small\raggedright
+\texttt{python -m pytest} \url{tests/unit/model_appearance/test_straw_hat.py}
+\url{tests/unit/model_appearance/test_head_cap.py} \texttt{-q}
+\end{quote}
+The controlled before and after native stills are in
+\url{evidence/appearance/straw_hat/}; they use the same full-body spec,
+neutral pose, view and lighting. The two input SHA-256 values are
+\url{a7aa4d740dd129648c55ed7273ac9dfe504b08b0100b24efd85fec244ca65c57}
+and \url{5932469f44f27c019bafd85a9c650ebbf8b35efbcad446821e27f5f53da9ca5e}.
+Reproduce the stills with:
+\begin{quote}\small\raggedright
+\texttt{MUJOCO\_GL=egl PYTHONPATH=.:src python}\\
+\url{docs/development/full_body_models/evidence/appearance/straw_hat/render.py}\\
+\texttt{--spec MODEL.json --appearance MODEL.appearance.json --out DIR}
+\end{quote}
+Use those same inputs. Photoreal identity,
+weave structure, fabric deformation and motion/contact qualification are not
+claimed.
+
+\end{document}

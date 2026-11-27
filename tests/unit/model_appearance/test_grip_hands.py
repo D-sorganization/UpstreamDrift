@@ -45,6 +45,7 @@ MIN_WRAP_COVERAGE = 0.9
 
 
 def _club(key: str) -> ca.ClubAssembly:
+    """Load the named club assembly fixture."""
     club = ca.assembly_from_spec(json.loads(SPECS[key].read_text(encoding="utf-8")))
     assert club is not None
     return club
@@ -68,6 +69,7 @@ def _radial(club: ca.ClubAssembly, pts: np.ndarray) -> tuple[np.ndarray, np.ndar
 @pytest.mark.parametrize("key", sorted(SPECS))
 @pytest.mark.parametrize("hand", list(Hand))
 def test_hand_frame_origin_is_on_the_grip_axis_at_the_pose_depth(key, hand) -> None:
+    """The hand frame origin sits on the grip axis at the pose depth."""
     club = _club(key)
     frame = gh.grip_hand_frame(club, hand)
     rot, origin = frame[:3, :3], frame[:3, 3]
@@ -109,16 +111,19 @@ def _club_direction(club, hand, azimuth_deg: float) -> np.ndarray:
 
 
 def _face_normal_off_shaft(club) -> np.ndarray:
+    """Clubface normal with the shaft component removed."""
     n = ca.clubface_vector(club)
     n = n - n[1] * np.array([0.0, 1.0, 0.0])
     return n / np.linalg.norm(n)
 
 
 def _angle_deg(a: np.ndarray, b: np.ndarray) -> float:
+    """Angle in degrees between two vectors."""
     return float(np.degrees(np.arccos(np.clip(a @ b, -1.0, 1.0))))
 
 
 def _azimuth_of(mesh_part) -> float:
+    """Azimuth of a mesh part around the grip axis."""
     v = mesh_part.mesh.vertices
     return float(np.degrees(np.arctan2(v[:, 1].mean(), v[:, 0].mean())))
 
@@ -146,6 +151,7 @@ def test_lead_knuckle_faces_the_target_and_dorsum_sits_at_minus_35(key) -> None:
 
 
 def test_frame_rejects_bad_inputs() -> None:
+    """Hand-frame helpers reject bad club and pose inputs."""
     club = _club("driver")
     with pytest.raises(TypeError, match="ClubAssembly"):
         gh.grip_hand_frame("driver", Hand.LEAD)  # type: ignore[arg-type]
@@ -160,6 +166,7 @@ def test_frame_rejects_bad_inputs() -> None:
 
 
 def test_grip_radius_follows_the_tube_taper() -> None:
+    """Grip radius follows the club tube taper."""
     club = _club("driver")
     assert gh.grip_radius_at(club, 0.0) == pytest.approx(ca.GRIP_BUTT_RADIUS_M)
     assert gh.grip_radius_at(club, club.grip_length_m) == pytest.approx(
@@ -170,6 +177,7 @@ def test_grip_radius_follows_the_tube_taper() -> None:
 @pytest.mark.parametrize("key", sorted(SPECS))
 @pytest.mark.parametrize("style", list(GripStyle))
 def test_hands_wrap_the_grip_tube_without_entering_it(key, style) -> None:
+    """Hands wrap the grip tube without entering it."""
     club = _club(key)
     pose = GripPose(style=style)
     meshes = gh.grip_hand_meshes(club, pose=pose)
@@ -198,6 +206,7 @@ def test_hands_wrap_the_grip_tube_without_entering_it(key, style) -> None:
 
 
 def test_lead_hand_is_above_the_trail_hand() -> None:
+    """The lead hand sits above the trail hand on the grip."""
     club = _club("driver")
     meshes = gh.grip_hand_meshes(club)
     lead, _ = _radial(club, meshes["lead_hand"].vertices)
@@ -208,6 +217,7 @@ def test_lead_hand_is_above_the_trail_hand() -> None:
 
 
 def test_assembly_with_hands_adds_two_glove_meshes_and_keeps_the_club() -> None:
+    """Adding hands keeps the club and adds two glove meshes."""
     club = _club("driver")
     plain = ca.assembly_meshes(club)
     full = gh.assembly_meshes_with_hands(club)

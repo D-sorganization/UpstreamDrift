@@ -48,6 +48,7 @@ _KNUCKLE_U_FRAC: dict[str, float] = {
 
 
 def _unit(vec: Array, fallback: Array | None = None) -> Array:
+    """Return ``vec`` scaled to unit length, or ``fallback``."""
     norm = float(np.linalg.norm(vec))
     if norm > 1e-12:
         return np.asarray(vec / norm, dtype=np.float64)
@@ -61,6 +62,7 @@ def _body_world(
     data: Any,
     suffix: str,
 ) -> tuple[Array, Array]:
+    """World position and rotation of a named MuJoCo body."""
     mujoco = _require_mujoco()
     for bid in range(model.nbody):
         bname = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, bid) or ""
@@ -77,6 +79,7 @@ def _body_in_grip(
     suffix: str,
     mount: Array,
 ) -> tuple[Array, Array, Array]:
+    """Position and axes of a body in the grip frame."""
     pos_w, rot_w = _body_world(model, data, suffix)
     pos_g = _transform_to_grip_frame(pos_w[None, :], mount)[0]
     linear = mount[:3, :3]
@@ -91,6 +94,7 @@ def _palm_frame(
     palm_palmar: Array,
     knuckles: dict[str, Array],
 ) -> tuple[Array, Array, Array]:
+    """Palm centre and axes from the wrist and palm body points."""
     _ = palm_palmar
     mcp_mid = 0.5 * (knuckles["middle"] + knuckles["ring"])
     heel = 0.5 * (wrist_p + palm_p)
@@ -110,6 +114,7 @@ def _palm_frame(
 
 
 def _clamp_outside_grip(points: Array, min_r: float) -> Array:
+    """Push points that fall inside ``min_r`` out to that radius."""
     out = np.asarray(points, dtype=np.float64).copy()
     rho = np.hypot(out[:, 0], out[:, 1])
     mask = (rho < min_r) & (rho > 1e-9)
@@ -125,6 +130,7 @@ def _eval_smooth_chain(
     n_samples: int,
     corner_blend_frac: float = 0.14,
 ) -> tuple[Array, Array]:
+    """Sample a smooth curve through ``nodes``."""
     pts = np.asarray(nodes, dtype=np.float64)
     diffs = np.linalg.norm(np.diff(pts, axis=0), axis=1)
     cum = np.concatenate([[0.0], np.cumsum(diffs)])
@@ -148,6 +154,7 @@ def _eval_smooth_chain(
 
 
 def _transport_frames(centers: Array, seed_palmar: Array) -> tuple[Array, Array, Array]:
+    """Parallel-transport frames along ``centers``."""
     n = len(centers)
     grad_c = np.asarray(np.gradient(centers, axis=0), dtype=np.float64)
     tangents = np.array(
@@ -178,6 +185,7 @@ def _digit_loft(
     is_thumb: bool,
     min_safe_r: float,
 ) -> Mesh:
+    """Loft one tapered digit along ``nodes``."""
     n_samples = cfg.skin_digit_samples
     sides = cfg.skin_digit_sides
     centers, s_nodes = _eval_smooth_chain(nodes, n_samples)
@@ -324,6 +332,7 @@ def _palm_loft(
     cfg: ShadowHandVisualSettings,
     min_safe_r: float,
 ) -> tuple[Mesh, float]:
+    """Loft the palm from the wrist and palm centres."""
     d_dist, d_rad, d_palm = _palm_frame(wrist_p, palm_p, palm_palmar, knuckles)
     k_pts = np.array([knuckles[f] for f in _FINGER_ORDER], dtype=np.float64)
     k_mean = k_pts.mean(axis=0)
@@ -400,6 +409,7 @@ def _build_skin_components(
     grip_radius_m: float,
     cfg: ShadowHandVisualSettings,
 ) -> tuple[Mesh, float, dict[str, list[Array]]]:
+    """Build the posed skin meshes for one Shadow hand."""
     model, data = _forward_model(hand, qpos, grip_spec.handedness)
     scale = _scale_vector(grip_spec.hand_size, cfg)
     s_avg = float(np.cbrt(scale[0] * scale[1] * scale[2]))

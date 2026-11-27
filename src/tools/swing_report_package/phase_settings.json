@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "description": "Key swing phases of the swing report package (#15721). Anchors (start, top, impact, end) come from the swing; a 'level' phase is the first instant after 'after' and up to 'before' at which the segment's unit vector has no vertical part. A segment runs from its first point to its second.",
+  "segments": {
+    "shaft": ["grip", "clubhead"],
+    "lead_arm": ["lead_shoulder", "lead_wrist"]
+  },
+  "phases": [
+    {"id": "address", "label": "Address", "rule": "start"},
+    {"id": "shaft_parallel_back", "label": "Shaft Parallel (Backswing)", "rule": "level", "segment": "shaft", "after": "start", "before": "top"},
+    {"id": "top", "label": "Top of Backswing", "rule": "top"},
+    {"id": "lead_arm_parallel", "label": "Lead Arm Parallel (Downswing)", "rule": "level", "segment": "lead_arm", "after": "top", "before": "impact"},
+    {"id": "shaft_parallel_down", "label": "Shaft Parallel (Downswing)", "rule": "level", "segment": "shaft", "after": "lead_arm_parallel", "before": "impact"},
+    {"id": "impact", "label": "Impact", "rule": "impact"},
+    {"id": "follow_through", "label": "Follow-Through (Shaft Parallel)", "rule": "level", "segment": "shaft", "after": "impact", "before": "end"}
+  ]
+}

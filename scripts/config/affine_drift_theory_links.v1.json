@@ -242,6 +242,10 @@
       "title": "Inverse Dynamics",
       "url": "https://affinedrift.com/articles/inverse-dynamics.html"
     },
+    "swing_report_package": {
+      "title": "Drift Is the Past, Control Is the Present",
+      "url": "https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html"
+    },
     "terrain_engine": {
       "title": "Constraint Forces",
       "url": "https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch07_constraint_forces.html"

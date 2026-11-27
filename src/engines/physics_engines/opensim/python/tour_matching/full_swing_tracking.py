@@ -144,7 +144,7 @@ class DynamicTrackingReceipt:
     objective_value: float | None
     num_iterations: int | None
     solve_duration_s: float | None
-    shared_metrics: dict[str, float]
+    shared_metrics: dict[str, float | None]
     per_frame_max_error_m: float | None
     root_residual_rms: float | None
     marker_coverage_ratio: float | None

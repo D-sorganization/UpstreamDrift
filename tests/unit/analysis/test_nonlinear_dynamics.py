@@ -84,6 +84,27 @@ class TestPermutationEntropy:
         assert isinstance(H4, float)
 
 
+@pytest.mark.unit
+class TestCorrelationDimension:
+    """Grassberger-Procaccia correlation dimension (#15344, FC-012)."""
+
+    def setup_method(self) -> None:
+        self.obj = _Concrete(n=200, n_joints=1)
+
+    def test_returns_finite_on_nominal_signal(self) -> None:
+        data = self.obj.joint_positions[:, 0]
+        d2 = self.obj.compute_correlation_dimension(data)
+        assert isinstance(d2, float)
+        assert np.isfinite(d2)
+
+    def test_degenerate_radius_with_spike_outlier_is_finite(self) -> None:
+        """A flat segment plus spike collapses the radius window and must not return NaN."""
+        data = np.ones(80, dtype=float)
+        data[40] = 100.0
+        d2 = self.obj.compute_correlation_dimension(data)
+        assert np.isfinite(d2)
+
+
 class TestLocalDivergenceRate:
     def setup_method(self) -> None:
         self.obj = _Concrete(n=100, n_joints=3)
@@ -154,3 +175,39 @@ class TestRecurrenceMatrixSparseParity:
         # Sanity: the reference (and therefore actual) has off-diagonal
         # recurrences for this data, so the test isn't vacuously trivial.
         assert reference.sum() > n
+
+
+@pytest.mark.unit
+class TestRQADeterminism:
+    """DET counts diagonal lines in both triangles (Marwan et al. 2007)."""
+
+    def setup_method(self) -> None:
+        self.obj = _Concrete(n=10, n_joints=1)
+
+    def test_all_recurrent_matrix(self) -> None:
+        # 12 off-diagonal points; lines of length >= 2 cover 3+2 points in each
+        # triangle, so DET = 10/12 (counting one triangle capped it at 5/12).
+        metrics = self.obj.compute_rqa_metrics(np.ones((4, 4), dtype=int))
+        assert metrics is not None
+        assert metrics.determinism == pytest.approx(10 / 12)
+        assert metrics.recurrence_rate == pytest.approx(1.0)
+
+    def test_band_matrix_is_fully_deterministic(self) -> None:
+        band = (
+            np.eye(5, dtype=int)
+            + np.eye(5, k=1, dtype=int)
+            + np.eye(5, k=-1, dtype=int)
+        )
+        metrics = self.obj.compute_rqa_metrics(band)
+        assert metrics is not None
+        assert metrics.determinism == pytest.approx(1.0)
+        assert metrics.longest_diagonal_line == 4
+
+    def test_main_diagonal_excluded_by_trace_not_size(self) -> None:
+        # Cross-recurrence matrices need not have ones on the main diagonal.
+        cross = np.zeros((3, 3), dtype=int)
+        cross[0, 1] = cross[1, 2] = 1
+        metrics = self.obj.compute_rqa_metrics(cross)
+        assert metrics is not None
+        assert metrics.recurrence_rate == pytest.approx(2 / 6)
+        assert metrics.determinism == pytest.approx(1.0)

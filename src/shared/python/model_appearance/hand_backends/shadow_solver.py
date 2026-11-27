@@ -61,6 +61,7 @@ def shadow_joint_name(canonical: str) -> str:
 
 
 def _require_mujoco() -> Any:
+    """Import MuJoCo with headless GL, or raise ImportError."""
     import os
 
     os.environ.setdefault("MUJOCO_GL", "disable")
@@ -73,6 +74,7 @@ def _require_mujoco() -> Any:
 
 @lru_cache(maxsize=4)
 def _load_model(trail: bool, handedness: Handedness) -> Any:
+    """Load the lead or trail Shadow MJCF for ``handedness``."""
     mujoco = _require_mujoco()
     path = shadow_hand_mjcf_path(trail=trail, handedness=handedness)
     return mujoco.MjModel.from_xml_path(str(path))
@@ -83,6 +85,7 @@ def _forward_model(
     qpos: Array,
     handedness: Handedness,
 ) -> tuple[Any, Any]:
+    """Run forward kinematics and return the model data."""
     mujoco = _require_mujoco()
     model = _load_model(hand == Hand.TRAIL, handedness)
     data = mujoco.MjData(model)
@@ -93,20 +96,24 @@ def _forward_model(
 
 
 def _hand_from_side(side: HandSide) -> Hand:
+    """Map a lead or trail side to the matching hand."""
     if side not in ("lead", "trail"):
         raise ValueError(f"side must be 'lead' or 'trail', got {side!r}")
     return Hand.TRAIL if side == "trail" else Hand.LEAD
 
 
 def _is_anatomical_right(hand: Hand, handedness: Handedness) -> bool:
+    """Return whether this hand uses the anatomical right model."""
     return (hand == Hand.TRAIL) ^ (handedness == "left")
 
 
 def _prefix(hand: Hand, handedness: Handedness = "right") -> str:
+    """MuJoCo body prefix for the anatomical side of ``hand``."""
     return "rh_" if _is_anatomical_right(hand, handedness) else "lh_"
 
 
 def _validate_grip_radius(grip_radius_m: float, cfg: ShadowHandVisualSettings) -> float:
+    """Return a finite positive grip radius inside the configured range."""
     if isinstance(grip_radius_m, bool) or not isinstance(grip_radius_m, int | float):
         raise TypeError(f"grip_radius_m must be finite real, got {grip_radius_m!r}")
     val = float(grip_radius_m)
@@ -117,6 +124,7 @@ def _validate_grip_radius(grip_radius_m: float, cfg: ShadowHandVisualSettings) -
 
 
 def _joint_qpos_index(model: Any, joint_name: str) -> int:
+    """qpos address of the named joint."""
     mujoco = _require_mujoco()
     jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
     if jid < 0:
@@ -125,6 +133,7 @@ def _joint_qpos_index(model: Any, joint_name: str) -> int:
 
 
 def _baseline_qpos(model: Any, hand: Hand, handedness: Handedness) -> Array:
+    """Neutral qpos before the grip is curled."""
     _ = (hand, handedness)
     return np.zeros(model.nq, dtype=float)
 
@@ -137,6 +146,7 @@ def _apply_joint_angles(
     *,
     handedness: Handedness = "right",
 ) -> Array:
+    """Write named hinge angles into ``qpos``."""
     if joint_angles is None:
         return qpos
     if isinstance(joint_angles, np.ndarray):
@@ -285,6 +295,7 @@ def _iter_visible_geoms(
 
 
 def _canonical_part_key(bname: str, mname: str) -> str:
+    """Map a Shadow body and mesh name to a canonical part key."""
     if "metacarpal" in mname or "metacarpal" in bname:
         return "lf_metacarpal"
     if "palm" in mname or "palm" in bname:
@@ -306,6 +317,7 @@ def _select_part_vertices(
     finger: str | None = None,
     segments: tuple[str, ...] | None = None,
 ) -> Array:
+    """World vertices that belong to one canonical skin part."""
     tag = None if finger is None else _FINGER_BODY_TAG[finger]
     chunks: list[Array] = []
     for bname, _mname, verts, _faces in _iter_visible_geoms(model, data, cfg):
@@ -320,6 +332,7 @@ def _select_part_vertices(
 
 
 def _scale_vector(hand_size: HandSize, cfg: ShadowHandVisualSettings) -> Array:
+    """Per-axis scale that sizes the native hand to ``hand_size``."""
     s_len = (hand_size.length_m / cfg.native_hand_length_m) * cfg.length_scale
     s_brd = (hand_size.breadth_m / cfg.native_hand_breadth_m) * cfg.breadth_scale
     s_dep = min(s_len, s_brd)
@@ -401,10 +414,12 @@ def _compute_mount_matrix(
 
 
 def _transform_to_grip_frame(points: Array, mount: Array) -> Array:
+    """Transform ``points`` by the grip mount matrix."""
     return points @ mount[:3, :3].T + mount[:3, 3]
 
 
 def _radial_xy(points: Array) -> Array:
+    """Distance of each point from the grip axis."""
     return np.hypot(points[:, 0], points[:, 1])
 
 
@@ -417,6 +432,7 @@ def _part_min_radial(
     finger: str,
     segments: tuple[str, ...],
 ) -> float:
+    """Smallest radial gap from one part to the grip axis."""
     pts = _transform_to_grip_frame(
         _select_part_vertices(model, data, cfg, finger=finger, segments=segments),
         mount,
@@ -445,6 +461,7 @@ def _solve_joint_contact(
     guard_segments: tuple[str, ...],
     min_q: float | None = None,
 ) -> None:
+    """Curl one joint until its pad meets the grip."""
     mujoco = _require_mujoco()
     model, data, cfg = ctx.model, ctx.data, ctx.cfg
     mount, grip_radius_m = ctx.mount, ctx.grip_radius_m
@@ -518,6 +535,7 @@ def _curl_digit_cascade(
     *,
     handedness: Handedness,
 ) -> None:
+    """Curl a digit's joints from base to tip onto the grip."""
     prefix = _prefix(hand, handedness)
     tag = _FINGER_BODY_TAG[finger].upper()
     mcp_floor = max(0.46, ctx.cfg.mcp_preflex_rad - 0.04)
@@ -552,6 +570,7 @@ def _score_thumb_state(
     safe_r: float,
     z_target: float,
 ) -> float:
+    """Score a thumb pose by pad contact and club penetration."""
     th_all = _transform_to_grip_frame(
         _select_part_vertices(ctx.model, ctx.data, ctx.cfg, finger="thumb"),
         ctx.mount,
@@ -585,6 +604,7 @@ def _solve_thumb_pose(
     *,
     mount: Array,
 ) -> None:
+    """Search a thumb pose that seats its pad on the grip."""
     mujoco = _require_mujoco()
     ctx = _SolveCtx(
         model=model,
@@ -674,6 +694,7 @@ def _solve_thumb_pose(
 
 
 def _finger_curl_sequence(hand: Hand, grip_spec: GripSpec) -> tuple[str, ...]:
+    """Fingers curled for this hand and grip style, in order."""
     prefix = "lead_" if hand == Hand.LEAD else "trail_"
     digits: list[str] = []
     for stage in grip_spec.curl_order:
@@ -693,6 +714,7 @@ def _relax_club_penetration(
     *,
     handedness: Handedness,
 ) -> Array:
+    """Back off joints that drive skin into the club."""
     mujoco = _require_mujoco()
     prefix = _prefix(hand, handedness)
     for _ in range(20):

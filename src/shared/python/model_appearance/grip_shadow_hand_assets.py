@@ -17,6 +17,7 @@ CANONICAL_HAND_ROOT = (
 
 
 def _sha256(path: Path) -> str:
+    """SHA-256 hex digest of the file at ``path``."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 

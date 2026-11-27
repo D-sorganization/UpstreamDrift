@@ -1,4 +1,4 @@
-# Capability Baseline Inventory: Analysis (Part 1/2)
+# Capability Baseline Inventory: Analysis (Part 1/3)
 
 <!-- Generated: python -m scripts.generate_capability_baseline -->
 
@@ -16,6 +16,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `analysis_tools_api` | Analysis Tools | `service` | `analysis` | — | `tools` | 🟢 active_feature | `src/api/routes/analysis_tools.py` | `tests/config/test_launcher_registry_parity.py` |
 | `anatomical_event_table` | Anatomical Event Table | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/anatomical_event_table/gui.py` | `tests/tools/anatomical_event_table/test_anatomical_event_table_tool.py` |
 | `biomech.exercise_injury_dashboards` | Exercise + injury-risk biomechanics dashboards | `feature` | `analysis` | — | `core` | ⚪ exempt | `src/launchers/exercise_dashboard.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `biomech.physics_informed_models` | Physics-informed biomechanics models | `feature` | `analysis` | — | `core` | 🟠 confirmed_prototype | `src/config/models.yaml` | `tests/config/feature_parity/test_registry.py` |
 | `biomechanics.anatomical_event_table` | Anatomical Event Table of Wrist and Forearm Terms at Swing Events | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/ui/anatomical_event_table_widget.py` | `tests/unit/anatomical_angles/test_event_table_view.py` |
 | `data_explorer` | Data Explorer | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `data_processor` | Data Processor | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `loop_nullspace_exploration` | Closed-loop null-space exploration (NSX) tabs rendered from the plot model | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/grip_wrench_plots/window.py` | `tests/unit/tools/grip_wrench_plots/test_nsx_tabs.py` |
 | `loop_nullspace_variability` | Closed-loop null-space variability and consistency (NSX-100) panels rendered from the plot model | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/grip_wrench_plots/variability_tab.py` | `tests/unit/tools/grip_wrench_plots/test_variability_tab.py` |
 | `matched_swing_browser` | Matched Swing Results Browser | `tile` | `analysis` | `simulation`, `capture` | `core` | 🟢 active_feature | `src/tools/matched_swing_browser/gui.py` | `tests/config/test_launcher_registry_parity.py` |
-| `model_explorer` | Model Explorer | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/model_explorer/main_window.py` | `tests/config/test_launcher_registry_parity.py` |

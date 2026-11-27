@@ -1,0 +1,65 @@
+{
+  "citation": "Hireko Golf, The Hireko Golf Dynamic Shaft Fitting Index (webinar slide deck, presented 2009-05-01), slides 6 and 7, hosted on SlideShare.",
+  "url": "https://www.slideshare.net/raltomonte/the-hireko-golf-dynamic-shaft-fitting-index",
+  "accessed": "2026-11-22",
+  "convention": {
+    "quantity": "assembled-club frequency, cycles per minute",
+    "clamp": "butt end of the assembled club, head plucked and set in oscillation",
+    "club_length": "A through X flex at 45 in and L flex at 44 in (Hireko Modern Guide to Shaft Fitting ch. 4, https://www.hirekogolf.com/pub/media/Modern_Guide_to_Shaft_Fitting_chapter4.pdf; the slides state only 'the same given length')",
+    "swingweight": "L flex measured at C-6; A through X flex at D-1",
+    "tip_weight": "assembled head; not stated separately"
+  },
+  "slope_assumption": "L flex is tabulated at 44 in, so it is moved to 45 in with the cited length slope (settings file, 9.3 cpm per inch). The other flexes are compared unconverted.",
+  "resolution_cpm": 1,
+  "repo_flex_to_source_flex": {
+    "Ladies": "L",
+    "Senior": "A",
+    "Regular": "R",
+    "Stiff": "S",
+    "X-Stiff": "X"
+  },
+  "graphite_driver": {
+    "L": {
+      "mean": 229,
+      "low": 204,
+      "high": 272
+    },
+    "A": {
+      "mean": 234,
+      "low": 219,
+      "high": 267
+    },
+    "R": {
+      "mean": 246,
+      "low": 225,
+      "high": 277
+    },
+    "S": {
+      "mean": 258,
+      "low": 226,
+      "high": 298
+    },
+    "X": {
+      "mean": 271,
+      "low": 246,
+      "high": 309
+    }
+  },
+  "second_source": {
+    "citation": "Steadfast Golf, replacement driver shaft chart, driver column 45.5 in.",
+    "url": "https://steadfastgolf.com/blogs/shaft-insights/best-replacement-golf-shafts-for-drivers-and-fairway-woods",
+    "accessed": "2026-11-23",
+    "convention": {
+      "quantity": "cycles per minute",
+      "clamp": "not stated",
+      "club_length_in": 45.5,
+      "head": "not stated"
+    },
+    "driver_cpm": {
+      "A": 227,
+      "R": 241,
+      "S": 258,
+      "X": 273
+    }
+  }
+}

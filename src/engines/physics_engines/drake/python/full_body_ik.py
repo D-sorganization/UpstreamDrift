@@ -16,6 +16,7 @@ from src.engines.physics_engines.drake.python.full_body_model import (
     FullBodyDrakeModel,
 )
 from src.shared.python.motion_matching import posture_metrics as post
+from src.shared.python.motion_matching.club_models import document_sole_point_m
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
@@ -396,6 +397,13 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         n = np.asarray(ground.normal, dtype=float)
         n = n / np.linalg.norm(n)
         pos, jp = self._frame_pos_and_jac(frame)
+        stated = document_sole_point_m(self.specification)
+        if stated is not None:  # the document's sole point, not the origin (#15296)
+            pose = self._plant.CalcRelativeTransform(
+                self._context, self._world_frame, frame
+            )
+            pos = pose.multiply(np.asarray(stated))
+            jp = self._translational_jacobian(frame, stated)
         hover = float(pos @ n - ground.height_m)
         if hover <= 0.0:
             return
@@ -409,7 +417,10 @@ class DrakeFullBodyIK(BaseFullBodyIK):
         jacs: list[Array],
         targets: Mapping[str, Array],
         weight: float,
+        soft: Any = None,
     ) -> None:
+        if soft is not None:  # #15296: implemented for the MuJoCo kinematics
+            raise ValueError("the soft stance anchor needs the MuJoCo kinematics")
         if weight <= 0 or not targets:
             return
         w = np.sqrt(weight)

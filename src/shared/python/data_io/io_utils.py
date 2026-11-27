@@ -130,6 +130,9 @@ def save_json(
 ) -> Path:
     """Save data to a JSON file.
 
+    Serialization errors propagate before any filesystem changes, preserving
+    existing destination content and leaving missing parent directories absent.
+
     Args:
         path: Path to save the JSON file.
         data: Data to serialize to JSON.
@@ -149,14 +152,15 @@ def save_json(
     if path is None:
         raise ValueError("path must be provided")
     file_path = Path(path)
+    serialized = json.dumps(
+        data, indent=indent, ensure_ascii=ensure_ascii, sort_keys=sort_keys
+    )
 
     if create_parents and file_path.parent:
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
     with file_path.open("w", encoding=encoding) as f:
-        json.dump(
-            data, f, indent=indent, ensure_ascii=ensure_ascii, sort_keys=sort_keys
-        )
+        f.write(serialized)
 
     return file_path
 
@@ -225,6 +229,9 @@ def save_yaml(
 ) -> Path:
     """Save data to a YAML file.
 
+    Serialization errors propagate before any filesystem changes, preserving
+    existing destination content and leaving missing parent directories absent.
+
     Args:
         path: Path to save the YAML file.
         data: Data to serialize to YAML.
@@ -251,21 +258,20 @@ def save_yaml(
         )
 
     file_path = Path(path)
+    yaml_dumper = dumper or yaml.SafeDumper
+    serialized = yaml.dump(
+        data,
+        Dumper=yaml_dumper,
+        default_flow_style=default_flow_style,
+        allow_unicode=allow_unicode,
+        sort_keys=sort_keys,
+    )
 
     if create_parents and file_path.parent:
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    yaml_dumper = dumper or yaml.SafeDumper
-
     with file_path.open("w", encoding=encoding) as f:
-        yaml.dump(
-            data,
-            f,
-            Dumper=yaml_dumper,
-            default_flow_style=default_flow_style,
-            allow_unicode=allow_unicode,
-            sort_keys=sort_keys,
-        )
+        f.write(serialized)
 
     return file_path
 

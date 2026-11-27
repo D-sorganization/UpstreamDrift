@@ -35,6 +35,7 @@ class PadDivergenceSettings:
 
 @lru_cache(maxsize=1)
 def pad_divergence_settings() -> PadDivergenceSettings:
+    """Load pad-divergence tolerances from the Shadow visual config."""
     raw = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
     block = raw.get("capsule_pad_divergence_tolerance_m", {})
     tol = {
@@ -55,6 +56,7 @@ def _capsule_pad_centroid(
     pose: GripPose,
     finger: FingerKey,
 ) -> Array:
+    """Centroid of one capsule finger pad."""
     baked = build_grip_hand_mesh(hand, grip_radius_m=grip_radius_m, pose=pose)
     return baked.fingertip_position(finger)
 
@@ -88,6 +90,7 @@ def solve_and_compare(
     grip_radius_m: float,
     grip_pose: GripPose,
 ) -> tuple[ShadowHandPose, dict[str, float]]:
+    """Solve the Shadow grip and compare its pads to the capsule hand."""
     spec_hand = grip_spec.lead if hand == Hand.LEAD else grip_spec.trail
     solved = solve_shadow_hand_qpos(
         hand, spec_hand, grip_spec=grip_spec, grip_radius_m=grip_radius_m

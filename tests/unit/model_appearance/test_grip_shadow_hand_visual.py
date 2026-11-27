@@ -34,10 +34,12 @@ mujoco = pytest.importorskip("mujoco")
 
 
 def _iron7() -> ClubAssembly:
+    """A short iron assembly used by the Shadow visual tests."""
     return ClubAssembly("iron7", 0.95, 0.25, 0.0065)
 
 
 def test_shadow_hand_provenance_gate() -> None:
+    """Shadow hand provenance records a hash and a licence."""
     record = load_shadow_hand_provenance()
     assert record["licence"] == "Apache-2.0"
     assert record["mesh_obj_count"] == 14
@@ -49,6 +51,7 @@ def test_shadow_hand_provenance_gate() -> None:
 
 
 def test_shadow_hand_mesh_has_many_vertices_and_fingers() -> None:
+    """The Shadow hand mesh has separate fingers and a dense vertex set."""
     spec = GripSpec.legacy()
     mesh = build_shadow_grip_hand_mesh(
         Hand.TRAIL, grip_radius_m=0.012, pose=spec.to_grip_pose(), grip_spec=spec
@@ -59,6 +62,7 @@ def test_shadow_hand_mesh_has_many_vertices_and_fingers() -> None:
 
 
 def test_club_penetration_within_tolerance() -> None:
+    """Shadow skin stays outside the club within tolerance."""
     spec = GripSpec.legacy()
     radius = 0.012
     settings = visual_settings()
@@ -77,6 +81,7 @@ def test_club_penetration_within_tolerance() -> None:
 
 
 def test_finger_finger_clearance_within_tolerance() -> None:
+    """Adjacent fingers keep the configured clearance."""
     spec = GripSpec.legacy()
     settings = visual_settings()
     solved = solve_shadow_hand_qpos(
@@ -93,6 +98,7 @@ def test_finger_finger_clearance_within_tolerance() -> None:
 
 
 def test_shaft_roll_rotates_hand_about_grip_axis() -> None:
+    """Shaft roll rotates the hand about the grip axis."""
     club = _iron7()
     base_pose = GripSpec.legacy().to_grip_pose()
     rolled_pose = replace(
@@ -114,6 +120,7 @@ def test_shaft_roll_rotates_hand_about_grip_axis() -> None:
 
 
 def test_left_handed_lead_uses_left_hand_xml_mirroring() -> None:
+    """A left-handed lead hand mirrors the left-hand model."""
     spec = GripSpec.neutral(handedness="left")
     lead = build_shadow_grip_hand_mesh(
         Hand.LEAD,
@@ -132,6 +139,7 @@ def test_left_handed_lead_uses_left_hand_xml_mirroring() -> None:
 
 
 def test_hand_grip_spec_round_trip_wrist_mapping() -> None:
+    """Wrist angles round-trip through the grip spec."""
     spec = GripSpec.legacy(
         lead=HandGripSpec(
             club_cross_angle_deg=42.0,
@@ -146,6 +154,7 @@ def test_hand_grip_spec_round_trip_wrist_mapping() -> None:
 
 
 def test_grip_hand_meshes_draw_shadow_when_opted_in() -> None:
+    """Opting in draws Shadow meshes instead of capsule gloves."""
     club = _iron7()
     meshes = grip_hand_meshes(
         club, DEFAULT_GRIP_POSE, grip_spec=GripSpec.legacy(), hand_backend="shadow"

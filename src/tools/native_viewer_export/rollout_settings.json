@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "lie": "fairway",
+  "slope": "flat",
+  "default_skill": "driver",
+  "assumption": "rollout: flat-fairway model",
+  "hud_format": "Roll {roll}   Total {total}   ({assumption})",
+  "sources": {
+    "enabled": "Whether the flight reports roll and total after the carry. Off leaves carry only, as before.",
+    "lie": "Landing surface of the roll: the fairway, the reference lie of the repository runout model (sg_optimizer.shot_model.ground_runout). A model assumption, never read from the scene.",
+    "slope": "Grade of the landing zone: flat, a bin of the repository slope vocabulary (slope_wind_bins.SLOPE_BINS). The tracer places the ball on level ground, so no slope is assumed.",
+    "default_skill": "Club class used when the export names no club: the driver, which is also the class of the flight's default spin envelope (flight_report.spin_envelope_reason).",
+    "assumption": "On-screen and manifest label of the roll: it is a model assumption, not a measurement or an engine contact result.",
+    "hud_format": "HUD line of the roll; {roll} and {total} are display-unit distance texts, {assumption} the label above."
+  }
+}

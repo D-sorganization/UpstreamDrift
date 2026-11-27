@@ -10,7 +10,7 @@ This adapter implements :class:`~src.shared.python.grip_contact.binding.ModelGri
 - Attaches non-colliding zero-mass visual style proxy geoms from :class:`GripSpec`
   (``overlap``, ``interlock``, ``ten_finger``, ``trigger_finger``) without altering
   body mass, inertia, or welded forward dynamics. Free-club Shadow Dexterous Hand
-  meshes use :mod:`grip_shadow_hand_free_club` (drake/pinocchio/opensim: TODO(#15122)).
+  meshes use :mod:`grip_shadow_hand_free_club`. Drake, Pinocchio and OpenSim stay on issue #15122.
 - Extracts the equality weld constraint wrench from ``data.efc_force`` via
   :func:`~src.engines.physics_engines.mujoco.python.grip_efc.weld_wrench_on_club`
   and feeds it to :func:`~src.shared.python.grip_contact.binding.evaluate_contacts`
@@ -157,6 +157,7 @@ class WeldedGripBodyError(SchemaFeatureUnavailableError, ValueError):
 
 
 def _raise_welded_error(model_id: str, feature: str) -> None:
+    """Raise when a welded-grip model cannot support ``feature``."""
     raise WeldedGripBodyError(
         model_id,
         consumer=_CONSUMER,
@@ -167,6 +168,7 @@ def _raise_welded_error(model_id: str, feature: str) -> None:
 
 
 def _canonical_model_id(model_id: str) -> str:
+    """Return a stripped model id, or reject a blank one."""
     if not isinstance(model_id, str) or not model_id.strip():
         raise ValueError("model_id must be a non-empty string")
     resolved = _MODEL_ID_ALIASES.get(model_id, model_id)
@@ -196,6 +198,7 @@ def _load_manifest_for_model(
     model_id: str,
     manifest_override: Mapping[str, Any] | Path | None = None,
 ) -> dict[str, Any]:
+    """Load the grip manifest for ``model_id``."""
     if manifest_override is None:
         resolved = _canonical_model_id(model_id)
         path = MANIFEST_PATHS[resolved]
@@ -213,10 +216,12 @@ def _load_manifest_for_model(
 
 
 def _format_floats(values: np.ndarray | tuple[float, ...]) -> str:
+    """Join floats as a MuJoCo numeric attribute."""
     return " ".join(f"{float(v):.17g}" for v in values)
 
 
 def _find_body_element(root: ET.Element, body_name: str) -> ET.Element:
+    """Return the MJCF body element named ``body_name``."""
     for elem in root.iter("body"):
         if elem.get("name") == body_name:
             return elem
@@ -583,6 +588,7 @@ def _calibration_grip_frames(
 def _state_to_pose_and_vel(
     state: BushingState | RigidBodyState,
 ) -> tuple[np.ndarray, tuple[np.ndarray, np.ndarray]]:
+    """Split a bushing or rigid-body state into pose and velocity."""
     pose = np.eye(4, dtype=float)
     pose[:3, :3] = state.rotation
     pose[:3, 3] = state.position_m
@@ -605,6 +611,7 @@ class MuJoCoHumanoidGripAdapter:
         visual_style_geoms: tuple[str, ...] = (),
         native_pair_names: tuple[str, ...] = (),
     ) -> None:
+        """Bind the adapter to a MuJoCo model and its grip manifest."""
         if attachment_redesign not in ATTACHMENT_REDESIGN_MODES:
             raise ValueError(
                 f"attachment_redesign must be one of {ATTACHMENT_REDESIGN_MODES}, "
@@ -741,6 +748,7 @@ class MuJoCoHumanoidGripAdapter:
         return len(self._native_pair_names)
 
     def _club_grip_frames(self) -> dict[str, np.ndarray]:
+        """World frames of the club grip bodies."""
         if self._interface is not None:
             left_f = self._interface.left
             right_f = self._interface.right

@@ -103,6 +103,7 @@ def finger_pad_contact_gaps(
 def _uv_ellipsoid(
     center: Array, radii: tuple[float, float, float], n_lat: int = 8, n_lon: int = 12
 ) -> tuple[Array, NDArray[np.int64]]:
+    """Triangulated ellipsoid centred at ``center``."""
     verts: list[list[float]] = [[0.0, 0.0, 1.0]]
     for i in range(1, n_lat):
         th = math.pi * i / n_lat
@@ -136,6 +137,7 @@ def _mcp_knuckle_bridges(
     cfg: ShadowHandVisualSettings,
     mount: Array,
 ) -> list[tuple[Array, NDArray[np.int64]]]:
+    """Meshes that bridge the palm to the knuckle line."""
     mujoco = _require_mujoco()
     r = cfg.mcp_bridge_radius_m
     radii = (r * 1.15, r * 0.95, r * 0.90)
@@ -184,6 +186,7 @@ def _resolve_visual_call(
     grip_radius_m: float | None,
     settings: ShadowHandVisualSettings | None = None,
 ) -> tuple[ShadowHandVisualSettings, Hand, HandGripSpec, float]:
+    """Resolve the Shadow visual build for one grip side."""
     cfg = visual_settings() if settings is None else settings
     hand = _hand_from_side(side)
     spec_hand = grip_spec.trail if hand == Hand.TRAIL else grip_spec.lead

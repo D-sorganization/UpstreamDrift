@@ -19,12 +19,15 @@ Migration semantics
 * An existing file in the new root is never overwritten.
 * A marker file is written once every item succeeded; later runs are
   no-ops. A failed item leaves no marker so the next start retries.
+* Copies are staged beside the destination and published only when complete.
+  Failed copies leave no partial authoritative file or directory tree.
 """
 
 from __future__ import annotations
 
 import shutil
 import sys
+import tempfile
 from pathlib import Path, PurePath
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -91,12 +94,23 @@ def user_config_path(*parts: str) -> Path:
 
 
 def _copy_item(source: Path, dest: Path) -> None:
-    """Copy one file or directory tree, never replacing an existing *dest*."""
+    """Publish a complete copy of *source* to an absent *dest*.
+
+    The caller skips existing authoritative destinations. Stage on the same
+    filesystem so a failed copy cannot leave a partial destination that the
+    next migration would mistake for a completed or user-owned item.
+    Temporary staging is removed on both success and failure.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if source.is_dir():
-        shutil.copytree(source, dest)
-    else:
-        shutil.copy2(source, dest)
+    with tempfile.TemporaryDirectory(
+        prefix=".legacy-migration-", dir=dest.parent
+    ) as tmp:
+        staged = Path(tmp) / source.name
+        if source.is_dir():
+            shutil.copytree(source, staged)
+        else:
+            shutil.copy2(source, staged)
+        staged.rename(dest)
 
 
 def _legacy_sources(home: Path) -> list[Path]:

@@ -20,6 +20,7 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python import scene_lighting
 from src.shared.python.model_appearance import geometry, library
 from src.shared.python.model_appearance.body_meshes import (
     SPEC_BODY_FRAME,
@@ -27,6 +28,7 @@ from src.shared.python.model_appearance.body_meshes import (
     club_meshes,
     resolve_appearance,
 )
+from src.shared.python.model_appearance.body_skin_export import body_skin_enabled
 from src.shared.python.model_appearance.club_assembly import ClubAssembly
 from src.shared.python.model_appearance.club_chain_meshes import club_meshes_by_body
 from src.shared.python.model_appearance.schema import (
@@ -85,6 +87,10 @@ class _Assets:
         material = self.materials[name]
         attrs = _material_attrs(material, plane)
         tex = material.texture
+        if _texture_carries_colour(material, plane):
+            # MuJoCo multiplies rgba by the texture; the texture already holds
+            # the colour, so the material takes white and keeps its alpha.
+            attrs["rgba"] = _nums((1.0, 1.0, 1.0, material.rgba[3]))
         if tex is not None and tex.kind != "flat":
             tex_name = f"tex_{name}{'_plane' if plane else ''}"
             ET.SubElement(
@@ -100,14 +106,17 @@ class _Assets:
         self._made.add(key)
         return mat_name
 
-    def mesh(self, name: str, mesh: geometry.Mesh) -> None:
-        ET.SubElement(
+    def mesh(self, name: str, mesh: geometry.Mesh, smooth: bool = False) -> None:
+        """Add a mesh asset; ``smooth`` shades it without creases (hair)."""
+        node = ET.SubElement(
             self.asset,
             "mesh",
             name=name,
             vertex=_nums(mesh.vertices),
             face=" ".join(str(int(i)) for i in mesh.faces.ravel()),
         )
+        if smooth:
+            node.set("smoothnormal", "true")
         self.n_meshes += 1
 
 
@@ -123,6 +132,17 @@ def _material_attrs(material: Material, plane: bool) -> dict[str, str]:
     if plane:
         attrs["reflectance"] = _nums(0.12 * smooth)
     return attrs
+
+
+def _texture_carries_colour(material: Material, plane: bool) -> bool:
+    """True when the emitted texture alone supplies the material colour.
+
+    A solid (non-plane) procedural texture without explicit colours is built
+    from ``base_color`` in :func:`_texture_attrs`; ground planes keep their
+    own checker colours and are not covered.
+    """
+    tex = material.texture
+    return not plane and tex is not None and tex.kind != "flat" and tex.color_a is None
 
 
 def _texture_attrs(name: str, material: Material, plane: bool) -> dict[str, str]:
@@ -142,7 +162,10 @@ def _texture_attrs(name: str, material: Material, plane: bool) -> dict[str, str]
     elif tex.kind == "gradient":
         attrs["builtin"] = "gradient"
     else:  # noise, or a file fallback that has no procedural form
+        # MuJoCo fills the bottom face of a flat cube texture with rgb2, which
+        # drew a lighter patch on every solid (#15299); only the marks take b.
         attrs["builtin"] = "flat"
+        attrs["rgb2"] = _rgb(a)
         attrs["mark"] = "random"
         attrs["markrgb"] = _rgb(b)
         attrs["random"] = _nums(max(0.005, tex.noise))
@@ -201,17 +224,10 @@ def _add_environment(
         offwidth=str(OFFSCREEN_SIZE[0]),
         offheight=str(OFFSCREEN_SIZE[1]),
     )
-    ET.SubElement(
-        visual,
-        "headlight",
-        ambient="0.55 0.55 0.58" if lit else "0.7 0.7 0.7",
-        diffuse="0.35 0.35 0.35" if lit else "0.2 0.2 0.2",
-        specular="0.05 0.05 0.05",
-    )
-    ET.SubElement(visual, "quality", shadowsize="4096", offsamples="8")
+    lighting = scene_lighting.load_scene_lighting()
+    scene_lighting.add_render_quality(visual, lighting, "studio" if lit else "flat")
     haze = _rgb(env.sky_bottom) + " 1"
     ET.SubElement(visual, "rgba", haze=haze)
-    ET.SubElement(visual, "map", haze="0.25", znear="0.02", zfar="40")
     return assets.material(env.ground_material, plane=True)
 
 
@@ -270,10 +286,20 @@ def attach_appearance(
         )
     assets = _Assets(root, doc)
     ground_material = _add_environment(root, assets, doc)
-    garments = _attach_body_meshes(
-        assets, elements, offsets, resolve_appearance(spec, doc, club)
-    )
+    skinned = body_skin_enabled(spec)
+    resolved = resolve_appearance(spec, doc, club, body_skin=skinned)
+    garments = _attach_body_meshes(assets, elements, offsets, resolved)
+    extra = {}
+    if skinned:  # default off: the loft body (#15299)
+        from src.engines.physics_engines.mujoco.python.body_skin_layer import (
+            attach_body_skin,
+        )
+
+        extra["body_skin"] = attach_body_skin(
+            root, elements, assets.material, doc, spec, club
+        )
     return {
+        **extra,
         "appearance": doc.name,
         "meshes": assets.n_meshes,
         "garments": garments,

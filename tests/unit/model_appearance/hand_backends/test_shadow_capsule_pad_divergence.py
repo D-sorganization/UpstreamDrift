@@ -27,6 +27,7 @@ _GRIP_R_M = 0.0118
 
 
 def _spec(roll_deg: float) -> GripSpec:
+    """Legacy grip spec rolled by ``roll_deg``."""
     if roll_deg == 0.0:
         return GripSpec.legacy()
     return replace(
@@ -45,6 +46,7 @@ def _spec(roll_deg: float) -> GripSpec:
 def test_digit_pads_contact_grip_surface(
     roll_deg: float, hand: Hand, finger: str
 ) -> None:
+    """Each digit pad meets the grip surface."""
     spec = _spec(roll_deg)
     hand_spec = spec.lead if hand == Hand.LEAD else spec.trail
     solved = solve_shadow_hand_qpos(
@@ -64,6 +66,7 @@ def test_digit_pads_contact_grip_surface(
 def test_shadow_capsule_pad_divergence_per_finger(
     roll_deg: float, hand: Hand, finger: str
 ) -> None:
+    """Shadow pads stay within the capsule-pad divergence limit."""
     spec = _spec(roll_deg)
     pose = spec.to_grip_pose()
     _solved, gaps = solve_and_compare(

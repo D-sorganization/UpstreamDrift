@@ -1,6 +1,6 @@
 """MuJoCo free-club scene hook for Shadow hand grip visuals (#15122).
 
-Drake, Pinocchio, and OpenSim shadow-hand grip visuals: TODO(#15122).
+Drake, Pinocchio, and OpenSim shadow-hand grip visuals stay tracked on issue #15122.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ from src.shared.python.model_appearance.mesh_io import stl_bytes
 
 
 def _write_hand_stl(mesh: Mesh, path: Path) -> None:
+    """Write ``mesh`` as an STL file at ``path``."""
     path.write_bytes(stl_bytes(mesh, header="UpstreamDrift shadow grip visual"))
 
 
@@ -96,6 +97,7 @@ def build_free_club_shadow_hands_mjcf(
 
 
 def _matrix_to_quat(rot) -> str:
+    """Format a rotation matrix as a MuJoCo quaternion string."""
     import numpy as np
     from scipy.spatial.transform import Rotation as SciRot
 

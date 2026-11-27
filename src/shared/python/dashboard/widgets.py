@@ -43,6 +43,7 @@ class FrequencyAnalysisDialog(QtWidgets.QDialog):
         fs: float = 100.0,
         label: str = "Data",
     ) -> None:
+        """Build the frequency analysis dialog for the given signal and sampling rate."""
         if fs is None:
             raise ValueError("fs must be provided")
         super().__init__(parent)
@@ -150,7 +151,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             "Kinetic Energy": "kinetic_energy",
             "Club Head Speed": "club_head_speed",
             "ZTCF (Zero Torque)": "ztcf_accel",
-            "ZVCF (Zero Velocity)": "zvcf_accel",
+            "ZVCF (Applied Control)": "zvcf_accel",
             "Drift Acceleration": "drift_accel",
             "Total Control Accel": "control_accel",
             "Induced Accel (Specific Source)": "induced_accel_source",
@@ -852,10 +853,6 @@ class LivePlotWidget(QtWidgets.QWidget):
         data_dict = {}
         if hasattr(self.recorder, "export_to_dict"):
             data_dict = self.recorder.export_to_dict()  # type: ignore[union-attr]
-        elif hasattr(self.recorder, "frames"):
-            # Try to build minimal dict from frames if accessible
-            # This is specific to some recorder implementations, risky but helpful fallback
-            pass
 
         if not data_dict:
             # Fallback: Scrape metric options?
@@ -891,6 +888,7 @@ class ControlPanel(QtWidgets.QGroupBox):
     toggle_playback_requested = QtCore.pyqtSignal()
 
     def __init__(self) -> None:
+        """Build the playback control buttons and accessibility labels."""
         super().__init__("Simulation Controls")
         self.setAccessibleName("Simulation Control Panel")
         self.setAccessibleDescription(

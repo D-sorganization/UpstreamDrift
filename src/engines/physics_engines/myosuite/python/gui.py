@@ -157,7 +157,7 @@ class MainWidget(QWidget):
             if not MYOSUITE_AVAILABLE:
                 missing_parts.append("wheel 'myosuite' (run: pip install myosuite)")
 
-            repo_root = Path(__file__).resolve().parents[6]
+            repo_root = Path(__file__).resolve().parents[5]
             myo_sim_dir = repo_root / "shared" / "models" / "myosuite" / "myo_sim"
             if not myo_sim_dir.exists() or not any(myo_sim_dir.iterdir()):
                 missing_parts.append(

@@ -21,10 +21,12 @@ mujoco = pytest.importorskip("mujoco")
 
 
 def test_shadow_backend_registered_and_enabled() -> None:
+    """The shadow backend is registered and enabled."""
     assert "shadow" in list_hand_visual_backends()
 
 
 def test_build_hand_visual_returns_skin_colour() -> None:
+    """Building the shadow hand returns a skin colour."""
     spec = GripSpec.legacy()
     result = build_hand_visual(spec, "trail", grip_radius_m=0.012, backend="shadow")
     assert result.backend == "shadow"
@@ -33,6 +35,7 @@ def test_build_hand_visual_returns_skin_colour() -> None:
 
 
 def test_humanized_mesh_omits_forearm_extent() -> None:
+    """The humanized mesh does not include the forearm."""
     spec = GripSpec.legacy()
     result = build_hand_visual(spec, "lead", grip_radius_m=0.012, backend="shadow")
     z_span = float(result.mesh.vertices[:, 2].max() - result.mesh.vertices[:, 2].min())
@@ -40,6 +43,7 @@ def test_humanized_mesh_omits_forearm_extent() -> None:
 
 
 def test_joint_angle_dict_round_trip_wrist() -> None:
+    """Wrist joint angles round-trip through the angle dict."""
     spec = GripSpec.legacy()
     from src.shared.python.model_appearance.grip_pose import Hand
 
@@ -66,10 +70,12 @@ def test_joint_angle_dict_round_trip_wrist() -> None:
     ],
 )
 def test_canonical_joint_names_map_to_shadow(canonical: str, native: str) -> None:
+    """Canonical joint names map to Shadow joint names."""
     assert shadow_joint_name(canonical) == native
 
 
 def test_canonical_joint_angles_curl_the_hand() -> None:
+    """Canonical joint angles curl the Shadow hand."""
     spec = GripSpec.legacy()
     straight = shadow.build_hand_visual(
         spec, "lead", HandJointAngles.from_mapping({}), grip_radius_m=0.012

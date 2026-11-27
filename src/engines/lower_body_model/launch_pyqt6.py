@@ -11,6 +11,7 @@ import time
 
 from mujoco import viewer
 from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QCloseEvent
 from PyQt6.QtWidgets import (
     QApplication,
     QFormLayout,
@@ -166,7 +167,7 @@ class ControlPanel(ThemedWindowMixin, QMainWindow):
         layout.addWidget(diag_group)
 
         # Low frequency UI updater
-        self.timer = QTimer()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_ui_state)
         self.timer.start(100)
 
@@ -176,6 +177,7 @@ class ControlPanel(ThemedWindowMixin, QMainWindow):
         self.ui_update_counter = 0
 
         # Background decoupled physics thread
+        self._stop_physics = threading.Event()
         self.physics_thread = threading.Thread(target=self.physics_loop, daemon=True)
         self.physics_thread.start()
 
@@ -357,7 +359,7 @@ class ControlPanel(ThemedWindowMixin, QMainWindow):
 
     def physics_loop(self) -> None:
         """Dedicated background thread immune to PySide deadlocks."""
-        while self.viewer.is_running():
+        while not self._stop_physics.is_set() and self.viewer.is_running():
             start_t = time.perf_counter()
             with self.sim_lock:
                 if self.is_playing:
@@ -370,7 +372,19 @@ class ControlPanel(ThemedWindowMixin, QMainWindow):
             # Throttle accurately to 40Hz (25ms) minus execution time overhead
             elapsed = time.perf_counter() - start_t
             sleep_time = max(0.001, 0.025 - elapsed)
-            time.sleep(sleep_time)
+            self._stop_physics.wait(sleep_time)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """Stop panel-owned activity before Qt releases the controls.
+
+        Postcondition: no physics step or viewer sync can occur after close.
+        The standalone launcher retains ownership of the passive viewer.
+        """
+        self.timer.stop()
+        self._stop_physics.set()
+        self.physics_thread.join()
+        self.is_playing = False
+        super().closeEvent(event)
 
 
 def main() -> None:

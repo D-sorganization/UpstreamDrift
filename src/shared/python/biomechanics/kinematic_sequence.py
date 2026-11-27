@@ -11,7 +11,10 @@ and is treated as a neutral, user-defined parameter.
 
 Planned enhancement: implement Proximal Braking Efficiency calculation.
 Planned enhancement: implement X-Factor Stretch calculation (currently missing here, present in injury_risk.py).
-Planned enhancement: implement Inter-segmental Power Flow calculation.
+Inter-segmental Robertson–Winter interface power (per-joint ``F · v + M · ω``,
+summed per segment) lives in ``src.shared.python.biomechanics.robertson_winter_interface_power``
+with the MuJoCo adapter ``mujoco_humanoid_golf.interface_power`` (#15390). Segment KE
+globes (#15389) remain a kinematic proxy, not energy flow.
 Known limitation: `efficiency_score` may have patent exposure and should be re-reviewed before release.
 """
 

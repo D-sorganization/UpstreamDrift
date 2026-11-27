@@ -6,11 +6,13 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      # Same list and order as classify_event_tier.DOCS_ONLY_PATTERNS.
+      # `.github/**` is not ignored: a workflow-only push to main must still
+      # run this workflow (#15765).
       - "docs/**"
       - "**.md"
       - "LICENSE"
       - ".gitignore"
-      - ".github/**"
   # NO `paths-ignore` here, deliberately. `quality-gate` (below) is a required
   # status check, and GitHub blocks a PR forever on a required context that
   # never reports. When this workflow was skipped by path filter, docs-only PRs
@@ -658,10 +660,22 @@ jobs:
           )
           run_with_heartbeat "pip-audit waiver-enforced scan" "$audit_python" -m pip_audit --timeout 60 -r requirements-dev.lock "${pip_audit_waiver_flags[@]}"
 
-      # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
+      # Code Quality Check (Issue #781 / #15765). The checker status is the
+      # gate. Review events check changed Python files; schedule and manual
+      # runs audit the tree and do not mask a non-zero status.
       - name: Code Quality Check
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
         run: |
-          PYTHONPATH=. python src/tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "$BASE_REF"
+          fi
+          python3 scripts/ci/run_code_quality_check.py
 
       - name: MATLAB Quality Check
         continue-on-error: true
@@ -1142,14 +1156,17 @@ jobs:
   # test modules hashed to its shard (scripts/ci/pytest_unit_gate_shard.py), so
   # every module runs in exactly one leg. The job key is unchanged, so
   # `needs.unit-test-gate.result` in quality-gate fails if any leg fails.
+  # Three legs since 2026-11-20: with two, leg 2 was cancelled at the 35 minute
+  # limit at 93 % of its tests (30 min of pytest after 6 min of setup) on five
+  # consecutive pull-request and merge-queue runs, so nothing could merge.
   unit-test-gate:
-    name: unit-test-gate (${{ matrix.shard }}/2)
+    name: unit-test-gate (${{ matrix.shard }}/3)
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3]
     runs-on: >-
       ${{ github.event.pull_request &&
       github.event.pull_request.head.repo.full_name != github.repository &&
@@ -1329,7 +1346,7 @@ jobs:
             xvfb-run --auto-servernum python -m pytest
             -p no:xvfb
             -p scripts.ci.pytest_unit_gate_shard
-            --unit-gate-shard=${{ matrix.shard }}/2
+            --unit-gate-shard=${{ matrix.shard }}/3
             -m "unit and not slow and not live_simulation and not requires_gl and not requires_drake and not requires_opensim and not requires_mujoco and not requires_pinocchio and not requires_myosuite and not requires_jaxsim and not requires_nimble and not requires_rerun and not requires_casadi and not requires_crocoddyl and not requires_network and not requires_gpu and not requires_mocap_fixtures"
             -n 4
             --timeout=60

@@ -14,6 +14,7 @@ without needing to repeat the explanatory copy.
 
 from __future__ import annotations
 
+import sys
 from typing import TYPE_CHECKING
 
 from PyQt6.QtCore import Qt
@@ -65,6 +66,21 @@ choice is always shown in the top-bar <code>Runtime:</code> label.</p>
 Docker image. You can build the image without ever switching to Docker
 mode (the image just sits in your local image store, ready to use).</p>
 """
+
+
+_PLATFORM_NAMES = {"win32": "Windows", "darwin": "macOS"}
+
+
+def native_runtime_name(platform: str | None = None) -> str:
+    """Human name of the OS the launcher's own interpreter runs on.
+
+    Precondition: ``platform`` is a ``sys.platform`` string (``ValueError``
+    when empty). Defaults to the running platform.
+    """
+    platform = sys.platform if platform is None else platform
+    if not platform:
+        raise ValueError("platform must be a non-empty sys.platform string")
+    return _PLATFORM_NAMES.get(platform, "Linux")
 
 
 def show_runtime_mode_help(parent: QWidget | None = None) -> None:

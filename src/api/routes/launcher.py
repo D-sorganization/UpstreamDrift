@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Final, cast
+from typing import Annotated, Any, Final, cast
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 
 from src.api.launcher_manifest_cache import (
@@ -84,17 +84,33 @@ async def get_manifest() -> dict[str, Any]:
 
 
 @router.get("/tiles")
-async def get_tiles() -> list[dict[str, Any]]:
+async def get_tiles(
+    min_maturity: Annotated[
+        str | None,
+        Query(
+            description="Lowest maturity to list; defaults to the MIN_MATURITY setting."
+        ),
+    ] = None,
+) -> list[dict[str, Any]]:
     """Get all visible launcher tiles in display order.
 
     Hidden tiles (legacy aliases) are excluded, matching the manifest
     invariant documented on ``LauncherManifest.to_dict`` (issue #8863).
+    ``min_maturity`` filters through ``meets_min_maturity``; the default
+    floor ``deprecated`` lists every visible tile.
 
     Returns:
         List of tile dictionaries.
+
+    Raises:
+        HTTPException: 422 when ``min_maturity`` is not a known level.
     """
     manifest = await _get_manifest_async()
-    return [t.to_dict() for t in manifest.visible_tiles]
+    try:
+        tiles = manifest.visible_tiles_meeting(min_maturity)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    return [t.to_dict() for t in tiles]
 
 
 @router.get("/tiles/{tile_id}")

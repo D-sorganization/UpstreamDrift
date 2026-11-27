@@ -1,0 +1,24 @@
+{
+  "rigs": {
+    "plain": [
+      {"name": "key", "offset_m": [1.5, -1.5], "height_m": 3.0, "diffuse": [0.8, 0.8, 0.8], "specular": [0.3, 0.3, 0.3], "castshadow": false},
+      {"name": "fill", "offset_m": [-2.0, 1.0], "height_m": 3.0, "diffuse": [0.4, 0.4, 0.4], "specular": [0.3, 0.3, 0.3], "castshadow": true}
+    ],
+    "studio": [
+      {"name": "key", "offset_m": [1.5, -1.5], "height_m": 3.0, "diffuse": [0.33, 0.33, 0.33], "specular": [0.1, 0.1, 0.1], "castshadow": true},
+      {"name": "fill", "offset_m": [-2.0, 1.0], "height_m": 3.0, "diffuse": [0.11, 0.11, 0.11], "specular": [0.1, 0.1, 0.1], "castshadow": false},
+      {"name": "rim", "offset_m": [0.0, 2.5], "height_m": 3.0, "diffuse": [0.13, 0.135, 0.156], "specular": [0.1, 0.1, 0.1], "castshadow": false}
+    ]
+  },
+  "headlight": {
+    "studio": {"ambient": [0.52, 0.52, 0.55], "diffuse": [0.25, 0.25, 0.25], "specular": [0.05, 0.05, 0.05]},
+    "flat": {"ambient": [0.7, 0.7, 0.7], "diffuse": [0.2, 0.2, 0.2], "specular": [0.05, 0.05, 0.05]}
+  },
+  "quality": {"shadowsize": 8192, "offsamples": 8},
+  "map": {"shadowclip": 0.7, "shadowscale": 0.6, "znear": 0.02, "zfar": 200.0, "haze": 0.25},
+  "acceptance": {
+    "image_size_px": [960, 720], "ragged_window_px": 3, "shadow_step_levels": 6.0, "clip_level": 250, "min_skin_px": 2000,
+    "views_azimuth_elevation_distance": [[-45.0, -10.0, 2.2], [20.0, -10.0, 2.2], [135.0, -20.0, 2.2]],
+    "max_ragged_shadow_share": 0.007, "max_clipped_share": 0.03
+  }
+}

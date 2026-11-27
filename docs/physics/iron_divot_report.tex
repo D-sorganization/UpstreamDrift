@@ -1,0 +1,25 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\title{Iron Divot Diagnostic Report Contract}
+\date{}
+\begin{document}
+\maketitle
+\section{Scope and Provenance}
+Supplementary editable reference for issue 15523, separate from the governed
+design manual. The exporter consumes the existing DivotResult from the
+parabolic sole-path and heuristic shear-work model in divot\_model.py.
+No equations, calibration, numerical integration, or launch penalties change.
+\section{Representation}
+Format: upstreamdrift/iron-divot-report/1.0. Model status is always
+uncalibrated\_heuristic. Offsets are metres along target relative to the ball;
+length/depth are metres, volume is cubic metres, losses are joules, retentions
+are dimensionless, and flags are booleans. Undefined no-contact entry/exit
+offsets become JSON null. Remaining model fields are preserved.
+\section{Acceptance and Limits}
+Reject invalid numeric fields, inverted contact offsets, and retentions that
+violate $0 \leq r_{spin} \leq r_{speed} \leq 1$. No-contact results require
+zero geometry/loss, unit retentions and no fat-shot flag. This boundary is
+not a physical consistency solver. Tests use actual model outputs and
+strict JSON round trips; they do not establish physical qualification.
+Reproduction commands and the usage example are in IRON\_DIVOT\_REPORT.md.
+\end{document}

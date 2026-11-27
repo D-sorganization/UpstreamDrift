@@ -1,0 +1,14 @@
+{
+  "sources": {
+    "preset": "Hole preset of golf_environment/shots_settings.json (par3, par4 or par5). Par 4 (380 m) lets a driver carry of 170 to 250 m land on the fairway; the hole is illustrative, not surveyed.",
+    "label": "Legend name of the shot; the legend also states the model carry and the side (left or right) from the flight model, never recomputed.",
+    "colour_rgba": "Trace colour on the fairway green, the first colour of shots_settings.json shot_colours_rgba, chosen there for contrast.",
+    "label_at_landing": "True puts a box at the rest point with carry, side, roll and total (roll and total from the export's rollout model, labelled as a model); false keeps the legend as the only statement of carry and side.",
+    "figure": "Figure size in inches and resolution that replace the figure block of shots_settings.json: a still of 10 by 6 inches at 130 dpi reads at 1300 by 780 pixels beside the 1280 wide export frames."
+  },
+  "preset": "par4",
+  "label": "Shot",
+  "colour_rgba": [0.85, 0.1, 0.1, 1.0],
+  "label_at_landing": true,
+  "figure": {"width_in": 10.0, "height_in": 6.0, "dpi": 130}
+}

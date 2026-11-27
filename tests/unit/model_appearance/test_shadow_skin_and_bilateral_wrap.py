@@ -19,6 +19,7 @@ mujoco = pytest.importorskip("mujoco")
 
 
 def _iron7() -> ClubAssembly:
+    """A short iron assembly used by the bilateral wrap tests."""
     return ClubAssembly("iron7", 0.95, 0.25, 0.0065)
 
 

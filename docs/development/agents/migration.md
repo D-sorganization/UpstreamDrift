@@ -5,25 +5,25 @@ the ownership inventory and migration ledger. It does not authorize deletion by
 itself; deletion requires a follow-up PR that proves tool references have moved
 and that the corresponding workflow owners approve the migration.
 
-`.gaai/` is the canonical agent-governance root because `CLAUDE.md` declares the
-repository a GAAI Fleet member and `AGENTS.md` delegates binding contributor
-policy to `CLAUDE.md`.
+`CLAUDE.md` and `AGENTS.md` are the binding contributor and agent policy. The
+vendored framework tree that used to be the canonical root was retired
+fleet-wide and removed (Repository_Management #2725); `.claude/` is now the
+canonical agent configuration root.
 
-| Directory | Status    | Owner   | Migration note                                                                                                                                     |
-| --------- | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| .gaai/    | Canonical | @core   | Owns governance rules, memory, backlog, skills, hooks, and orchestration docs.                                                                     |
-| .claude/  | Mirror    | @core   | Contains Claude command shims and duplicated skill entries; migrate durable content into `.gaai/core/compat/` or `.gaai/project/` before deletion. |
-| .kiro/    | Legacy    | @agents | Tool-specific steering/config root; migrate unique steering guidance into `.gaai/project/contexts/rules/` before deletion.                         |
-| .jules/   | Legacy    | @agents | Jules-specific automation configuration; migrate unique ownership metadata into `.gaai/project/` and `.github/WORKFLOWS.md` before deletion.       |
+| Directory | Status    | Owner   | Migration note                                                                                                          |
+| --------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| .claude/  | Canonical | @core   | Claude skills, rules, and settings.                                                                                     |
+| .kiro/    | Legacy    | @agents | Tool-specific steering/config root; migrate unique steering guidance into `AGENTS.md` before deletion.                  |
+| .jules/   | Legacy    | @agents | Jules-specific automation configuration; migrate unique ownership metadata into `.github/WORKFLOWS.md` before deletion. |
 
 ## Ownership Rules
 
-- New agent governance belongs under `.gaai/project/` unless a tool requires a
-  compatibility shim elsewhere.
-- Compatibility shims outside `.gaai/` must have an owner and migration note in
-  this file.
+- New agent governance belongs in `AGENTS.md` or its fleet-rules sources unless
+  a tool requires a configuration tree of its own.
+- Every root-level agent configuration tree must have an owner and migration
+  note in this file.
 - Workflow automation owned by agents must have a row in `.github/WORKFLOWS.md`
   with an explicit owner and `KEEP`, `MERGE`, `DELETE`, or `DISABLE` in the
   purpose cell.
-- Removing `.claude/`, `.kiro/`, or `.jules/` is intentionally left to
-  a smaller follow-up after owners verify tool references.
+- Removing `.kiro/` or `.jules/` is intentionally left to a smaller follow-up
+  after owners verify tool references.

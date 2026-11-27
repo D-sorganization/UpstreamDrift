@@ -114,6 +114,7 @@ class ShadowHandVisualSettings:
 
 
 def _pair(raw: Any, default: tuple[float, float]) -> tuple[float, float]:
+    """Read a length-2 float pair, or ``default``."""
     vals = raw if raw is not None else default
     return (float(vals[0]), float(vals[1]))
 
@@ -121,11 +122,13 @@ def _pair(raw: Any, default: tuple[float, float]) -> tuple[float, float]:
 def _triple(
     raw: Any, default: tuple[float, float, float]
 ) -> tuple[float, float, float]:
+    """Read a length-3 float triple, or ``default``."""
     vals = raw if raw is not None else default
     return (float(vals[0]), float(vals[1]), float(vals[2]))
 
 
 def _load_settings() -> ShadowHandVisualSettings:
+    """Load Shadow hand visual settings from the JSON config."""
     raw = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
     rot_cfg = raw["mount_rotation_deg"]
     rot = SciRot.from_euler(

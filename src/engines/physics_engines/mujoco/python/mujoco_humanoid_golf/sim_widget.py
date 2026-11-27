@@ -33,9 +33,12 @@ from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .physics_engine import MuJoCoPhysicsEngine
+from .sim_angmom_mixin import SimAngMomMixin
 from .sim_camera_mixin import SimCameraMixin
 from .sim_force_color_mixin import SimForceColorMixin
+from .sim_net_power_mixin import SimNetPowerMixin
 from .sim_rendering_mixin import SimRenderingMixin
+from .sim_segment_ke_mixin import SimSegmentKeMixin
 from .telemetry import TelemetryRecorder
 
 logger = get_logger(__name__)
@@ -71,6 +74,9 @@ class ModelLoaderThread(QtCore.QThread):
 class MuJoCoSimWidget(  # type: ignore[misc]
     SimCameraMixin,
     SimForceColorMixin,
+    SimNetPowerMixin,
+    SimAngMomMixin,
+    SimSegmentKeMixin,
     SimRenderingMixin,
     QtWidgets.QWidget,
 ):
@@ -86,12 +92,16 @@ class MuJoCoSimWidget(  # type: ignore[misc]
     loading_started = QtCore.pyqtSignal()
     loading_finished = QtCore.pyqtSignal(bool)
     force_legend_changed = QtCore.pyqtSignal(str)
+    ke_legend_changed = QtCore.pyqtSignal(str)
+    net_power_legend_changed = QtCore.pyqtSignal(str)
 
     def _init_visualization_toggles(self) -> None:
         from src.shared.python.body_part_viz import ForceColorScale
 
         self.axial_color_scale = ForceColorScale()
         self._init_force_color_hub()
+        self._init_net_power_state()
+        self._init_segment_ke_shading()
         self.force_legend_text = ""
         self.show_force_vectors = False
         self.show_torque_vectors = False
@@ -127,6 +137,9 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.visible_frames: set[int] = set()
         self.visible_coms: set[int] = set()
+
+        self.show_segment_ke_globes = False
+        self._segment_ke_peak_state: dict[str, tuple[float, float]] = {}
 
     def _init_scene_options(self) -> None:
         self.scene_option = mujoco.MjvOption()
@@ -172,6 +185,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.camera_name = "side"
 
         self._init_visualization_toggles()
+        self._init_angmom_overlay_state()
 
         self.enable_live_analysis = False
         self.latest_bio_data: BiomechanicalData | None = None
@@ -222,6 +236,9 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
         self.loader_thread: ModelLoaderThread | None = None
         self.restore_force_overlay_settings()
+        self.restore_net_power_overlay_settings()
+        self.restore_angmom_overlay_settings()
+        self.restore_segment_ke_settings()
 
     @property
     def model(self) -> mujoco.MjModel | None:
@@ -691,6 +708,18 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_live_screw = screw
         if not screw:
             self._prev_body_ts.clear()
+
+    def set_segment_ke_globe_visualization(self, enabled: bool) -> None:
+        """Toggle KE proxy debug globes (#15396)."""
+        self.show_segment_ke_globes = enabled
+        if not enabled:
+            self._segment_ke_peak_state.clear()
+        self._persist_segment_ke_state()
+        self._render_once()
+
+    def reset_segment_ke_peak_tracking(self) -> None:
+        """Clear running peak KE used for globe highlight scaling."""
+        self._segment_ke_peak_state.clear()
 
     def set_force_visualization(
         self, enabled: bool, scale: float | None = None

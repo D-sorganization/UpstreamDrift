@@ -35,6 +35,7 @@ __all__ = [
     "build_glyphs",
     "clamped_tip_shift",
     "label_group",
+    "arc_polyline_with_head",
     "scale_for_view",
 ]
 
@@ -702,6 +703,47 @@ def _compute_arc_basis(
     return u, v
 
 
+def arc_polyline_with_head(
+    center_m: tuple[float, float, float],
+    axis_unit: tuple[float, float, float],
+    radius_m: float,
+    sweep_rad: float,
+    n_segments: int,
+    head_length_m: float,
+) -> tuple[
+    tuple[tuple[float, float, float], ...],
+    tuple[float, float, float],
+    tuple[float, float, float],
+]:
+    """Circular-arc polyline in the plane normal to ``axis_unit``, with arrowhead."""
+    u, v = _compute_arc_basis(axis_unit)
+    cx, cy, cz = center_m
+    pts: list[tuple[float, float, float]] = []
+    for i in range(n_segments + 1):
+        theta = sweep_rad * (i / n_segments)
+        pts.append(
+            (
+                cx + radius_m * (math.cos(theta) * u[0] + math.sin(theta) * v[0]),
+                cy + radius_m * (math.cos(theta) * u[1] + math.sin(theta) * v[1]),
+                cz + radius_m * (math.cos(theta) * u[2] + math.sin(theta) * v[2]),
+            )
+        )
+    head_tip = pts[-1]
+    cos_last = math.cos(sweep_rad)
+    sin_last = math.sin(sweep_rad)
+    tangent = (
+        -sin_last * u[0] + cos_last * v[0],
+        -sin_last * u[1] + cos_last * v[1],
+        -sin_last * u[2] + cos_last * v[2],
+    )
+    head_base = (
+        head_tip[0] - head_length_m * tangent[0],
+        head_tip[1] - head_length_m * tangent[1],
+        head_tip[2] - head_length_m * tangent[2],
+    )
+    return tuple(pts), head_tip, head_base
+
+
 def clamped_tip_shift(
     tip: Sequence[float], base_center: Sequence[float], ratio: float = 0.6
 ) -> tuple[float, ...]:
@@ -793,34 +835,14 @@ def _build_torque_arc(
     eff_len = max(style.min_length_m, min(raw_len, max_len))
     radius = eff_len / 2.0
 
-    u, v = _compute_arc_basis(a_hat)
-    cx, cy, cz = wrench.point_m
-    n_seg = style.arc_segments
-    sweep = style.arc_sweep_rad
-
-    pts: list[tuple[float, float, float]] = []
-    for i in range(n_seg + 1):
-        theta = sweep * (i / n_seg)
-        cos_t = math.cos(theta)
-        sin_t = math.sin(theta)
-        x = cx + radius * (cos_t * u[0] + sin_t * v[0])
-        y = cy + radius * (cos_t * u[1] + sin_t * v[1])
-        z = cz + radius * (cos_t * u[2] + sin_t * v[2])
-        pts.append((x, y, z))
-
-    head_tip = pts[-1]
-    cos_last = math.cos(sweep)
-    sin_last = math.sin(sweep)
-    tangent = (
-        -sin_last * u[0] + cos_last * v[0],
-        -sin_last * u[1] + cos_last * v[1],
-        -sin_last * u[2] + cos_last * v[2],
-    )
     head_len = style.head_length_ratio * eff_len
-    head_base = (
-        head_tip[0] - head_len * tangent[0],
-        head_tip[1] - head_len * tangent[1],
-        head_tip[2] - head_len * tangent[2],
+    polyline_m, head_tip, head_base = arc_polyline_with_head(
+        wrench.point_m,
+        a_hat,
+        radius,
+        style.arc_sweep_rad,
+        style.arc_segments,
+        head_len,
     )
     rgba = _hex_to_rgba(color_hex)
 
@@ -830,7 +852,7 @@ def _build_torque_arc(
         center_m=wrench.point_m,
         axis_unit=a_hat,
         radius_m=radius,
-        polyline_m=tuple(pts),
+        polyline_m=polyline_m,
         head_tip_m=head_tip,
         head_base_m=head_base,
         rgba=rgba,

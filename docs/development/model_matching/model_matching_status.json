@@ -5,6 +5,9 @@
   "engines": [
     {
       "engine": "mujoco",
+      "input_sha256": {
+        "bundle": "bfa1a9a86cc84c8c7d2f1bce821750d10564d1aa5f59549d082c87e855cdfe91"
+      },
       "model": "full-body-v1 (44 coordinates), de Leva 1996 scaled, hip-calibrated, hands welded to club",
       "approach": "Marker IK (26.1 mm) then forward dynamics with KKT feedback tracking",
       "key_parameters": "12 Hz tracking cutoff; address calibration 5.6 mm; peak joint torque 537 N*m",
@@ -18,6 +21,10 @@
     },
     {
       "engine": "opensim",
+      "input_sha256": {
+        "model": "56c6c6f0e947ae92d2b6041135e049b68284d46c70fee135339ba3e3f447393e",
+        "states": "f489d41b68e84df3addab2ade825ae0266e672e60ec3abd083275f9f8c76d3f2"
+      },
       "model": "Rajagopal skeleton golf_humanoid, tour-scaled, address-registered markers (OS9)",
       "approach": "Kinematic marker IK only; no club-hand coupling, no muscles",
       "key_parameters": "Address calibration 19.1 mm; max frame RMS 49.6 mm; humerus scales 1.46/1.24",

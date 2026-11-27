@@ -294,8 +294,10 @@ def test_measured_length_overrides_the_spec_length(spec: dict[str, Any]) -> None
 def test_shoe_colour_stays_a_garment(meshes: list[BodyMesh]) -> None:
     garment = library.CLOTHING[DOC.clothing]["foot"]
     for m in _parts(meshes, "calcn_r", "garment") + _parts(meshes, "toes_r", ""):
-        if m.label.startswith("garment"):
+        if m.label.startswith(("garment", "trim")):
             assert m.material_name == garment
+        elif m.label.startswith("sole"):
+            assert m.material_name == library.SOLE_MATERIAL
         else:
             assert m.material_name == DOC.skin_tone
 
@@ -323,3 +325,104 @@ ANSUR_II_POOLED_SD = 0.0175
 def test_breadth_over_length_matches_the_ansur_ii_pooled_median() -> None:
     assert pytest.approx(ANSUR_II_POOLED_MEDIAN, abs=5e-4) == foot.BREADTH_OVER_LENGTH
     assert abs(foot.BREADTH_OVER_LENGTH - ANSUR_II_POOLED_MEDIAN) < ANSUR_II_POOLED_SD
+
+
+# --- golf-shoe shape (#15299): settings are fractions of the foot length ---
+STYLE = foot.load_shoe_style()
+
+
+def _shoe(spec: dict[str, Any], meshes: list[BodyMesh], prefix: str) -> np.ndarray:
+    """Right-foot ``prefix`` vertices as (length fraction, height m, left m)."""
+    frame, upper, _ = _shoe_points(spec, meshes, "r")
+    ref = frame.local(upper)
+
+    def local(label: str) -> np.ndarray:
+        pts = [
+            frame.to_calcn(body, m.mesh_in_body_frame.vertices)
+            for body in ("calcn_r", "toes_r")
+            for m in _parts(meshes, body, label)
+        ]
+        return frame.local(np.vstack(pts))
+
+    loc = local(prefix) - [ref[:, 0].min(), local("sole")[:, 1].min(), 0.0]
+    loc[:, 0] /= np.ptp(ref[:, 0])
+    return loc
+
+
+def _band(loc: np.ndarray, frac: float, half: float = 0.015) -> np.ndarray:
+    return loc[abs(loc[:, 0] - frac) < half]
+
+
+def test_toe_tip_springs_off_the_ground(spec: dict[str, Any], meshes: Any) -> None:
+    length = spec["anthropometry"]["segments"]["foot"]["length_m"]
+    start, rise, _ = STYLE.toe_spring
+    for prefix in ("sole", "garment"):
+        loc = _shoe(spec, meshes, prefix)
+        assert loc[loc[:, 0] > 0.995][:, 1].min() > 0.9 * rise * length, prefix
+        assert _band(loc, start - 0.05)[:, 1].min() < 1e-3, prefix
+    assert 0.015 <= rise <= 0.06 and start >= 0.85  # a toe spring, not a rocker
+
+
+def test_sole_has_a_heel_a_raised_shank_and_a_thinner_forefoot(
+    spec: dict[str, Any], meshes: list[BodyMesh]
+) -> None:
+    length = spec["anthropometry"]["segments"]["foot"]["length_m"]
+    loc = _shoe(spec, meshes, "sole")
+    heel, shank, ball = (_band(loc, f)[:, 1] for f in (0.12, 0.45, 0.70))
+    assert heel.min() < 5e-4 and ball.min() < 5e-4
+    assert shank.min() == pytest.approx(STYLE.shank[3] * length, abs=5e-4)
+    assert heel.max() == pytest.approx(STYLE.heel_height * length, abs=5e-4)
+    assert ball.max() == pytest.approx(STYLE.forefoot_height * length, abs=5e-4)
+    assert STYLE.heel_height > 1.5 * STYLE.forefoot_height
+
+
+@pytest.mark.parametrize("frac", [0.15, 0.45, 0.70])
+def test_welt_ledge_stands_proud_of_the_upper(
+    spec: dict[str, Any], meshes: list[BodyMesh], frac: float
+) -> None:
+    welt = STYLE.welt * spec["anthropometry"]["segments"]["foot"]["length_m"]
+    sole = _band(_shoe(spec, meshes, "sole"), frac, 0.012)
+    upper = _band(_shoe(spec, meshes, "garment"), frac, 0.012)
+    assert np.ptp(sole[:, 2]) - np.ptp(upper[:, 2]) == pytest.approx(2 * welt, abs=6e-4)
+    ledge = sole[sole[:, 1] > 0.8 * sole[:, 1].max()]  # a ledge, not a rounded bead
+    assert np.ptp(ledge[:, 2]) > np.ptp(upper[:, 2]) + welt
+
+
+def test_saddle_and_heel_counter_wear_a_second_material(
+    spec: dict[str, Any], meshes: list[BodyMesh]
+) -> None:
+    (panel,) = _parts(meshes, "calcn_r", "saddle")
+    assert panel.material_name == library.SADDLE_MATERIAL
+    assert panel.material_name != library.CLOTHING[DOC.clothing]["foot"]
+    loc, upper = _shoe(spec, meshes, "saddle"), _shoe(spec, meshes, "garment")
+    lo, hi, _ = STYLE.saddle
+    band, under = _band(loc, 0.5 * (lo + hi), 0.02), _band(upper, 0.5 * (lo + hi), 0.02)
+    assert band[:, 1].max() > under[:, 1].max()  # over the instep, welt to welt
+    assert np.ptp(band[:, 2]) > np.ptp(under[:, 2])
+    gap = loc[(loc[:, 0] > STYLE.heel_counter[0] + 0.02) & (loc[:, 0] < lo - 0.02)]
+    assert len(gap) == 0 and loc[:, 0].min() < 0.01 and loc[:, 0].max() < hi + 0.02
+    assert len(_parts(meshes, "calcn_r", "lace")) == 1
+    cap = _shoe(spec, meshes, "trim")
+    assert cap[:, 0].min() == pytest.approx(STYLE.toe_cap[0], abs=0.01)
+
+
+def test_toe_box_is_rounded_in_plan(spec: dict[str, Any], meshes: Any) -> None:
+    loc = _shoe(spec, meshes, "garment")
+    tip, ball = (np.ptp(_band(loc, f, 0.01)[:, 2]) for f in (0.95, 0.72))
+    assert 0.40 * ball < tip < 0.75 * ball  # neither a point nor a square end
+
+
+@pytest.mark.parametrize("side", SIDES)
+def test_foot_vertex_budget(meshes: list[BodyMesh], side: str) -> None:
+    bodies = (f"talus_{side}", f"calcn_{side}", f"toes_{side}")
+    count = sum(len(m.mesh_in_body_frame.vertices) for m in meshes if m.body in bodies)
+    assert count <= STYLE.max_vertices, count
+
+
+def test_shoe_settings_reject_a_value_out_of_range(tmp_path: Path) -> None:
+    raw = json.loads(foot.SHOE_SETTINGS.read_text(encoding="utf-8"))
+    raw["toe_spring"] = [1.2, 0.03, 2.0]
+    bad = tmp_path / "shoe_settings.json"
+    bad.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ValueError, match="toe_spring"):
+        foot.load_shoe_style(bad)

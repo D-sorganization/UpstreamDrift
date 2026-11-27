@@ -15,6 +15,7 @@ mujoco = pytest.importorskip("mujoco")
 
 
 def test_free_club_shadow_hands_mjcf_compiles() -> None:
+    """The free-club Shadow hand MJCF compiles in MuJoCo."""
     xml, mesh_dir, geom_names = build_free_club_shadow_hands_mjcf(GripSpec.legacy())
     model = mujoco.MjModel.from_xml_string(xml)
     assert model.ngeom >= 3

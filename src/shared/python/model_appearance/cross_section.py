@@ -13,6 +13,8 @@ frame.
 - **Foot** (talus, calcn, toes): ML is ``up x (calcn -> toes)``, the ground
   normal crossed with the foot's long axis; for an OpenSim calcn this is its
   lateral z axis.
+- **Leg** (thigh, shin): depth is forward, the horizontal direction its foot
+  points; ML is ``up x forward`` (#15299).
 
 The depth (thin, ``aspect``) axis is anteroposterior for the trunk
 (``ML x up``) and up for the foot (the shoe is wider than it is tall). Every
@@ -24,7 +26,7 @@ nothing here touches mass, inertia or joint frames.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -48,6 +50,7 @@ __all__ = [
 
 TRUNK_PARTS = frozenset({"torso", "pelvis"})
 FOOT_PARTS = frozenset({"foot"})
+LEG_PARTS = frozenset({"thigh", "shin"})
 # Landmark axes closer than this to "up" cannot define a horizontal ML/AP pair.
 _MIN_TILT_FROM_UP_DEG = 45.0
 
@@ -58,7 +61,10 @@ class BodySection:
 
     body: str
     ml_axis: Array  # mediolateral, from the landmarks (sign is irrelevant)
-    depth_axis: Array  # the thin semi-axis: AP for the trunk, up for the foot
+    depth_axis: Array  # AP for the trunk, up for the foot, forward for a leg
+    #: Forward (anterior) unit vector of a trunk body that carries the head,
+    #: along the head frame's x axis (#15292); ``None`` when it is unknown.
+    front_axis: Array | None = None
 
     def trunk_up_axis(self) -> Array:
         """Unit vertical of a trunk body (``depth x ML``), in its own frame.
@@ -149,8 +155,20 @@ class _Landmarks:
             raise ValueError(f"foot {body} has no toe joint to orient it")
         return _unit(self.origin(toe) - self.poses[toe["parent"]][:3, 3], "foot")
 
+    def foot_below(self, body: str) -> str:
+        """The first foot body down the chain from a leg ``body``."""
+        while classify_body(body) not in FOOT_PARTS:
+            kids = [j["child"] for j in self.joints if j["parent"] == body]
+            require(len(kids) == 1, f"leg chain at {body} needs one child", len(kids))
+            body = kids[0]
+        return body
+
     def to_body(self, body: str, world_vector: Array) -> Array:
         return self.poses[body][:3, :3].T @ world_vector
+
+
+def _is_head(body: str) -> bool:
+    return classify_body(body) == "head"
 
 
 def _section(marks: _Landmarks, body: str, part: str) -> BodySection:
@@ -159,6 +177,10 @@ def _section(marks: _Landmarks, body: str, part: str) -> BodySection:
         long_axis = marks.toe_axis(body)
         ml_world = _unit(np.cross(marks.up, long_axis), f"{body} foot axis vs up")
         depth_world = marks.up
+    elif part in LEG_PARTS:  # depth is forward: the way the foot points (#15299)
+        toes = marks.toe_axis(marks.foot_below(body))
+        depth_world = _unit(toes - (toes @ marks.up) * marks.up, f"{body} forward")
+        ml_world = _unit(np.cross(marks.up, depth_world), f"{body} ML axis")
     else:
         require(part in TRUNK_PARTS, f"no cross-section rule for part {part!r}", body)
         hips = marks.hips(body)
@@ -176,7 +198,13 @@ def _section(marks: _Landmarks, body: str, part: str) -> BodySection:
         depth_world = _unit(np.cross(ml_world, marks.up), f"{body} AP axis")
         ml_world = _unit(np.cross(marks.up, depth_world), f"{body} ML axis")
     ml, depth = marks.to_body(body, ml_world), marks.to_body(body, depth_world)
-    return BodySection(body, ml, depth)
+    front = None
+    heads = [j for j in marks.joints if j["parent"] == body and _is_head(j["child"])]
+    if part in TRUNK_PARTS and heads:
+        ahead = float(depth_world @ marks.poses[heads[0]["child"]][:3, 0])
+        if abs(ahead) > 0.5:  # the head faces along the AP axis
+            front = float(np.sign(ahead)) * depth
+    return BodySection(body, ml, depth, front)
 
 
 def body_sections(spec: Mapping[str, Any]) -> dict[str, BodySection]:
@@ -192,7 +220,11 @@ def body_sections(spec: Mapping[str, Any]) -> dict[str, BodySection]:
         for body in spec["bodies"]
         if body["name"] != "world"
     ]
-    wanted = [(name, part) for name, part in wanted if PART_ASPECT.get(part, 1.0) != 1]
+    wanted = [
+        (name, part)
+        for name, part in wanted
+        if PART_ASPECT.get(part, 1.0) != 1 or part in LEG_PARTS
+    ]
     if not wanted:
         return {}
     marks = _Landmarks(spec)
@@ -216,6 +248,20 @@ class PelvisLandmarks:
     hjc_r: Array  # the two hip joint origins (sides are not assigned)
     hjc_l: Array
     lumbar: Array  # origin of the first torso child joint (the lumbar plane)
+    #: Forward unit vector, the way the feet point; ``None`` without toe joints.
+    front: Array | None = None
+
+
+def _feet_forward(
+    spec: Mapping[str, Any], body: str, hips: Sequence[Mapping[str, Any]]
+) -> Array | None:
+    """Mean horizontal toe direction of the two legs, in the frame of ``body``."""
+    marks = _Landmarks(spec)
+    try:
+        toes = sum(marks.toe_axis(marks.foot_below(j["child"])) for j in hips)
+        return marks.to_body(body, _unit(toes - (toes @ marks.up) * marks.up, body))
+    except ValueError:  # no toe joints: the front is unknown, nothing is guessed
+        return None
 
 
 def pelvis_landmarks(spec: Mapping[str, Any]) -> dict[str, PelvisLandmarks]:
@@ -236,5 +282,6 @@ def pelvis_landmarks(spec: Mapping[str, Any]) -> dict[str, PelvisLandmarks]:
             np.asarray(j["parent_to_base"], dtype=np.float64)[:3, 3]
             for j in (*hips, spine[0])
         ]
-        out[body] = PelvisLandmarks(body, origin[0], origin[1], origin[2])
+        front = _feet_forward(spec, body, hips)
+        out[body] = PelvisLandmarks(body, origin[0], origin[1], origin[2], front)
     return out

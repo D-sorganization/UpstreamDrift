@@ -17,12 +17,12 @@
         "upper_arm": "polo_white",
         "pelvis": "trousers_charcoal",
         "thigh": "trousers_charcoal",
-        "foot": "shoe_black",
+        "foot": "shoe_leather",
         "shin": "trousers_charcoal"
       }
     },
     "headwear_default_material": {
-      "hair": "hair_brown",
+      "hair": "hair_dirty_blonde",
       "cap": "cap_navy"
     },
     "materials": {
@@ -123,6 +123,16 @@
           "kind": "noise",
           "noise": 0.05
         }
+      },
+      "hair_dirty_blonde": {
+        "base_color": [
+          0.66,
+          0.54,
+          0.36,
+          1.0
+        ],
+        "roughness": 0.8,
+        "metallic": 0.0
       }
     }
   },

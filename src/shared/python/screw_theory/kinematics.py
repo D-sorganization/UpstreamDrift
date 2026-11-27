@@ -65,6 +65,16 @@ class ScrewAxis:
     is_singular: bool
 
 
+def _finite_vector3(value: object, name: str) -> np.ndarray:
+    """Return ``value`` as a float ``(3,)`` array, refusing NaN/inf or wrong shape."""
+    arr = np.asarray(value, dtype=np.float64)
+    if arr.shape != (3,):
+        raise ValueError(f"{name} must have shape (3,), got {arr.shape}")
+    if not bool(np.all(np.isfinite(arr))):
+        raise ValueError(f"{name} must be finite, got {arr}")
+    return arr
+
+
 def compute_screw_axis(
     twist: Twist,
     singularity_threshold: float = 1e-6,
@@ -82,12 +92,22 @@ def compute_screw_axis(
 
     Returns:
         ScrewAxis with complete representation
+
+    Raises:
+        ValueError: ``twist`` is missing, its angular, linear or reference
+            point is not a finite 3-vector, or ``singularity_threshold`` is not
+            a finite positive number. A non-finite twist would otherwise yield
+            a NaN screw axis reported as a regular (non-singular) motion.
     """
     if not (twist is not None):
         raise ValueError("twist must be provided")
-    ω = twist.angular
-    v = twist.linear
-    r = twist.reference_point
+    if not (math.isfinite(singularity_threshold) and singularity_threshold > 0.0):
+        raise ValueError(
+            f"singularity_threshold must be finite and > 0, got {singularity_threshold}"
+        )
+    ω = _finite_vector3(twist.angular, "twist.angular")
+    v = _finite_vector3(twist.linear, "twist.linear")
+    r = _finite_vector3(twist.reference_point, "twist.reference_point")
 
     # Check for singular case (pure translation, ω ≈ 0)
     ω_mag = float(
@@ -140,13 +160,15 @@ def compute_screw_endpoints(
 
     Args:
         screw: Screw axis to visualize
-        length: Length of axis segment to draw [m]
+        length: Length of axis segment to draw [m] (finite, >= 0)
 
     Returns:
         Tuple of (start_point, end_point) for line segment [3], [3]
     """
     if not (screw is not None):
         raise ValueError("screw must be provided")
+    if not (math.isfinite(length) and length >= 0.0):
+        raise ValueError(f"length must be finite and >= 0, got {length}")
     if screw.is_singular:
         # Pure translation: draw along velocity direction
         start = screw.axis_point

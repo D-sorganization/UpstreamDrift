@@ -1,0 +1,48 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+\title{CC0 Flat-Cap Appearance Geometry}
+\author{UpstreamDrift appearance layer}
+\date{2026-11-26}
+\begin{document}
+\maketitle
+
+\section{Purpose and Scope}
+The \texttt{flat\_cap} style is a visual accessory for the CC0 mesh head. It
+adds no body, joint, collision, or physical-model geometry. The cap uses the
+existing closed crown shell and peak builder, with a style-specific crop.
+
+\section{Crown Shape}
+Let $(x,y,z)$ be vertices in canonical head-length coordinates, with $+x$
+pointing toward the face. The flat-cap crop shifts both surfaces of the crown
+shell forward by
+\begin{align}
+  x' &= x + \delta\,F(x)R(z)A(z), & y'&=y, & z'&=z, \\
+  \delta &= 0.12, &
+  F(x)&=S\!\left(\operatorname{clip}\frac{x-c_x}{0.24}\right),\\
+  R(z)&=S\!\left(\operatorname{clip}\frac{z-0.79}{0.09}\right), &
+  A(z)&=S\!\left(\operatorname{clip}\frac{0.99-z}{0.07}\right),
+\end{align}
+where $S(t)=t^2(3-2t)$ on $[0,1]$ and $\operatorname{clip}$ clamps to that
+interval. The smooth gates keep the cap line and apex fixed while adding a
+small front overhang. Moving both surfaces together preserves the shell
+thickness. The inner surface retains its normal stand-off from the scalp;
+short-cropped hair is trimmed to remain below it.
+
+The Hogan appearance sets the peak length to $0.12$ head lengths through the
+existing \texttt{cap\_brim} setting. Other appearances may choose any supported
+peak length. The crown is an approximate silhouette style, not a fitted
+historical headwear reconstruction.
+
+\section{Verification}
+The crown and peak tests check closed positive-volume meshes. A ray-triangle
+clearance check samples hair vertices against the crown. The native MuJoCo
+front/profile stills are visual review only and make no motion or physics
+qualification claim. Reproduce the focused checks from the repository root:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest \\
+  tests/unit/model_appearance/test_head_cap.py \\
+  tests/unit/model_appearance/test_schema_and_library.py \\
+  tests/unit/model_appearance/test_head_mesh_asset.py -q
+\end{verbatim}
+\end{document}

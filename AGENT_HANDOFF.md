@@ -7,6 +7,8 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
+- #15834: Shared `straw_hat` visual style and its [calculation reference](docs/development/full_body_models/appearance_reference/straw_hat.tex); preserve physical model and existing cap meshes.
+
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
 - `SPEC.md`: architecture contract; the change log is written by the fragment collate step, one row per PR.
@@ -51,7 +53,19 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
 
+
+- Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
+- Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
+- Reproducibility #15191: `fix/seed-validation-atomic` rejects non-integer seeds before modifying Python or NumPy RNG state; `validate=False` continues to bypass only the range check. Review through Barb's pipeline.
+- Player profiles #15816/#15832/#15833: `player_models.export_player` supports source-attributed Tiger/Hogan and five legend candidates; appearance is illustrative and motion remains unqualified.
+- Player delivery #15819: `scripts/export_player_models.py` and `assets/player_models/` provide native sized/reference-skin bundles, hash-bound review poses and desktop/phone previews; motion remains unqualified.
+- Historical player delivery #15836: five sized and five reference-physics skins, catalog-driven batch previews and native verification under epic #15832; historical motion remains unqualified.
+- Import Utilities #15193: `fix/dotted-module-imports` resolves dotted names to the requested module and reads its own version for dependency checks. Review through Barb's pipeline.
+
 Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
+
+- Config serialization #15196: `fix/json-serialization-preserve` checks JSON/YAML payloads before opening destinations or creating directories; rejected payloads preserve existing bytes. Review through Barb's pipeline.
+- Legend reference footage #15835: private acquired clips for Seve Ballesteros, Jack Nicklaus, Bobby Jones, Sam Snead, and Byron Nelson; source hashes, date/identity limits, and reproduction steps are in `docs/development/historical_capture/legend-reference-acquisition-2026-11-26.json` and its commands guide. No training or publication qualification is claimed.
 
 OpenSim musculoskeletal barbell lifts (OSL, Epic #13038; research record `docs/research/lift_models/lift_models.tex`; state as of 2026-10-20):
 
@@ -96,6 +110,7 @@ Golf Chain Visualisation, Epic #11706 (GCV):
 - Native export backends, quarter-speed variants, impact time, high-FPS schedule GCV-14: #11720; MyoSuite v3 export worker #11997.
 - ClubheadSeries adapters GCV-16 #11722; impact parameters panel GCV-17 #11723; ground reaction manual slice GCV-18 #11724.
 - Clubhead speed timing GCV-20: #11767; MyoSuite hip retarget #12052; right knee flexes negative like the left #12057.
+- Visual flat-cap appearance #15822 adds a low-profile CC0 headwear style; the crown geometry stays in the appearance layer.
 
 Open Swing Visualisation grip and gaze (OSV, Epic #11726):
 
@@ -130,3 +145,5 @@ Motion matching and tour baselines:
 - Tour baselines (exact-capture matching, fail-closed qualification): #10829, #10830, #10831, #10799, #10800, #10844, #10849; TB-12 #10597 merged.
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
+
+- #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.

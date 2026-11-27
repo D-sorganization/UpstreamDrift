@@ -1,0 +1,56 @@
+{
+  "asset_sha256": "2fd098e75f866979a0266ac41594b70444c43bf92add90fd345259f6918bbf2e",
+  "content_sha256": "c5309db09d40f23750347ecd4f9e567223bb15389153ff5a75dab1dfbc00c310",
+  "licence": "CC0-1.0",
+  "source_name": "MakeHuman hm08 base mesh, default skeleton and default weights (right hand extract)",
+  "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "source_urls": [
+    "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/3dobjs/base.obj",
+    "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/rigs/default.mhskel",
+    "https://github.com/makehumancommunity/makehuman/blob/a8bc2d54ff0ac92e78ff71431b1023eda42bf482/makehuman/data/rigs/default_weights.mhw"
+  ],
+  "vertex_count": 1770,
+  "face_count": 3536,
+  "bone_count": 21,
+  "modifications": "Skin weights are MakeHuman's except across the web between thumb and index, where they are smoothed (build_settings.json thumb_web_smoothing), and across the first finger creases (build_settings.json finger_crease_smoothing); zero iterations restores the originals. The cut end of the forearm stub is closed with a dome that is not MakeHuman geometry (build_settings.json forearm_cap; zero rings gives a flat fan).",
+  "thumb_web_smoothing": {
+    "thumb_bones": [
+      "thumb_meta",
+      "thumb_prox"
+    ],
+    "palm_bone": "meta_index",
+    "min_weight": 0.05,
+    "rings": 3,
+    "iterations": 10,
+    "blend": 0.5
+  },
+  "finger_crease_smoothing": {
+    "seams": [
+      [
+        "index_prox",
+        "index_mid"
+      ],
+      [
+        "middle_prox",
+        "middle_mid"
+      ],
+      [
+        "ring_prox",
+        "ring_mid"
+      ],
+      [
+        "little_prox",
+        "little_mid"
+      ]
+    ],
+    "min_weight": 0.05,
+    "rings": 1,
+    "iterations": 2,
+    "blend": 0.5
+  },
+  "forearm_cap": {
+    "rings": 4,
+    "depth_fraction": 0.6
+  },
+  "research_only_alternatives": "MANO and SMPL-X hand models are research/non-commercial licences and are not bundled; they remain research-only alternatives."
+}
