@@ -58,6 +58,7 @@ _ASSUMED = "Assumed prior; unmeasured turf, no primary citation"
 
 
 def _p(value: float, why: str) -> ParameterRecord:
+    """Wrap an assumed parameter value with its rationale as a ``ParameterRecord``."""
     return ParameterRecord(value, "assumption", _ASSUMED, why)
 
 
@@ -69,6 +70,7 @@ def load_bounce_settings() -> dict[str, Any]:
 
 
 def _cited() -> dict[str, ParameterRecord]:
+    """Return the cited first-bounce coefficients from ``runout_bounce.json``."""
     raw = load_bounce_settings()
     src = raw["source"]
     cite = (
@@ -188,6 +190,7 @@ class SlopeAwareGround:
     def __call__(
         self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
     ) -> NDArray[np.float64]:
+        """Map landing states ``(n, 6)`` to resting offsets ``(n, 2)`` yards."""
         require(
             landing.ndim == 2 and landing.shape[1] == len(LANDING_COLUMNS),
             f"landing state needs columns {LANDING_COLUMNS}",
