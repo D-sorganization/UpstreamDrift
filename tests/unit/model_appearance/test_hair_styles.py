@@ -145,3 +145,14 @@ def test_asymmetry_bounds_and_default_line():
             head_hair.build_short_crop(
                 skin, crop=replace(crop, hairline_asymmetry=invalid)
             )
+
+
+def test_full_styles_keep_crown_below_pompadour_height():
+    """Limit crown height while retaining the longer rear hairline."""
+    from src.shared.python.model_appearance import head_hair_styles
+
+    skin = head_mesh._default_asset().skin
+    for style in ("side_swept", "swept_back"):
+        vertices = head_hair_styles.build_hair_style(skin, "left", style).vertices
+        assert vertices[:, 2].max() < 1.09
+        assert vertices[:, 2].min() < 0.30
