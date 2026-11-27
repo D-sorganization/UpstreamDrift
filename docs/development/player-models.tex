@@ -42,6 +42,26 @@ for inspection, not inferred motion. Posed head-to-shoe height is not the
 same as erect anatomical stature. A bounded trunk calibration now matches
 the declared neutral shoe-to-head convention; see \texttt{player-stature.tex}
 for the equations, actual native checks and anatomical interpretation limits.
+\section{Cap Style Override}
+The batch exporter accepts \texttt{--cap-style} from the live
+\texttt{CAP\_STYLES} schema choices. This changes only the appearance
+sidecar; the profile remains unchanged and the receipt records an explicit
+\texttt{head.cap\_style} override. The override is rejected before any
+output is written when it is unknown, and cannot be combined with
+\texttt{--render-existing} because that mode does not regenerate XML.
+Flat and newsboy caps use a short 0.12-head-length peak; a profile's straw
+material is replaced with the neutral white cloth material for cloth caps.
+Choosing \texttt{straw\_hat} selects the straw material. Other explicit
+materials are retained. The default path makes no head-setting changes.
+After the corresponding profiles and styles are available, use:
+\begin{verbatim}
+python scripts/export_player_models.py --player ben_hogan sam_snead --cap-style flat_cap --output output/flat_caps
+python scripts/export_player_models.py --player byron_nelson --cap-style newsboy_cap --output output/byron
+\end{verbatim}
+The second command becomes accepted when the independent hat-style change adds
+\texttt{newsboy\_cap} to the schema choices and the Nelson profile is present.
+The exporter reads those choices from \texttt{CAP\_STYLES} rather than
+maintaining a second command-line list.
 \section{Reproduction and Acceptance}
 From the repository root, initialize the pinned Tools submodule and set
 \texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.

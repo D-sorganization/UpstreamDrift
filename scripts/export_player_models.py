@@ -296,6 +296,7 @@ def main(argv: list[str] | None = None) -> int:
         export_player,
         player_ids,
     )
+    from src.shared.python.model_appearance.schema import CAP_STYLES
 
     parser = argparse.ArgumentParser(description=__doc__)
     catalog = player_ids()
@@ -305,6 +306,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--base-spec", type=Path, help="Export appearance on a base physics spec"
+    )
+    parser.add_argument(
+        "--cap-style",
+        choices=CAP_STYLES,
+        help="Override only the exported appearance's cap style",
     )
     parser.add_argument(
         "--render-existing",
@@ -317,6 +323,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.render_existing and args.base_spec:
         parser.error("--base-spec cannot be used with --render-existing")
+    if args.render_existing and args.cap_style is not None:
+        parser.error("--cap-style cannot be used with --render-existing")
     args.output.mkdir(parents=True, exist_ok=True)
     selected = _selected_players(tuple(args.player), catalog)
     items: list[dict[str, Any]] = []
@@ -330,7 +338,9 @@ def main(argv: list[str] | None = None) -> int:
                     f"existing model files are missing under {folder}"
                 )
         else:
-            xml = export_player(player, folder, base_spec=args.base_spec)
+            xml = export_player(
+                player, folder, base_spec=args.base_spec, cap_style=args.cap_style
+            )
         spec = json.loads(spec_path.read_text(encoding="utf-8"))
         pose, values = None, None
         if args.pose_root:
