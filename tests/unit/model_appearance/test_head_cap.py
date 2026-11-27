@@ -161,3 +161,12 @@ def test_bad_cap_style_material_and_model_are_refused() -> None:
         _doc(**CAP, model="parametric")
     with pytest.raises(ValueError, match="cap_material"):
         library.check_references(_doc(**CAP, cap_material="no_such_material"))
+
+
+def test_newsboy_hair_is_cropped_below_the_crown() -> None:
+    """Keep the fuller newsboy crown outside the existing cap hair crop."""
+    skin = head_mesh._default_asset().skin
+    crop = head_cap.newsboy_cap_crop()
+    crown = dict(head_cap.build_period_cap(skin, 0.3, crop))["cap_crown"]
+    hair = head_hair.build_short_crop(skin, "left", crop.hair_under)
+    _assert_hair_under_crown(crown, hair, np.array([crop.centre_x, 0.0, 0.55]))

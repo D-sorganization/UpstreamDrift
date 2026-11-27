@@ -66,7 +66,7 @@
         "hair_style": { "enum": ["short_crop", "dome"] },
         "hair_part": { "enum": ["left", "right", "none"] },
         "eye_color": { "enum": ["blue_grey", "hazel", "brown"] },
-        "cap_style": { "enum": ["none", "baseball_cap", "flat_cap", "straw_hat"] },
+        "cap_style": { "enum": ["none", "baseball_cap", "flat_cap", "straw_hat", "newsboy_cap"] },
         "cap_material": { "$ref": "#/$defs/name" },
         "cap_brim": { "type": "number", "minimum": 0.1, "maximum": 0.8 },
         "sizing": { "enum": ["stature", "segment_length"] },

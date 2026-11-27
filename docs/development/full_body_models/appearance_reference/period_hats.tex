@@ -1,0 +1,26 @@
+% Standalone editable visual-model calculation note for issue 15853.
+\section{Period Hat Silhouettes}
+All coordinates are unit head lengths in the existing head frame, $x$ forward
+and $z$ up. The straw brim retains its earlier closed mesh. The crown and band start from
+their original closed shells; for $z>0.82$, put
+$t=(z-0.82)/(z_{\max}-0.82)$ and map its height to
+$0.82+(z_{\max}-0.82)[0.15t+0.85(1-(1-t)^3)]$. The positive derivative
+preserves shell orientation, and both shells share this map to stay attached.
+The unchanged lower edge preserves the
+brim and band junction. This creates a broad flat top with steeper sides; the
+hair clearance is checked by sampled rays. It is a stylized approximation of
+period headwear rather than a measured reproduction.
+
+The flat cap and fuller newsboy cap use the same short peak and cropped hair.
+The newsboy crown uses offset $0.085$ and forward overhang $0.16$ in head
+lengths. A closed ellipsoid spans the nearest central crown and peak vertices,
+representing their snap fastening. The baseball-cap path is unchanged. All
+parts are visual meshes: none contributes to mass, contact or inertia.
+Acceptance requires finite, outward closed meshes, connected snap endpoints,
+crown hair clearance and native dynamics identity at representative states.
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl \
+  python -m pytest tests/unit/model_appearance/test_period_hats.py
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl \
+  python scripts/render_period_hats.py --out /tmp/period-hats
+\end{verbatim}
