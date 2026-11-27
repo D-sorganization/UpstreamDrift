@@ -72,6 +72,7 @@ _MAX_AXIS_COS = math.cos(math.radians(MIN_WIDTH_AXIS_ANGLE_DEG))
 
 
 def _unit(name: str, value: Array) -> Array:
+    """Return ``value`` as a unit vector after a finite-length check."""
     v = _check_finite(name, value, 3)
     norm = float(np.linalg.norm(v))
     require(norm > 1e-12, f"{name} must be nonzero", value)
@@ -125,6 +126,7 @@ def _width_frame(axis: Array, width: Array) -> tuple[Array, Array, Array]:
 
 
 def _check_finite(name: str, value: Array, size: int) -> Array:
+    """Return ``value`` as a finite vector of length ``size``."""
     v = np.asarray(value, dtype=float)
     if v.shape != (size,) or not np.isfinite(v).all():
         raise ValueError(f"{name} must be a finite {size}-vector")
@@ -132,6 +134,7 @@ def _check_finite(name: str, value: Array, size: int) -> Array:
 
 
 def _orient(vertices: Array, faces: NDArray[np.int64]) -> Mesh:
+    """Return a mesh whose faces wind so the enclosed volume is positive."""
     mesh = Mesh(vertices, faces)
     if mesh.volume() < 0:
         mesh = Mesh(vertices, faces[:, ::-1].copy())
@@ -139,6 +142,7 @@ def _orient(vertices: Array, faces: NDArray[np.int64]) -> Mesh:
 
 
 def _ring_faces(n_rings: int, sides: int) -> list[tuple[int, int, int]]:
+    """Triangle faces that stitch consecutive rings of ``sides`` vertices."""
     faces = []
     for k in range(n_rings - 1):
         for j in range(sides):
@@ -566,3 +570,102 @@ def split_ellipsoid_mesh(
         )
         grid[k] = c + a * height + math.cos(ang) * plane
     return closed_grid_mesh(grid, c + a * shape.top, c - a * shape.half_down)
+
+
+_MAX_RASTER_CANDIDATES = 1_600_000
+
+
+def rasterize_face_zbuffer(
+    sx: Array,
+    sy: Array,
+    sz: Array,
+    faces: NDArray[np.int64],
+    width: int,
+    height: int,
+    face_mask: NDArray[np.bool_] | None = None,
+) -> NDArray[np.uint64]:
+    """Orthographic Z-buffer of ``faces`` into a ``width`` x ``height`` pixel grid.
+
+    Returns one packed ``uint64`` per pixel, ``depth_quantised << 32 | face + 1``,
+    so 0 means "no hit" and the low word decodes back into an index into
+    ``faces`` (not into ``face_mask``'s selected subset).
+
+    Precondition: ``sx``/``sy``/``sz`` are one value per vertex, ``faces`` holds
+    triangle vertex indices, ``face_mask`` (when given) has one entry per face.
+    Postcondition: the nearest triangle wins each pixel it covers.
+
+    Candidate pixels are expanded in bounding-box-sized batches so a dense mesh
+    cannot allocate an unbounded temporary; ``face_mask`` exists because the
+    shaded hand preview culls to the triangles in front of the camera while the
+    evidence renderer draws all of them -- one rasteriser serves both.
+    """
+    sel = (
+        np.arange(len(faces), dtype=np.int64)
+        if face_mask is None
+        else np.flatnonzero(face_mask)
+    )
+    best = np.zeros(width * height, dtype=np.uint64)
+    if len(sel) == 0:
+        return best
+    f_sel = faces[sel]
+    p0x, p0y = sx[f_sel[:, 0]], sy[f_sel[:, 0]]
+    p1x, p1y = sx[f_sel[:, 1]], sy[f_sel[:, 1]]
+    p2x, p2y = sx[f_sel[:, 2]], sy[f_sel[:, 2]]
+    tz0, tz1, tz2 = sz[f_sel[:, 0]], sz[f_sel[:, 1]], sz[f_sel[:, 2]]
+    x0i = np.maximum(
+        0, np.floor(np.minimum(np.minimum(p0x, p1x), p2x)).astype(np.int64)
+    )
+    x1i = np.minimum(
+        width - 1, np.ceil(np.maximum(np.maximum(p0x, p1x), p2x)).astype(np.int64)
+    )
+    y0i = np.maximum(
+        0, np.floor(np.minimum(np.minimum(p0y, p1y), p2y)).astype(np.int64)
+    )
+    y1i = np.minimum(
+        height - 1, np.ceil(np.maximum(np.maximum(p0y, p1y), p2y)).astype(np.int64)
+    )
+    bw = np.maximum(0, x1i - x0i + 1)
+    bh = np.maximum(0, y1i - y0i + 1)
+    area_bb = bw * bh
+    area2 = (p1x - p0x) * (p2y - p0y) - (p1y - p0y) * (p2x - p0x)
+    v_idx = np.flatnonzero((area_bb > 0) & (np.abs(area2) > 1e-6))
+    if len(v_idx) == 0:
+        return best
+    z_min = float(sz.min()) - 1e-4
+    z_max = float(sz.max()) + 1e-4
+    z_scale = 4294967290.0 / max(z_max - z_min, 1e-6)
+    cum = np.cumsum(area_bb[v_idx])
+    batch_start = 0
+    while batch_start < len(v_idx):
+        base_c = 0 if batch_start == 0 else int(cum[batch_start - 1])
+        end = max(
+            int(np.searchsorted(cum, base_c + _MAX_RASTER_CANDIDATES, side="right")),
+            batch_start + 1,
+        )
+        sl = v_idx[batch_start:end]
+        counts = area_bb[sl]
+        bws = bw[sl]
+        local_idx = np.repeat(sl, counts)
+        starts = np.repeat(np.cumsum(counts) - counts, counts)
+        rel = np.arange(int(counts.sum()), dtype=np.int64) - starts
+        bws_rep = np.repeat(bws, counts)
+        gx = np.repeat(x0i[sl], counts) + (rel % bws_rep)
+        gy = np.repeat(y0i[sl], counts) + (rel // bws_rep)
+        cx, cy = gx.astype(np.float64) + 0.5, gy.astype(np.float64) + 0.5
+        t0x, t0y = p0x[local_idx], p0y[local_idx]
+        t1x, t1y = p1x[local_idx], p1y[local_idx]
+        t2x, t2y = p2x[local_idx], p2y[local_idx]
+        inv_a = 1.0 / area2[local_idx]
+        w0 = ((t1x - cx) * (t2y - cy) - (t1y - cy) * (t2x - cx)) * inv_a
+        w1 = ((t2x - cx) * (t0y - cy) - (t2y - cy) * (t0x - cx)) * inv_a
+        w2 = 1.0 - w0 - w1
+        inside = (w0 >= -1e-5) & (w1 >= -1e-5) & (w2 >= -1e-5)
+        if np.any(inside):
+            hi = local_idx[inside]
+            hz = w0[inside] * tz0[hi] + w1[inside] * tz1[hi] + w2[inside] * tz2[hi]
+            hpx = gy[inside] * width + gx[inside]
+            zq = np.clip((hz - z_min) * z_scale, 1.0, 4294967294.0).astype(np.uint64)
+            packed = (zq << np.uint64(32)) | (sel[hi].astype(np.uint64) + np.uint64(1))
+            np.maximum.at(best, hpx, packed)
+        batch_start = end
+    return best

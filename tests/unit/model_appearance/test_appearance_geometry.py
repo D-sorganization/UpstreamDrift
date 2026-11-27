@@ -4,13 +4,17 @@ import numpy as np
 import pytest
 
 from src.shared.python.model_appearance import ellipsoid_mesh, lofted_segment
-from src.shared.python.model_appearance.geometry import LoftOptions
+from src.shared.python.model_appearance.geometry import (
+    LoftOptions,
+    rasterize_face_zbuffer,
+)
 
 pytestmark = pytest.mark.unit
 Z = np.array([0.0, 0.0, 0.4])
 
 
 def test_spindle_is_closed_with_positive_volume() -> None:
+    """A spindle loft is closed and has positive volume."""
     mesh = lofted_segment(np.zeros(3), Z, 0.05)
     assert mesh.volume() > 0
     assert np.isfinite(mesh.vertices).all()
@@ -26,6 +30,7 @@ def test_spindle_is_closed_with_positive_volume() -> None:
 
 
 def test_garment_band_is_thicker_than_the_skin_it_covers() -> None:
+    """A garment band is thicker than the skin it covers."""
     skin = lofted_segment(np.zeros(3), Z, 0.05, LoftOptions(coverage=(0.0, 0.6)))
     cloth = lofted_segment(
         np.zeros(3), Z, 0.05, LoftOptions(coverage=(0.0, 0.6), thickness=1.1)
@@ -34,6 +39,7 @@ def test_garment_band_is_thicker_than_the_skin_it_covers() -> None:
 
 
 def test_ellipsoid_volume_matches_the_analytic_value() -> None:
+    """An ellipsoid mesh matches the analytic volume."""
     half = np.array([0.05, 0.04, 0.03])
     mesh = ellipsoid_mesh(
         np.zeros(3), half, np.array([1.0, 1.0, 0.0]), rings=40, sides=60
@@ -53,6 +59,7 @@ def test_ellipsoid_volume_matches_the_analytic_value() -> None:
     ],
 )
 def test_preconditions_raise_value_error(call) -> None:
+    """Geometry helpers reject inputs that break their preconditions."""
     with pytest.raises(ValueError):
         call()
 
@@ -77,11 +84,13 @@ def _rotated_about_y(angle_deg: float) -> np.ndarray:
     ids=["missing", "parallel", "5deg", "9deg"],
 )
 def test_non_round_loft_requires_a_width_axis_off_the_segment(hint) -> None:
+    """A non-round loft requires a width axis off the segment."""
     with pytest.raises(ValueError):
         lofted_segment(np.zeros(3), Z, 0.05, LoftOptions(aspect=0.7, width_hint=hint))
 
 
 def test_width_axis_eleven_degrees_off_the_segment_is_accepted() -> None:
+    """A width axis eleven degrees off the segment is accepted."""
     mesh = lofted_segment(
         np.zeros(3), Z, 0.05, LoftOptions(aspect=0.7, width_hint=_rotated_about_y(11))
     )
@@ -89,6 +98,7 @@ def test_width_axis_eleven_degrees_off_the_segment_is_accepted() -> None:
 
 
 def test_round_loft_still_needs_no_width_axis() -> None:
+    """A round loft still needs no width axis."""
     assert lofted_segment(np.zeros(3), Z, 0.05, LoftOptions(aspect=1.0)).volume() > 0
 
 
@@ -96,6 +106,7 @@ def test_round_loft_still_needs_no_width_axis() -> None:
     "width", [np.array([0.0, 1.0, 0.0]), np.array([1.0, 1.0, 0.0])]
 )
 def test_cross_section_extents_follow_the_width_axis(width) -> None:
+    """Cross-section extents follow the width axis."""
     radius, thickness, aspect = 0.1, 1.08, 0.72
     mesh = lofted_segment(
         np.zeros(3),
@@ -114,6 +125,7 @@ def test_cross_section_extents_follow_the_width_axis(width) -> None:
 
 
 def test_section_width_axis_is_perpendicular_to_segment_and_depth() -> None:
+    """The section width axis is perpendicular to the segment and the depth."""
     from src.shared.python.model_appearance.geometry import section_width_axis
 
     width = section_width_axis(Z, np.array([1.0, 0.0, 0.0]))
@@ -141,6 +153,7 @@ def _landmark_ml(spec: dict, body: str) -> np.ndarray:
     rot = poses[body][:3, :3]
 
     def origin(joint: dict) -> np.ndarray:
+        """World origin of a spec joint."""
         return (poses[joint["parent"]] @ np.asarray(joint["parent_to_base"]))[:3, 3]
 
     joints = spec["joints"]
@@ -162,6 +175,7 @@ def _landmark_ml(spec: dict, body: str) -> np.ndarray:
 
 @pytest.mark.parametrize("spec_path", ANTHRO_SPECS)
 def test_width_axes_come_from_spec_landmarks(spec_path) -> None:
+    """Width axes come from the spec landmarks."""
     import json
     from pathlib import Path
 
@@ -203,3 +217,49 @@ def test_width_axes_come_from_spec_landmarks(spec_path) -> None:
             assert _angle_deg(width, sections[cap.body].ml_axis) < 5.0, cap.body
             checked += 1
     assert checked >= 4  # spine capsules and both shoes
+
+
+def _two_triangle_scene():
+    """A far triangle covering the grid and a near one inside it."""
+    sx = np.array([0.0, 9.0, 0.0, 2.0, 4.0, 2.0], dtype=np.float64)
+    sy = np.array([0.0, 0.0, 9.0, 2.0, 2.0, 4.0], dtype=np.float64)
+    sz = np.array([0.0, 0.0, 0.0, 1.0, 1.0, 1.0], dtype=np.float64)
+    faces = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
+    return sx, sy, sz, faces
+
+
+def _hit_faces(best):
+    """Decoded face index per pixel; -1 where the pixel is empty."""
+    out = np.full(best.shape, -1, dtype=np.int64)
+    hit = np.flatnonzero(best != 0)
+    out[hit] = (best[hit] & np.uint64(0xFFFFFFFF)).astype(np.int64) - 1
+    return out
+
+
+def test_nearer_triangle_wins_the_pixel() -> None:
+    """The nearer triangle wins the pixel."""
+    sx, sy, sz, faces = _two_triangle_scene()
+    won = _hit_faces(rasterize_face_zbuffer(sx, sy, sz, faces, 9, 9))
+    assert won[2 * 9 + 2] == 1  # pixel centre 2.5,2.5 is inside both: near wins
+    assert won[1 * 9 + 1] == 0  # centre 1.5,1.5 is outside the small triangle
+
+
+def test_face_mask_culls_without_renumbering_faces() -> None:
+    """Low word stays an index into ``faces``, not into the kept subset.
+
+    The shaded-hand preview culls to the triangles in front of the camera and
+    then looks the winner up in the *full* face list, so a masked rasteriser
+    that renumbered from zero would silently shade the wrong triangle.
+    """
+    sx, sy, sz, faces = _two_triangle_scene()
+    only_near = _hit_faces(
+        rasterize_face_zbuffer(sx, sy, sz, faces, 9, 9, np.array([False, True]))
+    )
+    assert only_near[2 * 9 + 2] == 1  # still face 1, not the subset's face 0
+    assert only_near[1 * 9 + 1] == -1  # the culled far triangle painted nothing
+
+
+def test_empty_selection_paints_nothing() -> None:
+    """An empty selection paints nothing."""
+    sx, sy, sz, faces = _two_triangle_scene()
+    assert not rasterize_face_zbuffer(sx, sy, sz, faces, 9, 9, np.zeros(2, bool)).any()
