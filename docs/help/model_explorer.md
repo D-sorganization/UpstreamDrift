@@ -70,6 +70,10 @@ it on every call:
   applying it.
 - `POST /tools/model-explorer/assembly/export` writes URDF or MJCF.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/degrees-of-freedom-and-dimensionality.html): *Degrees of Freedom and Dimensionality*.
+
 ## Limitations
 
 - Engine export supports MuJoCo (MJCF), Drake (Drake-annotated URDF with namespaces and collision filter groups), and Pinocchio (Pinocchio-annotated URDF). Other registered engines are not currently exposed in the export menu.

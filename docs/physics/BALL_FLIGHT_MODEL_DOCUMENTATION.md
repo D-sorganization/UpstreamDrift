@@ -39,11 +39,11 @@ COR = (V_ball_after - V_club_after) / (V_club_before - V_ball_before)
 
 The suite provides three impact model types:
 
-| Model Type        | Fidelity | Use Case                            |
-| ----------------- | -------- | ----------------------------------- |
-| **Rigid Body**    | Low      | Fast analysis, real-time simulation |
-| **Spring-Damper** | Medium   | Finite-time contact, energy loss    |
-| **Finite Time**   | High     | Detailed impulse-momentum analysis  |
+| Model Type        | Fidelity | Use Case                                               |
+| ----------------- | -------- | ------------------------------------------------------ |
+| **Rigid Body**    | Low      | Fast analysis, real-time simulation                    |
+| **Spring-Damper** | Medium   | Finite-time contact, energy loss                       |
+| **Finite Time**   | Low–Med  | Instantaneous rigid-body impulse with labeled duration |
 
 ### 1.3 Spin Generation at Impact
 
@@ -138,9 +138,12 @@ Where:
 
 - Varies with Reynolds number (velocity-dependent)
 - Higher at low speeds, lower at high speeds ("drag crisis"); the
-  enhanced simulator models this via
-  `src/shared/python/physics/atmosphere.py::cd_dimpled_sphere`
-- Increases with the spin parameter S via the quadratic law below
+  production kernel and enhanced simulator model this via
+  `src/shared/python/physics/atmosphere.py::cd_spinning_ball` (#15443):
+  the Reynolds crisis curve (fitted to Choi et al. 2006) on a 0.187
+  zero-spin floor plus 0.18·S
+  (`GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT`, `GOLF_BALL_SPIN_DRAG_SLOPE`)
+- The polynomial helper adds spin via the quadratic law below
 - Dimple pattern causes up to 40% variation between ball models
 
 #### Magnus Force (Spin-Induced Lift)
@@ -157,12 +160,22 @@ Where:
 **Spin Parameter (Waterloo/Penner Model)**:
 
 ```
-S = (ω * r) / v
+S = (r * ||ω × v̂||) / v
 ```
 
 - ω = angular velocity [rad/s]
 - r = ball radius [m]
 - v = linear velocity relative to the air [m/s]
+- `||ω × v̂||` is the transverse spin rate (equivalent to `||ω|| sin θ`); it
+  goes to zero when spin aligns with velocity (rifle / gyro spin). The native
+  Rust/Python flight kernels use this form in `compute_magnus` so Magnus
+  magnitude vanishes continuously as `ω ∥ v`.
+
+**World frame and backspin sign** (native `upstream-physics` kernel): **X**
+downrange, **Y** left, **Z** up; Magnus follows **ω × v**. Backspin on a level
+**+X** shot is rotation about **−Y** (`ω_y < 0`) and produces upward lift
+(**+Z**). A **+Y** spin component with **+X** velocity is topspin (**−Z**
+Magnus).
 
 S is dimensionless (surface speed over air speed). A driver shot at
 2500 rpm (ω ≈ 262 rad/s) and 73 m/s gives S ≈ 262 × 0.0213 / 73 ≈ 0.077.
@@ -260,16 +273,20 @@ altitude, temperature, and humidity. Entry points:
 | Air density (sea level) | <!-- calc:air_density_sea_level_kg_m3 -->1.225<!-- /calc --> | kg/m³ | `physics_constants.py::AIR_DENSITY_SEA_LEVEL_KG_M3` | ISA standard atmosphere   |
 | Min. aero speed         | <!-- calc:min_speed_threshold_m_s -->0.1<!-- /calc -->       | m/s   | `ball_properties.py::MIN_SPEED_THRESHOLD`           | Numerical guard           |
 
-Symbols: S = spin parameter ωr/v (dimensionless); ω = ball angular
-velocity [rad/s]; r = ball radius [m]; v = airspeed [m/s]; ρ = air
-density [kg/m³]; A = cross-sectional area [m²].
+Symbols: S = transverse spin parameter r·||ω × v̂||/v (dimensionless);
+ω = ball angular velocity [rad/s]; r = ball radius [m]; v = airspeed [m/s];
+ρ = air density [kg/m³]; A = cross-sectional area [m²].
 
 #### 2.4.1 Two Live Model Families (Issue #8978)
 
 The constants above govern the **core simulator**
 (`ball_properties.py` + `ball_simulator.py::BallFlightSimulator` and the
 enhanced/Rust engines) — the canonical trajectory authority pinned by this
-sheet.
+sheet. Note that `BallFlightSimulator` / `EnhancedBallFlightSimulator`
+integrate `cd_spinning_ball(Re, S, base_cd=0.187)` with exponential spin decay
+(`0.05 s^-1`; see #15443 for the reference-shot carries), whereas
+`BallProperties.calculate_cd` defines the polynomial helper and
+`WaterlooPennerModel` uses constant spin (`~247.5 m`).
 
 A second, deliberately distinct family lives in
 `src/shared/python/physics/flight_models.py` (the Multi-Model Ball Flight

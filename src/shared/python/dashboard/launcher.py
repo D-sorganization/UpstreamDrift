@@ -95,6 +95,8 @@ def launch_dashboard(
     try:
         from PyQt6.QtCore import Qt
 
+        import chat._ud_attachment_manifest_mixin  # noqa: F401 — patch ChatDockWidget
+
         from src.shared.python.chat import ChatConnectionConfig, ChatDockWidget
 
         engine_name = (

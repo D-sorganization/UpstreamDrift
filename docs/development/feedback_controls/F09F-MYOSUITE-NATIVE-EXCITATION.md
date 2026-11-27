@@ -56,7 +56,7 @@ pytest -q tests/unit/engines/myosuite/test_native_excitation_replay_contract.py 
 Before the wrapper-state refactor: Ruff passed; 17 tests passed and two
 optional tests skipped locally because the Python 3.13 environment lacks
 MyoSuite and the Drake Python package. An
-isolated owned Python 3.12 environment on DeskComputer has MyoSuite 3.0.0,
+isolated owned Python 3.12 environment on <host> has MyoSuite 3.0.0,
 myo-sim 0.2.3, Gymnasium 1.2.3, and MuJoCo 3.6.0. Its runtime test was run
 after copying the final adapter source into a disposable task-owned test
 overlay and passed: 1 passed, 2 unknown-marker warnings in 0.72 seconds.
@@ -81,7 +81,7 @@ passes 7 tests, with the optional native MyoSuite runtime test skipped in the
 local Python 3.13 environment.
 
 The callback-ownership and observed-output-clock hardening is newer than the
-DeskComputer runtime execution above. Synthetic MuJoCo regressions and local
+<host> runtime execution above. Synthetic MuJoCo regressions and local
 affected suites pass, but the retained Python 3.12 MyoSuite runtime has not
 re-executed this source revision. The earlier runtime result remains evidence
 only for the exact source bytes copied into its disposable overlay; it is not

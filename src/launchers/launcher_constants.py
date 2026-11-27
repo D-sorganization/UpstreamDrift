@@ -261,6 +261,24 @@ def validate_docker_stage(stage: str) -> str:
 CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
 
+MATLAB_R2025B_WINDOWS_EXE = "C:/Program Files/MATLAB/R2025b/bin/matlab.exe"
+MATLAB_R2025B_POSIX_EXE = "/usr/local/MATLAB/R2025b/bin/matlab"
+
+
+def resolve_matlab_r2025b_executable() -> str:
+    """Return the explicit MATLAB R2025b executable path (never bare PATH or R2026a)."""
+    override = os.environ.get("MATLAB_R2025B_EXE", "").strip()
+    if override:
+        has_sep = "/" in override or "\\" in override
+        if not has_sep or "r2025b" not in override.lower():
+            raise ValueError(
+                "MATLAB R2025b is required; MATLAB_R2025B_EXE must be an explicit "
+                f"R2025b executable path, got {override!r}"
+            )
+        return override
+    return MATLAB_R2025B_WINDOWS_EXE if os.name == "nt" else MATLAB_R2025B_POSIX_EXE
+
+
 if sys.platform == "win32":
     try:
         CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]

@@ -1,6 +1,6 @@
 """Driver for OpenSim constraint-aware dynamic marker tracking (OS-4).
 
-Executes on ControlTower with OpenSim 4.6 bindings:
+Executes on <host> with OpenSim 4.6 bindings:
 1. Loads the calibrated, scaled humanoid model (OS-3b).
 2. Sanitizes the TRC marker trajectory over the observation window [0.0, 0.85s].
 3. Configures and solves a MocoStudy problem with reserve coordinate actuators,
@@ -8,7 +8,7 @@ Executes on ControlTower with OpenSim 4.6 bindings:
 4. Evaluates marker tracking errors against reference markers.
 5. Replays the control trajectory forward via opensim.Manager (zero-feedback).
 6. Exports solution trajectories and writes cryptographic receipt.json.
-Verified on ControlTower runner for deliverable OS-4 (epic #10003).
+Verified on <host> runner for deliverable OS-4 (epic #10003).
 """
 
 from __future__ import annotations

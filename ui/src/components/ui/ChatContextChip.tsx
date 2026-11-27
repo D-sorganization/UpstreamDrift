@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import { Eye } from 'lucide-react';
 import { getApiBase } from '../../api/backend';
+import { launcherFetch } from '../../api/launcherFetch';
 
 export interface ChatContextSimulation {
   engine: string | null;
@@ -61,7 +62,7 @@ export function ChatContextChip({ refreshMs = 15_000 }: ChatContextChipProps = {
     const load = async () => {
       if (typeof fetch !== 'function') return;
       try {
-        const resp = await fetch(`${getApiBase()}/api/chat/context`);
+        const resp = await launcherFetch(`${getApiBase()}/api/chat/context`);
         if (!resp.ok) return;
         const data = (await resp.json()) as ChatContextInfo;
         if (!cancelled) setContext(data);

@@ -39,6 +39,14 @@ _ASSET = re.compile(r"[A-Za-z0-9._-]+\Z")
 Downloader = Callable[[str, str], bytes]
 
 
+class AssetIntegrityError(ValueError):
+    """Raised when an asset does not match its expected size or SHA-256."""
+
+
+class AssetMissingError(FileNotFoundError):
+    """Raised when an asset required by an index is missing."""
+
+
 @dataclass(frozen=True)
 class ReleaseAsset:
     """One repository file published as a release asset."""
@@ -47,6 +55,20 @@ class ReleaseAsset:
     asset: str
     bytes: int
     sha256: str
+
+
+@dataclass(frozen=True)
+class VerificationReport:
+    """Status summary of local research assets vs the release index."""
+
+    total_checked: int
+    matched: int
+    missing: tuple[str, ...]
+    corrupted: tuple[str, ...]
+
+    @property
+    def is_valid(self) -> bool:
+        return len(self.missing) == 0 and len(self.corrupted) == 0
 
 
 @dataclass(frozen=True)
@@ -108,6 +130,46 @@ def _file_matches(path: Path, entry: ReleaseAsset) -> bool:
     return _digest(path.read_bytes()) == entry.sha256
 
 
+def check_asset_status(path: Path, entry: ReleaseAsset) -> str:
+    """Return 'matched', 'missing', or 'corrupted' for a local file vs index."""
+    if not path.is_file():
+        return "missing"
+    if path.stat().st_size != entry.bytes:
+        return "corrupted"
+    if _digest(path.read_bytes()) != entry.sha256:
+        return "corrupted"
+    return "matched"
+
+
+def verify_assets(
+    index_path: Path,
+    repo_root: Path,
+    *,
+    only: str | None = None,
+) -> VerificationReport:
+    """Verify local repository assets against the index without network calls."""
+    index = load_index(index_path)
+    matched = 0
+    missing: list[str] = []
+    corrupted: list[str] = []
+    for entry in index:
+        if only is not None and only not in entry.path:
+            continue
+        status = check_asset_status(Path(repo_root) / entry.path, entry)
+        if status == "matched":
+            matched += 1
+        elif status == "missing":
+            missing.append(entry.path)
+        else:
+            corrupted.append(entry.path)
+    return VerificationReport(
+        total_checked=matched + len(missing) + len(corrupted),
+        matched=matched,
+        missing=tuple(missing),
+        corrupted=tuple(corrupted),
+    )
+
+
 def github_download(repo: str) -> Downloader:
     """Return a downloader for public release assets of ``repo``."""
 
@@ -142,11 +204,12 @@ def fetch(
     *,
     download: Downloader,
     only: str | None = None,
+    dry_run: bool = False,
 ) -> list[Path]:
     """Download missing or changed assets; return the paths written.
 
     Postcondition: every returned file matches its indexed size and SHA-256.
-    A download that fails verification raises ValueError and writes nothing
+    A download that fails verification raises AssetIntegrityError and writes nothing
     for that file.
     """
     index = load_index(index_path)
@@ -158,9 +221,16 @@ def fetch(
         if _file_matches(target, entry):
             continue
         data = download(index.release_tag, entry.asset)
-        if len(data) != entry.bytes or _digest(data) != entry.sha256:
-            raise ValueError(f"downloaded {entry.asset} does not match its sha256")
-        _write_atomic(target, data)
+        if len(data) != entry.bytes:
+            raise AssetIntegrityError(
+                f"downloaded {entry.asset} does not match expected size ({len(data)} vs {entry.bytes})"
+            )
+        if _digest(data) != entry.sha256:
+            raise AssetIntegrityError(
+                f"downloaded {entry.asset} does not match expected sha256"
+            )
+        if not dry_run:
+            _write_atomic(target, data)
         written.append(target)
     return written
 
@@ -170,9 +240,33 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--index", type=Path, default=DEFAULT_INDEX)
     parser.add_argument("--repo", default=DEFAULT_REPO)
     parser.add_argument("--only", help="restore only paths containing this text")
+    parser.add_argument(
+        "--check", action="store_true", help="verify local assets without downloading"
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="exit with non-zero code if any assets are missing or corrupted",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="simulate download and verification"
+    )
     args = parser.parse_args(argv)
+    if args.check:
+        report = verify_assets(args.index, REPO_ROOT, only=args.only)
+        print(  # noqa: T201 - CLI output
+            f"Checked {report.total_checked} asset(s): "
+            f"{report.matched} OK, {len(report.missing)} missing, {len(report.corrupted)} corrupted"
+        )
+        if args.strict and not report.is_valid:
+            return 1
+        return 0
     written = fetch(
-        args.index, REPO_ROOT, download=github_download(args.repo), only=args.only
+        args.index,
+        REPO_ROOT,
+        download=github_download(args.repo),
+        only=args.only,
+        dry_run=args.dry_run,
     )
     print(f"restored {len(written)} file(s)")  # noqa: T201 - CLI output
     return 0

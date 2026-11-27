@@ -52,6 +52,10 @@ stimpmeter geometry at a 1.83 m/s release speed, with Holmes/Penner
 speed-dependent hole capture) - the preserved counterpart to the model behind
 the [Putting Green](putting_green.md) tile.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/rotation-induced-spin.html): *Rotation-Induced Spin*.
+
 ## Limitations
 
 - **Any number this tile produces is model output, not measurement**, including

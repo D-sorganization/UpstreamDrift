@@ -30,6 +30,10 @@ Display the per-level spinal loads of a finished segmental-spine study. The view
 
 `src.tools.spine_viewer.core.open_study` loads the receipt with `load_verified_run`, which checks the artifact's SHA-256, and wraps the joint-reaction wrench in a `SpinalLoadSeries`. The heatmap comes from the shared `spine.viz_data.load_heatmap` and `spine.plots.plot_load_heatmap`. Loads follow ADR-0055: the force acts on the superior vertebra, is expressed in the inferior vertebra's ISB frame, and compression is +F_y; the tension view is the negative of compression.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/inverse-dynamics.html): *Inverse Dynamics*.
+
 ## Limitations
 
 The status is fail-closed: a study shows `QUALIFIED` only when its receipt declares a qualified scientific status and its run verdict is `pass`. A passing run is not a qualification. A missing, tampered or inconsistent artifact is reported as an error and nothing is drawn. The loads are model outputs from OpenSim JointReaction analysis, not measured spinal forces, and they depend on the distribution source named in the banner.

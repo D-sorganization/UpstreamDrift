@@ -165,14 +165,28 @@ def _has_marker_playback(npz_path: Path) -> bool:
 
 
 def _results_for(engine: str) -> Path:
+    """Committed playback archive for ``engine``.
+
+    Prefer archives whose recorded engine tag matches ``engine``. The ledger
+    lists cross-engine replay rows first; those share one ``.npz`` and would
+    make every export identical (#12878).
+    """
+    from src.tools.model_explorer.results_session import detect_engine_from_archive
+
     model = MatchedSwingBrowserModel()
+    playable: list[Path] = []
     for row in model.load_ledger():
         if row.engine != engine:
             continue
         npz = model.resolve_artifact_path(row, "npz")
         if npz is not None and _has_marker_playback(npz):
+            playable.append(npz)
+    if not playable:
+        pytest.fail(f"no committed matched-swing run with marker playback for {engine}")
+    for npz in playable:
+        if detect_engine_from_archive(npz) == engine:
             return npz
-    pytest.fail(f"no committed matched-swing run with marker playback for {engine}")
+    return playable[0]
 
 
 # --- 1 + 2: open and explore -------------------------------------------------
@@ -268,6 +282,50 @@ def test_load_results_and_scrub(
 
     with pytest.raises(ValueError, match="frame"):
         explorer.scrub_results(frames)
+
+
+_EXPORT_DISTINCT_ENGINES = ("mujoco", "drake", "pinocchio")
+
+
+@pytest.mark.unit
+def test_export_mp4_differs_per_engine(
+    explorer: MainWidget, tmp_path: Path, warnings_box: list[str]
+) -> None:
+    """Each installed engine's canonical results produce distinguishable MP4s (#12878)."""
+    import hashlib
+
+    import cv2
+
+    digests: dict[str, str] = {}
+    frame_hashes: dict[str, str] = {}
+    for engine in _EXPORT_DISTINCT_ENGINES:
+        npz = _results_for(engine)
+        out = tmp_path / f"distinct_{engine}.mp4"
+        assert explorer.load_results(npz, engine) is True, warnings_box
+        with patch.object(
+            QFileDialog, "getSaveFileName", return_value=(str(out), "MP4")
+        ):
+            explorer.export_video_action.trigger()
+        assert out.is_file() and out.stat().st_size > 0, warnings_box
+        digests[engine] = hashlib.sha256(out.read_bytes()).hexdigest()
+        capture = cv2.VideoCapture(str(out))
+        try:
+            assert capture.isOpened()
+            assert capture.grab()
+            ok, frame = capture.retrieve()
+            assert ok and frame is not None
+            frame_hashes[engine] = hashlib.sha256(frame.tobytes()).hexdigest()
+        finally:
+            capture.release()
+
+    digest_values = list(digests.values())
+    frame_values = list(frame_hashes.values())
+    assert len(set(digest_values)) == len(_EXPORT_DISTINCT_ENGINES), (
+        f"MP4 container bytes must differ per engine; got {digests}"
+    )
+    assert len(set(frame_values)) == len(_EXPORT_DISTINCT_ENGINES), (
+        f"decoded frame pixels must differ per engine; got {frame_hashes}"
+    )
 
 
 @pytest.mark.unit

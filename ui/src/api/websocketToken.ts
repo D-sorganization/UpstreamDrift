@@ -96,6 +96,18 @@ export async function ensureLauncherCapabilityToken(): Promise<string | null> {
   return inFlightTokenFetch;
 }
 
+/**
+ * Drop the cached token and read the current one from the backend.
+ *
+ * A restarted local backend issues a new token, so a cached one can go stale.
+ *
+ * @returns The current token, or `null` when it could not be obtained.
+ */
+export async function refreshLauncherCapabilityToken(): Promise<string | null> {
+  launcherCapabilityToken = null;
+  return ensureLauncherCapabilityToken();
+}
+
 export function withLauncherWebSocketToken(url: string): string {
   if (!url || url.trim().length === 0) {
     throw new Error('url must be a non-empty string');

@@ -4,11 +4,10 @@ This submodule contains BallFlightSimulator, the base simulator that delegates
 trajectory integration to the upstream_physics Rust wheel. Extracted from
 ball_flight_physics.py as part of P1 sprint decomposition (issue #2486).
 
-.. deprecated::
-    The RK4 integration loop has a Rust kernel equivalent in ``upstream_physics``
-    (via ``rust_kernel.create_integrator_config``). New simulation code should use
-    the Rust-backed integrator for native performance and WASM parity with the
-    React frontend.
+.. note::
+     Trajectory integration requires the ``upstream_physics`` Rust wheel
+    (``RuntimeError`` is raised if unavailable); there is no Python/Numba
+    integrator fallback.
 """
 
 from __future__ import annotations
@@ -19,7 +18,10 @@ import math
 import numpy as np
 
 from src.shared.python.core.contracts import invariant, postcondition, precondition
-from src.shared.python.core.physics_constants import GOLF_BALL_DRAG_COEFFICIENT
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+    GOLF_BALL_SPIN_DRAG_SLOPE,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.ball_launch_conditions import (
     EnvironmentalConditions,
@@ -39,6 +41,13 @@ from src.shared.python.physics.ball_trajectory_analysis import TrajectoryAnalysi
 logger = get_logger(__name__)
 
 
+def _air_temperature_kelvin(env: EnvironmentalConditions) -> float:
+    """Convert :class:`EnvironmentalConditions.temperature` [C] for the Rust kernel."""
+    if env.temperature < 200.0:
+        return env.temperature + 273.15
+    return env.temperature
+
+
 @invariant(lambda self: self.ball.mass > 0, "Ball mass must be positive")
 @invariant(lambda self: self.environment.gravity > 0, "Gravity must be positive")
 class BallFlightSimulator(TrajectoryAnalysisMixin):
@@ -53,14 +62,27 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         self.ball = ball or BallProperties()
         self.environment = env or environment or EnvironmentalConditions()
 
+    @property
+    def model_metadata(self) -> dict[str, Any]:
+        """Return declared aerodynamic model family and effective parameters."""
+        return {
+            "drag_model": "reynolds_dimpled_sphere",
+            "base_cd": float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
+            "spin_drag_slope": float(GOLF_BALL_SPIN_DRAG_SLOPE),
+            "lift_scale": PENNER_LIFT_SCALE,
+            "lift_exponent": PENNER_LIFT_EXPONENT,
+            "cl_max": MAX_LIFT_COEFFICIENT,
+            "spin_decay_rate": float(self.ball.spin_decay_rate),
+        }
+
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01: (
+        lambda self, launch, max_time=10.0, dt=0.01, **_kw: (
             launch is not None and launch.velocity >= 0
         ),
         "Launch conditions must not be None and velocity must be non-negative",
     )
     @precondition(
-        lambda self, launch, max_time=10.0, dt=0.01: max_time > 0 and dt > 0,
+        lambda self, launch, max_time=10.0, dt=0.01, **_kw: max_time > 0 and dt > 0,
         "Max time and time step must be positive",
     )
     @postcondition(
@@ -68,16 +90,24 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         "Trajectory must be returned as a non-None list",
     )
     def simulate_trajectory(
-        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+        self,
+        launch: LaunchConditions,
+        max_time: float = 10.0,
+        dt: float = 0.01,
+        *,
+        legacy_forces: bool = False,
     ) -> list[TrajectoryPoint]:
-        """Simulate trajectory from m/s, radian angles, and RPM spin.
+        """Simulate trajectory via ``upstream_physics`` from m/s, radians, and RPM.
 
-        When the upstream_physics Rust wheel is installed, the RK4 integration
-        is delegated to the native Rust implementation for performance.
-        Otherwise, falls back to the Python/Numba implementation.
+        Raises ``RuntimeError`` if the Rust extension is not installed (no
+        Python/Numba fallback).
         """
         return self._post_process_rust(
-            self._simulate_native(launch, max_time, dt), launch
+            self._simulate_native(
+                launch, max_time, dt, record_integrated_forces=not legacy_forces
+            ),
+            launch,
+            legacy_forces=legacy_forces,
         )
 
     def simulate_landing(
@@ -111,7 +141,12 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         return prev + fraction * (end - prev)
 
     def _simulate_native(
-        self, launch: LaunchConditions, max_time: float, dt: float
+        self,
+        launch: LaunchConditions,
+        max_time: float,
+        dt: float,
+        *,
+        record_integrated_forces: bool = True,
     ) -> Any:
         """Shared native call; retain all states inside Rust until requested."""
         if (
@@ -127,7 +162,9 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
 
         if not is_rust_available():
             raise RuntimeError(
-                "upstream-physics Rust kernel not found! Strict Rust Parity Enforced."
+                "upstream-physics Rust kernel not found or older than "
+                "rust_kernel.MIN_PHYSICS_REVISION! Strict Rust Parity Enforced. "
+                "Rebuild: maturin develop in rust_core/upstream-physics."
             )
 
         import upstream_physics  # type: ignore[import-untyped]
@@ -145,18 +182,18 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         ball_props = upstream_physics.AeroBallProperties(
             mass=self.ball.mass,
             radius=self.ball.radius,
-            # The kernel scales its Reynolds drag-crisis curve by this base
-            # Cd, exactly as the enhanced engine scales cd_dimpled_sphere.
-            # ball.cd0 is the spin polynomial's constant term, a different
-            # model; passing it under-predicted drag by ~16 %.
-            drag_coefficient=float(GOLF_BALL_DRAG_COEFFICIENT),
+            # Zero-spin floor; the kernel adds spin drag (#15443) as
+            # cd_spinning_ball does. ball.cd0 belongs to a different model.
+            drag_coefficient=float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT),
             spin_decay_rate=self.ball.spin_decay_rate,
         )
 
         air_props = upstream_physics.AirProperties(
             density=self.environment.air_density,
+            # Matches upstream_physics::AirProperties::default() (~20 C air) and
+            # the sha256-pinned default_trajectory.json fixture; DragModel uses 1.789e-5 (15 C ISA).
             viscosity=1.81e-5,
-            temperature=self.environment.temperature,
+            temperature=_air_temperature_kelvin(self.environment),
             pressure=101325.0,
         )
 
@@ -188,6 +225,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             ball_props,
             air_props,
             config,
+            record_integrated_forces=record_integrated_forces,
         )
 
     @staticmethod
@@ -227,19 +265,50 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             )
 
     def _post_process_rust(
-        self, rust_result: Any, launch: LaunchConditions
+        self,
+        rust_result: Any,
+        launch: LaunchConditions,
+        *,
+        legacy_forces: bool = False,
     ) -> list[TrajectoryPoint]:
-        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects.
-
-        Forces are calculated once for the whole trajectory via the
-        vectorized ``(3, N)`` batch path (``_calculate_forces`` dispatches on
-        ``vel.ndim``), rather than once per point through the scalar path.
-        """
+        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
         if launch is None:
             raise ValueError("launch must be provided")
         rust_points = list(rust_result.get_points())
         if not rust_points:
             return []
+
+        step_forces: list[Any] = []
+        if not legacy_forces and hasattr(rust_result, "get_step_forces"):
+            step_forces = list(rust_result.get_step_forces())
+        use_kernel_forces = not legacy_forces and len(step_forces) == len(rust_points)
+        forces_model = (
+            "rust_kernel_integrated"
+            if use_kernel_forces
+            else "python_polynomial_posthoc"
+        )
+
+        trajectory: list[TrajectoryPoint] = []
+        if use_kernel_forces:
+            for i, rust_point in enumerate(rust_points):
+                snapshot = step_forces[i]
+                forces = {
+                    "gravity": np.asarray(snapshot.gravity, dtype=float),
+                    "drag": np.asarray(snapshot.drag, dtype=float),
+                    "magnus": np.asarray(snapshot.magnus, dtype=float),
+                }
+                acc = np.asarray(snapshot.acceleration, dtype=float)
+                trajectory.append(
+                    TrajectoryPoint(
+                        rust_point.t,
+                        np.array([rust_point.x, rust_point.y, rust_point.z]),
+                        np.array([rust_point.vx, rust_point.vy, rust_point.vz]),
+                        acc,
+                        forces,
+                        forces_model=forces_model,
+                    )
+                )
+            return trajectory
 
         times = [p.t for p in rust_points]
         pos = np.array(
@@ -267,6 +336,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
                 vel[:, i],
                 acc[:, i],
                 {key: value[:, i] for key, value in forces.items()},
+                forces_model=forces_model,
             )
             for i in range(len(rust_points))
         ]
@@ -344,18 +414,18 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         drag_force_mag = aero_prefix * cd * (valid_speed**2)
         drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
 
-        # Magnus
-        cl = np.minimum(
-            MAX_LIFT_COEFFICIENT,
-            PENNER_LIFT_SCALE
-            * np.power(np.maximum(s_ratio, 0.0), PENNER_LIFT_EXPONENT),
-        )
-        magnus_force_mag = aero_prefix * cl * (valid_speed**2)
-
+        # Magnus: lift depends on the transverse spin ||w x v_hat|| (#15042).
         axis = spin_axis.reshape(3, 1)
         cross = np.cross(axis, valid_rel_vel / valid_speed, axis=0)
         cross_norm = np.sqrt(np.einsum("i...,i...->...", cross, cross))
         cross_mask = cross_norm > NUMERICAL_EPSILON
+
+        cl = np.minimum(
+            MAX_LIFT_COEFFICIENT,
+            PENNER_LIFT_SCALE
+            * np.power(np.maximum(s_ratio * cross_norm, 0.0), PENNER_LIFT_EXPONENT),
+        )
+        magnus_force_mag = aero_prefix * cl * (valid_speed**2)
 
         if np.any(cross_mask):
             factor = magnus_force_mag[cross_mask] / cross_norm[cross_mask]
@@ -385,7 +455,6 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
 
         s_ratio = (omega * self.ball.radius) / speed
         cd = self.ball.calculate_cd(s_ratio)
-        cl = self.ball.calculate_cl(s_ratio)
         aero_prefix = (
             0.5 * self.environment.air_density * self.ball.cross_sectional_area
         )
@@ -397,6 +466,9 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             cross[0], cross[1], cross[2]
         )  # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm
         if cross_norm > NUMERICAL_EPSILON:
+            # Lift depends on the transverse spin ||w x v_hat|| (= w sin(theta));
+            # spin along the flight direction produces no Magnus force (#15042).
+            cl = self.ball.calculate_cl(s_ratio * cross_norm)
             magnus = (aero_prefix * cl * speed**2) * (cross / cross_norm)
 
         return drag, magnus

@@ -1,0 +1,18 @@
+{
+  "schema_version": "motion-evidence-script/1",
+  "run_id": "two_window_fit_9967_102",
+  "script": "two_window_fit_102.py",
+  "status": "archived",
+  "required_git_ref": "7bbca06c74b901e06db184b88e196224ae166e01",
+  "required_branch": "feat/10285-native-saved-replay",
+  "archived_reason": "Pinocchio native multipoint replay modules were removed from main after run 102 was recorded; regenerate on the pinned ref or merge that branch.",
+  "missing_modules": [
+    "src.engines.physics_engines.pinocchio.python.native_node_chart",
+    "src.engines.physics_engines.pinocchio.python.native_replay",
+    "src.engines.physics_engines.pinocchio.python.native_sensitivity",
+    "src.shared.python.motion_matching.native_candidate",
+    "src.shared.python.motion_matching.native_effort_penalty",
+    "src.shared.python.motion_matching.native_effort_profile",
+    "src.shared.python.motion_matching.shooting_schedule"
+  ]
+}

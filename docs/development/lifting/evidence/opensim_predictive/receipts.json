@@ -29,6 +29,7 @@
   ],
   "bar_mass_kg": 100.0,
   "body_mass_kg": 80.0,
+  "comparison_refresh_commit": "1cc1f9c5e982a9b5dc7daed0aa8db47a6c861dec",
   "comparison_table": {
     "bundle_kinematics": {
       "label": "bundle kinematics",
@@ -37,19 +38,19 @@
     },
     "quantities": {
       "bar_final_height_m": {
-        "bundle_kinematics": 0.9094192166845657,
+        "bundle_kinematics": 0.9094202051609338,
         "predictive": null,
         "reason": "infeasible iterate (constraint violation 0.3013375979560333)",
         "unit": "m"
       },
       "bar_start_height_m": {
-        "bundle_kinematics": 0.43201984819805705,
+        "bundle_kinematics": 0.4320198481980573,
         "predictive": null,
         "reason": "infeasible iterate (constraint violation 0.3013375979560333)",
         "unit": "m"
       },
       "bar_vertical_rise_m": {
-        "bundle_kinematics": 0.47739936848650866,
+        "bundle_kinematics": 0.4774003569628765,
         "predictive": null,
         "reason": "infeasible iterate (constraint violation 0.3013375979560333)",
         "unit": "m"
@@ -61,14 +62,18 @@
         "unit": "s"
       },
       "peak_vertical_velocity_m_s": {
-        "bundle_kinematics": 0.5605000335510915,
+        "bundle_kinematics": 0.5625329285726857,
         "predictive": null,
         "reason": "infeasible iterate (constraint violation 0.3013375979560333)",
         "unit": "m/s"
       }
     },
+    "tracked_comparison": {
+      "reason": "infeasible iterate (constraint violation 0.3013375979560333)",
+      "status": "unavailable"
+    },
     "tracked_opensim": {
-      "reason": "the OSL-3 deadlift IK/ID receipt is complete, but the predictive-versus-tracked comparison (joint moments, GRF) is not implemented yet",
+      "reason": "the OSL-3 deadlift IK/ID receipt is complete; the comparison runs only on a converged predictive solution (see tracked_comparison)",
       "status": "not compared"
     }
   },
@@ -93,11 +98,17 @@
     "pelvis_tx": 0.05009705846052124,
     "pelvis_ty": 1.0009788035490281,
     "sphere_x_m": [
-      -0.12903777371487862, 0.027957539524612662, 0.10108023419026593,
-      -0.12903777371487862, 0.027957539524612662, 0.10108023419026593
+      -0.12903777371487862,
+      0.027957539524612662,
+      0.10108023419026593,
+      -0.12903777371487862,
+      0.027957539524612662,
+      0.10108023419026593
     ],
     "sphere_y_m": [
-      -0.0020103511302468624, -0.0010207022553469502, -0.0029999999999999125
+      -0.0020103511302468624,
+      -0.0010207022553469502,
+      -0.0029999999999999125
     ]
   },
   "mesh_intervals": 15,
@@ -133,11 +144,17 @@
     "pelvis_tx": -0.3391084875466617,
     "pelvis_ty": 0.7150469901070875,
     "sphere_x_m": [
-      -0.12715591672331536, 0.027564979920075672, 0.09959093680323991,
-      -0.12715591672331536, 0.027564979920075672, 0.09959093680323991
+      -0.12715591672331536,
+      0.027564979920075672,
+      0.09959093680323991,
+      -0.12715591672331536,
+      0.027564979920075672,
+      0.09959093680323991
     ],
     "sphere_y_m": [
-      -0.002012228006243316, -0.0010244530437438816, -0.0030000000000000374
+      -0.002012228006243316,
+      -0.0010244530437438816,
+      -0.0030000000000000374
     ]
   },
   "solver_status": "Maximum_Iterations_Exceeded",
@@ -161,11 +178,17 @@
       "pelvis_tx": 0.05009705846052124,
       "pelvis_ty": 1.0009788035490281,
       "sphere_x_m": [
-        -0.12903777371487862, 0.027957539524612662, 0.10108023419026593,
-        -0.12903777371487862, 0.027957539524612662, 0.10108023419026593
+        -0.12903777371487862,
+        0.027957539524612662,
+        0.10108023419026593,
+        -0.12903777371487862,
+        0.027957539524612662,
+        0.10108023419026593
       ],
       "sphere_y_m": [
-        -0.0020103511302468624, -0.0010207022553469502, -0.0029999999999999125
+        -0.0020103511302468624,
+        -0.0010207022553469502,
+        -0.0029999999999999125
       ]
     },
     "objective": 216.19931759236485,
@@ -195,11 +218,17 @@
       "pelvis_tx": -0.3391084875466617,
       "pelvis_ty": 0.7150469901070875,
       "sphere_x_m": [
-        -0.12715591672331536, 0.027564979920075672, 0.09959093680323991,
-        -0.12715591672331536, 0.027564979920075672, 0.09959093680323991
+        -0.12715591672331536,
+        0.027564979920075672,
+        0.09959093680323991,
+        -0.12715591672331536,
+        0.027564979920075672,
+        0.09959093680323991
       ],
       "sphere_y_m": [
-        -0.002012228006243316, -0.0010244530437438816, -0.0030000000000000374
+        -0.002012228006243316,
+        -0.0010244530437438816,
+        -0.0030000000000000374
       ]
     },
     "solver_status": "Maximum_Iterations_Exceeded",

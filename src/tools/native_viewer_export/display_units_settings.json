@@ -1,0 +1,10 @@
+{
+  "distance_unit": "yd",
+  "speed_unit": "mph",
+  "distance_decimals": 0,
+  "sources": {
+    "distance_unit": "Unit of every distance label of the flight and landing displays (HUD lines, flight inset, carry label): yd (default, golf convention) or m. Only the label text changes; the flight model, the manifest values and every internal number stay SI. The yard is exactly 0.9144 m by the 1959 international yard and pound agreement; the factor is core.physics_constants.YARD_TO_M.",
+    "speed_unit": "Unit of speeds in the flight HUD and the impact card: mph (default) or m/s. 1 mph is 0.44704 m/s exactly (impact_parameters.extract.MPS_TO_MPH is its reciprocal).",
+    "distance_decimals": "Decimals of a distance label (0 gives 226 yd), as the metre labels had before."
+  }
+}

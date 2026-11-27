@@ -2,7 +2,7 @@
 
 ## October 10 Resumption and Main Integration
 
-The later source-bound DeskComputer MyoSuite campaign at `e7bac248` reported
+The later source-bound <host> MyoSuite campaign at `e7bac248` reported
 175 passed and one failure over 176 cases. All 9,236 declared source/configuration
 files and 8,122 pinned Tools files were unchanged before/after execution. The
 failure was reproduced with an ordered pair but passed in isolation: engine

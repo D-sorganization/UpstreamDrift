@@ -438,20 +438,11 @@ class TestApiRoutesJointNamesIntegration:
         assert run.joint_names == ["upper_joint", "lower_joint"]
 
     def test_aip_methods_get_property(self) -> None:
+        from src.api.aip.errors import AIPMethodNotImplemented
         from src.api.aip.methods import _model_query
 
-        mock_engine = MagicMock()
-        mock_engine.get_joint_names.return_value = ["upper_joint", "lower_joint"]
-        del mock_engine.joint_names
-
-        mgr = MagicMock()
-        mgr.get_active_engine.return_value = mock_engine
-
-        result = _model_query(
-            property_name="joints",
-            _context={"engine_manager": mgr},
-        )
-        assert result == {"joints": ["upper_joint", "lower_joint"]}
+        with pytest.raises(AIPMethodNotImplemented, match="model.query"):
+            _model_query(property_name="joints")
 
     def test_control_interface(self) -> None:
         from src.shared.python.control_interface import ControlInterface

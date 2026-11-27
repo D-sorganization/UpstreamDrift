@@ -32,6 +32,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 import math
 from dataclasses import replace
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -54,6 +55,7 @@ from src.shared.python.hand_size import (
     DEFAULT_HAND_LENGTH_M,
     hand_mesh_scale,
 )
+from src.shared.python.grip_spec.shaft_roll import appearance_frame_with_shaft_roll
 from src.shared.python.model_appearance.grip_pose import (
     DEFAULT_GRIP_POSE,
     GripPose,
@@ -100,13 +102,22 @@ def grip_radius_at(club: ClubAssembly, distance_below_butt_m: float) -> float:
     return GRIP_BUTT_RADIUS_M + f * (GRIP_TIP_RADIUS_M - GRIP_BUTT_RADIUS_M)
 
 
-def _club_axes(club: ClubAssembly) -> tuple[Array, Array]:
+def face_square_axes(club: ClubAssembly) -> tuple[Array, Array]:
+    """(top of grip, trail side) unit axes, at right angles to the shaft and
+    squared to the clubface. ``ValueError`` if the face is parallel to the shaft.
+
+    A left-handed club's face is mirrored in the swing plane, which holds the
+    top of the grip: the cross product with its face normal is turned back so
+    both clubs share the axes (the second is then the left-hander's lead side).
+    """
     normal = np.asarray(clubface_vector(club), dtype=float)
     normal = normal - float(normal @ _GRIP_AXIS) * _GRIP_AXIS
     size = float(np.linalg.norm(normal))
     if size < 1e-6:
         raise ValueError("the club face normal is parallel to the shaft")
     x = np.cross(_GRIP_AXIS, normal / size)  # +t: the top of the grip (chin side)
+    if club.handedness == "left":
+        x = -x
     return x, np.cross(_GRIP_AXIS, x)
 
 
@@ -132,6 +143,23 @@ def _resolve_dorsal_axis(
     return proj / size
 
 
+@lru_cache(maxsize=32)
+def _dorsum_azimuth_rad(hand: Hand, pose: GripPose) -> float:
+    """Azimuth of the baked dorsum shell about the hand-grip frame ``z`` (rad).
+
+    Measured from the mesh itself (centroid of the dorsum shell, as the tests
+    read it), so it follows the V azimuth the hand is baked at (about -35 deg
+    lead, +75 deg trail) and no copy of that number lives here (#14747). It is
+    independent of the grip radius and hand scale (baking at
+    ``GRIP_BUTT_RADIUS_M`` vs tapered radius is checked within 2° by
+    ``test_grip_hand_dorsum_follows_wrist.py``).
+    """
+    baked = build_grip_hand_mesh(hand, grip_radius_m=GRIP_BUTT_RADIUS_M, pose=pose)
+    dorsum = next(c for c in baked.components if c.finger == "dorsum")
+    centroid = dorsum.mesh.vertices.mean(axis=0)
+    return math.atan2(float(centroid[1]), float(centroid[0]))
+
+
 def grip_hand_frame(
     club: ClubAssembly,
     hand: Hand,
@@ -143,8 +171,11 @@ def grip_hand_frame(
     """4x4 transform from ``hand``'s hand-grip frame to the club-body frame.
 
     When ``wrist_follower`` or ``hands`` (with ``wrist_dorsal_axes``) is present,
-    derives ``x`` and ``y`` from the wrist follower's dorsal axis projected off
-    the grip axis ``z`` (#13996); otherwise falls back to ``_club_axes(club)``.
+    the frame is turned about the grip axis ``z`` so the *drawn dorsum shell*,
+    which the baked hand carries at azimuth ``a`` from ``x``, points along the
+    wrist follower's dorsal axis projected off ``z`` (#14747; #13996 only put the
+    dorsal axis on ``x``, leaving the drawn back 35 deg (lead) and 75 deg (trail)
+    away). Otherwise it falls back to ``face_square_axes(club)``.
     """
     _check_club(club)
     if not isinstance(hand, Hand):
@@ -152,14 +183,17 @@ def grip_hand_frame(
     _check_pose(pose)
     dorsal = _resolve_dorsal_axis(hand, pose, wrist_follower, hands)
     if dorsal is not None:
-        x, y = dorsal, np.cross(_GRIP_AXIS, dorsal)
+        a = _dorsum_azimuth_rad(hand, pose)
+        tangent = np.cross(_GRIP_AXIS, dorsal)
+        x = math.cos(a) * dorsal - math.sin(a) * tangent
+        y = np.cross(_GRIP_AXIS, x)
     else:
-        x, y = _club_axes(club)
+        x, y = face_square_axes(club)
     frame = np.eye(4)
     frame[:3, 0], frame[:3, 1], frame[:3, 2] = x, y, _GRIP_AXIS
     butt = np.array([0.0, -club.length_m, club.axis_offset_m])
     frame[:3, 3] = butt + pose.distance_below_butt_m(hand) * _GRIP_AXIS
-    return frame
+    return appearance_frame_with_shaft_roll(frame, pose, hand)
 
 
 def _mesh_params(hand_length_m: float | None) -> HandMeshParams:
@@ -205,9 +239,26 @@ def grip_hand_meshes(
     clears it by at most ``grip_hand_mesh.MAX_PAD_CLEARANCE_M`` plus the
     taper across the hand (0.3 mm). Postcondition: closed, outward-wound
     meshes in the club-body frame.
+
+    With ``hands.visual_backend`` set to ``skinned_human`` the skinned human
+    pair of :mod:`skinned_club_hands` is drawn instead, squared to the clubface,
+    posed from the spec's grip when ``hands.grip_configured`` (#15654).
     """
     _check_club(club)
     _check_pose(pose)
+    if hands is not None and hands.visual_backend == "skinned_human":
+        # Imported here: the skinned backend loads a mesh asset and a solver.
+        from src.shared.python.model_appearance.skinned_club_hands import (
+            skinned_hand_meshes,
+        )
+
+        under_skin = hands.forearm_skin
+        return skinned_hand_meshes(
+            club,
+            with_ball=not under_skin,
+            sleeve=under_skin,
+            grip=hands.pose if hands.grip_configured else None,
+        )
     return {
         label: _placed_hand(club, hand, pose, hand_length_m=hand_length_m, hands=hands)
         for hand, label in HAND_PARTS.items()

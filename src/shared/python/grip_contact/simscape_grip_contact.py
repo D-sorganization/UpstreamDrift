@@ -81,6 +81,11 @@ DEFAULT_SPEC_PATH = (
     REPO_ROOT / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
 )
 DEFAULT_SWING_NPZ = REPO_ROOT / "tests/fixtures/club_face/swing_q_driver.npz"
+#: The same swing in the Simscape (native, unmirrored right arm) convention the
+#: R2025b run consumed; ``swing_q_driver.npz`` is its G1 (#14746) migration.
+DEFAULT_SWING_NATIVE_NPZ = (
+    REPO_ROOT / "tests/fixtures/club_face/swing_q_driver_native.npz"
+)
 DEFAULT_POSES_JSON = REPO_ROOT / "tests/fixtures/club_face/address_poses.json"
 DEFAULT_SCENARIOS_JSON_PATH = (
     GS3DX_ROOT / "tools/generated/gs3dx_grip_contact_scenarios.json"
@@ -348,10 +353,27 @@ def _build_one_scenario(
     }
 
 
+def _native_swing_sha256(native: Path, migrated: Path, names: list[str]) -> str:
+    """SHA-256 of the native-convention swing the Simscape model consumes.
+
+    Precondition: the migrated swing equals the native one with the flipped
+    right-arm coordinates negated (checked), so the hash identifies the data
+    both files carry.
+    """
+    from src.shared.python.motion_matching.arm_mirror import FLIPPED_COORDINATES
+
+    sign = np.array([-1.0 if n in FLIPPED_COORDINATES else 1.0 for n in names])
+    with np.load(native) as a, np.load(migrated) as b:
+        if not np.array_equal((a["q"] * sign).astype(a["q"].dtype), b["q"]):
+            raise ValueError("migrated swing is not the native swing mirrored")
+    return hashlib.sha256(Path(native).read_bytes()).hexdigest()
+
+
 def build_scenarios_payload(
     *,
     spec_path: Path = DEFAULT_SPEC_PATH,
     swing_npz_path: Path = DEFAULT_SWING_NPZ,
+    swing_native_npz_path: Path = DEFAULT_SWING_NATIVE_NPZ,
     poses_json_path: Path = DEFAULT_POSES_JSON,
     squeeze_per_hand_n: float = DEFAULT_SQUEEZE_PER_HAND_N,
     duration_s: float = DEFAULT_SCENARIO_DURATION_S,
@@ -398,7 +420,9 @@ def build_scenarios_payload(
         "matlab_release": REQUIRED_MATLAB_RELEASE,
         "squeeze_per_hand_n": float(squeeze_per_hand_n),
         "gravity_m_s2": [float(x) for x in spec["gravity_m_s2"]],
-        "swing_sha256": swing.sha256,
+        "swing_sha256": _native_swing_sha256(
+            swing_native_npz_path, swing_npz_path, names
+        ),
         "kernel_hashes": kernel_bundle_sha256(),
         "solver": {
             "solver_name": "ode15s",

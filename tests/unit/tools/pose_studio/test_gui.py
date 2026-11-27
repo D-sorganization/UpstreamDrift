@@ -18,6 +18,11 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
 from src.shared.python.pose_interchange.services import MockKinematicsService
 
 
+@pytest.fixture(autouse=True)
+def _require_qapp(qapp) -> None:  # noqa: ANN001
+    """A real QApplication must exist before any widget is built (#14810)."""
+
+
 @patch("src.tools.pose_studio.gui.QtWidgets.QApplication")
 def test_gui_initialization(mock_qapp) -> None:
     # Test fallback to "drake" if unknown engine is provided

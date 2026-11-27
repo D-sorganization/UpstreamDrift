@@ -13,9 +13,12 @@ released on its own.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
+import textwrap
 import threading
 import time
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -86,7 +89,7 @@ class StallingSource:
         self._released.set()
 
 
-def _plan_file(tmp_path) -> object:
+def _plan_file(tmp_path: Path) -> Path:
     path = tmp_path / "plan.json"
     path.write_text(
         '{"schema_version": "rig-plan/1.0.0", "name": "two", "cameras": ['
@@ -184,3 +187,141 @@ def test_a_source_that_goes_quiet_is_reported_and_released(tmp_path) -> None:
     assert "stalled" in panel.status.text().lower()
     assert not panel.active  # every view gone means the cameras are free
     panel.stop()
+
+
+def _run_qt_lifetime_probe(
+    script: str, plan_path: Path
+) -> subprocess.CompletedProcess[str]:
+    """Run a QThread lifetime probe in an isolated subprocess (qFatal aborts)."""
+    env = {**os.environ, "QT_QPA_PLATFORM": "offscreen"}
+    repo_root = Path(__file__).resolve().parents[3]
+    return subprocess.run(  # noqa: S603 - controlled test python executable
+        [sys.executable, "-c", textwrap.dedent(script), str(plan_path)],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=30,
+    )
+
+
+def test_repeated_start_stop_cycles_do_not_destroy_running_qthread(
+    tmp_path: Path,
+) -> None:
+    """Rapid start/stop cycles must not destroy BinderThread before OS unwind completes."""
+    plan = _plan_file(tmp_path)
+    assert isinstance(plan, Path)
+    script = """
+    import sys
+    import time
+    from pathlib import Path
+    from PyQt6.QtWidgets import QApplication
+    from src.motion_capture.rig.plan import CaptureMode
+    from src.tools.capture_rig.commands import PlanSelection
+    from src.tools.capture_rig.preview import PreviewPanel
+
+    app = QApplication(sys.argv[:1])
+
+    class QuickSource:
+        identity = "1"
+        def open(self, mode, controls=None):
+            return CaptureMode(width=16, height=12, fps=10, fourcc="BGR3")
+        def read(self):
+            time.sleep(0.005)
+            return None
+        def close(self):
+            pass
+
+    panel = PreviewPanel(
+        source_factory=lambda plan: {c.view: QuickSource() for c in plan.cameras}
+    )
+    plan_path = Path(sys.argv[1])
+    for _ in range(250):
+        panel.start(PlanSelection(plan=plan_path))
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline and not panel._workers:
+            app.processEvents()
+        assert panel._workers, "worker failed to bind during cycle"
+        panel.stop()
+    panel.close()
+    """
+    proc = _run_qt_lifetime_probe(script, plan)
+    assert proc.returncode == 0, (
+        f"subprocess exited {proc.returncode}:\nstdout={proc.stdout}\nstderr={proc.stderr}"
+    )
+
+
+def test_lingering_worker_past_join_timeout_is_retained_until_finished(
+    tmp_path: Path,
+) -> None:
+    """Threads still active past WORKER_JOIN_MS must be retained until finished fires."""
+    plan = _plan_file(tmp_path)
+    assert isinstance(plan, Path)
+    script = """
+    import gc
+    import sys
+    import threading
+    import time
+    from pathlib import Path
+    from PyQt6.QtWidgets import QApplication
+    import src.tools.capture_rig.preview as preview_mod
+    from src.motion_capture.rig.plan import CaptureMode
+    from src.tools.capture_rig.commands import PlanSelection
+
+    app = QApplication(sys.argv[:1])
+    preview_mod.WORKER_JOIN_MS = 20
+
+    entered = threading.Event()
+    release = threading.Event()
+
+    class UnresponsiveSource:
+        identity = "1"
+        def open(self, mode, controls=None):
+            return CaptureMode(width=16, height=12, fps=10, fourcc="BGR3")
+        def read(self):
+            entered.set()
+            release.wait(timeout=2.0)
+            return None
+        def close(self):
+            pass  # intentionally ignores close until test releases it
+
+    panel = preview_mod.PreviewPanel(
+        source_factory=lambda plan: {
+            c.view: UnresponsiveSource() for c in plan.cameras
+        }
+    )
+    panel.start(PlanSelection(plan=Path(sys.argv[1])))
+
+    deadline = time.monotonic() + 5.0
+    while time.monotonic() < deadline and not (entered.is_set() and panel._workers):
+        app.processEvents()
+        time.sleep(0.005)
+    assert entered.is_set() and panel._workers
+    lingering = list(panel._workers.values())
+
+    try:
+        panel.stop()
+        assert all(w in preview_mod._LINGERING_THREADS for w in lingering), (
+            "workers past join timeout were not retained"
+        )
+        gc.collect()
+        app.processEvents()
+        gc.collect()
+    finally:
+        release.set()
+
+    deadline = time.monotonic() + 5.0
+    while time.monotonic() < deadline and any(not w.isFinished() for w in lingering):
+        app.processEvents()
+        time.sleep(0.005)
+    app.processEvents()
+    assert all(w.isFinished() for w in lingering)
+    assert not any(w in preview_mod._LINGERING_THREADS for w in lingering)
+    panel.close()
+    gc.collect()
+    """
+    proc = _run_qt_lifetime_probe(script, plan)
+    assert proc.returncode == 0, (
+        f"subprocess exited {proc.returncode}:\nstdout={proc.stdout}\nstderr={proc.stderr}"
+    )

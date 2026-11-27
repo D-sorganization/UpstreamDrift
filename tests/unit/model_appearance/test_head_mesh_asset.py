@@ -11,6 +11,7 @@ from src.shared.python.model_appearance import (
     build_head_parts,
     document_from_dict,
     document_to_dict,
+    head_features,
     head_mesh,
     resolve_head_anchor,
 )
@@ -24,7 +25,8 @@ SPECS = ROOT / "docs/development/full_body_models"
 LENGTH = 0.2429
 MESH = HeadSettings(model="cc0_mesh")
 MAX_ASSET_BYTES = 150_000  # measured 63 kB; keep the repo light
-MAX_TOTAL_TRIANGLES = 12_000  # measured ~9.4k; 60 fps renders keep their cost
+# The budget and its measurement record live in assets/head_cc0/face_settings.json.
+MAX_TOTAL_TRIANGLES = head_features.face_settings("checks")["max_total_triangles"]
 
 
 def _by_name(parts):
@@ -67,7 +69,7 @@ def test_asset_size_budget() -> None:
 
 def test_head_slot_loads_the_mesh_with_skin_and_short_hair() -> None:
     parts = _by_name(build_head_parts(LENGTH, MESH))
-    assert set(parts) == {"skin_mesh", "hair_mesh"}
+    assert {"skin_mesh", "hair_mesh"} <= set(parts)  # plus the face features
     assert parts["skin_mesh"].material == "skin"
     assert parts["hair_mesh"].material == "headwear"
     assert len(parts["skin_mesh"].mesh.faces) > 4000
@@ -75,7 +77,8 @@ def test_head_slot_loads_the_mesh_with_skin_and_short_hair() -> None:
 
 def test_bare_head_has_no_hair_and_cap_is_refused() -> None:
     bare = build_head_parts(LENGTH, HeadSettings(model="cc0_mesh", headwear="none"))
-    assert [p.name for p in bare] == ["skin_mesh"]
+    assert "skin_mesh" in {p.name for p in bare}
+    assert "hair_mesh" not in {p.name for p in bare}
     with pytest.raises(ValueError, match="cap"):
         build_head_parts(LENGTH, HeadSettings(model="cc0_mesh", headwear="cap"))
 
@@ -111,7 +114,10 @@ def test_face_points_forward_in_the_canonical_frame() -> None:
 
 
 def test_hair_sits_on_the_crown_above_the_brow_and_outside_the_skull() -> None:
-    parts = _by_name(build_head_parts(LENGTH, MESH))
+    # The asset's own thin shell is the ``dome`` style; ``short_crop`` hair
+    # (the default, #15276) reaches the nape and is covered in its own tests.
+    dome = HeadSettings(model="cc0_mesh", hair_style="dome")
+    parts = _by_name(build_head_parts(LENGTH, dome))
     hair, skin = parts["hair_mesh"].mesh.vertices, parts["skin_mesh"].mesh.vertices
     assert hair[:, 2].max() > skin[:, 2].max()  # covers the crown
     forehead = skin[(skin[:, 0] > 0.30 * LENGTH) & (np.abs(skin[:, 1]) < 0.02)]

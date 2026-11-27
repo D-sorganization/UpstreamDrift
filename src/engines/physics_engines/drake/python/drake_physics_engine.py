@@ -710,46 +710,6 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             self.plant.SetPositions(self.plant_context, saved_q)
             self.plant.SetVelocities(self.plant_context, saved_v)
 
-    def _read_actuation_generalized_force(self) -> np.ndarray:
-        """Read the fixed actuation as a generalized force vector (#7051).
-
-        Drake's actuation input port carries the per-actuator command ``u``
-        (length ``num_actuators``). The generalized force it contributes is
-        ``B @ u`` where ``B = plant.MakeActuationMatrix()`` is the
-        ``num_velocities × num_actuators`` selection matrix.
-
-        Returns the ``(num_velocities,)`` generalized actuation force, or a
-        zero vector when no actuation has been fixed on the context, the
-        port is unconnected, or the actuation matrix cannot be formed. This
-        keeps ZVCF well-defined (passive, gravity-only) under the legacy
-        ``tau = 0`` assumption while honouring any nonzero fixed control.
-        """
-        nv = self.plant.num_velocities()
-        try:
-            port = self.plant.get_actuation_input_port()
-            if not port.HasValue(self.plant_context):
-                return np.zeros(nv)
-            u = np.asarray(port.Eval(self.plant_context), dtype=float)
-            if u.size == 0:
-                return np.zeros(nv)
-            b_matrix = np.asarray(self.plant.MakeActuationMatrix(), dtype=float)
-            tau = b_matrix @ u
-            if tau.shape != (nv,):
-                logger.warning(
-                    "ZVCF actuation map produced shape %s, expected (%d,); "
-                    "falling back to zero actuation.",
-                    tau.shape,
-                    nv,
-                )
-                return np.zeros(nv)
-            return tau
-        except (RuntimeError, ValueError, TypeError, AttributeError) as exc:
-            logger.debug(
-                "No fixed actuation available for ZVCF (%s); using tau=0.",
-                exc,
-            )
-            return np.zeros(nv)
-
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 

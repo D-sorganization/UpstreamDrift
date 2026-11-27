@@ -65,12 +65,18 @@ constant-coefficient implementation:
 | Model             | Approach                                              | Citation string in code      |
 | ----------------- | ----------------------------------------------------- | ---------------------------- |
 | Waterloo/Penner   | Waterloo quadratic Cd with Penner spin-ratio lift fit | Penner (2003); McPhee et al. |
-| MacDonald-Hanzely | ODE model with exponential spin decay                 | MacDonald & Hanzely (1991)   |
+| MacDonald-Hanzely | Constant Cd/Cl ODE with spin decay; not the paper's fit | MacDonald & Hanzely (1991)   |
 | Nathan            | Constant Cd/Cl with spin decay (Cd 0.22, Cl 0.24)     | Nathan et al. (2018)         |
 | Ballantyne        | Constant Cd/Cl, steady spin (Cd 0.20, Cl 0.18)        | Ballantyne et al. (2012)     |
 | J. Cole           | Constant Cd/Cl, moderate decay (Cd 0.23, Cl 0.22)     | Cole (2016)                  |
 | Rospie DL         | Constant Cd/Cl, driver launch (Cd 0.21, Cl 0.19)      | Rospie & Layton (2014)       |
 | Charry L3         | Constant Cd/Cl, higher drag (Cd 0.24, Cl 0.21)        | Charry et al. (2017)         |
+
+Nathan, Ballantyne, J. Cole, Rospie DL and Charry L3 are generic constant
+Cd/Cl presets that borrow a researcher's name. They are not the published
+models and their coefficients are illustrative (the in-code reference is the
+Bearman and Harvey post-critical band). MacDonald-Hanzely is likewise not the
+1991 paper's model.
 
 Drag and lift coefficients are dimensionless; spin decay rates are in 1/s.
 Every `FlightResult` carries the coefficient set the producing model actually
@@ -81,6 +87,10 @@ model's colour come from
 [ADR-0047](../adr/0047-trajectory-visualization-shared-wire-preserved-viewers.md).
 Model background is in
 [../physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md](../physics/BALL_FLIGHT_MODEL_DOCUMENTATION.md).
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html): *Impact Mechanics and Ball Flight*.
 
 ## Limitations
 

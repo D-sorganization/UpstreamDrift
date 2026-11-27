@@ -8,7 +8,7 @@ Tests all four Done Gates:
 Plus forward accelerations combining contact forces and weld loop-closure dynamics.
 
 If real Pinocchio is not available in the local environment, automatically executes
-on ControlTower via SSH and saves the resulting receipt.
+on <host> via SSH and saves the resulting receipt.
 """
 
 from __future__ import annotations
@@ -61,20 +61,25 @@ def has_real_pinocchio() -> bool:
         return False
 
 
-def run_remote_controltower() -> dict[str, Any]:
-    """Execute verification remotely on ControlTower and return the receipt."""
+def run_remote_host() -> dict[str, Any]:
+    """Execute verification remotely on the configured SSH host and return the receipt."""
+    from docs.development.full_body_models.evidence._remote import resolve_remote_target
+
+    host, distro, remote_home = resolve_remote_target(
+        "Ubuntu-24.04", run_fn=subprocess.run
+    )
     sys.stdout.write(
-        "Real Pinocchio not available locally. Dispatching to ControlTower...\n"
+        "Real Pinocchio not available locally. Dispatching to remote host...\n"
     )
     sys.stdout.flush()
-    # Sync files to ControlTower test directory
+    # Execute inside the configured remote test directory
     script = (
-        b"cd /home/dieterolson/fb3_pinocchio_test\n"
-        b"/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python "
-        b"docs/development/full_body_models/evidence/fb3_pinocchio/verify_pinocchio_full_body.py --local\n"
-    )
+        f"cd {remote_home}/fb3_pinocchio_test\n"
+        f"{remote_home}/simscape-pinocchio-9967/.venv/bin/python "
+        f"docs/development/full_body_models/evidence/fb3_pinocchio/verify_pinocchio_full_body.py --local\n"
+    ).encode()
     res = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=script,
         capture_output=True,
     )
@@ -87,9 +92,12 @@ def run_remote_controltower() -> dict[str, Any]:
         )
 
     # Fetch receipt from remote
-    fetch_cmd = b"cat /home/dieterolson/fb3_pinocchio_test/docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json\n"
+    fetch_cmd = (
+        f"cat {remote_home}/fb3_pinocchio_test/"
+        "docs/development/full_body_models/evidence/fb3_pinocchio/receipt.json\n"
+    ).encode()
     res_fetch = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=fetch_cmd,
         capture_output=True,
     )
@@ -370,7 +378,7 @@ def main() -> int:
         sys.stdout.write("Running verification with local Pinocchio...\n")
         receipt = run_local_verification()
     else:
-        receipt = run_remote_controltower()
+        receipt = run_remote_host()
         RECEIPT_PATH.parent.mkdir(parents=True, exist_ok=True)
         RECEIPT_PATH.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
 

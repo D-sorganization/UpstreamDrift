@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { fetchEngines, useSimulation } from './client';
 
@@ -159,13 +159,61 @@ describe('useSimulation setSpeed (issue #7166)', () => {
 });
 
 describe('useSimulation connection status (#7435)', () => {
-  it('does not leave a stale "lost" status after the hook unmounts', async () => {
+  class ControllableMockWebSocket {
+    static instances: ControllableMockWebSocket[] = [];
+    static CONNECTING = 0;
+    static OPEN = 1;
+    readyState = 0;
+    url: string;
+    onopen: ((event: Event) => void) | null = null;
+    onclose: ((event: CloseEvent) => void) | null = null;
+    onmessage: ((event: MessageEvent) => void) | null = null;
+    onerror: ((event: Event) => void) | null = null;
+
+    constructor(url: string) {
+      this.url = url;
+      ControllableMockWebSocket.instances.push(this);
+    }
+
+    send() {}
+
+    close(code = 1000, reason = '') {
+      this.readyState = 3;
+      if (this.onclose) {
+        this.onclose(
+          new CloseEvent('close', { code, reason, wasClean: code === 1000 }),
+        );
+      }
+    }
+
+    simulateOpen() {
+      this.readyState = 1;
+      this.onopen?.(new Event('open'));
+    }
+
+    static last(): ControllableMockWebSocket {
+      const instances = ControllableMockWebSocket.instances;
+      return instances[instances.length - 1];
+    }
+  }
+
+  beforeEach(() => {
+    ControllableMockWebSocket.instances = [];
+    vi.stubGlobal('WebSocket', ControllableMockWebSocket);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('does not leave a stale "lost" status after the hook unmounts', () => {
     const { result, unmount } = renderHook(() => useSimulation('mujoco'));
 
-    // Open a socket and let the MockWebSocket connect (0ms timer).
-    await act(async () => {
+    act(() => {
       result.current.start({});
-      await new Promise((r) => setTimeout(r, 1));
+    });
+    act(() => {
+      ControllableMockWebSocket.last().simulateOpen();
     });
     expect(result.current.connectionStatus).toBe('connected');
 

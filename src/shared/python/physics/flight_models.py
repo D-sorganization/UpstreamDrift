@@ -144,6 +144,10 @@ class UnifiedLaunchConditions:
     launch_angle: float
     azimuth_angle: float = 0.0
     spin_rate: float = 2500.0
+    #: Tilt from pure backspin [rad]. Positive values inject sidespin about
+    #: +Z; in the UD z-up frame (+Y is left), positive ``spin_axis_angle``
+    #: curves the ball toward +Y. Many launch-monitor exports use the
+    #: opposite sign for tilt — convert at import.
     spin_axis_angle: float = 0.0
     ball_mass: float = GOLF_BALL_MASS
     ball_radius: float = GOLF_BALL_RADIUS
@@ -231,6 +235,9 @@ class UnifiedLaunchConditions:
               direction: [sin(azimuth), -cos(azimuth), 0], producing upward Magnus lift.
             - Sidespin acts about the vertical (z-up) axis: [0, 0, 1], producing
               lateral curvature without vertical lift.
+            - ``spin_axis_angle`` is measured from pure backspin; **positive values
+              curve the ball toward +Y (left)** at azimuth zero. TrackMan-style tilt
+              often uses the opposite sign.
 
         Returns:
             Angular velocity vector [rad/s] as an array of shape (3,).
@@ -672,7 +679,10 @@ class WaterlooPennerModel(BallFlightModel):
     @property
     def description(self) -> str:
         """Return the Waterloo/Penner model description."""
-        return "Waterloo quadratic Cd with Penner spin-ratio lift fit"
+        return (
+            "Waterloo quadratic Cd with Penner spin-ratio lift fit; "
+            "cd1 and the lift cap are a constant-spin TrackMan calibration"
+        )
 
     @property
     def reference(self) -> str:
@@ -714,8 +724,6 @@ class WaterlooPennerModel(BallFlightModel):
             vu = v_rel / speed
             s = (omega_m * launch.ball_radius) / speed
             cd = cd0 + cd1 * s + cd2 * s**2
-            cl_val = cl0 + cl1 * s**cl2 if s > 0.0 else cl0
-            cl = min(cl_max, _capped_lift_coefficient(cl_val))
 
             acc = (
                 -(0.5 * launch.air_density * speed**2 * cd * area / launch.ball_mass)
@@ -725,6 +733,10 @@ class WaterlooPennerModel(BallFlightModel):
                 cross = np.cross(omega_v / omega_m, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
+                    # Lift uses the transverse spin ratio s*sin(theta) (#15042).
+                    s_t = s * cross_norm
+                    cl_val = cl0 + cl1 * s_t**cl2 if s_t > 0.0 else cl0
+                    cl = min(cl_max, _capped_lift_coefficient(cl_val))
                     acc += (
                         0.5
                         * launch.air_density
@@ -767,7 +779,11 @@ class MacDonaldHanzelyModel(BallFlightModel):
     @property
     def description(self) -> str:
         """Return the MacDonald-Hanzely model description."""
-        return "ODE model with exponential spin decay"
+        return (
+            "Constant Cd/Cl ODE with exponential spin decay, labelled with the "
+            "MacDonald and Hanzely name; not the published 1991 model "
+            "(its coefficients are illustrative, not taken from the paper)"
+        )
 
     @property
     def reference(self) -> str:
@@ -814,11 +830,12 @@ class MacDonaldHanzelyModel(BallFlightModel):
             acc = -k_drag * speed**2 * vu
 
             if omega > 0:
-                spin_ratio = omega * launch.ball_radius / speed
-                cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self.cl)
                 cross = np.cross(spin_axis, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
+                    # Transverse spin ratio w R sin(theta) / v (#15042).
+                    spin_ratio = omega * launch.ball_radius * cross_norm / speed
+                    cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self.cl)
                     acc += (
                         0.5
                         * launch.air_density
@@ -859,6 +876,20 @@ class ConstantCoefficientSpec:
     cd: float
     cl: float
     spin_decay: float
+
+
+def _preset_description(label: str, decay: str) -> str:
+    """Describe a constant Cd/Cl preset that only borrows a researcher's name.
+
+    Preconditions: ``label`` and ``decay`` are non-empty strings.
+    Postconditions: the text states the preset is not the published model.
+    """
+    if not label or not decay:
+        raise ValueError("label and decay must be non-empty")
+    return (
+        f"Constant Cd/Cl preset ({decay}) labelled {label}; "
+        f"not the published {label} model, coefficients are illustrative"
+    )
 
 
 class ConstantCoefficientModel(BallFlightModel):
@@ -928,11 +959,12 @@ class ConstantCoefficientModel(BallFlightModel):
             acc = -k_drag * speed**2 * vu
 
             if omega > 0:
-                spin_ratio = omega * launch.ball_radius / speed
-                cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self._spec.cl)
                 cross = np.cross(spin_axis, vu)
                 cross_norm = math.hypot(cross[0], cross[1], cross[2])
                 if cross_norm > NUMERICAL_EPSILON:
+                    # Transverse spin ratio w R sin(theta) / v (#15042).
+                    spin_ratio = omega * launch.ball_radius * cross_norm / speed
+                    cl_eff = _spin_ratio_lift_coefficient(spin_ratio, self._spec.cl)
                     acc += (
                         0.5
                         * launch.air_density
@@ -992,8 +1024,8 @@ class FlightModelRegistry:
         cls._models[FlightModelType.NATHAN] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Nathan",
-                description="Constant Cd/Cl model with spin decay",
-                reference="Nathan et al. (2018)",
+                description=_preset_description("Nathan", "spin decay 0.03/s"),
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.22,
                 cl=0.24,
                 spin_decay=0.03,
@@ -1002,8 +1034,8 @@ class FlightModelRegistry:
         cls._models[FlightModelType.BALLANTYNE] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Ballantyne",
-                description="Constant Cd/Cl model for steady spin",
-                reference="Ballantyne et al. (2012)",
+                description=_preset_description("Ballantyne", "spin decay 0.02/s"),
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.20,
                 cl=0.18,
                 spin_decay=0.02,
@@ -1012,8 +1044,8 @@ class FlightModelRegistry:
         cls._models[FlightModelType.JCOLE] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="J. Cole",
-                description="Constant Cd/Cl model with moderate decay",
-                reference="Cole (2016)",
+                description=_preset_description("J. Cole", "spin decay 0.04/s"),
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.23,
                 cl=0.22,
                 spin_decay=0.04,
@@ -1022,8 +1054,8 @@ class FlightModelRegistry:
         cls._models[FlightModelType.ROSPIE_DL] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Rospie DL",
-                description="Constant Cd/Cl model tuned for driver launch",
-                reference="Rospie & Layton (2014)",
+                description=_preset_description("Rospie DL", "spin decay 0.03/s"),
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.21,
                 cl=0.19,
                 spin_decay=0.03,
@@ -1032,8 +1064,8 @@ class FlightModelRegistry:
         cls._models[FlightModelType.CHARRY_L3] = ConstantCoefficientModel(
             ConstantCoefficientSpec(
                 name="Charry L3",
-                description="Constant Cd/Cl model with higher drag",
-                reference="Charry et al. (2017)",
+                description=_preset_description("Charry L3", "spin decay 0.05/s"),
+                reference="Illustrative constant-Cd/Cl preset (Bearman & Harvey 1976 post-critical band)",
                 cd=0.24,
                 cl=0.21,
                 spin_decay=0.05,

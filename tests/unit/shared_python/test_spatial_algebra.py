@@ -351,8 +351,11 @@ class TestJcalc:
 
     def test_Rz_at_pi_half(self) -> None:
         xj, _, _ = jcalc("Rz", q=np.pi / 2)
-        assert np.isclose(xj[0, 0], 0.0, atol=1e-9)
-        assert np.isclose(xj[0, 1], -1.0, atol=1e-9)
+        e_block = xj[0:3, 0:3]
+        np.testing.assert_allclose(
+            e_block[:, 0], np.array([0.0, -1.0, 0.0]), atol=1e-14
+        )
+        assert np.isclose(e_block[0, 1], 1.0, atol=1e-9)
 
     def test_Px_transform(self) -> None:
         xj, _, _ = jcalc("Px", q=1.0)

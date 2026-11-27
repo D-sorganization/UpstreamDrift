@@ -157,8 +157,11 @@ def _derivative(state, sliding, surface, field):  # type: ignore[no-untyped-def]
         sign = np.where(sliding & (speed - s < 0.0), -1.0, 1.0)
         drag = sign * drag
         out[4] = np.where(sliding & moving, sign * _SLIDE_SPIN_GAIN * mu * _G, 0.0)
-    out[2] = -drag * vx - _G * gx
-    out[3] = -drag * vy - _G * gy
+    roll_g: float | np.ndarray = (
+        5.0 / 7.0 if sliding is None else np.where(sliding, 1.0, 5.0 / 7.0)
+    )
+    out[2] = -drag * vx - _G * roll_g * gx
+    out[3] = -drag * vy - _G * roll_g * gy
     return out
 
 

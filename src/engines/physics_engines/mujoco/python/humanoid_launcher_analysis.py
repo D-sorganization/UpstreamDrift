@@ -351,16 +351,12 @@ class AnalysisMixin:
 
             # Control Mode
 
-            text = self.combo_control.currentText()
-
-            if "PD" in text:
-                self.config.control_mode = "pd"
-
-            elif "LQR" in text:
-                self.config.control_mode = "lqr"
-
-            elif "Polynomial" in text:
-                self.config.control_mode = "poly"
+            mode = self.combo_control.currentText().lower()
+            if mode == "polynomial":
+                mode = "poly"
+            if mode not in {"pd", "lqr", "poly"}:
+                raise ValueError(f"Unsupported control mode: {mode!r}")
+            self.config.control_mode = mode
 
             self.config_manager.save(self.config)
 

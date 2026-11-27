@@ -22,7 +22,7 @@ from src.shared.python.force_overlay.capacity_glyphs import LineSegmentGlyph
 from src.shared.python.motion_matching.diagnostics._skeleton_render import (
     equalize_3d_axes,
 )
-from src.shared.python.plot_style import FORCE_KIND_PALETTE
+from src.shared.python.force_overlay.palette import FORCE_KIND_PALETTE
 
 __all__ = [
     "draw_capacity_wire_3d",

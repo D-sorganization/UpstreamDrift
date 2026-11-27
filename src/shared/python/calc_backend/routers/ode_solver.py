@@ -140,4 +140,6 @@ def _rk4_solve(
         times=times,
         solutions=solutions,
         variable_summaries=summaries,
+        success=True,
+        message="Solution computed successfully",
     )

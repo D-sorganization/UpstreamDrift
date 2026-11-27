@@ -23,7 +23,8 @@ repository, so it is edited here (see
 
 from __future__ import annotations
 
-from typing import Any
+import weakref
+from typing import Any, Iterator
 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -40,7 +41,14 @@ except ImportError:  # pragma: no cover - exercised only on old matplotlib
         # headless stub rather than crashing at import time.
         raise ImportError("Qt backend for matplotlib not available") from exc
 
-__all__ = ["MplCanvas"]
+__all__ = ["MplCanvas", "iter_live_mpl_canvases"]
+
+_LIVE_MPL_CANVASES: weakref.WeakSet[MplCanvas] = weakref.WeakSet()
+
+
+def iter_live_mpl_canvases() -> Iterator[MplCanvas]:
+    """Yield live :class:`MplCanvas` instances without a full-GC scan."""
+    return iter(tuple(_LIVE_MPL_CANVASES))
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -89,6 +97,7 @@ class MplCanvas(FigureCanvasQTAgg):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.fig)
         self._canvas_closed = False
+        _LIVE_MPL_CANVASES.add(self)
         if parent is not None:
             self.setParent(parent)
 

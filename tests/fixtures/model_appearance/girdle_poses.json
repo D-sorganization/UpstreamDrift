@@ -1,0 +1,8 @@
+{
+  "description": "Shoulder-girdle poses added to the address pose (radians). The trail (right) shoulder link is 0.18 m long on the tour-average subject, so the protraction angles move its shoulder joint about 0.05 m and 0.11 m forward; the lift raises it about 0.10 m. Synthetic: set directly on the model, not taken from a capture.",
+  "poses": {
+    "trail_protracted_50_mm": {"RScapInputX": 0.0, "RScapInputY": -0.28},
+    "trail_protracted_110_mm": {"RScapInputX": 0.0, "RScapInputY": -0.66},
+    "trail_protracted_110_mm_and_lowered": {"RScapInputX": -0.24, "RScapInputY": -0.66}
+  }
+}

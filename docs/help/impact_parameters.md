@@ -33,6 +33,10 @@ Show launch-monitor-style delivery numbers for any engine run or matched swing: 
 
 The engine adapters (`impact_parameters.adapters`) transport the club body pose to the face centre; `extract_impact_parameters` evaluates the angles at the last pre-contact sample in the target frame. The API route is `GET /api/analysis/impact-parameters?run_id=...&target_dir=x,y`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html): *Impact Mechanics and Ball Flight*.
+
 ## Limitations
 
 A quantity that cannot be computed (face roll unobservable in mocap-matched swings, no ball model, a run with no clubhead series, speed below 1 m/s) is shown as "unavailable" with its reason, never as zero. The Impact Explorer link passes the available values as a query string; whether the Explorer consumes them is owned by the Tools epic (#9546).

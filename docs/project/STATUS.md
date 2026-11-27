@@ -2,27 +2,61 @@
 
 # UpstreamDrift Project Status
 
-Refreshed by project-steward on 2026-11-01: added DV-14176 from the validated
-`docs/development/planning/catalog.json` as a parked feature. Its simulator and
-skill-sampler prerequisites (#14171 and #14169) have since merged; published/licensed
-reference data and its provenance remain unavailable. No deferred feature has moved
-to done. Since the 2026-10-19 refresh, merged work relevant to
-the premier golf-modeling focus includes putting simulation, reference fixtures,
-skill sampling, expected-putts/strokes-gained optimization and variance attribution
-(PRs #14149, #14155, #14170, #14171, #14181, #14192, #14194, #14195, #14196,
-#14197, #14198, #14203, #14218, #14220 and #14226). The putting analytics epic
-#14168 remains open; its published-data calibration record DV-14176 remains parked.
-GitHub currently shows 87 open issues and 6 open PRs (5 ready, 1 draft). The latest
-main workflow batch started 2026-11-01 12:47 UTC and still had CI Standard and
-Docker checks in progress at the time of this refresh; several other workflows in
-that batch completed successfully, so main CI is pending rather than fully green.
+Refreshed by project-steward on 2026-11-27 from GitHub, the Runner Dashboard
+and the deferred-validation catalog. The catalog at
+`docs/development/planning/catalog.json` still holds the same 15 records, and
+the central `shared_scripts/deferred_validation.py` check reports
+"Deferred-validation catalog OK." No catalog entry changed after the 2026-11-14
+refresh. All 15 Board decisions are still pending, and no charter feature
+status changed.
 
-The Board-proposal dry-run template is available in the Repository_Management
-checkout, but this run could not submit the overdue architectural resourcing
-proposal: the authorized `submit_proposal` fleet tool returned “requires approval,
-but approval policy is never.” No proposal was filed through another channel.
-The pending decisions remain listed below; a later steward run with the proposal
-tool available should link the resulting Board proposal here.
+Since 2026-11-14, 510 pull requests have merged. They include the swing-report
+package (#15724, #15725 slices), the ZTCF/ZVCF viewer and export splits (#15150
+Z3-Z9), club-fitting shaft reports (#15150 C5/C12/C18), the open-loop replay
+horizon (#15150 D2), canonical-v2 contracts (#15796, #15810), security
+hardening (#15803, #15807) and the historical-golfer model bundles (#15831,
+#15841). Against the board focus: null-space epic #15494 closed through #15750
+on 2026-11-25, and canonical-golfer gate #15659 closed through #15668 on
+2026-11-24. Grip epic #15122 (the P1 directive), swing-report epic #15725,
+default-golfer migration #15648 and playback epic #15660 are still open. These
+merges move executable work forward but supply no external-validation
+evidence.
+
+GitHub shows 193 open issues and 43 open PRs (38 ready, 5 drafts). CI on
+`main` is green: every main-push workflow on `b1084002` (#15841) completed
+successfully on 2026-11-27 at 00:03 UTC, including CI Standard, CI Requires
+OpenSim, Docs Governance and Release and Companion Publication. All four fleet
+machines are online.
+
+The role definition grants `submit_proposal` and `proposals.write`, but this
+run's session does not expose the fleet tool. The cross-cutting resourcing
+proposal is therefore raised only as a requested staff action in the run
+report. No proposal link, submission or approval is claimed below.
+
+Refreshed by project-steward on 2026-11-14 from the validated
+`docs/development/planning/catalog.json`, GitHub and the Runner Dashboard. The
+catalog remains the sole deferred-validation authority; all 15 records, owner
+plans and original source snapshots are present and validate. All 15 Board
+decisions remain pending, and no record has evidence that clears its external
+measurement, hardware, licensed-data, independent-review or human-trial gate.
+No charter feature status changed; the closed putting-analytics and NSX
+source issues remain parked deferred obligations.
+
+Since the 2026-11-01 refresh, merged software and research work includes NSX
+campaign/trade-off and torque-capacity work (#15064, #15067, #15068), Simscape
+and matched-motion work, and Agent API/documentation updates (#15073, #15080).
+These merges advance executable work but do not supply external-validation
+evidence. GitHub currently shows 94 open issues and 28 open PRs (25 ready, 3
+drafts). Main CI is pending: the latest main-push batch at 2026-11-14 13:00 UTC
+has CI Standard, CI Requires OpenSim, and Release and Companion Publication in
+progress; completed checks in that batch include Docs Governance and Conflict
+Disarm. This checkout does not contain `docs/fleet-in-flight.md`; live fleet
+activity was read from the Runner Dashboard API.
+
+The overdue architectural resourcing decisions remain under Decisions Needed.
+No `submit_proposal` fleet tool is exposed in this run, so no Board proposal
+was submitted and no proposal link or approval is asserted. Keep the decisions
+open until the Board records a decision and the proposal capability is available.
 
 Refreshed by project-steward on 2026-10-19: added DV-11984, DV-11542, DV-12554,
 DV-12583, DV-12718, DV-13061 and DV-13082 (catalog `docs/development/planning/catalog.json`
@@ -75,6 +109,9 @@ none of it supplies the missing external evidence.
 
 ## Decisions Needed
 
+- Queue (first recorded 2026-11-27): PRs for P1 grip epic #15122 have stalled. Since 2026-11-06/15, #14745, #15142, #15143, #15146, #15153, #15154 and #15161 have merge conflicts (three of them drafts), and #14798 and #15140 are blocked. Decide which to rebase onto `main` and which to close as superseded. This is routine and stays here.
+- Queue (first recorded 2026-11-27): null-space epic #15494 closed on 2026-11-25 through #15750, but #15546, #15592 and #15609 still reference it and are open. Decide whether they are still in scope or superseded. This is routine and stays here.
+- Cross-cutting (first recorded 2026-11-27): the DV-9546/9613/9619/9700/10375/10382 items below were first recorded on 2026-09-23 and DV-11408 on 2026-10-04, so all are past the 14-day proposal age. They should go to the Board as one resourcing proposal for external-validation work, filed against UpstreamDrift. The proposal was requested as a staff action in the 2026-11-27 run, but no fleet tool was available in that session, so it has not been submitted and there is no link yet.
 - DV-11408: Board decision pending on whether to resource the [Owner Plan](https://github.com/D-sorganization/UpstreamDrift/blob/main/docs/development/planning/DV-11408.md) (first recorded 2026-10-04); accountable owner, access dates, funding and execution capacity remain unverified.
 - DV-11408: Decide how to obtain and qualify simultaneous physical optical marker capture and multi-camera video of golf swings with calibrated time synchronization; prerequisite evidence remains unavailable.
 - DV-11408: Decide how to obtain and qualify the joint-angle error metric pipeline by swing phase with wrist and forearm breakout; prerequisite evidence remains unavailable.

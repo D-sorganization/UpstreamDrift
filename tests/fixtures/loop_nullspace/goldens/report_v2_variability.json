@@ -1871,7 +1871,7 @@
           "label": "fixture/S6",
           "strategy": "S6",
           "status": "not_implemented",
-          "reason": "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism",
+          "reason": "S6: UCM split exists (variability_ucm.ucm_decompose, NSX-97); no S6 arm turns it into a strategy parameter and cost; no muscle-level evaluator exists for this mechanism",
           "admitted": false,
           "rank": null,
           "exclusion": "not_attempted",
@@ -1977,7 +1977,7 @@
         },
         {
           "label": "fixture/S6",
-          "reason": "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism"
+          "reason": "S6: UCM split exists (variability_ucm.ucm_decompose, NSX-97); no S6 arm turns it into a strategy parameter and cost; no muscle-level evaluator exists for this mechanism"
         },
         {
           "label": "fixture/S9",
@@ -3206,7 +3206,7 @@
             "label": "fixture/S6",
             "status": "not_implemented",
             "exclusion": "not_attempted",
-            "reason": "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism"
+            "reason": "S6: UCM split exists (variability_ucm.ucm_decompose, NSX-97); no S6 arm turns it into a strategy parameter and cost; no muscle-level evaluator exists for this mechanism"
           },
           {
             "label": "fixture/S9",

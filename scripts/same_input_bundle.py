@@ -8,6 +8,9 @@
     MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle closed-loop \\
         --run-dir RUN --bundle bundle.npz --engine drake --out receipt.json
 
+    MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle horizon \\
+        --bundle bundle.npz [--engine drake] [--impact-s T] [--out horizon.json]
+
 ``export --shaft-model chain`` replaces the rigid club by the R6 chain shaft
 (#12686) and appends an undeflected shaft to the tracked reference; chain
 bundles replay only in engines that pass the chain parity gate
@@ -20,6 +23,11 @@ controller hold, #12279; default 1 ms).  ``replay`` integrates the bundle effort
 open loop in one engine and writes the full-horizon and segmented scores.
 ``closed-loop`` tracks the run's reference in one engine with the identical
 controller function and scores it against the bundle's MuJoCo reference.
+``horizon`` searches backward from impact for the earliest open-loop replay
+start that still delivers the club within the ``open_loop_horizon.json``
+tolerances (#15150 D2) and prints (or writes) the result as JSON.  Its
+``--engine`` defaults to a parity engine other than the bundle's reference
+engine; a self-replay is exact by construction and is flagged in the JSON.
 """
 
 from __future__ import annotations
@@ -28,6 +36,7 @@ import argparse
 import hashlib
 import json
 import logging
+import sys
 import time
 from pathlib import Path
 
@@ -36,10 +45,17 @@ import numpy as np
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
+    add_shaft_arguments,
+    checked_shaft_options,
     passive_coordinates,
+    shaft_options,
 )
 from src.shared.python.motion_matching.execution.spec_builder import with_shaft_model
 from src.shared.python.motion_matching.impact_force import ImpactForce
+from src.shared.python.motion_matching.open_loop_horizon import (
+    SETTINGS_PATH,
+    load_settings,
+)
 from src.shared.python.motion_matching.same_input import (
     ALL_ENGINES,
     InputBundle,
@@ -93,17 +109,23 @@ def padded_track(spec_bytes: bytes, q_track: np.ndarray) -> np.ndarray:
 
 
 def shaft_inputs(
-    spec_bytes: bytes, q_track: np.ndarray, shaft_model: str
+    spec_bytes: bytes,
+    q_track: np.ndarray,
+    shaft_model: str,
+    options: dict | None = None,
 ) -> tuple[bytes, np.ndarray]:
     """Spec and track of a ``shaft_model`` bundle (#12691).
 
     ``"rigid"`` returns both inputs unchanged; ``"chain"`` applies the R6
-    chain of the spec's club and pads the track with a straight shaft.
+    chain of the spec's club, with the flex, stiffness scale and link
+    ``options`` (#15150; empty is the default chain), and pads the track with
+    a straight shaft. Options with a rigid club raise ``ValueError``.
     """
+    checked_shaft_options(shaft_model, options)
     if shaft_model == DEFAULT_SHAFT_MODEL:
         return spec_bytes, q_track
     document = json.loads(spec_bytes)
-    chain = with_shaft_model(document, document["club"]["name"], shaft_model)
+    chain = with_shaft_model(document, document["club"]["name"], shaft_model, options)
     chain_bytes = json.dumps(chain).encode()
     return chain_bytes, padded_track(chain_bytes, q_track)
 
@@ -128,16 +150,20 @@ def export(
     duration_s: float | None,
     effort_hold_ms: float = 1.0,
     shaft_model: str = DEFAULT_SHAFT_MODEL,
+    options: dict | None = None,
 ) -> dict:
     """Build the MuJoCo reference bundle of a pipeline run directory.
 
     ``effort_hold_ms`` is the controller hold recorded in the manifest
     (#12279); it must split the 1 ms step evenly into at most eight holds.
-    ``shaft_model`` selects the rigid club (default) or the chain shaft.
+    ``shaft_model`` selects the rigid club (default) or the chain shaft, and
+    the chain ``options`` (#15150) are recorded in the provenance when given.
     """
     spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
     record_path, times, q_track = _track(run_dir)
-    spec_bytes, q_track = shaft_inputs(spec_path.read_bytes(), q_track, shaft_model)
+    spec_bytes, q_track = shaft_inputs(
+        spec_path.read_bytes(), q_track, shaft_model, options
+    )
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
     impact, split = _impact_plan(receipt, times)
     bundle = generate_reference_bundle(
@@ -154,6 +180,7 @@ def export(
             "capture_sha256": receipt.get("capture_sha256"),
             "spec_file": spec_path.name,
             "shaft_model": shaft_model,
+            **({"shaft_options": dict(options)} if options else {}),
             "dynamics_record_sha256": _sha256(record_path),
         },
     )
@@ -238,8 +265,42 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     }
 
 
+def horizon_receipt(
+    bundle_path: Path,
+    engine: str | None,
+    settings_path: Path,
+    impact_s: float | None,
+) -> dict:
+    """Open-loop horizon search on ``bundle_path`` in ``engine`` (#15150 D2).
+
+    ``engine`` ``None`` replays in a parity engine other than the bundle's
+    reference engine; a self-replay is flagged ``self_replay`` with a note.
+    """
+    from src.shared.python.motion_matching.same_input.horizon_replay import (
+        BundleReplay,
+        cross_engine,
+        replay_provenance,
+        search_bundle_horizon,
+    )
+
+    bundle = InputBundle.load(bundle_path)
+    if engine is None:
+        engine = cross_engine(bundle.reference_engine)
+    replay_fn = BundleReplay(bundle, VectorPlant(engine, bundle.spec_bytes), impact_s)
+    settings = load_settings(settings_path)
+    result = search_bundle_horizon(replay_fn, settings=settings)
+    return {
+        "schema": "same-input-horizon/v1",
+        "bundle_sha256": _sha256(bundle_path),
+        **replay_provenance(bundle.reference_engine, engine),
+        "settings": vars(settings),
+        "reference": vars(replay_fn.reference()),
+        "horizon": result.summary(),
+    }
+
+
 def build_parser() -> argparse.ArgumentParser:
-    """Return the ``export`` / ``replay`` / ``closed-loop`` argument parser."""
+    """Return the ``export`` / ``replay`` / ``closed-loop`` / ``horizon`` parser."""
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     exp = sub.add_parser("export")
@@ -258,6 +319,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_SHAFT_MODEL,
         help="rigid club (default) or the R6 chain shaft (#12686, #12691)",
     )
+    add_shaft_arguments(exp)
     rep = sub.add_parser("replay")
     rep.add_argument("--bundle", type=Path, required=True)
     rep.add_argument("--engine", choices=ALL_ENGINES, required=True)
@@ -268,6 +330,24 @@ def build_parser() -> argparse.ArgumentParser:
     clo.add_argument("--bundle", type=Path, required=True)
     clo.add_argument("--engine", choices=ALL_ENGINES, required=True)
     clo.add_argument("--out", type=Path, required=True)
+    hor = sub.add_parser("horizon")
+    hor.add_argument("--bundle", type=Path, required=True)
+    hor.add_argument(
+        "--engine",
+        choices=ALL_ENGINES,
+        default=None,
+        help="replay engine (default: a parity engine other than the reference)",
+    )
+    hor.add_argument("--settings", type=Path, default=SETTINGS_PATH)
+    hor.add_argument(
+        "--impact-s",
+        type=float,
+        default=None,
+        help="contact time on the bundle clock (default: the recorded impact)",
+    )
+    hor.add_argument(
+        "--out", type=Path, default=None, help="JSON path (default stdout)"
+    )
     return parser
 
 
@@ -281,8 +361,23 @@ def main() -> None:
             args.duration,
             args.effort_hold_ms,
             args.shaft_model,
+            shaft_options(args),
         )
         LOG.info("wrote %s: %d steps", args.out, manifest["steps"])
+        return
+    if args.command == "horizon":
+        receipt = horizon_receipt(
+            args.bundle, args.engine, args.settings, args.impact_s
+        )
+        text = json.dumps(receipt, indent=2) + "\n"
+        if args.out is None:
+            sys.stdout.write(text)
+            return
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(text, encoding="utf-8")
+        LOG.info("horizon: %s", json.dumps(receipt["horizon"]["status"]))
+        if receipt["self_replay"]:
+            LOG.warning("%s", receipt["note"])
         return
     if args.command == "closed-loop":
         receipt = closed_loop_receipt(args.run_dir, args.bundle, args.engine)

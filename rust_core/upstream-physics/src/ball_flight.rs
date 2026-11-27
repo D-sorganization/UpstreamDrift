@@ -70,6 +70,41 @@ impl TrajectoryPoint {
     }
 }
 
+/// Per-step force snapshot evaluated at the integrated state (issue #14937).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
+pub struct IntegratedStepForces {
+    /// Gravitational force [N]
+    pub gravity: [f64; 3],
+    /// Drag force [N]
+    pub drag: [f64; 3],
+    /// Magnus force [N]
+    pub magnus: [f64; 3],
+    /// Acceleration implied by gravity + aerodynamics [m/s²]
+    pub acceleration: [f64; 3],
+}
+
+#[cfg(feature = "python")]
+#[pyo3::prelude::pymethods]
+impl IntegratedStepForces {
+    #[getter]
+    fn gravity(&self) -> [f64; 3] {
+        self.gravity
+    }
+    #[getter]
+    fn drag(&self) -> [f64; 3] {
+        self.drag
+    }
+    #[getter]
+    fn magnus(&self) -> [f64; 3] {
+        self.magnus
+    }
+    #[getter]
+    fn acceleration(&self) -> [f64; 3] {
+        self.acceleration
+    }
+}
+
 /// Result of a ball trajectory simulation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
@@ -80,6 +115,8 @@ pub struct BallTrajectoryResult {
     pub completed: bool,
     /// Number of integration steps taken.
     pub steps: usize,
+    /// Forces at each trajectory point from the integrated aerodynamic model.
+    pub step_forces: Vec<IntegratedStepForces>,
 }
 
 #[cfg(feature = "python")]
@@ -114,6 +151,104 @@ impl BallTrajectoryResult {
             .iter()
             .map(|p| vec![p.t, p.x, p.y, p.z, p.vx, p.vy, p.vz])
             .collect()
+    }
+
+    /// Per-step forces from the integrator's aerodynamic model (empty when not recorded).
+    fn get_step_forces(&self) -> Vec<IntegratedStepForces> {
+        self.step_forces.clone()
+    }
+}
+
+fn integrated_forces_at_state(
+    state: &[f64],
+    spin_axis_v: &Vector3,
+    gravity_v: &Vector3,
+    wind_v: &Vector3,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+) -> IntegratedStepForces {
+    let velocity = Vector3::new(state[3], state[4], state[5]);
+    let omega = state[6];
+    let rel_vel = velocity - *wind_v;
+    let spin = *spin_axis_v * omega;
+    let forces = compute_aero_forces(&rel_vel, &spin, ball, air);
+    let gravity = [
+        gravity_v.x * ball.mass,
+        gravity_v.y * ball.mass,
+        gravity_v.z * ball.mass,
+    ];
+    let drag = [forces.drag.x, forces.drag.y, forces.drag.z];
+    let magnus = [forces.magnus.x, forces.magnus.y, forces.magnus.z];
+    let ax = gravity_v.x + (forces.drag.x + forces.magnus.x + forces.lift.x) / ball.mass;
+    let ay = gravity_v.y + (forces.drag.y + forces.magnus.y + forces.lift.y) / ball.mass;
+    let az = gravity_v.z + (forces.drag.z + forces.magnus.z + forces.lift.z) / ball.mass;
+    IntegratedStepForces {
+        gravity,
+        drag,
+        magnus,
+        acceleration: [ax, ay, az],
+    }
+}
+
+/// Linear time interpolation of position/velocity when ``z`` crosses zero.
+fn interpolate_ground_contact(
+    t_above: f64,
+    state_above: &[f64],
+    t_below: f64,
+    state_below: &[f64],
+) -> TrajectoryPoint {
+    let z_above = state_above[2];
+    let z_below = state_below[2];
+    debug_assert!(z_above > 0.0 && z_below <= 0.0);
+    let fraction = z_above / (z_above - z_below);
+    let t = t_above + fraction * (t_below - t_above);
+    let lerp = |a: f64, b: f64| a + fraction * (b - a);
+    TrajectoryPoint {
+        t,
+        x: lerp(state_above[0], state_below[0]),
+        y: lerp(state_above[1], state_below[1]),
+        z: 0.0,
+        vx: lerp(state_above[3], state_below[3]),
+        vy: lerp(state_above[4], state_below[4]),
+        vz: lerp(state_above[5], state_below[5]),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn refine_landing_point(
+    points: &mut [TrajectoryPoint],
+    step_forces: &mut [IntegratedStepForces],
+    times: &[f64],
+    states: &[f64],
+    state_dim: usize,
+    spin_axis_v: &Vector3,
+    gravity_v: &Vector3,
+    wind_v: &Vector3,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+    record_forces: bool,
+) {
+    if points.len() < 2 {
+        return;
+    }
+    let last = points.len() - 1;
+    if points[last].z > 0.0 || points[last - 1].z <= 0.0 {
+        return;
+    }
+    let t0 = times[last - 1];
+    let t1 = times[last];
+    let s0 = &states[(last - 1) * state_dim..last * state_dim];
+    let s1 = &states[last * state_dim..(last + 1) * state_dim];
+    points[last] = interpolate_ground_contact(t0, s0, t1, s1);
+    if record_forces && step_forces.len() == points.len() {
+        let mut land_state = s1.to_vec();
+        let frac = s0[2] / (s0[2] - s1[2]);
+        for i in 0..state_dim {
+            land_state[i] = s0[i] + frac * (s1[i] - s0[i]);
+        }
+        land_state[2] = 0.0;
+        step_forces[last] =
+            integrated_forces_at_state(&land_state, spin_axis_v, gravity_v, wind_v, ball, air);
     }
 }
 
@@ -153,6 +288,7 @@ pub fn simulate_ball_trajectory(
     ball: &AeroBallProperties,
     air: &AirProperties,
     config: &IntegratorConfig,
+    record_integrated_forces: bool,
 ) -> Result<BallTrajectoryResult, String> {
     if !pos0.iter().all(|v| v.is_finite()) {
         return Err("initial position must be finite".to_string());
@@ -180,8 +316,10 @@ pub fn simulate_ball_trajectory(
     let y0 = [pos0[0], pos0[1], pos0[2], vel0[0], vel0[1], vel0[2], omega0];
 
     // Capture by reference using owned copies for the closure
-    let ball = ball.clone();
-    let air = air.clone();
+    let ball_record = ball.clone();
+    let air_record = air.clone();
+    let ball_integrate = ball.clone();
+    let air_integrate = air.clone();
     // Normalize spin_axis to unit vector; fall back to Z-axis if near-zero
     let raw_spin = Vector3::new(spin_axis[0], spin_axis[1], spin_axis[2]);
     let spin_axis_v = {
@@ -195,6 +333,9 @@ pub fn simulate_ball_trajectory(
     };
     let gravity_v = Vector3::new(gravity[0], gravity[1], gravity[2]);
     let wind_v = Vector3::new(wind[0], wind[1], wind[2]);
+    let spin_axis_record = spin_axis_v;
+    let wind_record = wind_v;
+    let gravity_record = gravity_v;
 
     let derivative = move |_t: f64, state: &[f64]| -> Vec<f64> {
         let velocity = Vector3::new(state[3], state[4], state[5]);
@@ -207,29 +348,29 @@ pub fn simulate_ball_trajectory(
         let spin = spin_axis_v * omega;
 
         // Aerodynamic forces [N]
-        let forces = compute_aero_forces(&rel_vel, &spin, &ball, &air);
+        let forces = compute_aero_forces(&rel_vel, &spin, &ball_integrate, &air_integrate);
         let total_aero = forces.drag + forces.lift + forces.magnus;
 
         // Acceleration = gravity + F_aero / mass
-        let ax = gravity_v.x + total_aero.x / ball.mass;
-        let ay = gravity_v.y + total_aero.y / ball.mass;
-        let az = gravity_v.z + total_aero.z / ball.mass;
+        let ax = gravity_v.x + total_aero.x / ball_integrate.mass;
+        let ay = gravity_v.y + total_aero.y / ball_integrate.mass;
+        let az = gravity_v.z + total_aero.z / ball_integrate.mass;
 
         // d(omega)/dt = -spin_decay_rate * omega (continuous exponential decay)
-        let domega = -ball.spin_decay_rate * omega;
+        let domega = -ball_integrate.spin_decay_rate * omega;
 
         vec![velocity.x, velocity.y, velocity.z, ax, ay, az, domega]
     };
 
-    // Terminate when ball returns to ground (z ≤ 0, after initial launch)
-    let terminate = |t: f64, state: &[f64]| -> bool { t > 0.05 && state[2] <= 0.0 };
+    // Ground crossing while descending (physical landing event, not a time guard).
+    let terminate = |_t: f64, state: &[f64]| -> bool { state[2] <= 0.0 && state[5] < 0.0 };
 
     let max_time = config.max_steps as f64 * config.dt;
     let result = integrate(derivative, 0.0, max_time, &y0, config, Some(terminate))?;
 
     // Convert IntegrationResult to BallTrajectoryResult
     let state_dim = result.state_dim;
-    let points: Vec<TrajectoryPoint> = result
+    let mut points: Vec<TrajectoryPoint> = result
         .times
         .iter()
         .zip(result.states.chunks(state_dim))
@@ -244,18 +385,49 @@ pub fn simulate_ball_trajectory(
         })
         .collect();
 
-    // Landing (termination by ground contact) is a successful outcome, not an
-    // aborted integration.  Override completed=true whenever the final point
-    // reached z ≤ 0 after the minimum flight time.
+    let mut step_forces = if record_integrated_forces {
+        result
+            .states
+            .chunks(state_dim)
+            .map(|state| {
+                integrated_forces_at_state(
+                    state,
+                    &spin_axis_record,
+                    &gravity_record,
+                    &wind_record,
+                    &ball_record,
+                    &air_record,
+                )
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+
+    refine_landing_point(
+        &mut points,
+        &mut step_forces,
+        &result.times,
+        &result.states,
+        state_dim,
+        &spin_axis_record,
+        &gravity_record,
+        &wind_record,
+        &ball_record,
+        &air_record,
+        record_integrated_forces,
+    );
+
     let landed = points
         .last()
-        .map(|p| p.z <= 0.0 && p.t > 0.05)
+        .map(|p| p.z.abs() < 1e-12 && p.vz < 0.0)
         .unwrap_or(false);
 
     Ok(BallTrajectoryResult {
         completed: result.completed || landed,
         steps: result.steps_taken,
         points,
+        step_forces,
     })
 }
 
@@ -290,6 +462,7 @@ mod tests {
             &ball,
             &AirProperties::default(),
             &default_config(),
+            false,
         );
         assert!(result.is_err(), "invalid ball mass must be rejected");
     }
@@ -306,6 +479,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         );
         assert!(result.is_err(), "non-finite position must be rejected");
     }
@@ -328,6 +502,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -375,6 +550,7 @@ mod tests {
             &ball,
             &air,
             &config,
+            false,
         )
         .unwrap();
 
@@ -412,6 +588,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
         let result2 = simulate_ball_trajectory(
@@ -424,6 +601,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -456,6 +634,7 @@ mod tests {
             &fast_decay,
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
         let result_slow = simulate_ball_trajectory(
@@ -468,6 +647,7 @@ mod tests {
             &slow_decay,
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -498,6 +678,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -511,6 +692,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -521,6 +703,31 @@ mod tests {
             headwind_range < base_range,
             "Headwind range {headwind_range:.2} should be less than no-wind range {base_range:.2}"
         );
+    }
+
+    /// Landing carry uses the ground-plane crossing, not the discrete undershoot.
+    #[test]
+    fn test_landing_interpolated_to_z_zero() {
+        let result = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [20.0, 0.0, 10.0],
+            [0.0, 1.0, 0.0],
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &default_config(),
+            false,
+        )
+        .unwrap();
+        let landing = result.points.last().expect("landing point");
+        assert!(
+            landing.z.abs() < 1e-12,
+            "landing z should be on the ground plane, got {}",
+            landing.z
+        );
+        assert!(landing.vz < 0.0, "landing must occur while descending");
     }
 
     /// Test: normal landing must report completed = true (issue #2484).
@@ -536,6 +743,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -559,6 +767,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
         let result_scaled = simulate_ball_trajectory(
@@ -571,6 +780,7 @@ mod tests {
             &AeroBallProperties::default(),
             &AirProperties::default(),
             &default_config(),
+            false,
         )
         .unwrap();
 
@@ -586,5 +796,39 @@ mod tests {
             last_unit.x,
             last_scaled.x
         );
+    }
+
+    #[test]
+    fn test_integrated_step_forces_match_newton_and_state_accel() {
+        let ball = AeroBallProperties::default();
+        let air = AirProperties::default();
+        let result = simulate_ball_trajectory(
+            [0.0, 0.0, 0.0],
+            [60.0, 0.0, 12.0],
+            [0.0, -1.0, 0.0],
+            2500.0 * std::f64::consts::PI / 30.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &ball,
+            &air,
+            &IntegratorConfig {
+                dt: 0.01,
+                max_steps: 200,
+            },
+            true,
+        )
+        .unwrap();
+        assert_eq!(result.points.len(), result.step_forces.len());
+        for forces in &result.step_forces {
+            let fx = forces.gravity[0] + forces.drag[0] + forces.magnus[0];
+            let fy = forces.gravity[1] + forces.drag[1] + forces.magnus[1];
+            let fz = forces.gravity[2] + forces.drag[2] + forces.magnus[2];
+            let ax = fx / ball.mass;
+            let ay = fy / ball.mass;
+            let az = fz / ball.mass;
+            assert!((ax - forces.acceleration[0]).abs() < 1e-9);
+            assert!((ay - forces.acceleration[1]).abs() < 1e-9);
+            assert!((az - forces.acceleration[2]).abs() < 1e-9);
+        }
     }
 }

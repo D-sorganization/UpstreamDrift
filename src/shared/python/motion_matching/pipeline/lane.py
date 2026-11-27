@@ -18,6 +18,7 @@ from src.shared.python.motion_matching.club_observability import (
 )
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+from src.shared.python.motion_matching.knee_axial_rotation import knee_axial_bounds_rad
 from src.shared.python.motion_matching.pipeline.address_feet import planted_stance
 from src.shared.python.motion_matching.pipeline.plant import (
     MatchingPlant,
@@ -38,7 +39,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     IK_RESTART_POLICIES,
     IK_UNBOUNDED,
     LEG_LABELS,
-    LEG_SEEDS,
     POSTURE_PRIOR_COORDINATES,
     PRIOR,
     RESTART_MAX_JOINT_SPEED_RAD_S,
@@ -54,6 +54,9 @@ from src.shared.python.motion_matching.pipeline.constants import (
     WRIST_COORDINATES,
     rate_from_times,
     square_forefoot_seeds,
+)
+from src.shared.python.motion_matching.pipeline.marker_selection import (
+    base_leg_seeds,
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
@@ -315,12 +318,20 @@ def configure_lane(lane: Lane, document: dict[str, Any]) -> None:
     """Document-dependent solver settings: declared ranges, the spin priors and
     address constraints of anthropometric documents, full head weight when a
     neck carries the head."""
-    lane.bounds |= document_bounds(document)
+    lane.bounds |= document_bounds(document) | knee_axial_bounds_rad(document)
     if "address_seed_deg" in document:
         lane.anthropometric = True
         lane.prior_weights = dict.fromkeys(SPIN_COORDINATES, SPIN_PRIOR)
     if "NeckInputZ" in document.get("coordinate_order", ()):
         lane.marker_weights = {}
+
+
+#: Shoulder-girdle coordinates and the widest symmetric range every document
+#: girdle range contains (the narrowest document limit is 20 degrees).
+GIRDLE_COORDINATES: tuple[str, ...] = tuple(
+    f"{s}ScapInput{a}" for s in ("L", "R") for a in ("X", "Y")
+)
+GIRDLE_RANGE_MAX_DEG: float = 20.0
 
 
 class Lane:
@@ -386,6 +397,8 @@ class Lane:
         self.gaze_plan: Any = None
         #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
         self.feet: Any = None
+        #: Leg seeds the document carries (#15296); None: built-in LEG_SEEDS.
+        self.document_leg_seeds: Mapping[str, Any] | None = None
         #: Address knee-flexion targets (R4, #12684); None keeps the legacy fit.
         self.knees: Any = None
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
@@ -399,6 +412,16 @@ class Lane:
         self.restart_policy = DEFAULT_IK_RESTART_POLICY
         #: Weight of the address-pose posture prior (#12042); 0 disables it.
         self.posture_prior_weight = 0.0
+        #: Iteration cap of each full-capture pose solve; None keeps the solver's.
+        self.ik_iterations: int | None = None
+        self.stance_slide = False
+        #: Address pose targets of the bundle stage (#15296): ``{coordinate:
+        #: (target_rad, weight)}`` on the first frame of the full-capture solve.
+        self.address_pose_prior: dict[str, tuple[float, float]] = {}
+        #: Soft stance anchor keywords of the full-capture solve (#15296).
+        self.stance_anchor: dict[str, float] = {}
+        self.girdle_range_deg: float | None = None
+        self.spin_prior_override: float | None = None
         #: Last pre-contact capture frame (GCV-20); the reference low-pass is
         #: split there. None filters across impact (no club triad observed).
         self.impact_index: int | None = None
@@ -425,6 +448,27 @@ class Lane:
             raise ValueError(f"Unknown restart policy {policy!r}; expected {known}")
         self.restart_policy = policy
 
+    def set_trajectory_convergence(
+        self, iterations: int | None, spin_prior_weight: float | None
+    ) -> None:
+        """Opt-in convergence settings of the full-capture solve (#15296).
+
+        ``iterations`` caps each frame's pose solve (the solver's own cap of 60
+        stops fast frames short of their optimum); ``spin_prior_weight``
+        replaces the weight that ties each spin coordinate to the previous
+        frame (at 360 Hz the document's weight makes fast forearm rotation
+        lag). ``None`` leaves either unchanged. Raises ``ValueError`` for a
+        cap under 1 or a negative weight.
+        """
+        if iterations is not None and iterations < 1:
+            raise ValueError(f"trajectory IK iterations must be >= 1, got {iterations}")
+        if spin_prior_weight is not None and not spin_prior_weight >= 0:
+            raise ValueError(f"spin prior weight must be >= 0, got {spin_prior_weight}")
+        self.ik_iterations = iterations
+        self.spin_prior_override = spin_prior_weight
+        if spin_prior_weight is not None:
+            self.prior_weights = dict.fromkeys(self.prior_weights, spin_prior_weight)
+
     def restart_settings(self, consecutive: bool = True) -> dict[str, Any]:
         """``solve_trajectory`` restart keywords for the active policy.
 
@@ -432,7 +476,8 @@ class Lane:
         are not one sample apart, so the joint-speed bound does not apply.
         """
         policy = self.restart_policy if consecutive else "free"
-        return {
+        capped = consecutive and self.ik_iterations is not None
+        return ({"iterations": self.ik_iterations} if capped else {}) | {
             "restarts": 0 if policy == "off" else TRAJECTORY_RESTARTS,
             "restart_threshold_m": TRAJECTORY_RESTART_THRESHOLD_M,
             "restart_margin_m": TRAJECTORY_RESTART_MARGIN_M,
@@ -461,6 +506,88 @@ class Lane:
             for name in POSTURE_PRIOR_COORDINATES
             if name in order
         }
+
+    def set_girdle_range(self, range_deg: float | None) -> None:
+        """Bound ``GIRDLE_COORDINATES`` to +/- ``range_deg`` about neutral
+        (#15296, off by default) in every solve that reads the lane's bounds.
+
+        Unbounded, the girdle absorbs the static gap between the skeleton and
+        the shoulder markers (the trail shoulder joint sat about 105 mm from
+        neutral all swing); bounded, the marker offsets and the thorax take it.
+        The range must lie inside every document girdle range, so it can only
+        tighten: raises ``ValueError`` outside ``(0, GIRDLE_RANGE_MAX_DEG]``.
+        """
+        if range_deg is None:
+            return
+        if not 0.0 < range_deg <= GIRDLE_RANGE_MAX_DEG:
+            raise ValueError(
+                f"girdle range must be in (0, {GIRDLE_RANGE_MAX_DEG}] deg, "
+                f"got {range_deg}"
+            )
+        self.girdle_range_deg = float(range_deg)
+        limit = float(np.radians(range_deg))
+        self.bounds |= dict.fromkeys(GIRDLE_COORDINATES, (-limit, limit))
+
+    def stance_settings(self, consecutive: bool = True) -> dict[str, Any]:
+        """Stance keywords of a solve. With ``stance_slide`` (#15296, off by
+        default) the full-capture solve keeps the stance spheres on the ground
+        but does not anchor them where they first touched: the anchor is 100
+        times stiffer than a marker and the capture's feet roll and pivot by
+        10 to 25 mm in the downswing. Calibration subsets stay planted."""
+        stance = planted_stance(self)
+        if not consecutive:
+            return stance
+        if not self.stance_slide:
+            return stance | self.stance_anchor
+        return stance | {"plant_stance": False, "anchor_stance_at_init": False}
+
+    def set_stance_anchor(self, weight: float | None, slide_mm: float | None) -> None:
+        """Soften the stance anchor of the full-capture solve and of its
+        consistency re-solve (#15296, off by default): ``weight`` is that of a
+        planted sphere's in-plane slide (1 is a marker; the legacy anchor is
+        the ground weight, 100) and ``slide_mm`` the slide left free of it. The
+        sphere stays on the ground at the ground weight either way; a sphere
+        the capture lifts is released as before. With ``stance_slide`` the
+        first solve has no anchor and only the re-solve is softened.
+        Raises ``ValueError`` on a negative or non-finite value."""
+        given = {"anchor_weight": weight, "anchor_slide_m": slide_mm}
+        for value in given.values():
+            if value is not None and not (np.isfinite(value) and value >= 0):
+                raise ValueError(
+                    f"stance anchor weight and slide must be finite and >= 0: {given}"
+                )
+        scale = {"anchor_weight": 1.0, "anchor_slide_m": 1e-3}
+        self.stance_anchor = {
+            key: scale[key] * float(value)
+            for key, value in given.items()
+            if value is not None
+        }
+
+    def address_pose_frames(
+        self, frames: Sequence[int] | None
+    ) -> list[dict[str, tuple[float, float]] | None] | None:
+        """``address_pose_prior`` on the first frame of a full-capture solve;
+        ``None`` without targets or for a calibration subset."""
+        if frames is not None or not self.address_pose_prior:
+            return None
+        rest: list[dict[str, tuple[float, float]] | None] = [None] * (self.frames - 1)
+        return [dict(self.address_pose_prior), *rest]
+
+    def convergence_report(self) -> dict[str, Any]:
+        """Receipt block of ``set_trajectory_convergence``; empty when not opted in."""
+        opted = {
+            "iterations": self.ik_iterations,
+            "spin_prior_weight": self.spin_prior_override,
+            "free_stance_slide": True if self.stance_slide else None,
+            "stance_anchor_weight": self.stance_anchor.get("anchor_weight"),
+            "stance_slide_mm": (
+                None
+                if "anchor_slide_m" not in self.stance_anchor
+                else 1e3 * self.stance_anchor["anchor_slide_m"]
+            ),
+            "girdle_range_deg": self.girdle_range_deg,
+        }
+        return {key: value for key, value in opted.items() if value is not None}
 
     def restart_report(self) -> dict[str, Any]:
         """Receipt block naming the restart policy and its bound (#12042)."""
@@ -642,9 +769,8 @@ class Lane:
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
         """Leg marker seeds; forefoot markers squared when foot progression is on."""
-        if self.feet is None:
-            return dict(LEG_SEEDS)
-        return dict(square_forefoot_seeds(LEG_SEEDS))
+        seeds = base_leg_seeds(self)
+        return dict(seeds if self.feet is None else square_forefoot_seeds(seeds))
 
     @property
     def rate_hz(self) -> float:
@@ -773,7 +899,7 @@ class Lane:
             ground=self.ground,
             frames=frames,
             prior_weight=PRIOR,
-            **planted_stance(self),
+            **self.stance_settings(consecutive=frames is None),
             bounds=self.bounds,
             marker_weights={**self.marker_weights, **self.split_marker_weights},
             prior_weights=self.prior_weights,
@@ -781,6 +907,7 @@ class Lane:
                 axis_targets, self.face_targets, self.thorax_targets
             ),
             posture_prior=None if frames else self.posture_prior(kin, q_start),
+            posture_prior_per_frame=self.address_pose_frames(frames),
             **self.restart_settings(consecutive=frames is None),
         )
 
@@ -859,3 +986,69 @@ def probe_pink_capability() -> tuple[bool, dict[str, Any]]:
         msg = f"Required packages unavailable: {', '.join(missing)}"
         return False, {"available": False, "missing": missing, "reason": msg}
     return True, {"available": True, "missing": [], "reason": "ok"}
+
+
+def add_trajectory_convergence_arguments(parser: Any) -> None:
+    """``--ik-iterations``, ``--ik-spin-prior-weight`` and
+    ``--ik-free-stance-slide`` and ``--ik-girdle-range-deg`` (#15296), all
+    off by default."""
+    parser.add_argument(
+        "--ik-girdle-range-deg",
+        type=float,
+        default=None,
+        help=(
+            "bound the four shoulder-girdle coordinates to +/- this many degrees "
+            "about neutral in every solve (default: the document's ranges)"
+        ),
+    )
+    parser.add_argument(
+        "--ik-free-stance-slide",
+        action="store_true",
+        help=(
+            "full-capture solve: keep the stance spheres on the ground without "
+            "anchoring them where they first touched (default: anchored)"
+        ),
+    )
+    parser.add_argument(
+        "--ik-stance-anchor-weight",
+        type=float,
+        default=None,
+        help=(
+            "full-capture solve and its consistency re-solve: weight of a planted "
+            "stance sphere's in-plane slide, 1 being a marker (default: 100)"
+        ),
+    )
+    parser.add_argument(
+        "--ik-stance-slide-mm",
+        type=float,
+        default=None,
+        help=(
+            "full-capture solve and its consistency re-solve: slide of a planted "
+            "stance sphere from its anchor that is left free, mm (default: 0)"
+        ),
+    )
+    parser.add_argument(
+        "--ik-iterations",
+        type=int,
+        default=None,
+        help="iteration cap of each full-capture pose solve (default: the solver's 60)",
+    )
+    parser.add_argument(
+        "--ik-spin-prior-weight",
+        type=float,
+        default=None,
+        help=(
+            "weight tying each arm spin coordinate to the previous frame in the "
+            "full-capture solve (default: the document's)"
+        ),
+    )
+
+
+def apply_stance_arguments(lane: Lane, args: Any) -> None:
+    """Hand ``lane`` the stance flags of ``args`` (#15296): the free slide of
+    the first full-capture solve and the soft anchor of every planted one."""
+    lane.stance_slide = bool(getattr(args, "ik_free_stance_slide", False))
+    lane.set_stance_anchor(
+        getattr(args, "ik_stance_anchor_weight", None),
+        getattr(args, "ik_stance_slide_mm", None),
+    )

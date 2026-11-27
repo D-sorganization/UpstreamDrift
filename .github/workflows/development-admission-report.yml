@@ -27,5 +27,5 @@ jobs:
       trusted_provider_commit: 5c573e3804494b47bf71c639107ae80f2cd4d6da
       trusted_bundle_sha256: 5a2efd76cd0771e7437c58b6af23346501ee6d3d289f927220d51e257b86236b
     secrets:
-      provider_app_id: ${{ secrets.JULES_APP_ID }}
-      provider_app_private_key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+      provider_app_id: ${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}
+      provider_app_private_key: ${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}

@@ -4,9 +4,7 @@
 # Before using in any shared or internet-facing environment:
 #   - Change port bindings from 127.0.0.1 to an appropriate reverse-proxy.
 #   - Remove or set GOLF_AUTH_DISABLED=false if present in your .env.
-#   - Remove --reload from the uvicorn command.
-version: "3.8"
-
+#   - Do not load docker-compose.override.yml (it enables uvicorn --reload).
 # Shared by the three model-explorer services (UpstreamDrift #12878 D). See
 # docs/development/DOCKER_SETUP.md ("Model Explorer in Docker").
 x-explorer-common: &explorer-common
@@ -14,7 +12,7 @@ x-explorer-common: &explorer-common
     context: .
     dockerfile: Dockerfile.modular
     # Host prune jobs skip images labelled keep (they take 25+ min to rebuild
-    # over the ControlTower WAN).
+    # over the <host> WAN).
     labels:
       keep: "true"
     args:
@@ -48,16 +46,14 @@ services:
       - ./data:/workspace/data
     environment:
       - PYTHONPATH=/workspace
-      - PATH=/home/golfer/.local/bin:/opt/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PATH=/opt/venv/bin:/usr/local/bin:/usr/bin:/bin
       - DATABASE_URL=sqlite:////workspace/golf_modeling_suite.db
       - API_HOST=0.0.0.0
       - API_PORT=8001
       - ENVIRONMENT=development
       - MUJOCO_GL=${MUJOCO_GL:-osmesa}
-    # Override the image ENTRYPOINT (the prod uvicorn wrapper, #7129) so this
-    # dev `command` with --reload is run directly rather than passed as args.
-    entrypoint: []
-    command: python3 -m uvicorn src.api.server:app --host 0.0.0.0 --port 8001 --reload
+    # The image ENTRYPOINT (the prod uvicorn wrapper, #7129) runs by default.
+    # Dev-only `--reload` lives in docker-compose.override.yml (#15763).
     restart: unless-stopped
     working_dir: /workspace
     healthcheck:
@@ -200,7 +196,7 @@ services:
     command: ["gui"]
     shm_size: "1gb"
 
-  # --- Images other ControlTower jobs expect (ct-run.sh) ---------------------
+  # --- Images other <host> jobs expect (ct-run.sh) ---------------------
   # `build:` as well as `image:`, so a pruned image is rebuilt on demand and never
   # becomes a failed pull. `scripts/docker/explorer.sh ensure` does this for you.
   # ud-sim:latest = the explorer base (all engines + Qt + EGL + ffmpeg); its

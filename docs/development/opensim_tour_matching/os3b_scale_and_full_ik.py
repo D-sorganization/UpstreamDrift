@@ -1,6 +1,6 @@
 """OS-3b: OpenSim segment scaling, marker calibration, and full 654-frame IK.
 
-Runs where ``import opensim`` succeeds (e.g. ControlTower opensim-10003 venv).
+Runs where ``import opensim`` succeeds (e.g. <host> opensim-10003 venv).
 1. Computes segment scale factors from frame 0 marker pairs and audits rigid assumption.
 2. Scales the OpenSim golf model segments.
 3. Calibrates 34 body-fixed marker offsets with alternating IK (retaining best iteration).

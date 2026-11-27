@@ -43,3 +43,16 @@ original imagery, image-space landmark overlays and package export.
 Historical model fitting and accepted simulation handoffs are tracked in #11235.
 See [Historical Capture Procedure](../development/historical-capture-procedure.md)
 for source provenance, capture procedures and the Tiger/Hogan processing record.
+
+## Player Appearance Models
+
+Tiger Woods and Ben Hogan presets can be exported through the current full-body
+MuJoCo pipeline with `model_appearance.player_models.export_player`. Supply
+`base_spec` to preserve an existing match, or omit it for a separately sized
+published-dimension candidate. See the [Model Reference](../development/player-models.tex)
+and [Visual Morphology Contract](../development/player-skin-morphology.tex).
+Likeness and segment proportions are authored estimates; motion is not trained.
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/proximal_distal_energy_transfer/index.html): *Proximal-to-Distal Energy Transfer*.

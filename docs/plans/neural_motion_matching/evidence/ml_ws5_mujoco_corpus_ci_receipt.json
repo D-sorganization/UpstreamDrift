@@ -1,0 +1,34 @@
+{
+  "content_digest": "2ee565af06e2d6d4dac60c8aa48b0ac74258f4098fb19e7f6244653f0bf6bccb",
+  "corpus_manifest_digest": "76cab2866280134e85d85b1924fd9f50a116d0bd532edd8906e40c0c9ab97a06",
+  "episode_count": 1,
+  "generator_seed": 137810,
+  "hand_fix_commit": "30025fe59a9f1feb2ba443a29cdff6361a45b9dd",
+  "held_out_strata": {
+    "club": [
+      "iron7"
+    ],
+    "contact": [
+      "no_contact"
+    ],
+    "geometry": [
+      "anthro_iron"
+    ]
+  },
+  "repo_commit_sha": "1929438431f38cd719f7ca67f6aedc0651af7b50",
+  "schema": "neural-mujoco-corpus-run/1.0.0",
+  "spec_sha256": "35c11e50499c1b9c71935e31e65a662bafbbe9f95aff5ae2409590a4dedf3c93",
+  "split_counts": {
+    "train": 1
+  },
+  "split_plan_digest": "bd994c8a8b5d5fa2c6464b201af72af71af2a0fcbd30b8e0af479883de1d31ef",
+  "split_ratios": {
+    "test": 0.15,
+    "train": 0.7,
+    "val": 0.15
+  },
+  "split_seed": 137810,
+  "store_manifest_digest": "774f52899b423c97d16244dafad38325464520321e345c6f7bfc171568d168bd",
+  "store_root": "tests/fixtures/neural_motion/ml_ws4_mujoco_corpus_ci",
+  "wall_clock_s": 0.004829024000002846
+}

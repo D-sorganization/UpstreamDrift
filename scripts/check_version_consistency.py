@@ -85,6 +85,18 @@ def _read_workspace_package_version(path: Path) -> str:
     return version
 
 
+def _read_cargo_package_version(path: Path) -> str:
+    """Return the [package] version field from a Cargo.toml manifest."""
+    data = _read_toml(path)
+    package = data.get("package")
+    if not isinstance(package, dict):
+        raise ValueError(f"{path} must contain a [package] table")
+    version = package.get("version")
+    if not isinstance(version, str) or not version:
+        raise ValueError(f"{path} must contain a non-empty package.version")
+    return version
+
+
 def _read_package_json_version(path: Path) -> str:
     if not path.is_file():
         raise ValueError(f"Required version file is missing: {path}")
@@ -278,6 +290,11 @@ def _collect_surfaces(repo_root: Path) -> tuple[VersionSurface, ...]:
             _read_json_version(repo_root / "ui" / "src-tauri" / "tauri.conf.json"),
         ),
         VersionSurface(
+            "ui/src-tauri/Cargo.toml",
+            repo_root / "ui" / "src-tauri" / "Cargo.toml",
+            _read_cargo_package_version(repo_root / "ui" / "src-tauri" / "Cargo.toml"),
+        ),
+        VersionSurface(
             "scripts/config/sbom_baseline.json",
             repo_root / "scripts" / "config" / "sbom_baseline.json",
             _read_json_version(repo_root / "scripts" / "config" / "sbom_baseline.json"),
@@ -441,6 +458,17 @@ def _set_ui_manifest_versions(repo_root: Path, target_version: str) -> None:
         data = json.loads(tauri_conf.read_text(encoding="utf-8"))
         data["version"] = target_version
         tauri_conf.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+    tauri_cargo = repo_root / "ui" / "src-tauri" / "Cargo.toml"
+    if tauri_cargo.is_file():
+        content = tauri_cargo.read_text(encoding="utf-8")
+        content = re.sub(
+            r'(?ms)(\[package\].*?^\s*version\s*=\s*")[^"]+(")',
+            rf"\g<1>{target_version}\g<2>",
+            content,
+            count=1,
+        )
+        tauri_cargo.write_text(content, encoding="utf-8")
 
 
 def _set_release_metadata_versions(

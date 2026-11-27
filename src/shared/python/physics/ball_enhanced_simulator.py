@@ -17,7 +17,10 @@ from typing import TYPE_CHECKING, Callable
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
-from src.shared.python.core.physics_constants import AIR_VISCOSITY_KG_M_S
+from src.shared.python.core.physics_constants import (
+    AIR_VISCOSITY_KG_M_S,
+    GOLF_BALL_SPIN_DRAG_SLOPE,
+)
 from src.shared.python.physics.aerodynamics import _rust_facade
 from src.shared.python.physics.aerodynamics._rust_facade import AerodynamicsSpec
 from src.shared.python.physics.atmosphere import (
@@ -32,7 +35,12 @@ from src.shared.python.physics.ball_launch_conditions import (
     LaunchConditions,
     TrajectoryPoint,
 )
-from src.shared.python.physics.ball_properties import BallProperties
+from src.shared.python.physics.ball_properties import (
+    MAX_LIFT_COEFFICIENT,
+    PENNER_LIFT_EXPONENT,
+    PENNER_LIFT_SCALE,
+    BallProperties,
+)
 from src.shared.python.physics.ball_trajectory_analysis import TrajectoryAnalysisMixin
 
 if TYPE_CHECKING:
@@ -323,6 +331,11 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
                 velocity, spin, t, position, gravity_acc
             )
 
+            forces_model = (
+                "custom_force_provider"
+                if self._force_provider is not None
+                else "aerodynamics_engine_integrated"
+            )
             trajectory.append(
                 TrajectoryPoint(
                     time=t,
@@ -330,6 +343,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
                     velocity=velocity.copy(),
                     acceleration=acceleration.copy(),
                     forces=forces,
+                    forces_model=forces_model,
                 )
             )
 
@@ -544,5 +558,20 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             results.append(analysis)
 
         return results
+
+    @property
+    def model_metadata(self) -> dict[str, object]:
+        """Return declared aerodynamic model family and effective parameters."""
+        return {
+            "drag_model": "reynolds_dimpled_sphere",
+            "base_cd": float(self.aero_config.drag_coefficient),
+            "spin_drag_slope": float(GOLF_BALL_SPIN_DRAG_SLOPE),
+            "lift_scale": PENNER_LIFT_SCALE,
+            "lift_exponent": PENNER_LIFT_EXPONENT,
+            "cl_max": min(
+                MAX_LIFT_COEFFICIENT, float(self.aero_config.magnus_coefficient)
+            ),
+            "spin_decay_rate": float(self.aero_config.spin_decay_rate),
+        }
 
     # Analysis methods are inherited from TrajectoryAnalysisMixin (DRY principle).

@@ -29,6 +29,10 @@ from src.shared.python.motion_matching.full_body_ik import (
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
 from src.shared.python.motion_matching.marker_kinematics import MarkerLinearization
+from src.shared.python.motion_matching.stance_anchor import (
+    SoftAnchor,
+    soft_anchor_rows,
+)
 
 Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
@@ -118,6 +122,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             coordinate_order=tuple(adapter.coordinate_order),
             labels=tuple(attachments),
         )
+        self.arm_mirrored = bool(adapter.arm_mirrored)
         mj: Any = adapter._mj
         self._mj = mj
         self.adapter = adapter
@@ -432,6 +437,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         jacs: list[Array],
         targets: Mapping[str, Array],
         weight: float,
+        soft: SoftAnchor | None = None,
     ) -> None:
         if weight <= 0 or not targets:
             return
@@ -441,8 +447,14 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             site = self._spheres[name][0]
             jp = np.zeros((3, nv))
             self._mj.mj_jacSite(self.model, self.data, jp, None, site)
-            rows.append(w * (self.data.site_xpos[site] - target))
-            jacs.append(w * jp[:, self._dof])
+            gap = self.data.site_xpos[site] - target
+            row, slope = (
+                (w * gap, w * jp[:, self._dof])
+                if soft is None
+                else soft_anchor_rows(gap, jp[:, self._dof], soft)
+            )
+            rows.append(row)
+            jacs.append(slope)
 
     def _append_balance(
         self, rows: list[Array], jacs: list[Array], ground: GroundPlane, weight: float
@@ -501,14 +513,19 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         return int(self._mj.mj_name2id(self.model, mjt_obj.mjOBJ_BODY, name))
 
     def _club_sole_world(self) -> Array:
-        """World sole point (spec club-body origin) at the current ``data`` pose."""
+        """World sole at the current ``data`` pose: the stated sole point
+        (#15296), else the spec club-body origin (#12969)."""
         name = self._club_body_name()
         if name is None:
             raise ValueError("model has no club body")
         body_id = self._club_body_id(name)
         frame = self.adapter.body_frames[name]
         rot_mj = self.data.xmat[body_id].reshape(3, 3)
-        return self.data.xpos[body_id] + rot_mj @ frame[:3, 3]
+        local = frame[:3, 3]
+        stated = self.adapter.club_sole_point_m
+        if stated is not None:
+            local = local + frame[:3, :3] @ np.asarray(stated)
+        return self.data.xpos[body_id] + rot_mj @ local
 
     def _append_club_sole(
         self,

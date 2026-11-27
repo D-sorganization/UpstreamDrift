@@ -7,6 +7,8 @@ the exact NSX-80 pendulum goldens (``variability_sensitivity.json``).
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -198,6 +200,32 @@ def test_event_outcome_rows_apply_the_event_projection() -> None:
     assert rows == pytest.approx(c_y @ event_projection(grad_g, flow), abs=1e-15)
     # A perturbation along the flow only shifts the event time: no outcome change.
     assert rows @ flow == pytest.approx(np.zeros(1), abs=1e-14)
+
+
+def _flow_at_transversality(trans: float) -> np.ndarray:
+    """Unit flow whose angle to the event normal ``[1, 0]`` gives ``trans``."""
+    return np.array([trans, math.sqrt(1.0 - trans**2)])
+
+
+def test_event_outcome_rows_refuse_a_near_grazing_impact() -> None:
+    from src.shared.python.loop_nullspace.event_section import (
+        GRAZING_TRANSVERSALITY,
+    )
+
+    flow = _flow_at_transversality(0.5 * GRAZING_TRANSVERSALITY)
+    with pytest.raises(ValueError, match="near-grazing"):
+        vp.event_outcome_rows(np.array([[0.4, 1.0]]), np.array([1.0, 0.0]), flow)
+
+
+def test_event_outcome_rows_accept_an_impact_just_above_the_grazing_gate() -> None:
+    from src.shared.python.loop_nullspace.event_section import (
+        GRAZING_TRANSVERSALITY,
+    )
+
+    flow = _flow_at_transversality(1.01 * GRAZING_TRANSVERSALITY)
+    rows = vp.event_outcome_rows(np.array([[0.4, 1.0]]), np.array([1.0, 0.0]), flow)
+    assert np.all(np.isfinite(rows))
+    assert rows @ flow == pytest.approx(np.zeros(1), abs=1e-12)
 
 
 # ----------------------------------------------------------------- golden

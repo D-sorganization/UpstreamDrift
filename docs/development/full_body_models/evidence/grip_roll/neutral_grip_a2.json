@@ -1,0 +1,215 @@
+{
+  "issue": 14551,
+  "convention": "face-on grip roll, motion_matching/grip_roll.py",
+  "target_roll_deg": 15.0,
+  "before_roll_deg": {
+    "lead": 97.85,
+    "trail": 107.98
+  },
+  "after_roll_deg": {
+    "lead": 15.0,
+    "trail": 15.0
+  },
+  "club_position_error_mm": 0.002,
+  "club_rotation_error_deg": 0.002,
+  "closure_error_mm": 0.001,
+  "sides": {
+    "lead": {
+      "total_deg": [
+        -75.3894,
+        -9.7161,
+        4.5795
+      ]
+    },
+    "trail": {
+      "total_deg": [
+        -75.3894,
+        -9.7161,
+        4.5795
+      ]
+    }
+  },
+  "swings_resolved": {
+    "swing_q_driver.npz": {
+      "frames": 908,
+      "outside_coordinate_ranges": {
+        "LWInputX": {
+          "frames": 130,
+          "min": -44.3,
+          "max": 47.8,
+          "range": [
+            -40.0,
+            25.0
+          ]
+        },
+        "LWInputY": {
+          "frames": 216,
+          "min": -92.5,
+          "max": -7.1,
+          "range": [
+            -70.0,
+            70.0
+          ]
+        },
+        "NeckInputZ": {
+          "frames": 4,
+          "min": -80.5,
+          "max": 70.1,
+          "range": [
+            -80.0,
+            80.0
+          ]
+        },
+        "RScapInputX": {
+          "frames": 378,
+          "min": -10.9,
+          "max": 37.4,
+          "range": [
+            -30.0,
+            10.0
+          ]
+        },
+        "RWInputX": {
+          "frames": 66,
+          "min": -77.2,
+          "max": 32.8,
+          "range": [
+            -40.0,
+            25.0
+          ]
+        },
+        "RWInputY": {
+          "frames": 691,
+          "min": -130.2,
+          "max": -14.0,
+          "range": [
+            -70.0,
+            70.0
+          ]
+        },
+        "hip_rotation_l": {
+          "frames": 22,
+          "min": -6.0,
+          "max": 40.6,
+          "range": [
+            -40.0,
+            40.0
+          ]
+        },
+        "hip_rotation_r": {
+          "frames": 43,
+          "min": -41.2,
+          "max": 15.5,
+          "range": [
+            -40.0,
+            40.0
+          ]
+        },
+        "mtp_angle_l": {
+          "frames": 47,
+          "min": -24.8,
+          "max": 62.6,
+          "range": [
+            -30.0,
+            30.0
+          ]
+        },
+        "mtp_angle_r": {
+          "frames": 13,
+          "min": -31.5,
+          "max": 30.0,
+          "range": [
+            -30.0,
+            30.0
+          ]
+        },
+        "subtalar_angle_l": {
+          "frames": 122,
+          "min": -19.1,
+          "max": 25.7,
+          "range": [
+            -20.0,
+            20.0
+          ]
+        },
+        "subtalar_angle_r": {
+          "frames": 40,
+          "min": -19.6,
+          "max": 20.5,
+          "range": [
+            -20.0,
+            20.0
+          ]
+        }
+      }
+    },
+    "ik_trajectory.npz": {
+      "frames": 654,
+      "outside_coordinate_ranges": {
+        "LScapInputX": {
+          "frames": 7,
+          "min": -15.9,
+          "max": 20.3,
+          "range": [
+            -10.0,
+            30.0
+          ]
+        },
+        "LWInputX": {
+          "frames": 114,
+          "min": -53.1,
+          "max": 48.4,
+          "range": [
+            -40.0,
+            25.0
+          ]
+        },
+        "LWInputY": {
+          "frames": 148,
+          "min": -87.8,
+          "max": -8.5,
+          "range": [
+            -70.0,
+            70.0
+          ]
+        },
+        "RFInput": {
+          "frames": 5,
+          "min": -40.4,
+          "max": 97.9,
+          "range": [
+            -90.0,
+            90.0
+          ]
+        },
+        "RScapInputX": {
+          "frames": 275,
+          "min": -14.8,
+          "max": 41.0,
+          "range": [
+            -30.0,
+            10.0
+          ]
+        },
+        "RWInputX": {
+          "frames": 146,
+          "min": -82.6,
+          "max": 34.2,
+          "range": [
+            -40.0,
+            25.0
+          ]
+        },
+        "RWInputY": {
+          "frames": 476,
+          "min": -131.2,
+          "max": -4.7,
+          "range": [
+            -70.0,
+            70.0
+          ]
+        }
+      }
+    }
+  }
+}

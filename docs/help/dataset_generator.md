@@ -96,6 +96,10 @@ prefix `/dataset`). That router exposes `POST /generate`,
 `POST /control/configure`, `GET /control/strategies`, `GET /features`,
 `POST /execute`, `GET /plots/types`, and `GET /export/formats`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - **The registry gives this tile an empty `path`, and that is

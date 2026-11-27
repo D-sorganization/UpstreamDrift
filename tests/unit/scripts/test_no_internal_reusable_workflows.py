@@ -23,12 +23,17 @@ INTERNAL_PREFIX = "D-sorganization/Repository_Management/.github/workflows/"
 PR_BODY_LINT_REUSABLE = (
     "D-sorganization/Repository_Management/.github/workflows/reusable-pr-body-lint.yml"
 )
-PR_BODY_LINT_PIN = "d3c5ff3fcb21e15997ca8668b8c9278e2e25dcff"
+PR_BODY_LINT_PIN = "3b5e9f54febbd730bc2a650dc9193d26922ff49f"
 FLEET_WORKFLOWS_CONFLICT_DISARM = (
     "D-sorganization/fleet-workflows/.github/workflows/reusable-conflict-disarm.yml"
 )
 # fleet-workflows commit that scopes the App token to the swept repo (#8).
 FLEET_WORKFLOWS_PIN = "367b182c24ae3b01488fc1266130969e775023de"
+# ``workflow_call.secrets`` of the provider at that pin. Re-read them on a pin bump.
+FLEET_WORKFLOWS_PIN_SECRETS = {
+    "JULES_APP_ID": "${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}",
+    "JULES_APP_PRIVATE_KEY": "${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}",
+}
 
 pytestmark = pytest.mark.unit
 
@@ -71,7 +76,7 @@ def test_pr_body_lint_calls_the_sha_pinned_rm_reusable() -> None:
     assert workflow == PR_BODY_LINT_REUSABLE
     assert ref == PR_BODY_LINT_PIN
     assert re.fullmatch(r"[0-9a-f]{40}", ref)
-    assert job["with"]["report_only"] == "true"
+    assert set(job["with"]) == {"pr_number", "repo_owner", "repo_name"}
     assert "steps" not in job
 
 
@@ -80,4 +85,12 @@ def test_conflict_disarm_keeps_dry_run_and_the_12634_exclusion() -> None:
 
     assert job["with"]["dry_run"] == "${{ inputs.dry_run || 'true' }}"
     assert job["with"]["exclude_prs"] == "${{ inputs.exclude_prs || '12634' }}"
-    assert set(job["secrets"]) == {"JULES_APP_ID", "JULES_APP_PRIVATE_KEY"}
+
+
+def test_conflict_disarm_passes_only_secrets_the_pinned_provider_declares() -> None:
+    """#15246: a key the called workflow does not declare fails every run at startup.
+
+    The provider still names its two optional secrets after the retired Jules App,
+    so the caller keeps those key names and feeds them the rotated credentials.
+    """
+    assert _conflict_disarm_job()["secrets"] == FLEET_WORKFLOWS_PIN_SECRETS

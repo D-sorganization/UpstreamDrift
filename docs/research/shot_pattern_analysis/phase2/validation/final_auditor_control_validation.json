@@ -69,7 +69,7 @@
       "scipy": "1.18.1"
     }
   },
-  "plan_sha256": "491a37dd430b4de0946089b75db11db5fe17016df3b98ff32d6c819f664af073",
+  "plan_sha256": "874256a4d6c88f5ed8e963679b10d67e7945d211b08ab1f4e8dafa18692a21cd",
   "script_sha256": "e7452f6dedb9e52191d31ebc405b99f58b359720c5c7f065f7a68cb8fe7dd86e",
   "audit_dependency_sha256": {
     "src/tools/shot_pattern_analysis/noise.py": "04fac647bc650f51d71e7ea4ffc716e9f42b80b5bc94714dd91c893cb3e6f097",

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { getApiBase } from '@/api/backend';
 import type { CharacterSpecRequestBody } from './characterSpecTypes';
+import { launcherFetch } from '../../api/launcherFetch';
 
 /**
  * Live spec-body preview (CMB-7f, #11658; the CMB-6 #11657 web viewer).
@@ -20,7 +21,7 @@ export async function fetchCharacterGltf(
   requestBody: CharacterSpecRequestBody,
   signal?: AbortSignal,
 ): Promise<string> {
-  const response = await fetch(`${getApiBase()}/api/character-builder/export/gltf`, {
+  const response = await launcherFetch(`${getApiBase()}/api/character-builder/export/gltf`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),

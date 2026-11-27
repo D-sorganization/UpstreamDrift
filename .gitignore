@@ -99,6 +99,7 @@ logs/
 
 # Binary models/data via LFS
 *.h5
+!tests/fixtures/neural_motion/ml_ws4_mujoco_corpus_ci/**/*.h5
 *.zip
 
 # Personal files

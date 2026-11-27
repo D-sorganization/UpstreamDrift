@@ -124,6 +124,7 @@ from .design import (
     WorkbenchInputError,
 )
 from .field import ContactPatch, SoleLoadField, contact_patch
+from .flight import bunker_flight
 from .shot3d import ShotScene, shot_scene
 from .objective import (
     MIN_RANKABLE_CONDITIONS,
@@ -236,14 +237,23 @@ def _sand_delivery(
         exit_speed_m_s=result.exit_speed_m_s,
         bed_relative_density=sand.relative_density,
         verdict=result.verdict,
-        exit_velocity_m_s=tuple(float(v) for v in result.exit_velocity_m_s),
+        exit_velocity_m_s=(
+            float(result.exit_velocity_m_s[0]),
+            float(result.exit_velocity_m_s[1]),
+            float(result.exit_velocity_m_s[2]),
+        ),
         exit_angular_velocity_rad_s=(
-            tuple(float(w) for w in result.exit_angular_velocity_rad_s)
+            (
+                float(result.exit_angular_velocity_rad_s[0]),
+                float(result.exit_angular_velocity_rad_s[1]),
+                float(result.exit_angular_velocity_rad_s[2]),
+            )
             if hasattr(result, "exit_angular_velocity_rad_s")
             else None
         ),
         exit_orientation=tuple(
-            tuple(float(x) for x in row) for row in result.exit_orientation
+            (float(row[0]), float(row[1]), float(row[2]))
+            for row in result.exit_orientation
         ),
     )
 
@@ -481,6 +491,7 @@ class WorkbenchModel:
                 "a refusal must carry the verdict that triggered it",
                 value=type(verdict).__name__,
             )
+            assert isinstance(verdict, ValidityVerdict)
             return ShotOutcome(
                 verdict=verdict,
                 fidelity_tier=FidelityTier.F0,
@@ -536,6 +547,23 @@ class WorkbenchModel:
             "carry",
             missing,
         )
+        flight = _try(
+            lambda: (
+                bunker_flight(
+                    carry.launch, refused=False, dt=self._settings.flight_time_step_s
+                )
+                if carry is not None and carry.launch is not None
+                else None
+            ),
+            "ball flight",
+            missing,
+        )
+        if carry is not None and flight is None:
+            if not any(reason.startswith("ball flight:") for reason in missing):
+                missing.append(
+                    "ball flight: release did not yield a usable flight and settled "
+                    "green rollout; no trajectory is reported"
+                )
         return ShotOutcome(
             verdict=result.verdict,
             fidelity_tier=result.fidelity_tier,
@@ -563,6 +591,7 @@ class WorkbenchModel:
             contact_patch=views.patch,
             scene=views.scene,
             traces=views.traces,
+            flight=flight,
             carry_m=None if carry is None else carry.carry_m,
             carry_verdict=None if carry is None else carry.verdict,
             carry_band=None if carry is None else carry.band,
@@ -741,6 +770,7 @@ class WorkbenchModel:
             verdict=launch.verdict,
             band=band,
             band_reasons=reasons,
+            launch=launch,
         )
 
     def _flight_carry_m(self, launch: BallLaunchResult) -> float:
@@ -759,17 +789,18 @@ class WorkbenchModel:
         from src.shared.python.physics.ball_simulator import BallFlightSimulator
 
         simulator = BallFlightSimulator()
-        trajectory = simulator.simulate_trajectory(
+        landing = simulator.simulate_landing(
             LaunchConditions(
                 velocity=launch.ball_speed_m_s,
                 launch_angle=launch.launch_angle_rad,
                 azimuth_angle=launch.azimuth_rad,
                 spin_rate=launch.spin_rate_rpm,
+                spin_axis=np.asarray(launch.spin_axis, dtype=float),
             ),
             max_time=_MAX_FLIGHT_TIME_S,
             dt=self._settings.flight_time_step_s,
         )
-        return float(simulator.analyze_trajectory(trajectory)["carry_distance"])
+        return math.hypot(float(landing[0]), float(landing[1]))
 
     # ---------------------------------------------------------- playability
 

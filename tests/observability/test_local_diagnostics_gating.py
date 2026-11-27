@@ -24,9 +24,11 @@ def production_client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
 
     environment.get_environment.cache_clear()
 
-    from src.api.local_server import create_local_app
+    from src.api.local_server import LAUNCHER_CSRF_HEADER, create_local_app
 
-    with TestClient(create_local_app()) as test_client:
+    app = create_local_app()
+    capability = {LAUNCHER_CSRF_HEADER: app.state.launcher_csrf_token}
+    with TestClient(app, headers=capability) as test_client:
         yield test_client
 
     environment.get_environment.cache_clear()

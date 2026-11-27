@@ -26,6 +26,23 @@ import numpy.typing as npt
 Array: TypeAlias = npt.NDArray[np.float64]
 IntArray: TypeAlias = npt.NDArray[np.int64]
 
+_CANONICAL_PHYSICAL_DECIMALS = 9
+
+
+def quantize_physical_scalar_for_canonical_identity(value: float) -> float:
+    """Round physical scalars so canonical hashes match across CPython builds."""
+
+    numeric = float(value)
+    if not math.isfinite(numeric):
+        raise ValueError("canonical physical scalar must be finite")
+    return round(numeric, _CANONICAL_PHYSICAL_DECIMALS)
+
+
+def _canonical_physical_vector(values: Array) -> list[float]:
+    return [
+        quantize_physical_scalar_for_canonical_identity(float(item)) for item in values
+    ]
+
 
 @dataclass(frozen=True)
 class JointSpec:
@@ -75,8 +92,8 @@ class SpatialModel:
                     "name": joint.name,
                     "parent": joint.parent,
                     "kind": joint.kind,
-                    "axis": joint.axis.tolist(),
-                    "offset_m": joint.offset_m.tolist(),
+                    "axis": _canonical_physical_vector(joint.axis),
+                    "offset_m": _canonical_physical_vector(joint.offset_m),
                     "region": joint.region,
                 }
                 for joint in self.joints
@@ -85,9 +102,13 @@ class SpatialModel:
                 {
                     "name": body.name,
                     "joint": body.joint,
-                    "mass_kg": body.mass_kg,
-                    "radius_m": body.radius_m,
-                    "com_offset_m": body.com_offset_m.tolist(),
+                    "mass_kg": quantize_physical_scalar_for_canonical_identity(
+                        body.mass_kg
+                    ),
+                    "radius_m": quantize_physical_scalar_for_canonical_identity(
+                        body.radius_m
+                    ),
+                    "com_offset_m": _canonical_physical_vector(body.com_offset_m),
                     "region": body.region,
                 }
                 for body in self.bodies

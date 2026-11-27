@@ -56,6 +56,10 @@ as a source format for the wider pipeline (33 landmarks, normalized
 coordinates, partial 3D via relative depth) is recorded in the
 [format matrix](../motion_pipeline/formats.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 - **Estimated landmarks are inference, not measurement.** A neural

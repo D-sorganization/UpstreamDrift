@@ -123,3 +123,4 @@ def test_receipt_fields_present() -> None:
     )
     assert isp.HYPOTHESIS_ID in doc["impedance_hypotheses"]
     assert {m["drive_mode"] for m in doc["modes"]} == {m.value for m in DriveMode}
+    assert "hill_cocontraction_sweep" in doc

@@ -62,6 +62,10 @@ initial seated pose at roughly 90 degrees of hip and knee flexion, no barbell,
 and the MuJoCo Z-up gravity convention. That is the sibling repository's
 documentation, not this repository's implementation.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/inverse-dynamics.html): *Inverse Dynamics*.
+
 ## Limitations
 
 - No sit-to-stand analysis code exists in this repository. This tile is a

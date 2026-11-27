@@ -168,6 +168,17 @@ def test_simscape_rows_apply_signs_and_reaxe_translations() -> None:
         simscape_rows(model.dof_names, q[:, :5], 60.0)
 
 
+def test_simscape_translation_round_trip_without_manual_remap() -> None:
+    """``simscape_angles_to_q`` must invert ``simscape_rows`` translation re-axing."""
+    model = golfer_model()
+    q = np.zeros((1, model.n_dof))
+    q[0, 0], q[0, 1], q[0, 2] = 0.1, 0.9, 0.3
+    rows = simscape_rows(model.dof_names, q, 60.0)
+    exported = {name: np.array([rows[0][name]]) for name in rows[0] if name != "time_s"}
+    back = simscape_angles_to_q(model, exported)
+    np.testing.assert_allclose(back[0, :3], q[0, :3], atol=1e-12)
+
+
 def test_simscape_angles_round_trip_through_the_export() -> None:
     model = golfer_model()
     rng = np.random.default_rng(5)
@@ -181,10 +192,6 @@ def test_simscape_angles_round_trip_through_the_export() -> None:
     }
     # Translations come back through the same world map.
     back = simscape_angles_to_q(model, exported)
-    back[:, :3] = (
-        np.column_stack([exported[f"TranslationStartPosition{a}"] for a in "XYZ"])
-        @ WORLD_SIMSCAPE_FROM_OURS
-    )
     for ours in SIMSCAPE_NAMES:
         np.testing.assert_allclose(back[:, col[ours]], q[:, col[ours]], atol=1e-12)
 

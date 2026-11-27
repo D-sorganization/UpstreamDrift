@@ -54,6 +54,10 @@ and FreeMoCap is AGPL. The rationale and the process diagram are in
 FreeMoCap's own landmark estimation is MediaPipe-based, and its
 `n_landmarks` is reported as 33 in the documented output contract.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 - **It is a command-line runner, not a GUI.** The module exposes an

@@ -3,6 +3,18 @@
 //! Computes drag and a single spin-induced Magnus/lift force using empirical correlations
 //! from golf ball aerodynamics literature.
 //!
+//! # World Frame and Spin Sign Convention
+//!
+//! The native kernel uses a right-handed world frame with **X** downrange (target
+//! direction), **Y** left, and **Z** up. Magnus/lift direction follows **ω × v**
+//! (relative air velocity). For a level **+X** shot, **backspin** is rotation about
+//! **−Y** (`ω_y < 0`), which produces upward Magnus (**+Z**). A **+Y** spin component
+//! with **+X** velocity is **topspin** and bends the trajectory downward (**−Z** Magnus).
+//!
+//! `compute_aero_forces` returns spin lift only in `AeroForces::magnus`. The `lift`
+//! field is intentionally zero so consumers do not double-count; `compute_lift` is the
+//! same transverse-spin kernel exposed for direct call sites and parity checks.
+//!
 //! # Design by Contract
 //! - All velocity/spin inputs must be finite (no NaN/Inf)
 //! - Air density must be positive
@@ -18,14 +30,56 @@ use tools_core::Vector3;
 
 const MIN_VALID_REYNOLDS: f64 = 1.0e3;
 const MAX_VALID_REYNOLDS: f64 = 1.0e7;
+// Drag crisis (#15443 F1): centre, width, recovery centre and the floor
+// `DEFAULT_POST_CRISIS_CD` are a least-squares fit to Choi, Jeon & Choi 2006,
+// Phys. Fluids 18, 041702, Fig. 1 (rms 0.008); mirrors Python `atmosphere.py`.
+/// Subcritical Cd (Bearman & Harvey 1976; Lyu et al. 2018). Held fixed.
 const CD_PRECRITICAL: f64 = 0.50;
-const RE_MIN_CD: f64 = 7.0e4;
+/// Crisis centre Reynolds number (Choi 2006 fit).
+const RE_MIN_CD: f64 = 7.59e4;
+/// High-Re asymptote Cd (Bearman & Harvey 1976, Mehta 1985). Held fixed.
 const CD_HIGH: f64 = 0.30;
-const TRANSITION_WIDTH: f64 = 0.16;
-const DRAG_CRISIS_RECOVERY_RE: f64 = 7.0e5;
+/// Crisis width in log10(Re) decades (Choi 2006 fit).
+const TRANSITION_WIDTH: f64 = 0.065;
+/// Recovery centre Reynolds number (Choi 2006 fit).
+const DRAG_CRISIS_RECOVERY_RE: f64 = 2.81e5;
+/// Recovery width in log10(Re) decades (Mehta 1985 shape). Held fixed.
+const RECOVERY_WIDTH: f64 = 0.45;
 const MAX_LIFT_COEFFICIENT: f64 = 0.26;
 const PENNER_LIFT_SCALE: f64 = 0.70;
 const PENNER_LIFT_EXPONENT: f64 = 0.645;
+/// Zero-spin drag floor (#15443): Choi 2006 fit, checked against Lyu et al.
+/// 2018. Mirrors Python `GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT` (sources there).
+pub const DEFAULT_POST_CRISIS_CD: f64 = 0.187;
+/// Drag rise per unit spin ratio (#15443): Smits & Smith 1994 `CD2 = 0.18`.
+/// Mirrors Python `GOLF_BALL_SPIN_DRAG_SLOPE` (sources there).
+pub const CD_SPIN_SLOPE: f64 = 0.18;
+
+/// Transverse spin rate ||ω × v̂|| [rad/s] used for Magnus/lift magnitude.
+///
+/// Equivalent to `||ω|| sin θ` where θ is the angle between spin and velocity.
+/// Goes smoothly to zero as ω aligns with v (rifle / gyro spin).
+#[must_use]
+fn transverse_spin_rate(velocity: &Vector3, spin: &Vector3, speed: f64) -> f64 {
+    if speed < 1e-6 {
+        return 0.0;
+    }
+    spin.cross(velocity).magnitude() / speed
+}
+
+/// Dimensionless spin parameter S = r · ||ω × v̂|| / |v| for Penner lift curves.
+#[must_use]
+fn spin_parameter_transverse(
+    velocity: &Vector3,
+    spin: &Vector3,
+    ball_radius: f64,
+    speed: f64,
+) -> f64 {
+    if speed < 1e-6 {
+        return 0.0;
+    }
+    ball_radius * transverse_spin_rate(velocity, spin, speed) / speed
+}
 
 /// Air properties at given atmospheric conditions.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -94,7 +148,7 @@ pub struct AeroBallProperties {
     pub radius: f64,
     /// Cross-sectional area [m²]
     pub area: f64,
-    /// Baseline drag coefficient (turbulent regime)
+    /// Zero-spin post-crisis drag floor; the kernel adds the spin term
     pub drag_coefficient: f64,
     /// Spin decay time constant [1/s]
     pub spin_decay_rate: f64,
@@ -108,7 +162,7 @@ impl Default for AeroBallProperties {
             mass: 0.04593,
             radius,
             area: std::f64::consts::PI * radius * radius,
-            drag_coefficient: 0.25,
+            drag_coefficient: DEFAULT_POST_CRISIS_CD,
             spin_decay_rate: 0.05,
         }
     }
@@ -193,7 +247,8 @@ pub fn compute_aero_forces(
         .expect("invalid aerodynamic ball properties");
     air.validate().expect("invalid air properties");
 
-    let drag = compute_drag(velocity, ball, air);
+    let drag = compute_drag(velocity, spin, ball, air);
+    // Legacy lift slot stays zero: combined kernels emit one spin force in `magnus`.
     let lift = Vector3::zero();
     let magnus = compute_magnus(velocity, spin, ball, air);
 
@@ -202,15 +257,22 @@ pub fn compute_aero_forces(
 
 /// Compute drag force opposing motion.
 ///
-/// F_drag = -0.5 * ρ * Cd * A * |v|² * v̂
+/// F_drag = -0.5 * ρ * Cd(Re, S) * A * |v|² * v̂ with the transverse spin
+/// ratio S of `spin` (see [`cd_spinning_ball`]).
 #[must_use]
-pub fn compute_drag(velocity: &Vector3, ball: &AeroBallProperties, air: &AirProperties) -> Vector3 {
+pub fn compute_drag(
+    velocity: &Vector3,
+    spin: &Vector3,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+) -> Vector3 {
     let speed = velocity.magnitude();
     if speed < 1e-6 {
         return Vector3::new(0.0, 0.0, 0.0);
     }
 
-    let cd = compute_drag_coefficient(speed, ball, air);
+    let spin_ratio = spin_parameter_transverse(velocity, spin, ball.radius, speed);
+    let cd = compute_drag_coefficient(speed, spin_ratio, ball, air);
     let f_mag = 0.5 * air.density * cd * ball.area * speed * speed;
 
     // Opposite to velocity direction
@@ -222,9 +284,9 @@ pub fn compute_drag(velocity: &Vector3, ball: &AeroBallProperties, air: &AirProp
     )
 }
 
-/// Compute lift force from backspin.
+/// Compute lift force from spin (same transverse-spin magnitude as `compute_magnus`).
 ///
-/// Lift direction: spin_axis × velocity (normalized)
+/// Lift direction: ω̂ × v (normalized). Uses ||ω × v̂|| in the Penner spin parameter.
 #[must_use]
 pub fn compute_lift(
     velocity: &Vector3,
@@ -238,11 +300,15 @@ pub fn compute_lift(
     }
 
     let spin_mag = spin.magnitude();
-    let spin_ratio = ball.radius * spin_mag / (speed + 1e-10);
+    if spin_mag < 1e-6 {
+        return Vector3::new(0.0, 0.0, 0.0);
+    }
+
+    let spin_ratio = spin_parameter_transverse(velocity, spin, ball.radius, speed);
     let cl = compute_lift_coefficient(spin_ratio);
 
     // Spin axis (unit vector)
-    let spin_inv = 1.0 / (spin_mag + 1e-10);
+    let spin_inv = 1.0 / spin_mag;
     let spin_axis = Vector3::new(spin.x * spin_inv, spin.y * spin_inv, spin.z * spin_inv);
 
     // Lift direction: spin_axis × velocity
@@ -265,7 +331,8 @@ pub fn compute_lift(
 
 /// Compute the single spin-induced Magnus/lift force.
 ///
-/// F_magnus = 0.5 * ρ * Cl * A * |v|² * (ω × v) / |ω × v|
+/// F_magnus = 0.5 * ρ * Cl(S) * A * |v|² * (ω × v) / |ω × v| with
+/// S = r · ||ω × v̂|| / |v| (transverse spin, zero when ω ∥ v).
 #[must_use]
 pub fn compute_magnus(
     velocity: &Vector3,
@@ -287,7 +354,7 @@ pub fn compute_magnus(
         return Vector3::new(0.0, 0.0, 0.0);
     }
 
-    let spin_param = ball.radius * spin_mag / speed;
+    let spin_param = spin_parameter_transverse(velocity, spin, ball.radius, speed);
     let cl = compute_magnus_coefficient(spin_param);
     let f_mag = 0.5 * air.density * cl * ball.area * speed * speed;
     let inv_norm = 1.0 / magnus_norm;
@@ -299,16 +366,37 @@ pub fn compute_magnus(
     )
 }
 
-/// Compute drag coefficient based on Reynolds number.
+/// Compute drag coefficient from Reynolds number and spin ratio.
 ///
 /// Golf ball dimples reduce drag at high Re through turbulent boundary
-/// layer transition.
+/// layer transition; spin adds drag linearly (see [`cd_spinning_ball`]).
 #[must_use]
-pub fn compute_drag_coefficient(speed: f64, ball: &AeroBallProperties, air: &AirProperties) -> f64 {
+pub fn compute_drag_coefficient(
+    speed: f64,
+    spin_ratio: f64,
+    ball: &AeroBallProperties,
+    air: &AirProperties,
+) -> f64 {
     let re = air.density * speed * (2.0 * ball.radius) / air.viscosity;
     let clamped_re = re.clamp(MIN_VALID_REYNOLDS, MAX_VALID_REYNOLDS);
-    cd_dimpled_sphere(clamped_re, ball.drag_coefficient)
+    cd_spinning_ball(clamped_re, spin_ratio.max(0.0), ball.drag_coefficient)
         .expect("clamped Reynolds number and validated ball Cd must be accepted")
+}
+
+/// Drag coefficient of a spinning golf ball (#15443).
+///
+/// `Cd = cd_dimpled_sphere(Re, base_cd) + CD_SPIN_SLOPE * S`, mirroring the
+/// Python `atmosphere.cd_spinning_ball`. Requires a finite `spin_ratio >= 0`;
+/// returns zero when `base_cd == 0`.
+pub fn cd_spinning_ball(reynolds: f64, spin_ratio: f64, base_cd: f64) -> Result<f64, String> {
+    if !spin_ratio.is_finite() || spin_ratio < 0.0 {
+        return Err("spin_ratio must be finite and non-negative".to_string());
+    }
+    let cd = cd_dimpled_sphere(reynolds, base_cd)?;
+    if cd == 0.0 {
+        return Ok(0.0);
+    }
+    Ok(cd + CD_SPIN_SLOPE * spin_ratio)
 }
 
 fn smoothstep_tanh(x: f64, x0: f64, width: f64) -> f64 {
@@ -353,7 +441,7 @@ pub fn cd_dimpled_sphere(reynolds: f64, base_cd: f64) -> Result<f64, String> {
     let crisis_blend = smoothstep_tanh(log_re, log_re_crisis, TRANSITION_WIDTH);
     let cd_crisis = CD_PRECRITICAL + (cd_floor - CD_PRECRITICAL) * crisis_blend;
 
-    let recovery_blend = smoothstep_tanh(log_re, log_re_recovery, 0.45);
+    let recovery_blend = smoothstep_tanh(log_re, log_re_recovery, RECOVERY_WIDTH);
     let cd = cd_crisis + (CD_HIGH - cd_floor) * recovery_blend;
 
     Ok(cd.clamp(0.15, 0.55))
@@ -453,7 +541,7 @@ impl AirProperties {
 #[pyo3::prelude::pymethods]
 impl AeroBallProperties {
     #[new]
-    #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=0.25, spin_decay_rate=0.05))]
+    #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=DEFAULT_POST_CRISIS_CD, spin_decay_rate=0.05))]
     fn py_new(
         mass: f64,
         radius: f64,
@@ -506,6 +594,14 @@ mod tests {
 
     fn default_ball() -> AeroBallProperties {
         AeroBallProperties::default()
+    }
+
+    /// Ball on the pre-#15443 0.25 floor, for anchors calibrated on it.
+    fn legacy_floor_ball() -> AeroBallProperties {
+        AeroBallProperties {
+            drag_coefficient: 0.25,
+            ..default_ball()
+        }
     }
 
     fn default_air() -> AirProperties {
@@ -576,7 +672,7 @@ mod tests {
         let v = Vector3::new(50.0, 0.0, 0.0);
         let ball = default_ball();
         let air = default_air();
-        let drag = compute_drag(&v, &ball, &air);
+        let drag = compute_drag(&v, &Vector3::zero(), &ball, &air);
 
         // Drag must oppose velocity (negative x)
         assert!(drag.x < 0.0, "Drag must oppose velocity: got {}", drag.x);
@@ -589,7 +685,7 @@ mod tests {
         let v = Vector3::new(0.0, 0.0, 0.0);
         let ball = default_ball();
         let air = default_air();
-        let drag = compute_drag(&v, &ball, &air);
+        let drag = compute_drag(&v, &Vector3::zero(), &ball, &air);
 
         assert!(drag.x.abs() < 1e-10);
         assert!(drag.y.abs() < 1e-10);
@@ -598,7 +694,8 @@ mod tests {
 
     #[test]
     fn test_drag_scales_with_speed_squared() {
-        let ball = default_ball();
+        // 4.15 was calibrated on the 0.25 floor; the recovery term depends on it.
+        let ball = legacy_floor_ball();
         let air = default_air();
 
         // Both speeds must be fully turbulent (Re > 2e5)
@@ -607,8 +704,8 @@ mod tests {
         let v1 = Vector3::new(80.0, 0.0, 0.0);
         let v2 = Vector3::new(160.0, 0.0, 0.0);
 
-        let drag1 = compute_drag(&v1, &ball, &air);
-        let drag2 = compute_drag(&v2, &ball, &air);
+        let drag1 = compute_drag(&v1, &Vector3::zero(), &ball, &air);
+        let drag2 = compute_drag(&v2, &Vector3::zero(), &ball, &air);
 
         // Both fully turbulent → same Cd → ratio should be (160/80)^2 = 4
         let ratio = drag2.x.abs() / drag1.x.abs();
@@ -622,23 +719,83 @@ mod tests {
     // ── Lift Tests ───────────────────────────────────────────────────────
 
     #[test]
-    fn test_lift_with_backspin() {
-        // Backspin (positive y-spin) with forward velocity (x direction)
-        // Should produce upward lift (positive z)
+    fn test_backspin_produces_upward_magnus_in_documented_frame() {
+        // Documented frame: +X downrange, +Y left, +Z up; backspin is −Y.
+        let v = Vector3::new(50.0, 0.0, 0.0);
+        let spin = Vector3::new(0.0, -300.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+
+        let magnus = compute_magnus(&v, &spin, &ball, &air);
+        assert!(
+            magnus.z > 0.01,
+            "backspin (−Y) must lift upward (+Z): got {}",
+            magnus.z
+        );
+        assert!(magnus.x.abs() < 1e-6 && magnus.y.abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_topspin_plus_y_produces_downward_magnus_for_plus_x_shot() {
         let v = Vector3::new(50.0, 0.0, 0.0);
         let spin = Vector3::new(0.0, 300.0, 0.0);
         let ball = default_ball();
         let air = default_air();
 
-        let lift = compute_lift(&v, &spin, &ball, &air);
-
-        // Lift should have a significant z-component
-        // spin_axis × velocity = (0,1,0) × (50,0,0) = (0,0,-50) — negative z
-        // Actually: (0,1,0) × (50,0,0) = (1*0 - 0*0, 0*50 - 0*0, 0*0 - 1*50) = (0, 0, -50)
-        // The magnitude matters, sign depends on cross product direction
+        let magnus = compute_magnus(&v, &spin, &ball, &air);
         assert!(
-            lift.magnitude() > 0.01,
-            "Backspin should produce non-zero lift"
+            magnus.z < -0.01,
+            "+Y topspin must produce downward Magnus: got {}",
+            magnus.z
+        );
+    }
+
+    #[test]
+    fn test_magnus_magnitude_uses_transverse_spin() {
+        let v = Vector3::new(50.0, 0.0, 0.0);
+        let rifle = Vector3::new(250.0, 0.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+
+        let magnus_rifle = compute_magnus(&v, &rifle, &ball, &air);
+        assert!(
+            magnus_rifle.magnitude() < 1e-6,
+            "ω ∥ v should yield zero Magnus, got {}",
+            magnus_rifle.magnitude()
+        );
+
+        let transverse = Vector3::new(250.0, 8.0, 0.0);
+        let magnus_near = compute_magnus(&v, &transverse, &ball, &air);
+        assert!(
+            magnus_near.magnitude() > 0.01,
+            "small transverse component should restore Magnus"
+        );
+    }
+
+    #[test]
+    fn test_magnus_magnitude_continuous_near_rifle_spin() {
+        let v = Vector3::new(50.0, 0.0, 0.0);
+        let ball = default_ball();
+        let air = default_air();
+        let omega = 250.0;
+
+        let epsilons = [5.0, 1.0, 0.1, 1e-2, 1e-4, 1e-6, 0.0];
+        let mut prev =
+            compute_magnus(&v, &Vector3::new(omega, epsilons[0], 0.0), &ball, &air).magnitude();
+        for eps in epsilons.iter().skip(1) {
+            let spin = Vector3::new(omega, *eps, 0.0);
+            let mag = compute_magnus(&v, &spin, &ball, &air).magnitude();
+            assert!(
+                mag <= prev + 1e-9,
+                "Magnus magnitude should decrease smoothly as ω aligns with v"
+            );
+            prev = mag;
+        }
+        let full_transverse =
+            compute_magnus(&v, &Vector3::new(0.0, omega, 0.0), &ball, &air).magnitude();
+        assert!(
+            prev < full_transverse * 0.05,
+            "near-rifle spin should be much weaker than pure topspin"
         );
     }
 
@@ -746,7 +903,7 @@ mod tests {
         let ball = default_ball();
         let air = default_air();
 
-        let drag = compute_drag(&v, &ball, &air);
+        let drag = compute_drag(&v, &Vector3::zero(), &ball, &air);
 
         // Dot product of drag and velocity should be negative (opposing)
         let dot = drag.x * v.x + drag.y * v.y + drag.z * v.z;
@@ -757,12 +914,12 @@ mod tests {
 
     #[test]
     fn test_drag_coefficient_laminar() {
-        let ball = default_ball();
+        let ball = legacy_floor_ball();
         let air = default_air();
         // Very low speed → laminar → Cd = 0.5
-        let cd = compute_drag_coefficient(1.0, &ball, &air);
+        let cd = compute_drag_coefficient(1.0, 0.0, &ball, &air);
         assert!(
-            (cd - 0.500_001_242_489_331_1).abs() < 1e-12,
+            (cd - 0.500_007_278_123_134_7).abs() < 1e-12,
             "Laminar Cd should match the Python dimpled-sphere curve, got {}",
             cd
         );
@@ -770,11 +927,11 @@ mod tests {
 
     #[test]
     fn test_drag_coefficient_matches_python_drag_crisis_curve() {
-        let ball = default_ball();
+        let ball = legacy_floor_ball();
         let air = default_air();
-        let cd = compute_drag_coefficient(100.0, &ball, &air);
+        let cd = compute_drag_coefficient(100.0, 0.0, &ball, &air);
         assert!(
-            (cd - 0.257_787_143_359_211_3).abs() < 1e-12,
+            (cd - 0.275_676_454_138_666_4).abs() < 1e-12,
             "Rust Cd should match Python cd_dimpled_sphere at golf launch Re, got {}",
             cd
         );
@@ -783,12 +940,12 @@ mod tests {
     #[test]
     fn test_cd_dimpled_sphere_python_parity_anchors() {
         let cases = [
-            (1.0e3, 0.500_000_161_176_627_4),
-            (1.0e4, 0.500_007_263_990_912_3),
-            (4.0e4, 0.488_763_716_427_621_5),
-            (7.0e4, 0.375_580_365_822_265_2),
-            (7.0e5, 0.275_000_931_659_821_1),
-            (1.0e7, 0.299_706_757_892_032_6),
+            (1.0e3, 0.500_000_938_587_036_6),
+            (1.0e4, 0.500_079_797_031_805_9),
+            (4.0e4, 0.501_086_585_301_479_8),
+            (7.0e4, 0.439_887_227_582_845_43),
+            (7.0e5, 0.292_671_378_568_654_77),
+            (1.0e7, 0.299_949_391_121_969_44),
         ];
 
         for (reynolds, expected) in cases {
@@ -808,6 +965,26 @@ mod tests {
         assert!(cd_dimpled_sphere(1.0e8, 0.25).is_err());
         assert!(cd_dimpled_sphere(1.0e5, f64::INFINITY).is_err());
         assert!(cd_dimpled_sphere(1.0e5, -0.01).is_err());
+    }
+
+    #[test]
+    fn test_spin_adds_linear_drag_on_production_floor() {
+        assert_eq!(default_ball().drag_coefficient, DEFAULT_POST_CRISIS_CD);
+        let base = cd_dimpled_sphere(1.5e5, DEFAULT_POST_CRISIS_CD).unwrap();
+        let spun = cd_spinning_ball(1.5e5, 0.2, DEFAULT_POST_CRISIS_CD).unwrap();
+        assert!((spun - base - CD_SPIN_SLOPE * 0.2).abs() < 1e-15);
+        assert_eq!(cd_spinning_ball(1.5e5, 0.2, 0.0).unwrap(), 0.0);
+        assert!(cd_spinning_ball(1.5e5, -0.1, 0.2).is_err());
+        assert!(cd_spinning_ball(1.5e5, f64::NAN, 0.2).is_err());
+    }
+
+    #[test]
+    fn test_backspin_raises_drag_force() {
+        let (ball, air) = (default_ball(), default_air());
+        let v = Vector3::new(60.0, 0.0, 0.0);
+        let still = compute_drag(&v, &Vector3::zero(), &ball, &air).magnitude();
+        let spun = compute_drag(&v, &Vector3::new(0.0, -300.0, 0.0), &ball, &air).magnitude();
+        assert!(spun > still);
     }
 
     #[test]

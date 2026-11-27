@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.engine_registry import EngineStatus, EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -70,8 +70,8 @@ class EngineWorkflowAdapter:
                 payload={"available": False, "error": f"Unknown engine: {engine_name}"},
             )
 
-        available_engines = self._engine_manager.get_available_engines()
-        is_available = engine_type in available_engines
+        status = self._engine_manager.get_engine_status(engine_type)
+        is_available = status in (EngineStatus.AVAILABLE, EngineStatus.LOADED)
         return EngineWorkflowResult(
             ok=True,
             payload={

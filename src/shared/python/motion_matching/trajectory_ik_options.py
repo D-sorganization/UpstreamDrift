@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from typing import Any
+from typing import Any, Literal
 
 from src.shared.python.motion_matching.marker_calibration import Array
 
@@ -37,12 +37,15 @@ class TrajectoryIkOptions:
     reg_weight: float = 1e-3
     max_nfev: int = 50
     coordinate_bounds: CoordinateBounds | None = None
+    method: Literal["lm", "trf"] | None = None
 
     def __post_init__(self) -> None:
         if self.closure_weight < 0:
             raise ValueError("closure_weight must be non-negative")
         if self.reg_weight < 0:
             raise ValueError("reg_weight must be non-negative")
+        if self.method is not None and self.method not in ("lm", "trf"):
+            raise ValueError(f"Unknown trajectory IK method: {self.method}")
 
 
 def resolve_trajectory_options(

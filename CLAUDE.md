@@ -6,8 +6,6 @@
 
 `CLAUDE.md` is the authoritative contributor and agent policy file.
 
-> **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
-> Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
 > PRs target `main`. Use focused topic branches such as `fix/...`, `feat/...`, `chore/...`, or `claude/...`.
 
 ## Engineering Design Manual Authority
@@ -63,9 +61,8 @@ Short version:
 
 4. **Priority order** (see `Repository_Management/shared_scripts/agent_identity.py`):
    `user > maxwell-daemon > claude > codex > jules > local > gaai`. The
-   `Jules-Redundant-PR-Closer` workflow in this repo enforces this — when
-   two agents file PRs against the same issue, the lower-priority PR is
-   auto-closed with a deferral comment.
+   Fleet agent identity policy defines the order; duplicate PR handling is
+   managed by the Repository_Management tooling.
 
 5. **The `Agent-Lease-Reaper` runs every 30 minutes from `Repository_Management`** and sweeps stale claims fleet-wide. Manual release via a `<!-- agent-lease v1 release -->` comment is welcome but not required.
 
@@ -281,11 +278,6 @@ Repository-hygiene tests at `tests/unit/repo_hygiene/` enforce this:
 - `test_no_deprecated_imports.py` — fails if any `src/` or `tests/` file imports `upstream_drift_tools` (Stage 2+)
 
 See issue #5623, #5619.
-
-## Slash Commands
-
-- `/gaai-deliver` — Run Delivery Loop for next ready backlog item
-- `/gaai-status` — Show current backlog and memory state
 
 ## Closing issues — non-negotiable rule
 

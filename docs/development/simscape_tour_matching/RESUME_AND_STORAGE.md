@@ -10,13 +10,13 @@ Removal exposed borrowed Git-object dependencies between submodules. Verified ar
 
 [Cleanup Verification](worktree-cleanup-verification-20260910.json) records all removed paths and preserved branch checks; the accompanying cleanup and alternate-reference receipts retain intermediate refusals and recovery actions. Recreate a removed tree with `git worktree add <new-path> <preserved-branch>` and initialize its submodules. Raw submodule Git archives provide additional recovery history; their historical worktree paths must be adjusted when restoring elsewhere.
 
-[Matching Resumption Plan](RESUMPTION_PLAN.md) defines the next bounded assignment: extend original-state 0.6 s to 0.7 s on DeskComputer R2025b, using the existing cubic runner, identity-checked transfer, cold replay and all-27 audit. A lower-cost coding agent can perform this prescribed execution and evidence collection. Geometry, attachment choices, convergence diagnosis and final scientific acceptance still need stronger review. No new fit or agent was launched in this cleanup/plan turn.
+[Matching Resumption Plan](RESUMPTION_PLAN.md) defines the next bounded assignment: extend original-state 0.6 s to 0.7 s on <host> R2025b, using the existing cubic runner, identity-checked transfer, cold replay and all-27 audit. A lower-cost coding agent can perform this prescribed execution and evidence collection. Geometry, attachment choices, convergence diagnosis and final scientific acceptance still need stronger review. No new fit or agent was launched in this cleanup/plan turn.
 
 ## Saved Matching State
 
 Epic #9921 and draft PR #9948 remain unfinished. MATLAB R2025b is required. All source changes preceding this checkpoint are published on `feat/9921-simscape-tour-matching`; use the commit containing this document for the recovery snapshot. The main clone and other tasks have unrelated dirty work; this checkpoint does not claim they are committed.
 
-The two latest fit/cold-audit pipelines completed on DeskComputer with explicit exit codes zero. No MATLAB fitting process was observed during this review. Preserve remote runtime checkouts and experiment folders. Historical running/pending text below the newest AGENT_HANDOFF section is superseded.
+The two latest fit/cold-audit pipelines completed on <host> with explicit exit codes zero. No MATLAB fitting process was observed during this review. Preserve remote runtime checkouts and experiment folders. Historical running/pending text below the newest AGENT_HANDOFF section is superseded.
 
 | Experiment                    | Interval | Marker RMS   | p95          | Maximum      | Cold Replay                              |
 | ----------------------------- | -------- | ------------ | ------------ | ------------ | ---------------------------------------- |
@@ -30,7 +30,7 @@ Both optimizers exhausted their budgets without convergence. These are partial f
 Longest verified forward candidate:
 
 - Local extracted run: `C:/Users/diete/Repositories/simscape-tour-checkpoints/prefix-600ms-cubic-refine-02`.
-- DeskComputer original run: `C:/Users/diete/SimscapeTour9921/prefix-600ms-cubic-refine-02`.
+- <host> original run: `C:/Users/diete/SimscapeTour9921/prefix-600ms-cubic-refine-02`.
 - Full controls, initial-state identity and predicted marker arrays: `first_prefix_fit.json` in that run. Normalized Bernstein controls are in `stage.parameters`, with scales, duration and coordinate order in the report. The existing replay routine converts these into native A�G polynomial coefficients.
 - Native simulation logs: `final_native_replay.mat` and `qualified_candidate_replay.mat`.
 - Comparison chart: [Refined 0.6 s Fit](native_evidence/prefix_600ms_refined_fit.png).
@@ -41,7 +41,7 @@ The chart shows marker residuals, optimization evaluations and torque ranges. It
 
 Complete ZIP archives exist on both machines. SHA256 and every archived file hash are in the receipts. Archive hashes were compared across machines and every ZIP CRC checked. Do not replace these immutable bundles; save subsequent runs under new names.
 
-## Resume on DeskComputer
+## Resume on <host>
 
 Use SSH over Tailscale with `ssh -o BatchMode=yes -o StrictHostKeyChecking=yes deskcomputer`. Explicit MATLAB: `C:/Program Files/MATLAB/R2025b/bin/matlab.exe`. Python engine environment: `C:/Users/diete/SimscapeTour9921/python-r2025b/Scripts/python.exe`.
 
@@ -72,7 +72,7 @@ Measurements on 2026-09-10 are a snapshot; unrelated processes changed Windows f
 ## Recovery Order
 
 1. Remove only approved completed worktrees after checking no task/process still uses them, verifying unchanged HEAD/clean status and checking ignored artifacts. Use `git worktree remove` on verified absolute paths within `C:/Users/diete/Repositories`; preserve branches for recreation. Git refuses normal removal of initialized submodules. For this cleanup, explicit `git worktree remove --force` is permitted only after clean parent/submodule and artifact checks, exact merged-head verification, and CRC/SHA-verified backups of submodule Git histories. Do not use shell recursive deletion or delete the main clone/shared Git directory. Dirty or uncertain trees stay intact.
-2. Recheck Windows free space. The matching evidence and remote R2025b execution do not depend on Ubuntu, so model work can resume through DeskComputer after the local checkpoint is safe.
+2. Recheck Windows free space. The matching evidence and remote R2025b execution do not depend on Ubuntu, so model work can resume through <host> after the local checkpoint is safe.
 3. Diagnose Ubuntu's actual I/O problem before further writes. Save critical Linux work to another device/host if accessible. A controlled shutdown/restart interrupts WSL workloads and requires coordination. If filesystem repair is necessary, follow Microsoft's offline VHD procedure after preserving a backup; do not guess the block-device name.
 4. After the filesystem is healthy, inspect Linux caches, build outputs and obsolete worktrees, remove approved content, then trim free blocks and compact the detached VHD. The approximately 41 GiB gap between VHD length and rounded guest usage is not a guaranteed reclaim amount. Compaction cannot recover the 293 GiB still occupied by live files.
 5. A longer-term option is to move/export the distribution to another disk with adequate capacity. Only C: was available in this review. Do not unregister Ubuntu as a cleanup shortcut.

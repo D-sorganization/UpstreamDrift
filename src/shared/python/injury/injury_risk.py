@@ -5,8 +5,8 @@
 """
 Injury Risk Scoring Module
 
-Aggregates all injury risk factors into comprehensive risk scores with
-evidence-based thresholds and recommendations.
+Aggregates biomechanical screening factors into composite scores. Numeric bands
+are heuristic defaults for relative comparison, not validated clinical thresholds.
 
 This module combines:
 - Spinal load analysis (compression, shear, torsion)
@@ -25,6 +25,9 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.injury.heuristic_disclaimers import (
+    INJURY_RISK_SCORER_LIMITATIONS,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -91,13 +94,17 @@ class InjuryRiskReport:
     # Confidence level (based on data quality)
     confidence: float = 1.0
 
+    # Honesty label surfaced to UI and reports (#15011).
+    limitations: str = ""
+
 
 class InjuryRiskScorer:
     """
     Comprehensive injury risk scoring system.
 
-    Combines multiple biomechanical risk factors into actionable risk scores
-    with evidence-based thresholds from golf injury literature.
+    Combines multiple biomechanical screening factors into composite scores.
+    Weights and cutoffs are unvalidated heuristics for engineering comparison,
+    not clinical injury thresholds.
 
     Example:
         >>> scorer = InjuryRiskScorer()
@@ -107,7 +114,7 @@ class InjuryRiskScorer:
         ...     print(f"  - {rec}")
     """
 
-    # Risk factor weights (based on injury prevalence in golf)
+    # Screening weights (golf injury prevalence informed; not validated for diagnosis)
     WEIGHTS = {
         InjuryType.LOW_BACK: 0.35,  # Most common (25-58%)
         InjuryType.ELBOW: 0.20,  # Second most common
@@ -141,7 +148,7 @@ class InjuryRiskScorer:
             InjuryRiskReport with scores and recommendations
         """
 
-        report = InjuryRiskReport()
+        report = InjuryRiskReport(limitations=INJURY_RISK_SCORER_LIMITATIONS)
         self.risk_factors = []
 
         # Score spinal risks
@@ -185,7 +192,7 @@ class InjuryRiskScorer:
                 threshold_high=6.0,
                 weight=1.2,
                 modifiable=True,
-                description="Axial compression on lumbar spine",
+                description="Heuristic axial compression screening (not clinical limit)",
             )
         )
 
@@ -199,7 +206,7 @@ class InjuryRiskScorer:
                 threshold_high=1.0,
                 weight=1.0,
                 modifiable=True,
-                description="Lateral shear force on spine",
+                description="Heuristic lateral shear screening (not clinical limit)",
             )
         )
 
@@ -347,7 +354,7 @@ class InjuryRiskScorer:
                     threshold_high=1.5,
                     weight=0.4,
                     modifiable=True,
-                    description="Backswing:downswing tempo ratio",
+                    description="Backswing:downswing tempo ratio (coaching heuristic)",
                 )
             )
             report.technique_risk_score += (
@@ -413,7 +420,7 @@ class InjuryRiskScorer:
                     threshold_high=1000,
                     weight=0.8,
                     modifiable=True,
-                    description="Number of full swings per week",
+                    description="Weekly swing count (uncited screening band)",
                 )
             )
             report.chronic_risk_score += self._value_to_score(swings, 500, 1000) * 0.8
@@ -544,8 +551,9 @@ class InjuryRiskScorer:
         # Add general recommendations based on overall risk
         if report.overall_risk_level in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]:
             recommendations.append(
-                "Overall risk is elevated. Consider consulting a golf fitness professional "
-                "or sports medicine physician for personalized guidance."
+                "Heuristic composite score is elevated relative to internal bands. "
+                "This is not a clinical diagnosis; consult a qualified professional "
+                "for medical decisions."
             )
 
         # Remove duplicates while preserving order

@@ -200,9 +200,20 @@ reserve limit, axial-rotation reserves ($-18$ to $-54$\,N$\cdot$m) exceed the
 axial-rotation demand ($-9$ to $-19$\,N$\cdot$m), and some flexion reserves oppose
 the demand (L5--S1 demand $-29.5$\,N$\cdot$m, reserve $+35.2$\,N$\cdot$m).
 L5/S1 compression at address of 4.87\,BW reflects co-contraction rather than
-demand. Hypotheses include passive fibre force after the Millard swap (affine
-model intercept from $a=0.5$ and $a=1$), affine extrapolation error, or thoracic
-AR moment-arm screening.
+demand. Diagnosis on the same input confirmed passive muscle moments
+($2.6\times$ demand) from rib-attached obliques stretched by the non-physiological
+torso-in-pelvis posture (OS-8 registration, \#13434); the solver behaviour is
+consistent with that input, not a Millard--affine defect. The trunk plausibility
+gate is fail-closed in \texttt{spine/golf\_input.py}; address reserve share below
+\texttt{max\_share}~0.05 on physiological motion is covered by
+\texttt{test\_address\_so\_reserve\_share\_below\_max\_share\_on\_synthetic\_fixture}.
+A native re-run on the OS-9 registered IK (evidence/
+\texttt{os9\_address\_registration/}) is asset-gated in
+\texttt{test\_os9\_capture\_address\_reserve\_share\_below\_max\_share} and uses an
+explicit \texttt{allow\_implausible} study override only while the address trunk
+screening bound remains 0.2\textdegree{} above the declared limit (owner, \#13434).
+The table above remains the historical OS-8 capture-A record until a qualified
+native receipt supersedes it.
 
 In joint reactions (compression defined as $+F_y$ on the superior by the inferior
 in the inferior frame, under \texttt{bruno2015\_regional}, $p=3$), L5/S1

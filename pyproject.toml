@@ -58,7 +58,8 @@ dependencies = [
     # path; it previously existed only as a hand-edit in the generated
     # environment.yml, where it constrained conda users alone and was
     # scheduled for deletion by the next `make sync-deps` (#8689).
-    "tornado>=6.6",
+    # CVE-2026-126347 fixed in 6.6.1 (#13761).
+    "tornado>=6.6.1",
     # Transitive via flask/uvicorn/pip-tools rather than imported directly.
     # Declared here for the same reason as tornado above: the floor must bind
     # on every install path, not depend on whichever dependent resolves first.
@@ -68,9 +69,6 @@ dependencies = [
     # the same reason as tornado/click above: the floor must bind on every install
     # path (CVE-2026-97687, fixed in 2.8.0; #11191).
     "urllib3>=2.8.0",
-    # Transitive via requests; floor binds on every install path (PYSEC-2026-4320).
-    "certifi>=2026.10.19",
-
     "flask>=3.1.3",
 
     # Geospatial projection for sg_optimizer Phase 2 (#6271).
@@ -96,6 +94,9 @@ dependencies = [
     # in 50.0.0), PYSEC-2026-3553 and PYSEC-2026-3554 (both 49.0.0) (#8738).
     "cryptography>=50.0.0",
     "email-validator>=2.0.0",
+    # Transitive via email-validator; floor binds pip-audit on every install path
+    # (CVE-2026-128089, fixed in 2.9.2; #13761).
+    "dnspython>=2.9.2",
     # Hardened XML parsing used at module load by src/api/routes/models.py, which
     # is imported by src/api/routes/__init__.py and therefore by every API server
     # start-up. Tiny pure-Python package; must be core, not urdf-extra-only (#8032).
@@ -115,6 +116,8 @@ force-plate-live = ["python-socketio[client]>=5"]
 # subscribe path when ``UD_REALTIME_BACKEND=python`` or the rust wheel is
 # absent). Imported lazily in ``ws_pubsub.py`` (#13423).
 realtime = ["websockets>=12.0,<18.0"]
+# Stdio MCP SDK for ``ud-sim-mcp`` (Agent API epic #15019 / #15022).
+sim-mcp = ["mcp>=1.2,<2"]
 # Pandoc is an external CLI; this extra supplies the Python PDF renderer.
 shot-pattern-report = ["reportlab>=4,<6", "pypdf>=6,<7", "matplotlib>=3.10.8,<4"]
 # Optional JIT for the profiled incremental contact loop; Python reference remains available.
@@ -340,6 +343,8 @@ gui-tools = [
     "matplotlib>=3.10.8",
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",   # required by pandas.read_excel for .xlsx
+    "pyqtgraph>=0.13",   # golf_environment tile 3D viewer (pyqtgraph.opengl)
+    "PyOpenGL>=3.1",     # required by pyqtgraph.opengl
     "pywinpty>=2.0; platform_system == 'Windows'", # required for Sidekick Terminal PTY support
 ]
 
@@ -375,6 +380,8 @@ upstream-drift = "launch_upstream_drift:main"
 sidekick = "sidekick.__main__:main"
 # Headless simulation batch runner CLI (Epic #14085 / #14090).
 ud-sim = "src.sim_run.cli:main"
+# Stdio MCP adapter for the sim_run Agent API (#15020).
+ud-sim-mcp = "src.sim_run.mcp:main"
 
 [project.entry-points."upstream_drift.engines"]
 # Third-party engines register here via pyproject.toml:
@@ -708,6 +715,13 @@ warn_return_any = true
 
 [[tool.mypy.overrides]]
 module = [
+    "shared.python.sidekick.*",
+    "src.shared.python.sidekick.*",
+]
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = [
     "tifffile",
     "tifffile.*",
 ]
@@ -728,14 +742,10 @@ testpaths = [
     "src/shared/python/ai/tests",
     "src/shared/python/calc_backend/tests",
     "src/shared/python/chat/tests",
-    "src/shared/python/data_processing/tests",
     "src/shared/python/humanoid_character_builder/tests",
     "src/shared/python/model_generation/tests",
-    "src/shared/python/plot_engine/tests",
-    "src/shared/python/programmatic_pid/tests",
     "src/shared/python/sidekick/process_calculators/scrubber/tests",
     "src/shared/python/sidekick/tests",
-    "src/shared/python/signal_toolkit/tests",
     # "vendor/ud-tools/src/shared/python/tests",
 ]
 pythonpath = [

@@ -15,7 +15,7 @@ import numpy as np
 from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_CROSS_SECTIONAL_AREA_M2,
-    GOLF_BALL_DRAG_COEFFICIENT,
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
     GOLF_BALL_LIFT_COEFFICIENT,
     GOLF_BALL_RADIUS_M,
     MAGNUS_COEFFICIENT,
@@ -37,9 +37,10 @@ class AerodynamicsConfig:
         drag_enabled: Enable drag force (air resistance)
         lift_enabled: Enable lift force (from backspin)
         magnus_enabled: Enable Magnus force (from spin)
-        drag_coefficient: Base drag coefficient (Cd)
-        lift_coefficient: Base lift coefficient (Cl)
-        magnus_coefficient: Magnus effect coefficient (Cm)
+        drag_coefficient: Base drag coefficient (Cd) passed to ``DragModel``
+        lift_coefficient: Scalar lift cap for standalone ``LiftModel`` only
+            (``AerodynamicsEngine`` emits combined spin lift in ``magnus``)
+        magnus_coefficient: Magnus/lift coefficient cap used by ``MagnusModel``
         spin_decay_rate: Rate of spin decay [1/s]
         reynolds_correction_enabled: Apply Reynolds number correction to Cd
         ball_radius: Ball radius for calculations [m]
@@ -53,7 +54,7 @@ class AerodynamicsConfig:
     magnus_enabled: bool = True
 
     # Tunable coefficients
-    drag_coefficient: float = float(GOLF_BALL_DRAG_COEFFICIENT)
+    drag_coefficient: float = float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT)
     lift_coefficient: float = float(GOLF_BALL_LIFT_COEFFICIENT)
     magnus_coefficient: float = float(MAGNUS_COEFFICIENT)
     spin_decay_rate: float = float(SPIN_DECAY_RATE_S)

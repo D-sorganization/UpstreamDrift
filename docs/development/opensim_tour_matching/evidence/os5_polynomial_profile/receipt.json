@@ -7,7 +7,7 @@
   "inputs": {
     "model_path": "/mnt/c/Users/diete/opensim-10003/os3b-scale-ik/golf_humanoid_scaled_tour_markers.osim",
     "model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
-    "controls_path": "/home/dieterolson/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/os4_moco_tracking/tracked_controls.sto",
+    "controls_path": "<owner-home>/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/os4_moco_tracking/tracked_controls.sto",
     "controls_sha256": "dab10f6acdf76cf83549955fdf16df8dfac3a249aebe4452e0e715ddb8f01080",
     "ik_states_path": "/mnt/c/Users/diete/opensim-10003/ik_states_full.sto",
     "ik_states_sha256": "325796072973aad8b007c5f975253eaf62057b91924cada85e2dae381cd1c2cc"
@@ -261,6 +261,6 @@
     "sim_wall_time_ms": 7.163268979638815,
     "terminal_time_s": 0.1,
     "num_steps": 6,
-    "states_sto": "/home/dieterolson/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/forward_states.sto"
+    "states_sto": "<owner-home>/opensim-10003-runtime/docs/development/opensim_tour_matching/evidence/os5_polynomial_profile/forward_states.sto"
   }
 }

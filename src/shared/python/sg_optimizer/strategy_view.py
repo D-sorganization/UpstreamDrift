@@ -22,7 +22,8 @@ class StrategyView:
     """Both expected-strokes numbers plus the shot options for one scenario.
 
     ``personal_strokes`` is ``None`` in quick-tour mode (the player solve is
-    skipped); ``options`` then come from the tour baseline.
+    skipped); ``options`` then come from the tour baseline. ``shot_model`` names
+    the model behind the personal solve (#14744).
     """
 
     hole: str
@@ -34,6 +35,7 @@ class StrategyView:
     residual: float = 0.0
     converged: bool = True
     green_terminal: bool = True
+    shot_model: str = "baseline"
 
     @property
     def delta(self) -> float | None:
@@ -122,6 +124,11 @@ def _terminal_note(view: StrategyView) -> str:
     return "Terminal: pin cell only (value depends on raster resolution)"
 
 
+def _terminal_target_name(view: StrategyView) -> str:
+    """Name the endpoint whose expected-strokes value is being reported."""
+    return "green" if view.green_terminal else "pin cell"
+
+
 def _pin_frame(o: ShotOption) -> tuple[float, float, float]:
     """Ellipse centre and axis in the golfer's pin-line frame, SVG coordinates.
 
@@ -140,10 +147,11 @@ def render_text(view: StrategyView) -> str:
     tour, personal, delta = _numbers(view)
     lines = [
         f"Hole: {view.hole}",
-        "Expected strokes to green  "
+        f"Expected strokes to {_terminal_target_name(view)}  "
         f"tour: {tour}   personal: {personal}   personal - tour: {delta}",
         _terminal_note(view),
         _solve_note(view),
+        f"Shot model: {view.shot_model}",
         "",
         f"{'club':<10}{'aim vs pin':>11}{'strokes':>9}{'carry':>8}{'95% long':>10}{'95% wide':>10}",
     ]
@@ -181,7 +189,8 @@ def render_html(view: StrategyView) -> str:
         f"<title>Strategy: {html.escape(view.hole)}</title>"
         f"<h1>{html.escape(view.hole)}</h1><p>{html.escape(_solve_note(view))}</p>"
         f"<p>{html.escape(_terminal_note(view))}</p>"
-        f"<p>Expected strokes to green: tour <b>{tour}</b> &middot; personal <b>{personal}</b>"
+        f"<p>Shot model: {html.escape(view.shot_model)}</p>"
+        f"<p>Expected strokes to {_terminal_target_name(view)}: tour <b>{tour}</b> &middot; personal <b>{personal}</b>"
         f" &middot; personal &minus; tour <b>{delta}</b></p>"
         f"<svg viewBox='{near - 10:.0f} {-span - 4:.0f} {far - near + 20:.0f} {2 * span + 8:.0f}' "
         "width='100%' style='max-height:70vh' role='img' aria-label='Dispersion ellipses'>"

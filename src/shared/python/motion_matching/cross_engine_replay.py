@@ -15,7 +15,7 @@ import json
 import logging
 import math
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -85,6 +85,22 @@ class CrossEngineReplayConfig:
 
 
 @dataclass(frozen=True)
+class StepSizeTolerance:
+    """Convergence thresholds for step-size refinement.
+
+    ``qd_rad_s=None`` (default) keeps the historical q-only gate; declare it to
+    also gate the maximum qd difference (#14756 P7).
+    """
+
+    q_rad: float = 0.05
+    qd_rad_s: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.qd_rad_s is not None and not self.qd_rad_s > 0.0:
+            raise ValueError("qd_rad_s must be positive when provided")
+
+
+@dataclass(frozen=True)
 class StepSizeConvergenceResult:
     """Results of step-size refinement convergence analysis."""
 
@@ -112,9 +128,21 @@ def compute_step_size_convergence(
     qd_refined: Array,
     h_nominal: float,
     h_refined: float,
-    tolerance_rad: float = 0.05,
+    tolerance_rad: float | StepSizeTolerance = 0.05,
 ) -> StepSizeConvergenceResult:
-    """Measure trajectory difference across integration step refinement."""
+    """Measure trajectory difference across integration step refinement.
+
+    ``is_converged`` requires every q/qd sample of both runs to be finite and
+    the maximum q difference to be within the q tolerance. ``tolerance_rad`` is
+    either a float (q-only, historical behaviour) or a ``StepSizeTolerance``;
+    the qd difference is only gated when ``qd_rad_s`` is declared, so no gate
+    is redefined implicitly (#14756 P7).
+    """
+    tol = (
+        tolerance_rad
+        if isinstance(tolerance_rad, StepSizeTolerance)
+        else StepSizeTolerance(q_rad=tolerance_rad)
+    )
     if q_nominal.shape != q_refined.shape or qd_nominal.shape != qd_refined.shape:
         raise ValueError("Nominal and refined trajectories must have identical shape")
     if len(time_s) != q_nominal.shape[0]:
@@ -125,7 +153,13 @@ def compute_step_size_convergence(
 
     max_q_diff = float(np.max(q_diff))
     max_qd_diff = float(np.max(qd_diff))
-    is_converged = bool(max_q_diff <= tolerance_rad)
+    all_finite = all(
+        bool(np.all(np.isfinite(a)))
+        for a in (q_nominal, qd_nominal, q_refined, qd_refined)
+    )
+    is_converged = bool(all_finite and max_q_diff <= tol.q_rad)
+    if tol.qd_rad_s is not None:
+        is_converged = bool(is_converged and max_qd_diff <= tol.qd_rad_s)
 
     return StepSizeConvergenceResult(
         h_nominal=h_nominal,
@@ -148,6 +182,7 @@ class EngineReplayOutcome:
     max_closure_residual_m: float
     max_closure_translation_m: float | None = None
     max_closure_rotation_rad: float | None = None
+    aligned_model_markers_m: Array | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -232,9 +267,10 @@ class CrossEngineComparisonReport:
             PARITY_REPORT_SCHEMA_VERSION,
             ComparisonClass,
             EngineParityRow,
-            PointwiseDifference,
             UnifiedParityReport,
         )
+
+        pointwise_by_engine = _inter_engine_pointwise_marker_diffs(self)
 
         rows: dict[str, EngineParityRow] = {}
         for eng, outcome in self.outcomes.items():
@@ -248,25 +284,16 @@ class CrossEngineComparisonReport:
                 if outcome.shared_metrics is not None
                 else None
             )
-            pt_diffs: dict[str, PointwiseDifference] = {}
-            for pair_key, diffs in self.pairwise_metric_diffs.items():
-                if eng in pair_key:
-                    for k, val in diffs.items():
-                        pt_diffs[k] = PointwiseDifference(
-                            metric_name=k,
-                            max_abs_diff=val,
-                            rms_diff=val,
-                            mean_diff=val,
-                            unit="m" if "marker" in k else "rad",
-                            pass_gate=(val <= 0.001 if "marker" in k else val <= 0.05),
-                        )
+            pt_diffs = dict(pointwise_by_engine.get(eng, {}))
             rows[eng] = EngineParityRow(
                 engine=eng,
                 status=(
                     "qualified" if outcome.status.upper() == "PASSED" else "rejected"
                 ),
                 comparison_class=comp_class,
-                shared_metrics=metrics,
+                # as_dict() maps non-finite metrics to None (#14756 P7); the
+                # row forwards them unchanged, so only the annotation differs.
+                shared_metrics=cast("dict[str, float] | None", metrics),
                 pointwise_differences=pt_diffs,
                 assumptions={
                     "max_closure_residual_m": outcome.max_closure_residual_m,
@@ -284,6 +311,61 @@ class CrossEngineComparisonReport:
             engine_rows=rows,
             pairwise_comparisons=self.pairwise_metric_diffs,
         )
+
+
+def _inter_engine_pointwise_marker_diffs(
+    report: CrossEngineComparisonReport,
+) -> dict[str, dict[str, Any]]:
+    """Aligned marker trajectories only; never infer pointwise stats from aggregate RMSE."""
+    by_engine: dict[str, dict[str, Any]] = {}
+    engines = report.engines
+    for i in range(len(engines)):
+        for j in range(i + 1, len(engines)):
+            eng_a, eng_b = engines[i], engines[j]
+            out_a = report.outcomes[eng_a]
+            out_b = report.outcomes[eng_b]
+            traj_a = out_a.aligned_model_markers_m
+            traj_b = out_b.aligned_model_markers_m
+            if traj_a is None or traj_b is None:
+                continue
+            if np.asarray(traj_a).shape != np.asarray(traj_b).shape:
+                continue
+            diff = _evaluate_aligned_marker_pointwise(
+                np.asarray(traj_a, dtype=np.float64),
+                np.asarray(traj_b, dtype=np.float64),
+            )
+            key = f"inter_engine_markers_{eng_a}_vs_{eng_b}"
+            by_engine.setdefault(eng_a, {})[key] = diff
+            by_engine.setdefault(eng_b, {})[key] = diff
+    return by_engine
+
+
+def _evaluate_aligned_marker_pointwise(
+    traj_a: Array,
+    traj_b: Array,
+    tolerance_m: float = 0.001,
+) -> Any:
+    """Pointwise marker distance; matches parity_report.evaluate_pointwise_trajectory_parity."""
+    from src.shared.python.motion_matching.parity_schema import PointwiseDifference
+
+    delta = np.asarray(traj_a, dtype=np.float64) - np.asarray(traj_b, dtype=np.float64)
+    if delta.ndim >= 3:
+        pointwise_dist = np.sqrt(np.sum(delta**2, axis=-1))
+    elif delta.ndim == 2:
+        pointwise_dist = np.abs(delta)
+    else:
+        pointwise_dist = np.abs(delta)
+    max_val = float(np.max(pointwise_dist))
+    rms_val = float(np.sqrt(np.mean(pointwise_dist**2)))
+    mean_val = float(np.mean(pointwise_dist))
+    return PointwiseDifference(
+        metric_name="marker_diff_m",
+        max_abs_diff=max_val,
+        rms_diff=rms_val,
+        mean_diff=mean_val,
+        unit="m",
+        pass_gate=bool(max_val <= tolerance_m),
+    )
 
 
 def _compute_pairwise_diffs(
@@ -311,7 +393,13 @@ def _compute_pairwise_diffs(
             dict_b = b.shared_metrics.as_dict()
             pair_diffs: dict[str, float] = {}
             for k in metric_keys:
-                diff_val = abs(dict_a[k] - dict_b[k])
+                val_a, val_b = dict_a[k], dict_b[k]
+                if val_a is None or val_b is None:
+                    raise ValueError(
+                        f"Metric {k!r} is unavailable for {pair_key}; "
+                        "cannot compute a pairwise difference"
+                    )
+                diff_val = abs(val_a - val_b)
                 pair_diffs[f"{k}_diff"] = diff_val
                 if "marker" in k:
                     max_diff = max(max_diff, diff_val)

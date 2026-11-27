@@ -102,7 +102,7 @@ swing. Preserve that distinction when quoting the result.
 - Initial pose: `native_evidence/native_pose_seed_waist_r2025b.json`.
 - Local checkpoint directory:
   `C:/Users/diete/Repositories/simscape-tour-checkpoints/first-prefix-20260910`.
-- DeskComputer checkpoint directory:
+- <host> checkpoint directory:
   `C:/Users/diete/SimscapeTour9921/checkpoints/first-prefix-25`.
 - Saved snapshot:
   `evaluation-00283-56e0ff8fb6fdfba07912fa7dbf3fb70197da89899d4c85955865726f8303dcab.json`.
@@ -132,9 +132,9 @@ uses the authoritative forward wrapper via the native marker adapter, and saves
 JSON plus a raw MAT replay before asserting parity and initial-state tolerances.
 Its fixed input preserves the original coefficients and body offsets; it does
 not recalibrate against the replay. The original raw MAT is preserved on
-DeskComputer at `C:/Users/diete/SimscapeTour9921/cold_candidate_replay.mat`.
+<host> at `C:/Users/diete/SimscapeTour9921/cold_candidate_replay.mat`.
 
-## Running or Resuming on DeskComputer
+## Running or Resuming on <host>
 
 Use the isolated interpreter at
 `C:/Users/diete/SimscapeTour9921/python-r2025b/Scripts/python.exe`.
@@ -221,7 +221,7 @@ directory to MATLAB's path. The probe uses the versioned geometry-sweep result,
 applies identical geometry to KinematicsSolver and the forward wrapper, and
 checks initial q, 15 directly logged frames, and actual arm lengths. It restores
 workspace values without saving the model. This is geometry/state qualification,
-not a fitted swing. Raw MAT evidence remains in DeskComputer scratch.
+not a fitted swing. Raw MAT evidence remains in <host> scratch.
 
 ## Unqualified Initial-Velocity Seed
 

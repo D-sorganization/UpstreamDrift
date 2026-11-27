@@ -24,7 +24,7 @@
    "fixture/S4",
    "S4: no per-joint effort-share parameterisation exists; no muscle-level evaluator exists for this mechanism",
    "fixture/S6",
-   "S6: no UCM computation exists in the repository; no muscle-level evaluator exists for this mechanism",
+   "S6: UCM split exists (variability_ucm.ucm_decompose, NSX-97); no S6 arm turns it into a strategy parameter and cost; no muscle-level evaluator exists for this mechanism",
    "fixture/S9",
    "S9: a joint-torque model has no biarticular muscles to couple; no biarticular comparison is built on the NSX-94 frame",
    "fixture/S10",

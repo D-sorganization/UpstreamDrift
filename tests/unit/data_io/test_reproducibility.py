@@ -17,12 +17,32 @@ from src.shared.python.data_io.reproducibility import (
     set_seeds,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # set_seeds
 # ---------------------------------------------------------------------------
 
 
 class TestSetSeeds:
+    @pytest.mark.parametrize("seed", [1.5, 0.0, "42", None])
+    @pytest.mark.parametrize("validate", [True, False])
+    def test_invalid_type_preserves_rng_state(self, seed, validate) -> None:
+        python_state = random.getstate()
+        numpy_state = np.random.get_state()
+        try:
+            with pytest.raises(TypeError) as raised:
+                set_seeds(seed, validate=validate)
+            assert random.getstate() == python_state
+            after = np.random.get_state()
+            assert after[0] == numpy_state[0]
+            np.testing.assert_array_equal(after[1], numpy_state[1])
+            assert after[2:] == numpy_state[2:]
+            assert "Seed must be an integer" in str(raised.value)
+        finally:
+            random.setstate(python_state)
+            np.random.set_state(numpy_state)
+
     def test_default_seed_constant(self) -> None:
         assert DEFAULT_SEED == 42
 

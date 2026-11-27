@@ -63,6 +63,48 @@ DEFAULT_LIVE_LAYOUT = "side_by_side"
 NOTE_SEPARATOR = "\n"
 BADGE_INSET = LayoutMetrics.SPACING_SM + 2  # from the tile's top-left corner
 
+_LINGERING_THREADS: set[QThread] = set()
+
+
+def _prune_finished_threads() -> None:
+    """Drop QThread wrappers once Qt marks the underlying C++ thread finished."""
+    for thread in list(_LINGERING_THREADS):
+        if thread.isFinished():
+            _LINGERING_THREADS.discard(thread)
+
+
+def _retain_until_finished(thread: QThread) -> None:
+    """Keep a QThread alive until Qt finishes teardown to prevent ~QThread aborts."""
+    _prune_finished_threads()
+    if thread.isFinished() or thread in _LINGERING_THREADS:
+        return
+    _LINGERING_THREADS.add(thread)
+    thread.finished.connect(_prune_finished_threads)
+    if thread.isFinished():
+        _LINGERING_THREADS.discard(thread)
+
+
+def _retire_thread(thread: QThread | None, join_ms: int | None = None) -> bool:
+    """Join ``thread`` up to ``join_ms`` or retain it until ``finished`` fires."""
+    _prune_finished_threads()
+    if thread is None:
+        return True
+    timeout_ms = WORKER_JOIN_MS if join_ms is None else join_ms
+    if thread.wait(timeout_ms) or thread.isFinished():
+        _LINGERING_THREADS.discard(thread)
+        return True
+    _retain_until_finished(thread)
+    return thread.isFinished()
+
+
+def _disconnect_slots(
+    connections: tuple[tuple[Any, Any], ...], log_message: str
+) -> None:
+    """Disconnect Qt signal-slot pairs without failing if already detached."""
+    for signal, slot in connections:
+        with narrow_catch(TypeError, RuntimeError, log_message=log_message):
+            signal.disconnect(slot)
+
 
 def default_sources(plan: RigPlan) -> Mapping[str, FrameSource]:
     """ffmpeg-decoded previews bound the way the recorder binds cameras."""
@@ -379,16 +421,38 @@ class PreviewPanel(QWidget):
 
         return factory
 
+    def _disconnect_binder(self, binder: BinderThread) -> None:
+        _disconnect_slots(
+            (
+                (binder.bound, self._on_bound),
+                (binder.failed, self._on_bind_failed),
+            ),
+            "disconnect binder signal",
+        )
+
+    def _disconnect_worker(self, worker: CameraWorker) -> None:
+        _disconnect_slots(
+            (
+                (worker.frame_ready, self._on_frame),
+                (worker.failed, self._on_failed),
+                (worker.opened, self._on_opened),
+            ),
+            "disconnect worker signal",
+        )
+
     def stop(self) -> None:
         """Release every camera (blocks until the threads have closed them)."""
         binder, self._binder = self._binder, None
         if binder is not None:
-            binder.wait(60000)  # binding cannot be interrupted; it is bounded
-        workers = list(self._workers.values())
+            self._disconnect_binder(binder)
+            _retire_thread(
+                binder, 60000
+            )  # binding cannot be interrupted; it is bounded
+        workers, self._workers = list(self._workers.values()), {}
         for worker in workers:
+            self._disconnect_worker(worker)
             worker.stop()  # closes the source, so a parked read returns
-        lingering = [w for w in workers if not w.wait(WORKER_JOIN_MS)]
-        self._workers = {}
+        lingering = [w for w in workers if not _retire_thread(w, WORKER_JOIN_MS)]
         self._stall_timer.stop()
         self._note_all("preview off")
         if workers or binder is not None:
@@ -431,7 +495,22 @@ class PreviewPanel(QWidget):
 
     # -- slots --------------------------------------------------------------------
     def _on_bound(self, sources: object) -> None:
-        self._binder = None
+        binder, self._binder = self._binder, None
+        if binder is None:
+            if isinstance(sources, dict):
+                for source in sources.values():
+                    close_fn = getattr(source, "close", None)
+                    if callable(close_fn):
+                        with narrow_catch(
+                            OSError,
+                            ValueError,
+                            RuntimeError,
+                            log_message="close late-bound source",
+                        ):
+                            close_fn()
+            return
+        self._disconnect_binder(binder)
+        _retire_thread(binder, WORKER_JOIN_MS)
         plan = self._plan
         if plan is None or not isinstance(sources, dict):
             return
@@ -458,7 +537,11 @@ class PreviewPanel(QWidget):
             self.state_changed.emit(False)
 
     def _on_bind_failed(self, message: str) -> None:
-        self._binder = None
+        binder, self._binder = self._binder, None
+        if binder is None:
+            return
+        self._disconnect_binder(binder)
+        _retire_thread(binder, WORKER_JOIN_MS)
         if self._fast_attempt and self._selection is not None:
             self._camera_ids = {}  # the remembered cameras are gone; re-enumerate
             self._fast_attempt = False
@@ -590,8 +673,9 @@ class PreviewPanel(QWidget):
         ]
         for view in stalled:
             worker = self._workers.pop(view)
+            self._disconnect_worker(worker)
             worker.stop()
-            worker.wait(WORKER_JOIN_MS)
+            _retire_thread(worker, WORKER_JOIN_MS)
             self._notes[view] = "stalled: camera released"
         if not stalled:
             return
@@ -610,6 +694,15 @@ class PreviewPanel(QWidget):
             self._notes[view] = message
             self._show_notes()
         self.status.setText(f"{view} failed: {message}")
-        self._workers.pop(view, None)
+        worker = self._workers.pop(view, None)
+        if worker is not None:
+            self._disconnect_worker(worker)
+            _retire_thread(worker, WORKER_JOIN_MS)
         if not self._workers:
             self.state_changed.emit(False)
+
+    def closeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        """Stop preview threads and snapshot timers when the widget closes."""
+        self.stop()
+        self.stop_watching()
+        super().closeEvent(event)

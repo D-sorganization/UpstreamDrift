@@ -63,6 +63,10 @@ submodule or set `TOOLS_REPO_PATH`.
 `POST /datasets/{name}/filter`, and `GET /export-formats`, rendered by
 `ui/src/pages/DataExplorer.tsx`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/theory-part1.html): *AffineDrift Theory Part I*.
+
 ## Limitations
 
 - The registry entry's `path`, `src/data_explorer/data_explorer_app.py`,

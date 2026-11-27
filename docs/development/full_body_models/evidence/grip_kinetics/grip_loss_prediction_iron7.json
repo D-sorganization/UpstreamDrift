@@ -1,0 +1,76 @@
+{
+  "club": "iron7",
+  "source": "iron7",
+  "disclaimer": "Offline grip-loss prediction from recorded loads and Coulomb margin hysteresis only; not a simulated fly-off or dynamic clamp release.",
+  "friction": 0.9,
+  "normal_floor_n": 1.0,
+  "squeeze_scale": 1.0,
+  "thresholds": {
+    "slip_enter_margin": 0.0,
+    "slip_exit_margin": 0.06,
+    "release_enter_margin": -0.15,
+    "min_slip_dwell_s": 0.004,
+    "min_release_dwell_s": 0.004
+  },
+  "first_slip_s": null,
+  "first_slip_patch": null,
+  "first_release_s": null,
+  "first_release_patch": null,
+  "sample_count": 914,
+  "sensitivity": [
+    {
+      "friction_scale": 0.9,
+      "squeeze_scale": 0.95,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 0.9,
+      "squeeze_scale": 1.0,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 0.9,
+      "squeeze_scale": 1.05,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 1.0,
+      "squeeze_scale": 0.95,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 1.0,
+      "squeeze_scale": 1.0,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 1.0,
+      "squeeze_scale": 1.05,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 1.1,
+      "squeeze_scale": 0.95,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 1.1,
+      "squeeze_scale": 1.0,
+      "first_slip_s": null,
+      "first_release_s": null
+    },
+    {
+      "friction_scale": 1.1,
+      "squeeze_scale": 1.05,
+      "first_slip_s": null,
+      "first_release_s": null
+    }
+  ]
+}

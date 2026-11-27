@@ -24,6 +24,7 @@ class DriveMode(str, Enum):
     TORQUE_UNDAMPED = "torque_undamped"
     TORQUE_CANONICAL = "torque_canonical"
     JOINT_IMPEDANCE = "joint_impedance"
+    HILL_MTU = "hill_mtu"
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,13 @@ class DriveModeSensitivityReceipt:
     directional_gains: dict[str, float]
     phi_window_norm: np.ndarray
     validation_status: str = "UNVALIDATED"
+    cocontraction: float | None = None
+    tendon_mode: str | None = None
+    tau_act_s: float | None = None
+    tau_deact_s: float | None = None
+    residual_torque_rms_nm: float | None = None
+    effective_kq_mean: float | None = None
+    effective_dq_mean: float | None = None
 
     def __post_init__(self) -> None:
         sv = self.singular_values_window
@@ -83,7 +91,7 @@ class DriveModeSensitivityReceipt:
     def to_dict(self) -> dict[str, Any]:
         sv = [round(s, 6) for s in self.singular_values_window]
         dg = {k: round(v, 6) for k, v in self.directional_gains.items()}
-        return {
+        out: dict[str, Any] = {
             "drive_mode": self.drive_mode,
             "impedance_hypotheses": list(self.impedance_hypotheses),
             "sigma_max_window": round(self.sigma_max_window, 6),
@@ -93,6 +101,21 @@ class DriveModeSensitivityReceipt:
             "directional_gains": dg,
             "validation_status": self.validation_status,
         }
+        if self.cocontraction is not None:
+            out["cocontraction"] = round(self.cocontraction, 6)
+        if self.tendon_mode is not None:
+            out["tendon_mode"] = self.tendon_mode
+        if self.tau_act_s is not None:
+            out["tau_act_s"] = self.tau_act_s
+        if self.tau_deact_s is not None:
+            out["tau_deact_s"] = self.tau_deact_s
+        if self.residual_torque_rms_nm is not None:
+            out["residual_torque_rms_nm"] = self.residual_torque_rms_nm
+        if self.effective_kq_mean is not None and math.isfinite(self.effective_kq_mean):
+            out["effective_kq_mean"] = round(self.effective_kq_mean, 6)
+        if self.effective_dq_mean is not None and math.isfinite(self.effective_dq_mean):
+            out["effective_dq_mean"] = round(self.effective_dq_mean, 6)
+        return out
 
 
 def _coerce_mode(mode: DriveMode | str) -> DriveMode:

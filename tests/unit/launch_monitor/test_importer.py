@@ -151,6 +151,65 @@ def test_generic_tabular_formats_use_same_mapping(tmp_path: Path, suffix: str) -
     assert session.shots.loc[0, "club_speed"] == pytest.approx(90 * 0.44704)
 
 
+def test_length_metric_yards_from_column_header() -> None:
+    session = import_session(FIXTURES / "trackman.csv")
+    assert session.manifest.source_units["carry_distance"] == "yd"
+    assert session.manifest.unit_evidence["carry_distance"] == "header"
+    assert session.shots.loc[0, "carry_distance"] == pytest.approx(170 * 0.9144)
+
+
+def test_length_metric_metres_from_import_options(tmp_path: Path) -> None:
+    source = tmp_path / "shots.csv"
+    source.write_text("distance,speed\n100,90\n", encoding="utf-8")
+    session = import_session(
+        source,
+        ImportOptions(
+            profile_id="generic",
+            length_unit="m",
+            mappings=(
+                ColumnMapping("speed", "club_speed", "mph"),
+                ColumnMapping("distance", "carry_distance"),
+            ),
+        ),
+    )
+    assert session.shots.loc[0, "carry_distance"] == pytest.approx(100.0)
+    assert session.manifest.source_units["carry_distance"] == "m"
+    assert session.manifest.unit_evidence["carry_distance"] == "options"
+
+
+def test_unlabeled_length_metric_fails_without_unit_declaration(tmp_path: Path) -> None:
+    source = tmp_path / "shots.csv"
+    source.write_text("distance,speed\n150,90\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Length unit required"):
+        import_session(
+            source,
+            ImportOptions(
+                profile_id="generic",
+                mappings=(
+                    ColumnMapping("speed", "club_speed", "mph"),
+                    ColumnMapping("distance", "carry_distance"),
+                ),
+            ),
+        )
+
+
+def test_unknown_length_unit_fails(tmp_path: Path) -> None:
+    source = tmp_path / "shots.csv"
+    source.write_text("distance,speed\n150,90\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Unknown length unit"):
+        import_session(
+            source,
+            ImportOptions(
+                profile_id="generic",
+                length_unit="furlongs",
+                mappings=(
+                    ColumnMapping("speed", "club_speed", "mph"),
+                    ColumnMapping("distance", "carry_distance"),
+                ),
+            ),
+        )
+
+
 def test_project_aggregates_sessions_and_round_trips(tmp_path: Path) -> None:
     project = LaunchMonitorProject("Player Study")
     project.add_session(import_session(FIXTURES / "trackman.csv"))

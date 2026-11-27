@@ -1,38 +1,47 @@
 # Running Simulations
 
-The Golf Modeling Suite offers multiple ways to run simulations, from a graphical user interface to programmatic control.
+UpstreamDrift offers multiple ways to run simulations, from the unified launcher to headless CLI and Python APIs.
 
-## 🚀 Unified Launcher
+## Unified Launcher
 
-The easiest way to start is using the Unified Launcher:
+The easiest way to start interactively is via the unified launcher:
 
 ```bash
-python launch_golf_suite.py
+upstream-drift
+# or from source:
+python launch_upstream_drift.py
 ```
 
-This opens a GUI where you can:
+This starts the local API server and opens the interface where you can:
 
-- specify specific physics engine (MuJoCo, Drake, etc.)
+- Select a physics engine (MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite, Pendulum, etc.)
 - Configure simulation parameters
-- Visualize results
+- Visualize results and diagnostics
 - Export data
 
-## 💻 Command Line Interface
+## Headless and Programmatic Execution
 
-You can also run simulations directly from Python scripts.
+For headless batch simulations, use `ud-sim`:
+
+```bash
+ud-sim run tests/fixtures/sim_run/smoke_case.json --format summary
+```
+
+You can also manage simulation outputs directly from Python scripts.
 
 ### Basic Example
 
 ```python
-from shared.python.output_manager import OutputManager
+from src.shared.python.output_manager import OutputManager
 
 # Setup output
 manager = OutputManager()
 manager.create_output_structure()
 
 # Run a simulation (conceptual)
-# engine = MujocoEngine()
-# result = engine.simulate(duration=3.0)
+# engine = MujocoPhysicsEngine()
+# engine.load_from_path("path/to/model.xml")
+# result = engine.step(0.002)
 
 # Save results
 # manager.save_simulation_results(result, "swing_test")

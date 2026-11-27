@@ -15,6 +15,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.shared.python.motion_matching.pelvis_yaw import (
+    pelvis_yaw_error_pct_from_diff_deg,
+)
 from src.shared.python.motion_matching.two_window_fit import (
     MarkerMetricResults,
     TwoWindowParityInputs,
@@ -35,6 +38,10 @@ RUN102_DIR = (
     / "native_evidence"
     / "two_window_fit_9967_102"
 )
+RUN102_PELVIS_YAW_DIFF_DEG = 0.3251533720040811
+RUN102_PELVIS_YAW_PCT = 0.361281524448979
+# Archived ``returned.json`` retains the pre-#15015 pct mapping; do not rewrite evidence.
+RUN102_ARCHIVED_PELVIS_YAW_PCT = 0.5954129834382699
 
 
 def test_compute_marker_metrics_analytical() -> None:
@@ -95,6 +102,39 @@ def test_check_acceptance_honest_gates() -> None:
     assert check_acceptance(bad_terminal) is False
 
 
+def test_check_acceptance_fails_when_subwindows_unmeasured() -> None:
+    """Missing early/terminal/club samples must not pass as zero RMS."""
+    import math
+
+    unmeasured = MarkerMetricResults(
+        whole_rms_m=0.020,
+        early_rms_m=float("nan"),
+        terminal_rms_m=0.030,
+        club_cluster_rms_m=0.050,
+        pelvis_yaw_error_pct=2.0,
+        pelvis_yaw_diff_deg=0.5,
+        score=1.0,
+    )
+    assert check_acceptance(unmeasured) is False
+    assert math.isnan(unmeasured.early_rms_m)
+
+
+def test_compute_marker_metrics_missing_waist_fails_acceptance() -> None:
+    """Without WaistLeft/WaistRight labels, pelvis yaw must not read as passing."""
+    time_s = np.array([0.0, 0.5])
+    labels = ("Head", "Back")
+    pred = np.zeros((2, 2, 3))
+    target = np.zeros((2, 2, 3))
+    valid = np.ones((2, 2), dtype=bool)
+
+    metrics = compute_marker_metrics(
+        pred, target, valid, time_s, labels, pelvis_yaw_weight=0.0
+    )
+    assert check_acceptance(metrics) is False
+    assert np.isnan(metrics.pelvis_yaw_error_pct)
+    assert np.isnan(metrics.pelvis_yaw_diff_deg)
+
+
 def test_reproduces_run102_uninterrupted_metrics_and_zero_parity() -> None:
     """Reproduces run-102 returned candidate uninterrupted metrics and verifies parity."""
     receipt_path = RUN102_DIR / "receipt.json"
@@ -139,6 +179,17 @@ def test_reproduces_run102_uninterrupted_metrics_and_zero_parity() -> None:
     # Verifies exact reproduction of all metrics to machine precision
     for key, expected_val in expected_unint.items():
         computed_val = getattr(metrics, key)
+        if key == "pelvis_yaw_error_pct":
+            # Legacy artifact literal; recomputation uses rotation-invariant #15015 mapping.
+            assert expected_val == pytest.approx(
+                RUN102_ARCHIVED_PELVIS_YAW_PCT, abs=1e-12
+            )
+            assert computed_val == pytest.approx(RUN102_PELVIS_YAW_PCT, abs=1e-12)
+            assert computed_val == pytest.approx(
+                pelvis_yaw_error_pct_from_diff_deg(RUN102_PELVIS_YAW_DIFF_DEG),
+                abs=1e-12,
+            )
+            continue
         assert computed_val == pytest.approx(expected_val, abs=1e-12)
 
     # 2. Evaluate zero-displacement parity using identical uninterrupted markers

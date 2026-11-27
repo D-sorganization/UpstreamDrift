@@ -29,6 +29,7 @@ import pytest
 
 from src.shared.python.motion_matching import coordinate_sign_map as sign_map
 from src.shared.python.motion_matching.anthropometric_geometry import WRIST_ROLL
+from src.shared.python.motion_matching.arm_mirror import mirror_document_arm
 from src.shared.python.motion_matching.range_of_motion import HUMAN_RANGES_DEG
 
 mujoco = pytest.importorskip("mujoco")
@@ -53,7 +54,10 @@ PROBE_BASIS = {"forward": 0, "left": 1, "up": 2}
 
 
 def _spec(path: Path = SPEC_PATH) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    """The fixture with the right arm mirrored (G1, #14746), as the driver spec is."""
+    document = json.loads(path.read_text(encoding="utf-8"))
+    mirror_document_arm(document)
+    return document
 
 
 def _short(name: str) -> str:
@@ -65,7 +69,7 @@ def _compile(path: Path = SPEC_PATH) -> tuple[Any, Any]:
         export_full_body_mjcf,
     )
 
-    xml, _ = export_full_body_mjcf(path.read_bytes())
+    xml, _ = export_full_body_mjcf(json.dumps(_spec(path)).encode())
     model = mujoco.MjModel.from_xml_string(xml)
     return model, mujoco.MjData(model)
 
@@ -208,28 +212,30 @@ def test_wrist_y_is_flexion_extension_with_mirrored_sense(
     forearm = measured["LFInput"]["axis"]
     for got in (left, right):
         assert abs(float(np.dot(got["axis"], forearm))) < 1e-9
-        assert got["motion"] == "left"
+    # G1 (#14746): the right wrist is the sagittal mirror of the left, so the
+    # same positive coordinate pushes the forward hand toward its own dorsum.
+    assert (left["motion"], right["motion"]) == ("left", "right")
     rows = sign_map.COORDINATE_SIGN_MAP
-    # The same axis and the same push toward +y: toward the dorsum of the left
-    # hand (extension) and toward the palm of the right hand (flexion).
     assert rows["LWInputY"].meaning.startswith("extension")
-    assert rows["RWInputY"].meaning.startswith("flexion")
+    assert rows["RWInputY"].meaning.startswith("extension")
 
 
 def test_wrist_ranges_use_the_measured_senses() -> None:
     lo, hi = HUMAN_RANGES_DEG["LWInputX"]
-    assert (lo, hi) == (-40.0, 25.0)  # ulnar .. radial, positive radial
+    assert (lo, hi) == (-60.0, 45.0)  # ulnar .. radial, positive radial (#14795)
 
 
 # --- forearm pronation, hips, knees ------------------------------------------
 
 
-def test_forearm_axis_is_proximal_and_pronation_sign_flips_by_side(
+def test_forearm_axis_is_mirrored_and_supination_is_positive_on_both_sides(
     compiled: tuple[Any, Any], measured: dict[str, dict[str, Any]]
 ) -> None:
     model, data = compiled
     pelvis = _pelvis_rotation(model, data)
-    for side, pronation_sign in (("L", -1.0), ("R", +1.0)):
+    # G1 (#14746): positive is supination on both sides; the axes are mirrored,
+    # so the left turns about the proximal direction and the right about the distal.
+    for side, about_proximal_sign in (("L", +1.0), ("R", -1.0)):
         forearm_id = mujoco.mj_name2id(
             model, mujoco.mjtObj.mjOBJ_BODY, _long_name(model, f"{side}LowerForearm")
         )
@@ -240,12 +246,10 @@ def test_forearm_axis_is_proximal_and_pronation_sign_flips_by_side(
         )
         distal = pelvis.T @ (data.xpos[hand_id] - data.xpos[forearm_id])
         axis = measured[f"{side}FInput"]["axis"]
-        # Pronation is positive about the proximal direction of a right
-        # forearm and about the distal direction of a left forearm.
         about_proximal = -float(np.dot(axis, distal / np.linalg.norm(distal)))
-        assert about_proximal > 0.99
+        assert about_proximal * about_proximal_sign > 0.99
         meaning = sign_map.COORDINATE_SIGN_MAP[f"{side}FInput"].meaning
-        assert meaning.startswith("pronation" if pronation_sign > 0 else "supination")
+        assert meaning.startswith("supination")
 
 
 def _long_name(model: Any, suffix: str) -> str:
@@ -509,7 +513,7 @@ def _assert_axes_match_table(axes: dict[str, np.ndarray]) -> None:
 @pytest.mark.requires_pinocchio
 def test_pinocchio_forward_kinematics_reproduces_the_table() -> None:
     pin = pytest.importorskip("pinocchio")
-    if not hasattr(pin, "SE3"):
+    if not hasattr(pin, "SE3") or type(pin).__module__ == "unittest.mock":
         pytest.skip("real pinocchio required")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
@@ -529,13 +533,18 @@ def test_pinocchio_forward_kinematics_reproduces_the_table() -> None:
 
 @pytest.mark.requires_drake
 def test_drake_forward_kinematics_reproduces_the_table() -> None:
-    pytest.importorskip("pydrake")
+    drake = pytest.importorskip("pydrake")
+    if type(drake).__module__ == "unittest.mock":
+        pytest.skip("real pydrake required")
     from src.engines.physics_engines.drake.python.full_body_model import (
         FullBodyDrakeModel,
     )
 
     spec = _spec()
-    model = FullBodyDrakeModel(spec)
+    try:
+        model = FullBodyDrakeModel(spec)
+    except ImportError:
+        pytest.skip("real pydrake required")
     links = model.metadata["body_links"]
 
     def rotation_of(values: dict[str, float], body: str) -> np.ndarray:

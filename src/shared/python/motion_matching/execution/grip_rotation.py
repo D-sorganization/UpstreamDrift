@@ -24,6 +24,7 @@ from src.shared.python.model_appearance.grip_pose import (
     wrist_grip_offset_m,
 )
 from src.shared.python.model_appearance.schema import physics_spec_sha256
+from src.shared.python.motion_matching.arm_mirror import native_wrist_rotation
 from src.shared.python.motion_matching.full_body_spec import canonical_sha256
 from src.shared.python.motion_matching.grip_contract import (
     GripSpec,
@@ -87,7 +88,11 @@ def apply_grip_rotation(
         joint = _wrist_joint(out, side)
         c2f = np.asarray(joint["child_to_follower"], dtype=float)
         current = grip_rotation(recorded[side])
-        c2f[:3, :3] = c2f[:3, :3] @ current.T @ grip_rotation(total)
+        # The grip angles are stated before the G1 (#14746) right-arm half turn.
+        native = native_wrist_rotation(out, c2f[:3, :3], side)
+        c2f[:3, :3] = native_wrist_rotation(
+            out, native @ current.T @ grip_rotation(total), side
+        )
         joint["child_to_follower"] = c2f.tolist()
         recorded[side] = total
         changed = True

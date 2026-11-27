@@ -332,7 +332,11 @@ def _entries_s1_to_s6() -> list[StrategyEntry]:
             "clubhead outcome.",
             (),
             _reps(
-                _no(_RIGID, "no UCM computation exists in the repository"),
+                _no(
+                    _RIGID,
+                    "UCM split exists (variability_ucm.ucm_decompose, NSX-97); no S6 "
+                    "arm turns it into a strategy parameter and cost",
+                ),
                 _no(_MUSCLE, _NO_MUSCLE),
             ),
             _UNDEFINED,

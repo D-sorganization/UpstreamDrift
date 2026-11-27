@@ -26,6 +26,10 @@ from scipy.linalg import LinAlgError, cho_factor, cho_solve
 from src.shared.python.core.numerical_constants import EPSILON_SINGULARITY_DETECTION
 from src.shared.python.loop_nullspace.constrained_dynamics import kkt_projector
 from src.shared.python.loop_nullspace.decomposition import CharacteristicScales
+from src.shared.python.spatial_algebra.spatial_ordering import (
+    SpatialOrdering,
+    permute_task_jacobian,
+)
 from src.shared.python.spatial_algebra.spatial_vectors import skew
 
 SYMMETRY_TOLERANCE = 1e-9  # [relative] allowed asymmetry of M
@@ -33,11 +37,13 @@ SYMMETRY_TOLERANCE = 1e-9  # [relative] allowed asymmetry of M
 __all__ = [
     "CapacityEllipsoid",
     "Ellipsoid",
+    "SpatialOrdering",
     "acceleration_capacity",
     "drift_acceleration",
     "force_capacity",
     "force_ellipsoid",
     "mobility_matrix",
+    "permute_task_jacobian",
     "transport_spatial_mobility",
     "velocity_ellipsoid",
 ]
@@ -98,6 +104,7 @@ def mobility_matrix(
     Jc: np.ndarray | None = None,
     *,
     scales: CharacteristicScales | None = None,
+    spatial_ordering: SpatialOrdering = SpatialOrdering.LINEAR_FIRST,
 ) -> np.ndarray:
     """Return the (k, k) operational-space mobility ``J A_c J^T``.
 
@@ -112,6 +119,9 @@ def mobility_matrix(
         scales: if given (k = 6 only), angular rows and columns are multiplied
             by the characteristic length ``scales.moment / scales.force`` [m]
             (0.05 m for the defaults) so all blocks share the uniform unit [kg^-1].
+        spatial_ordering: row order of ``J`` when ``k == 6``; default is
+            ``LINEAR_FIRST`` ([linear; angular]). ``ANGULAR_FIRST`` is converted
+            at the API boundary before the kernel runs.
 
     Returns:
         Symmetric positive-semidefinite (k, k) array; Loewner-below the
@@ -121,6 +131,8 @@ def mobility_matrix(
         ValueError: on non-finite or mis-shaped inputs, non-symmetric or
             non-positive-definite ``M``, or ``scales`` with a 3-row ``J``.
     """
+    if spatial_ordering is not SpatialOrdering.LINEAR_FIRST:
+        J = permute_task_jacobian(J, spatial_ordering, SpatialOrdering.LINEAR_FIRST)
     J, M, Jc, factor = _validated_task(J, M, Jc)
     k = J.shape[0]
     if scales is not None and k != 6:
@@ -370,7 +382,10 @@ def velocity_ellipsoid(mobility: np.ndarray) -> Ellipsoid:
 
 
 def force_ellipsoid(
-    mobility: np.ndarray, *, tol: float = EPSILON_SINGULARITY_DETECTION
+    mobility: np.ndarray,
+    *,
+    tol: float = EPSILON_SINGULARITY_DETECTION,
+    tikhonov: float | None = None,
 ) -> Ellipsoid:
     """Force ellipsoid: radii ``1/sqrt(lambda)`` [kg^1/2], the inertial dual.
 
@@ -383,10 +398,15 @@ def force_ellipsoid(
     """
     if not tol > 0:
         raise ValueError("tol must be positive")
+    if tikhonov is not None and not tikhonov > 0:
+        raise ValueError("tikhonov must be positive when set")
     lam, vec = _eigh_psd(mobility)
     lam_max = float(lam.max()) if lam.size else 0.0
     floor = tol * max(lam_max, 1.0)
     singular = lam <= floor
+    if tikhonov is not None:
+        lam_eff = lam + tikhonov
+        return Ellipsoid(vec, 1.0 / np.sqrt(lam_eff), singular)
     return Ellipsoid(vec, 1.0 / np.sqrt(np.maximum(lam, floor)), singular)
 
 

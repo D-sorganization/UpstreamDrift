@@ -63,6 +63,10 @@ as documented in [MuJoCo engine reference](../engines/mujoco.md). The engine
 capability list for this tile is declared in `src/config/models.yaml` under
 `mujoco_unified`.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/drift-is-the-past-control-is-the-present.html): *Drift Is the Past, Control Is the Present*.
+
 ## Limitations
 
 - MuJoCo must be installed. `main()` exits with a non-zero status and an

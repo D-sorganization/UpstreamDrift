@@ -2,15 +2,15 @@
 
 OpenSim and MyoSuite pytest markers are skipped in standard CI. These receipts
 record the last native-lane execution on a qualified host (typically
-ControlTower) with contract hashes and per-test outcomes.
+<host>) with contract hashes and per-test outcomes.
 
-## Refresh on ControlTower
+## Refresh on <host>
 
 ```bash
 # OpenSim (opensim-10003 venv)
 bash scripts/ci/run_native_engine_lane.sh \
   --engine opensim \
-  --venv /home/dieterolson/opensim-10003 \
+  --venv <owner-home>/opensim-10003 \
   --out docs/development/matched_swing_program/evidence/nightly
 
 # MyoSuite (environment with myosuite extra installed)
@@ -31,7 +31,7 @@ tests warn after seven days and fail after thirty days on `main`.
 
 Do not edit `.github/workflows` in this repository for lane placement. The
 existing `nightly-cross-engine.yml` job installs optional engine extras; schedule
-ControlTower refresh via the fleet `run_job.py` detached-job pattern or manual
+<host> refresh via the fleet `run_job.py` detached-job pattern or manual
 dispatch on a labeled runner.
 
 ## Local Verification

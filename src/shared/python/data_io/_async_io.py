@@ -71,7 +71,9 @@ def submit_async_save(
         callback: Optional callback called with Path on success or Exception on failure.
 
     Returns:
-        Future that resolves to the saved file path.
+        Future that resolves to the saved file path. Filesystem and
+        validation/runtime failures reach the callback and are re-raised
+        by the future.
     """
     executor = get_io_executor()
 
@@ -81,7 +83,7 @@ def submit_async_save(
             if callback:
                 callback(path)
             return path
-        except (RuntimeError, TypeError, ValueError) as e:
+        except (OSError, RuntimeError, TypeError, ValueError) as e:
             if callback:
                 callback(e)
             raise

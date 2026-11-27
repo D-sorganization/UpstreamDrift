@@ -267,6 +267,43 @@ async def test_replay_coordinator_pause_and_rewind_safety() -> None:
 
 
 @pytest.mark.asyncio
+async def test_impact_to_send_latency_includes_replay_quantization() -> None:
+    """Impact-to-send is wall time from scheduled impact to send attempt (not t_trigger - t_trigger)."""
+    time_src = FakeTimeSource(start=100.0)
+    clock = MonotonicReplayClock(time_fn=time_src.monotonic)
+    adapter = FakeSimulatorAdapter()
+    await adapter.connect({})
+
+    session_service = GolfSessionService(session_id="sess-latency", adapter=adapter)
+    shot = _make_model_shot(session_id="sess-latency", impact_time_s=1.0)
+    prep = session_service.prepare(shot=shot, context_revision=1)
+    arm_token = session_service.arm(
+        prepared_shot_id=prep.prepared_shot_id, context_revision=1
+    )
+
+    coordinator = ReplaySubmissionCoordinator(
+        session_service=session_service,
+        clock=clock,
+        time_fn=time_src.monotonic,
+    )
+    coordinator.arm_submission(prepared_shot=prep, arm_token=arm_token)
+
+    clock.play()
+    time_src.advance(0.9)
+    await coordinator.tick()
+    time_src.advance(0.15)  # replay crosses impact at t_curr=1.05s (0.05s past impact)
+    receipt = await coordinator.tick()
+    assert receipt is not None
+
+    record = coordinator.last_timing_record
+    assert record is not None
+    assert record.impact_to_send_latency_ms > 0.0
+    assert record.send_to_response_latency_ms >= 0.0
+    # 0.05s replay overshoot at 1.0x playback rate → 50ms presentation-to-send budget.
+    assert record.impact_to_send_latency_ms == pytest.approx(50.0, abs=1e-6)
+
+
+@pytest.mark.asyncio
 async def test_replay_coordinator_latency_recording_benchmark() -> None:
     """Benchmark p95 impact-to-send latency across 100 simulated samples."""
     adapter = FakeSimulatorAdapter()
@@ -318,6 +355,6 @@ async def test_replay_coordinator_latency_recording_benchmark() -> None:
     assert len(timing_records) == 100
     latencies = [r.impact_to_send_latency_ms for r in timing_records]
     latencies.sort()
-    # In fake clock simulation, impact-to-send overhead is essentially 0 ms
+    # Each sample crosses impact by 0.05s replay time at 1.0x (50ms budget).
     p95 = latencies[94]
     assert p95 <= 50.0, f"Expected p95 latency <= 50ms, got {p95}ms"

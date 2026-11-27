@@ -9,6 +9,7 @@
  */
 
 import { getApiBase } from './backend';
+import { launcherFetch } from './launcherFetch';
 
 /** A scalar receipt measurement: present-and-finite, or explained-absent. */
 export interface NumericField {
@@ -134,7 +135,7 @@ function apiUrl(path: string): string {
 }
 
 export async function fetchLiftBaseline(): Promise<LiftBaselineMetadata> {
-  const resp = await fetch(apiUrl('/api/v1/lifting/baseline'));
+  const resp = await launcherFetch(apiUrl('/api/v1/lifting/baseline'));
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Failed to load lift baseline: ${resp.status} ${text}`);
@@ -143,7 +144,7 @@ export async function fetchLiftBaseline(): Promise<LiftBaselineMetadata> {
 }
 
 export async function fetchLiftBaselineLift(lift: string): Promise<LiftView> {
-  const resp = await fetch(
+  const resp = await launcherFetch(
     apiUrl(`/api/v1/lifting/baseline/lifts/${encodeURIComponent(lift)}`),
   );
   if (!resp.ok) {

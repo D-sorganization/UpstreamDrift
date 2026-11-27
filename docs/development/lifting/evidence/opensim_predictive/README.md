@@ -6,7 +6,6 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 ## Result Status: Exploratory
 
 ### Stage 1: Torque-Driven Solve
-
 - **Actuation:** `CoordinateActuator`s on free coordinates; six pelvis residuals (optimal force 1765.197, effort weight 100.0); planted-feet goal weight 10000.0; muscles removed
 - **Solver Status:** `Maximum_Iterations_Exceeded`
 - **Converged:** `False`
@@ -26,25 +25,24 @@ using OpenSim Moco with foot contact, bar carried at hands, and effort goal.
 - **Lockout Pose:** {'ankle_angle': 0.0515055071788027, 'arm_flex': 0.08194959693190208, 'bar_height_m': 0.8514348830095264, 'bar_x_m': -0.014694959344290002, 'com_x_m': -0.024927296347860516, 'hip_flexion': 0.0, 'knee_angle': 0.0, 'lumbar_extension': 0.0, 'pelvis_tilt': -0.07749225656822019, 'pelvis_tx': 0.05009705846052124, 'pelvis_ty': 1.0009788035490281, 'sphere_x_m': [-0.12903777371487862, 0.027957539524612662, 0.10108023419026593, -0.12903777371487862, 0.027957539524612662, 0.10108023419026593], 'sphere_y_m': [-0.0020103511302468624, -0.0010207022553469502, -0.0029999999999999125]}
 
 ### Stage 2: Muscle-Driven Solve
-
 - **Actuation:** 80 Rajagopal lower-limb muscles (DeGroote-Fregly 2016)
 - **Status:** `not run`
 - **Reason:** Stage 1 torque-driven solve did not converge (Maximum_Iterations_Exceeded)
 
 ## Kinematic Comparison
 
-| Quantity          | Bundle Kinematics   | Predictive Solution | Unit |
-| :---------------- | :------------------ | :------------------ | :--- |
-| Bar Start Height  | 0.43201984819805705 | None                | m    |
-| Bar Final Height  | 0.9094192166845657  | None                | m    |
-| Bar Vertical Rise | 0.47739936848650866 | None                | m    |
-| Peak Bar Velocity | 0.5605000335510915  | None                | m/s  |
-| Lift Duration     | 2.0                 | None                | s    |
+| Quantity | Bundle Kinematics | Predictive Solution | Unit |
+| :--- | :--- | :--- | :--- |
+| Bar Start Height | 0.4320198481980573 | None | m |
+| Bar Final Height | 0.9094202051609338 | None | m |
+| Bar Vertical Rise | 0.4774003569628765 | None | m |
+| Peak Bar Velocity | 0.5625329285726857 | None | m/s |
+| Lift Duration | 2.0 | None | s |
 
 ### Tracked OpenSim Solution Status
-
 - **Status:** `not compared`
-- **Reason:** the OSL-3 deadlift IK/ID receipt is complete, but the predictive-versus-tracked comparison (joint moments, GRF) is not implemented yet
+- **Reason:** the OSL-3 deadlift IK/ID receipt is complete; the comparison runs only on a converged predictive solution (see tracked_comparison)
+- **Comparison:** `unavailable` infeasible iterate (constraint violation 0.3013375979560333)
 
 ## Reproduction Command
 

@@ -49,3 +49,7 @@ variance attribution study reports first-order ($S_1$) and total ($S_T$) Sobol
 indices across stroke and read error sources, alongside paired factor elimination
 strokes gained per round. The other studies list every value of the answer by
 its dotted path, such as `bands[0].make_rate.mean`.
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/putting-roll-models.html): *Putting Roll Models*.

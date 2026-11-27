@@ -21,6 +21,7 @@ import {
   type AppearancePalette,
   type AppearancePicks,
 } from './appearanceTypes';
+import { launcherFetch } from '../../api/launcherFetch';
 
 interface AppearancePanelProps {
   onPaletteChange?: (palette: AppearancePalette) => void;
@@ -298,7 +299,7 @@ export function AppearancePanel({
     setExporting(true);
     setExportError(null);
     try {
-      const response = await fetch(
+      const response = await launcherFetch(
         `${getApiBase()}/api/character-builder/appearance/export`,
         {
           method: 'POST',

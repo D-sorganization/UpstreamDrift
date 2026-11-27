@@ -59,6 +59,8 @@ class KnotOptimisationSettings:
     """Settings governing the MJX trajectory knot optimisation.
 
     ``learning_rate`` is ignored when ``method == "lbfgs"``.
+    ``lbfgs_*`` apply only to L-BFGS-B (#13779: relative ``ftol``/``gtol`` vs
+    typical ``delta_knots`` magnitude).
     """
 
     method: Literal["adam", "lbfgs"] = "adam"
@@ -70,6 +72,10 @@ class KnotOptimisationSettings:
     horizon_s: float = 1.65
     weld_stiffness: float = WELD_STIFFNESS_N_M
     weld_damping: float = WELD_DAMPING_N_S_M
+    lbfgs_parameter_scale: float = 10.0
+    lbfgs_ftol: float | None = None
+    lbfgs_gtol: float | None = None
+    lbfgs_pgtol: float | None = None
 
     def __post_init__(self) -> None:
         if self.method not in ("adam", "lbfgs"):
@@ -100,6 +106,21 @@ class KnotOptimisationSettings:
             raise ValueError(
                 f"weld_damping must be finite and > 0, got {self.weld_damping}"
             )
+        if (
+            not math.isfinite(self.lbfgs_parameter_scale)
+            or self.lbfgs_parameter_scale <= 0.0
+        ):
+            raise ValueError(
+                "lbfgs_parameter_scale must be finite and > 0, "
+                f"got {self.lbfgs_parameter_scale}"
+            )
+        for name, val in (
+            ("lbfgs_ftol", self.lbfgs_ftol),
+            ("lbfgs_gtol", self.lbfgs_gtol),
+            ("lbfgs_pgtol", self.lbfgs_pgtol),
+        ):
+            if val is not None and (not math.isfinite(val) or val <= 0.0):
+                raise ValueError(f"{name} must be finite and > 0 when set, got {val}")
 
 
 @dataclass(frozen=True)
@@ -115,6 +136,7 @@ class KnotOptimisationResult:
     knots: int
     actuated_coordinates: int
     dtype: str
+    projected_gradient_inf_norm: float | None = None
 
 
 @dataclass(frozen=True)
@@ -367,7 +389,13 @@ def optimise_reference(
         result = lbfgs_minimise(
             value_and_grad,
             delta,
-            LbfgsSettings(max_iterations=settings.iterations),
+            LbfgsSettings(
+                max_iterations=settings.iterations,
+                parameter_scale=settings.lbfgs_parameter_scale,
+                ftol=settings.lbfgs_ftol,
+                gtol=settings.lbfgs_gtol,
+                pgtol=settings.lbfgs_pgtol,
+            ),
             on_iteration=forward_callback,
         )
     else:
@@ -394,6 +422,7 @@ def optimise_reference(
         knots=expected_shape[0],
         actuated_coordinates=expected_shape[1],
         dtype=str(jnp.array(1.0).dtype),
+        projected_gradient_inf_norm=result.projected_gradient_norm,
     )
 
 
@@ -425,4 +454,6 @@ def optimisation_receipt(
         "history": result.history,
         "elapsed_s": elapsed_s,
         "dtype": result.dtype,
+        "stop_reason": result.stop_reason,
+        "lbfgs_projected_gradient_inf_norm": result.projected_gradient_inf_norm,
     }

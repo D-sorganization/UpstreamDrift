@@ -1,0 +1,22 @@
+{
+  "content_digest": "76cab2866280134e85d85b1924fd9f50a116d0bd532edd8906e40c0c9ab97a06",
+  "engine": "mujoco",
+  "episode_count": 1,
+  "generator_seed": 137810,
+  "hand_fix_commit": "30025fe59a9f1feb2ba443a29cdff6361a45b9dd",
+  "model_id": "full_body_mujoco",
+  "schema": "neural-mujoco-corpus-manifest/1.0.0",
+  "simulator": "motion_matching.FullBodySimulator",
+  "spec_path": "/agent/repos/UpstreamDrift/docs/development/full_body_models/full_body_spec_anthro_driver.json",
+  "spec_sha256": "35c11e50499c1b9c71935e31e65a662bafbbe9f95aff5ae2409590a4dedf3c93",
+  "store_manifest": {
+    "content_digest": "774f52899b423c97d16244dafad38325464520321e345c6f7bfc171568d168bd",
+    "episode_ids": [
+      "f626bc8317db360c"
+    ],
+    "schema": "neural-episode-store/1.0.0",
+    "trial_index": {
+      "mujoco_corpus_137810": "f626bc8317db360c"
+    }
+  }
+}

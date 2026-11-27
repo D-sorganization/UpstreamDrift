@@ -45,6 +45,13 @@ class MockWebSocket {
     // Auto-respond with simulation frames
     const parsed = JSON.parse(data);
     if (parsed.action === 'start') {
+      if (this.onmessage) {
+        this.onmessage(
+          new MessageEvent('message', {
+            data: JSON.stringify({ status: 'running' }),
+          }),
+        );
+      }
       this.startSimulationFrames();
     }
   }

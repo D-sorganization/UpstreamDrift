@@ -64,6 +64,10 @@ Backgrounding is beneficial and enabled by default: the adapter's own
 comment notes that keeping the panel alive while hidden preserves
 conversation state cheaply and holds no scarce GPU resource.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/core-theses-registry.html): *Core Theses Registry*.
+
 ## Limitations
 
 - **Despite the tile name, this is not the vendored Tools Sidekick.**

@@ -38,7 +38,7 @@ tectonic --keep-logs --keep-intermediates \
 
 ## Checkouts and Ownership
 
-All checkouts are under `/home/dieterolson/.codex/worktrees/`:
+All checkouts are under `<owner-home>/.codex/worktrees/`:
 
 | Role | Checkout | Branch / Checkpoint |
 | --- | --- | --- |

@@ -20,7 +20,10 @@ from typing import Any
 import numpy as np
 from defusedxml import ElementTree as ET
 
+from src.shared.python.motion_matching.arm_mirror import mirror_document_arm
 from src.shared.python.motion_matching.anthropometric_geometry import (
+    GIRDLE_MASS_ADDED,
+    GIRDLE_MASS_RULES,
     GRIP_ROTATION_DEG,
     LEG_VISUAL_RADIUS_M,
     build_upper_body,
@@ -30,12 +33,21 @@ from src.shared.python.motion_matching.anthropometry import (
     de_leva_table_dict,
     de_leva_table_sha256,
 )
-from src.shared.python.motion_matching.club_models import CLUBS
+from src.shared.python.motion_matching.club_models import (
+    CLUBS,
+    SOLE_POINT_SOURCE,
+    ClubSpec,
+    checked_sole_point_m,
+    recorded_club,
+)
 from src.shared.python.motion_matching.club_shaft_chain import (
     DEFAULT_SHAFT_MODEL,
     SHAFT_MODELS,
+    add_shaft_arguments,
     apply_shaft_chain,
     build_shaft_chain,
+    checked_shaft_options,
+    shaft_options,
 )
 from src.shared.python.motion_matching.execution.assets import (
     get_candidate_geometry_spec,
@@ -43,22 +55,30 @@ from src.shared.python.motion_matching.execution.assets import (
     get_native_geometry_spec,
     get_opensim_model,
 )
+from src.shared.python.motion_matching.execution.marker_seed_overrides import (
+    apply_marker_seed_overrides,
+)
+from src.shared.python.motion_matching.execution.subject_preset import (
+    load_subject_preset,
+)
 from src.shared.python.motion_matching.execution.club_markers import (
     CLUB_MARKER_BODY,
     Offset,
     load_club_markers,
 )
+from src.shared.python.motion_matching.execution.osim_leg_lengths import (
+    positive_length_m,
+    scale_leg_lengths,
+)
 from src.shared.python.motion_matching.execution.grip_selection import (
-    GripOverrides,
     add_grip_arguments,
-    apply_grip_selection,
-    apply_visual_picks,
     overrides_from_args,
 )
-from src.shared.python.model_appearance.appearance_selection import (
-    resolve_appearance,
+from src.shared.python.motion_matching.execution.spec_revisions import (
+    with_current_golfer_model,
+    with_grip_revision,
+    write_grip_sidecar,
 )
-from src.shared.python.model_appearance.schema import appearance_path_for
 from src.shared.python.motion_matching.hip_calibration import hip_is_mirrored
 from src.shared.python.motion_matching.full_body_spec import (
     BodySpec,
@@ -73,7 +93,13 @@ from src.shared.python.motion_matching.full_body_spec import (
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
+    UPPER_RANGES_DEG,
     as_document,
+)
+from src.shared.python.motion_matching.knee_axial_rotation import (
+    DEFAULT_KNEE_AXIAL_RANGE_DEG,
+    KNEE_AXIAL_KEY,
+    apply_knee_axial_rotation,
 )
 from src.shared.python.motion_matching.tibial_torsion import (
     DEFAULT_TIBIAL_TORSION_OFFSET_DEG,
@@ -110,6 +136,17 @@ LEG_MARKER_BODIES = {
 
 HIP_PERMUTATION = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], dtype=float)
 KNEE_PERMUTATION = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]], dtype=float)
+_LIFT_UPPER_RANGES_DEG: dict[str, tuple[float, float]] = {
+    **UPPER_RANGES_DEG,
+    "LScapInputX": (-10.0, 30.0),
+    "RScapInputX": (-10.0, 30.0),
+    "LScapInputY": (-40.0, 40.0),
+    "RScapInputY": (-40.0, 40.0),
+    "LWInputX": (-40.0, 25.0),
+    "RWInputX": (-40.0, 25.0),
+    "LWInputY": (-70.0, 70.0),
+    "RWInputY": (-70.0, 70.0),
+}
 
 
 def body_fixed_xyz(angles: np.ndarray) -> np.ndarray:
@@ -503,19 +540,39 @@ def _build_aligned_leg_extension(
     stature_m: float,
     hip_frame: dict[str, Any],
     leg_mass_kg: float | None = None,
+    settings: Mapping[str, Any] | None = None,
 ) -> tuple[Any, list[str], float]:
-    bodies, joints = read_osim(osim_path)
+    """Aligned legs, the conversion notes and the hip half spacing, m.
+
+    ``settings`` (#15296, each optional, m): ``thigh_length_m`` and
+    ``shank_length_m`` are ``osim_leg_lengths.scale_leg_lengths``'s, and
+    ``hip_half_spacing_m`` is half the distance between the hip joint centres
+    instead of ``pelvis_alignment_for``'s stature fraction. Without them the
+    legs are the OpenSim file's stored lengths, which do not follow stature.
+    """
+    settings = settings or {}
+    thigh, shank = settings.get("thigh_length_m"), settings.get("shank_length_m")
+    bodies, joints = scale_leg_lengths(*read_osim(osim_path), thigh, shank)
     if leg_mass_kg is not None:
         bodies = scale_leg_mass(bodies, leg_mass_kg)
     rotation, hip_half = pelvis_alignment_for(stature_m)
+    if settings.get("hip_half_spacing_m") is not None:
+        hip_half = positive_length_m(
+            "hip_half_spacing_m", settings["hip_half_spacing_m"]
+        )
+    stated = "".join(
+        f"; {name} scaled to {value:.4f} m on both sides"
+        for name, value in (("thigh", thigh), ("shank", shank))
+        if value is not None
+    )
     hips = np.array(
         [joints["hip_r"]["parent_translation"], joints["hip_l"]["parent_translation"]]
     )
     mid = rotation @ hips.mean(axis=0)
     alignment = transform(rotation, -mid)
     extension, notes = leg_extension(
-        bodies,
-        joints,
+        dict(bodies),
+        dict(joints),
         hip_frame["body"],
         np.asarray(hip_frame["placement"]) @ alignment,
         frozenset(s for s, sign in hip_axis_signs(osim_path).items() if sign < 0),
@@ -540,7 +597,8 @@ def _build_aligned_leg_extension(
         extension.bodies,
         edges,
         extension.provenance
-        + "; hip centres at the subject hip half width on the pelvis frame",
+        + "; hip centres at the subject hip half width on the pelvis frame"
+        + stated,
     )
     return extension, notes, hip_half
 
@@ -630,6 +688,35 @@ def _club_marker_offsets(
     return markers.offsets_m, resolved
 
 
+def _seeded_markers(
+    upper: dict[str, Any],
+    extension: LowerLimbExtension,
+    club: str,
+    native_candidate_path: Path,
+    kwargs: Mapping[str, Any],
+) -> tuple[float, Mapping[str, MarkerAttachment], Path | None]:
+    """Hub height, marker seeds and the club marker file of a build.
+
+    ``marker_seed_overrides`` and ``dropped_markers`` (kwargs, #15296) are
+    ``marker_seed_overrides.apply_marker_seed_overrides``'s; ``None`` keeps
+    the builder's own seeds.
+    """
+    offsets, club_path = _club_marker_offsets(club, kwargs.get("club_markers_path"))
+    hub_h, markers = _extract_marker_seeds(upper, native_candidate_path, offsets)
+    joints = [*upper["joints"], *(j.as_document() for j in extension.joints)]
+    return (
+        hub_h,
+        apply_marker_seed_overrides(
+            markers,
+            kwargs.get("marker_seed_overrides"),
+            kwargs.get("dropped_markers"),
+            joints,
+            upper["frames"],
+        ),
+        club_path,
+    )
+
+
 def _write_outputs(
     document: dict[str, Any],
     output_dir: Path,
@@ -664,8 +751,15 @@ def _write_outputs(
     return spec_path, receipt_path
 
 
-def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
-    """Copy the subject, anthropometry, ranges and visual hints into ``document``."""
+def _annotate_document(
+    document: dict[str, Any], upper: dict[str, Any], mirror_arm: bool = True
+) -> None:
+    """Copy the subject, anthropometry, ranges and visual hints into ``document``.
+
+    The build tables are native; ``mirror_arm`` (G1 #14746) mirrors the right-arm
+    axes and limits, ``False`` keeps the native convention for consumers whose
+    stored joint angles still use it (lifting).
+    """
     document["subject"] = upper["subject"]
     document["de_leva_table_sha256"] = de_leva_table_sha256()
     document["anthropometry"] = {
@@ -689,26 +783,37 @@ def _annotate_document(document: dict[str, Any], upper: dict[str, Any]) -> None:
             for side in ("r", "l")
         }
     )
+    if mirror_arm:
+        mirror_document_arm(document)
 
 
 def with_shaft_model(
-    document: dict[str, Any], club: str, shaft_model: str | None
+    document: dict[str, Any],
+    club: str | ClubSpec,
+    shaft_model: str | None,
+    options: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Apply the ``club.shaft.model`` flag (#12686); ``"rigid"`` is the default.
 
     ``"rigid"`` (or ``None``) returns ``document`` itself, unchanged, so the
     default spec stays byte-identical; ``"chain"`` returns the flexible-shaft
-    copy built by :func:`club_shaft_chain.apply_shaft_chain`.
+    copy built by :func:`club_shaft_chain.apply_shaft_chain`. ``options``
+    (#15150) are the ``build_shaft_chain`` flex, stiffness scale and link
+    count (``checked_shaft_options``); empty gives the default chain, and the
+    chain records them in ``club.shaft``.
 
     Raises:
-        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``.
+        ValueError: ``shaft_model`` is not one of ``SHAFT_MODELS``, or the
+            options are unknown, invalid or given for a rigid club.
     """
     model = DEFAULT_SHAFT_MODEL if shaft_model is None else shaft_model
     if model not in SHAFT_MODELS:
         raise ValueError(f"shaft_model must be one of {SHAFT_MODELS}, got {model!r}")
+    chosen = checked_shaft_options(model, options)
     if model == "rigid":
         return document
-    return apply_shaft_chain(document, build_shaft_chain(CLUBS[club]))
+    spec = recorded_club(document, club) if isinstance(club, str) else club
+    return apply_shaft_chain(document, build_shaft_chain(spec, **chosen))
 
 
 @dataclass(frozen=True)
@@ -733,6 +838,64 @@ def _apply_kwarg_tibial_torsion(document: Any, kwargs: dict[str, Any]) -> Any:
         kwargs.get("tibial_torsion_offset_deg", DEFAULT_TIBIAL_TORSION_OFFSET_DEG)
     )
     return apply_tibial_torsion(document, {"r": torsion, "l": torsion})
+
+
+def _provenance_notes(
+    club: str, club_markers_path: Path | None, leg_mass_kg: float | None
+) -> str:
+    """Provenance suffix naming the club marker file and any leg mass scaling."""
+    note = (
+        f"; {club} club markers from {club_markers_path.name} (#12210)"
+        if club_markers_path
+        else ""
+    )
+    if leg_mass_kg is not None:
+        note += (
+            f"; Rajagopal legs scaled to {leg_mass_kg:.3f} kg so the body "
+            "without the club matches the subject mass (#12199)"
+        )
+    return note
+
+
+def _club_spec(club: str, kwargs: Mapping[str, Any]) -> ClubSpec:
+    """The catalogue club, or the ``club_spec`` kwarg restating it (#15296)."""
+    spec: ClubSpec = kwargs.get("club_spec") or CLUBS[club]
+    if spec.name != club:
+        raise ValueError(f"club_spec is a {spec.name!r}, not the {club!r} asked for")
+    if kwargs.get("club_butt_to_sole_m") and "club_spec" not in kwargs:
+        raise ValueError("club_butt_to_sole_m records a club_spec and needs one")
+    return spec
+
+
+def _record_preset(upper: dict[str, Any], kwargs: Mapping[str, Any]) -> None:
+    """Name the preset in ``subject``; butt to sole length and the sole point
+    (the address ground pin, ``checked_sole_point_m``) in ``club``."""
+    if kwargs.get("subject_preset"):
+        upper["subject"]["subject_preset"] = kwargs["subject_preset"]
+    if kwargs.get("club_butt_to_sole_m"):
+        upper["club"]["butt_to_sole_m"] = float(kwargs["club_butt_to_sole_m"])
+    if kwargs.get("club_sole_point_m") is not None:
+        point = checked_sole_point_m(kwargs["club_sole_point_m"])
+        upper["club"]["sole_point_m"] = list(point)
+        upper["club"]["sole_point_source"] = SOLE_POINT_SOURCE
+    if kwargs.get("dropped_markers"):
+        upper["subject"]["dropped_markers"] = sorted(kwargs["dropped_markers"])
+
+
+def _apply_kwarg_model_options(
+    document: Any, club_spec: Any, kwargs: dict[str, Any]
+) -> Any:
+    """Shaft model, tibial torsion and knee axial rotation from ``kwargs``.
+
+    Without a ``shaft_model`` the composed club stays rigid here and
+    :func:`with_current_golfer_model` gives it the current flexible shaft.
+    """
+    if kwargs.get("shaft_model") is not None:
+        document = with_shaft_model(
+            document, club_spec, kwargs["shaft_model"], kwargs.get("shaft_options")
+        )
+    document = _apply_kwarg_tibial_torsion(document, kwargs)
+    return apply_knee_axial_rotation(document, kwargs.get(KNEE_AXIAL_KEY))
 
 
 def compose_anthropometric_document(
@@ -763,57 +926,56 @@ def compose_anthropometric_document(
     with :func:`scale_leg_mass` so body mass without the club equals ``mass_kg``
     (#12199, #12300); the legs carry what the upper body does not. Raises
     ``ValueError`` when the upper body alone reaches ``mass_kg``; see :func:`_apply_kwarg_tibial_torsion`.
+
+    ``shoulder_girdle_mass`` (kwarg, default ``GIRDLE_MASS_ADDED``; #15150) is
+    ``build_upper_body``'s rule for the clavicle links' mass, which validates it
+    (``ValueError`` naming ``GIRDLE_MASS_RULES``) and records a non-default rule
+    in ``subject``, so in the document and the build receipt.
+    ``subject_preset.SubjectPreset`` kwargs (#15296): ``club_spec`` restates
+    ``club`` (same name, ``ValueError`` otherwise),
+    ``shoulder_below_cervicale_m`` is ``build_upper_body``'s; :func:`_seeded_markers`.
+    ``knee_axial_rotation_deg`` (default off) is ``apply_knee_axial_rotation``'s.
     """
     native_path = native_path or get_native_geometry_spec(None)
     osim_path = osim_path or get_opensim_model(None)
     native_candidate_path = native_candidate_path or get_candidate_geometry_spec(None)
-
-    trunk_scale = float(kwargs.get("trunk_scale", 1.0))
-    arm_scale = float(kwargs.get("arm_scale", 1.0))
-    shoulder_scale = float(kwargs.get("shoulder_scale", 1.0))
-    grip_roll_deg = float(kwargs.get("grip_roll_deg", 0.0))
     match_subject_mass = bool(kwargs.get("match_subject_mass", False))
-
+    upper_ranges = kwargs.get("upper_ranges_deg") or (
+        _LIFT_UPPER_RANGES_DEG if not kwargs.get("mirror_arm", True) else None
+    )
     native = json.loads(native_path.read_text(encoding="utf-8"))
+    club_spec = _club_spec(club, kwargs)
     upper = build_upper_body(
         native,
         stature_m=stature_m,
         mass_kg=mass_kg,
-        trunk_scale=trunk_scale,
-        arm_scale=arm_scale,
-        shoulder_scale=shoulder_scale,
-        club=CLUBS[club],
-        grip_roll_deg=grip_roll_deg,
+        trunk_scale=float(kwargs.get("trunk_scale", 1.0)),
+        arm_scale=float(kwargs.get("arm_scale", 1.0)),
+        shoulder_scale=float(kwargs.get("shoulder_scale", 1.0)),
+        club=club_spec,
+        grip_roll_deg=float(kwargs.get("grip_roll_deg", 0.0)),
         grip_rotation_deg={
             "L": kwargs.get("lead_grip_rotation") or GRIP_ROTATION_DEG["L"],
             "R": kwargs.get("trail_grip_rotation") or GRIP_ROTATION_DEG["R"],
         },
         scale_hand_mass=match_subject_mass,
+        upper_ranges_deg=upper_ranges,
+        shoulder_girdle_mass=kwargs.get("shoulder_girdle_mass", GIRDLE_MASS_ADDED),
+        shoulder_below_cervicale_m=kwargs.get("shoulder_below_cervicale_m"),
     )
-
+    _record_preset(upper, kwargs)
     hip_frame = next(f for f in upper["frames"] if f["name"] == "Hip")
     leg_mass_kg = (
         mass_kg - _body_mass_without_club(upper) if match_subject_mass else None
     )
     extension, notes, hip_half = _build_aligned_leg_extension(
-        osim_path, stature_m, hip_frame, leg_mass_kg
+        osim_path, stature_m, hip_frame, leg_mass_kg, kwargs
     )
     contact = _create_contact_spec()
-    club_offsets, club_markers_path = _club_marker_offsets(
-        club, kwargs.get("club_markers_path")
+    hub_h, markers, club_markers_path = _seeded_markers(
+        upper, extension, club, native_candidate_path, kwargs
     )
-    hub_h, markers = _extract_marker_seeds(upper, native_candidate_path, club_offsets)
-    club_note = (
-        f"; {club} club markers from {club_markers_path.name} (#12210)"
-        if club_markers_path
-        else ""
-    )
-    if leg_mass_kg is not None:
-        club_note += (
-            f"; Rajagopal legs scaled to {leg_mass_kg:.3f} kg so the body "
-            "without the club matches the subject mass (#12199)"
-        )
-
+    club_note = _provenance_notes(club, club_markers_path, leg_mass_kg)
     document = derive_full_body_spec(
         upper,
         extension,
@@ -825,39 +987,14 @@ def compose_anthropometric_document(
             "marker offsets are anatomical seeds to be calibrated" + club_note
         ),
     )
-    _annotate_document(document, upper)
-    document = with_shaft_model(document, club, kwargs.get("shaft_model"))
-    document = _apply_kwarg_tibial_torsion(document, kwargs)
+    _annotate_document(document, upper, kwargs.get("mirror_arm", True))
+    document = _apply_kwarg_model_options(document, club_spec, kwargs)
     return AnthropometricDocument(
         document=document,
         subject=upper["subject"],
         hip_half_m=hip_half,
         hub_height_m=hub_h,
         notes=notes,
-    )
-
-
-def _with_grip_revision(
-    built: AnthropometricDocument, overrides: GripOverrides | None
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    """The document and receipt subject after the physical grip picks (GR4).
-
-    Physical picks make a GR2 spec revision (a refit is needed); picture-only
-    picks do not touch the spec (they belong in an appearance sidecar).
-    """
-    if overrides is None or not overrides.has_physical:
-        return built.document, built.subject
-    document, _grip = apply_grip_selection(built.document, overrides)
-    return document, {**built.subject, **document["subject"]}
-
-
-def _write_grip_sidecar(spec_path: Path, overrides: GripOverrides | None) -> None:
-    """Write the picture-only grip picks beside the spec (never physical ones)."""
-    if overrides is None or not overrides.has_visual:
-        return
-    sidecar = resolve_appearance(None, apply_visual_picks({}, overrides.visual_only()))
-    appearance_path_for(spec_path).write_text(
-        json.dumps(sidecar, indent=2) + "\n", encoding="utf-8"
     )
 
 
@@ -872,7 +1009,11 @@ def build_anthropometric_spec(
     club: str = "driver",
     **kwargs: Any,
 ) -> tuple[Path, Path]:
-    """Build candidate spec and receipt, writing both to output_dir."""
+    """Build candidate spec and receipt, writing both to output_dir.
+
+    ``handedness="left"`` writes the sagittal mirror of the right-handed
+    current-model spec (#15652).
+    """
     name = kwargs.get("name")
     spec_name = name or f"full_body_spec_anthro_{club}"
     built = compose_anthropometric_document(
@@ -885,7 +1026,14 @@ def build_anthropometric_spec(
         **kwargs,
     )
     club_markers = get_club_markers(club, kwargs.get("club_markers_path"))
-    document, subject = _with_grip_revision(built, kwargs.get("grip_overrides"))
+    document, subject = with_current_golfer_model(
+        *with_grip_revision(
+            built.document, built.subject, kwargs.get("grip_overrides")
+        ),
+        shaft_model=kwargs.get("shaft_model"),
+        shaft_options=kwargs.get("shaft_options"),
+        handedness=kwargs.get("handedness") or "right",
+    )
     paths = _write_outputs(
         document=document,
         output_dir=output_dir,
@@ -897,22 +1045,30 @@ def build_anthropometric_spec(
         hub_h=built.hub_height_m,
         notes=built.notes,
     )
-    _write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
+    write_grip_sidecar(paths[0], kwargs.get("grip_overrides"))
     return paths
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser(preset: Mapping[str, Any] | None = None) -> argparse.ArgumentParser:
+    """The command line; ``preset`` values replace the defaults they name."""
+    preset = dict(preset or {})
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--subject-preset",
+        default=None,
+        help="evidence/subject_presets/<name>.json or a file; flags override it",
+    )
     parser.add_argument("--native", type=Path, required=True)
     parser.add_argument("--osim", type=Path, required=True)
     parser.add_argument("--native-candidate", type=Path, required=True)
-    parser.add_argument("--stature", type=float, required=True)
-    parser.add_argument("--mass", type=float, required=True)
+    parser.add_argument("--stature", type=float, required="stature" not in preset)
+    parser.add_argument("--mass", type=float, required="mass" not in preset)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--trunk-scale", type=float, default=1.0)
     parser.add_argument("--arm-scale", type=float, default=1.0)
     parser.add_argument("--shoulder-scale", type=float, default=1.0)
     parser.add_argument("--club", choices=sorted(CLUBS), default="driver")
+    parser.add_argument("--handedness", choices=("right", "left"), default="right")
     parser.add_argument(
         "--grip-roll", type=float, default=0.0, help="hand roll about the shaft, deg"
     )
@@ -938,9 +1094,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--shaft-model",
         choices=SHAFT_MODELS,
-        default=DEFAULT_SHAFT_MODEL,
-        help="club.shaft.model: rigid (default) or the chain flexible shaft (#12686)",
+        default=None,
+        help=(
+            "club.shaft.model; default: the current golfer model's flexible "
+            "chain shaft (#15684); rigid is a ballpark fallback only"
+        ),
     )
+    add_shaft_arguments(parser)
     parser.add_argument(
         "--tibial-torsion",
         type=float,
@@ -953,13 +1113,48 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="club-markers/1 file (default evidence/club_markers/<club>.json)",
     )
+    parser.add_argument(
+        "--shoulder-girdle-mass",
+        choices=GIRDLE_MASS_RULES,
+        default=GIRDLE_MASS_ADDED,
+        help="where the clavicle links' mass comes from (#15279, #15150)",
+    )
+    parser.add_argument(
+        "--knee-axial-rotation",
+        type=float,
+        nargs="?",
+        const=DEFAULT_KNEE_AXIAL_RANGE_DEG[1],
+        default=None,
+        help="opt-in knee axial rotation, +- deg (off unless given; #15296)",
+    )
     add_grip_arguments(parser, physical=True)
+    parser.set_defaults(**preset)
     return parser
 
 
+# Command-line destination -> builder kwarg a subject preset gives a default for.
+_PRESET_FLAGS = {"stature": "stature_m", "mass": "mass_kg", "club": "club"} | {
+    "club_markers": "club_markers_path",
+    **{k: k for k in ("trunk_scale", "arm_scale", "shoulder_scale")},
+    "knee_axial_rotation": KNEE_AXIAL_KEY,
+}
+
+
+def _preset_kwargs(argv: Sequence[str] | None) -> dict[str, Any]:
+    """Builder kwargs of the ``--subject-preset`` named in ``argv``, if any."""
+    probe = argparse.ArgumentParser(add_help=False)
+    probe.add_argument("--subject-preset", default=None)
+    name = probe.parse_known_args(argv)[0].subject_preset
+    return load_subject_preset(name).builder_kwargs() if name else {}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = build_parser()
+    preset = _preset_kwargs(argv)
+    flags = {k: preset.pop(v) for k, v in _PRESET_FLAGS.items() if preset}
+    parser = build_parser(flags)
     args = parser.parse_args(argv)
+    if flags and args.club != flags["club"]:
+        parser.error(f"--club must be the preset's {flags['club']!r}")
     build_anthropometric_spec(
         native_path=args.native,
         osim_path=args.osim,
@@ -981,8 +1176,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         name=args.name,
         club_markers_path=args.club_markers,
         shaft_model=args.shaft_model,
+        shaft_options=shaft_options(args),
+        handedness=args.handedness,
         tibial_torsion_offset_deg=args.tibial_torsion,
+        shoulder_girdle_mass=args.shoulder_girdle_mass,
         grip_overrides=overrides_from_args(args),
+        **{KNEE_AXIAL_KEY: args.knee_axial_rotation},
+        **preset,
     )
     return 0
 

@@ -23,6 +23,7 @@ import {
   parseConfigText,
   validateConfigText,
 } from './crossEngineConfig';
+import { launcherFetch } from '../api/launcherFetch';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -78,7 +79,7 @@ async function startStudy(
   config: PerturbationConfig,
 ): Promise<string> {
   const base = getApiBase();
-  const resp = await fetch(`${base}/api/v1/analysis/cross-engine`, {
+  const resp = await launcherFetch(`${base}/api/v1/analysis/cross-engine`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ engines, config }),
@@ -93,7 +94,7 @@ async function startStudy(
 
 async function pollStatus(taskId: string): Promise<{ status: string; result?: CrossEngineResult; error?: string }> {
   const base = getApiBase();
-  const resp = await fetch(`${base}/api/v1/analysis/cross-engine/status/${taskId}`);
+  const resp = await launcherFetch(`${base}/api/v1/analysis/cross-engine/status/${taskId}`);
   if (!resp.ok) {
     throw new Error(`Poll failed: ${resp.status}`);
   }

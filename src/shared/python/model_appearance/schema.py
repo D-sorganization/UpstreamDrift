@@ -22,17 +22,28 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
+from src.shared.python.core.canonical_floats import canonical_floats
 from src.shared.python.core.handedness import (
     DEFAULT_HANDEDNESS,
     HANDEDNESS_CHOICES,
 )
 from src.shared.python.model_appearance.defaults import default_fields
+from src.shared.python.model_appearance.head_morph import HeadMorph
 
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
 APPEARANCE_SUFFIX = ".appearance.json"
 # Spec keys that only ever affect pictures; excluded from the physics hash.
 VISUAL_ONLY_SPEC_KEYS = ("visual_hints", "appearance")
+# Full-precision digests the physics hash leaves out (#14397): each would carry
+# last-bit BLAS drift into it.  ``upper_body_sha256`` digests a slice of this
+# same document, whose floats are hashed at canonical precision anyway; the
+# parent's ``parent_spec_canonical_sha256`` (visual keys included) sits beside
+# its ``parent_physics_spec_sha256``, which identifies the parent stably.
+_FULL_PRECISION_DIGEST_PATHS = (
+    ("upper_body_sha256",),
+    ("spec_revision", "parent_spec_canonical_sha256"),
+)
 # Owner ruling (#12685): the default outfit is charcoal trousers. The preset
 # itself is defined in ``library.CLOTHING``, which checks this name exists.
 # Every default comes from the one contract (HRG-B1, #13163; see ``defaults``).
@@ -73,6 +84,7 @@ class Material:
 
     @property
     def rgba(self) -> tuple[float, float, float, float]:
+        """Return the material's RGB colour with an opaque default alpha."""
         rgb = tuple(float(c) for c in self.base_color[:3])
         alpha = float(self.base_color[3]) if len(self.base_color) == 4 else 1.0
         return (rgb[0], rgb[1], rgb[2], alpha)
@@ -113,6 +125,7 @@ class BallSettings:
     source: str = "address_geometry"
 
     def __post_init__(self) -> None:
+        """Validate the source label and optional finite ball position."""
         if self.source not in BALL_SOURCES:
             raise ValueError(f"ball source must be one of {BALL_SOURCES}")
         if self.position_m is not None:
@@ -124,6 +137,19 @@ class BallSettings:
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
 HEAD_MODELS = ("parametric", "cc0_mesh")
+HAIR_STYLES = ("short_crop", "dome")
+HAIR_PARTS = ("left", "right", "none")
+EYE_COLORS = ("blue_grey", "hazel", "brown")
+CAP_STYLES = ("none", "baseball_cap", "flat_cap", "straw_hat")
+CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
+DEFAULT_CAP_BRIM = 0.30
+#: ``stature``: menton to vertex is ``height_over_stature`` of the subject's
+#: stature (#15299); ``segment_length``: the spec's head segment length.
+HEAD_SIZINGS = ("stature", "segment_length")
+#: Adult male menton to top of head over stature: 232 mm of 1.756 m (Gordon et
+#: al. 1989, 1988 US Army survey), a head of 1 : 7.6.
+DEFAULT_HEAD_HEIGHT_OVER_STATURE = 0.132
+HEAD_HEIGHT_OVER_STATURE_RANGE = (0.10, 0.16)
 BODY_MODELS = ("ellipsoid", "meshes")
 HEAD_OVERRIDE_FRAMES = ("parent", "world")
 
@@ -161,6 +187,32 @@ class HeadSettings:
     orientation_override: HeadOrientationOverride | None = None
     #: ``cc0_mesh`` (default, owner ruling #12949) or ``parametric`` (procedural).
     model: str = "cc0_mesh"
+    #: ``short_crop`` (tapered sides, volume on top; CC0 head only) or the thin
+    #: ``dome`` shell. The parametric head always draws the dome (#15276).
+    hair_style: str = "short_crop"
+    #: Side of the parting for ``short_crop``: ``left``, ``right`` or ``none``.
+    hair_part: str = "left"
+    #: Iris colour: ``blue_grey`` (default), ``hazel`` or ``brown``.
+    eye_color: str = "blue_grey"
+    #: ``none`` (default), ``baseball_cap`` or a low-profile ``flat_cap``.
+    cap_style: str = "none"
+    #: Library material of the cap (a colour); the brim shares it.
+    cap_material: str = "cap_navy"
+    #: Brim length in head lengths, within :data:`CAP_BRIM_RANGE`.
+    cap_brim: float = DEFAULT_CAP_BRIM
+    #: One of :data:`HEAD_SIZINGS`; ``segment_length`` is the size before #15299.
+    sizing: str = "stature"
+    #: Drawn menton to vertex over stature, in :data:`HEAD_HEIGHT_OVER_STATURE_RANGE`.
+    height_over_stature: float = DEFAULT_HEAD_HEIGHT_OVER_STATURE
+    #: Artistic face shape controls, in the canonical CC0 head frame.
+    morph: HeadMorph = field(default_factory=HeadMorph)
+
+    def __post_init__(self) -> None:
+        """Require a CC0 head whenever non-identity face morphs are set."""
+        if not isinstance(self.morph, HeadMorph):
+            raise ValueError("head morph must be a HeadMorph")
+        if self.morph != HeadMorph() and self.model != "cc0_mesh":
+            raise ValueError("head morph needs the cc0_mesh head model")
 
 
 @dataclass(frozen=True)
@@ -194,6 +246,7 @@ class AppearanceDocument:
 
 @lru_cache(maxsize=1)
 def _validator() -> Any:
+    """Build and cache the appearance-v1 JSON Schema validator."""
     import jsonschema
 
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
@@ -216,6 +269,7 @@ def validate_document(data: Mapping[str, Any]) -> None:
 
 
 def _texture(raw: Mapping[str, Any]) -> Texture:
+    """Parse a validated texture mapping into the immutable texture type."""
     if raw["kind"] == "file" and not raw.get("path"):
         raise ValueError("A file texture needs a path")
     a, b = raw.get("color_a"), raw.get("color_b")
@@ -230,6 +284,7 @@ def _texture(raw: Mapping[str, Any]) -> Texture:
 
 
 def _material(raw: Mapping[str, Any]) -> Material:
+    """Parse a validated material mapping and its optional texture."""
     texture = raw.get("texture")
     return Material(
         tuple(float(c) for c in raw["base_color"]),
@@ -247,6 +302,7 @@ def _head_model(raw: Mapping[str, Any], defaults: HeadSettings) -> str:
 
 
 def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
+    """Parse head controls, applying defaults and enforcing head constraints."""
     defaults = HeadSettings()
     ovr_raw = raw.get("orientation_override")
     override = None
@@ -261,6 +317,27 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         )
     if raw.get("forward_axis", "+x")[1] == raw.get("up_axis", "+z")[1]:
         raise ValueError("head forward_axis and up_axis must be different axes")
+    choices = {
+        "hair_style": HAIR_STYLES,
+        "hair_part": HAIR_PARTS,
+        "eye_color": EYE_COLORS,
+        "cap_style": CAP_STYLES,
+        "sizing": HEAD_SIZINGS,
+    }
+    picked = {k: raw.get(k, getattr(defaults, k)) for k in choices}
+    for key, value in picked.items():
+        if value not in choices[key]:
+            raise ValueError(f"head {key} must be one of {choices[key]}, got {value!r}")
+    brim = float(raw.get("cap_brim", defaults.cap_brim))
+    if not CAP_BRIM_RANGE[0] <= brim <= CAP_BRIM_RANGE[1]:
+        raise ValueError(f"head cap_brim must be within {CAP_BRIM_RANGE}, got {brim!r}")
+    ratio = float(raw.get("height_over_stature", defaults.height_over_stature))
+    low, high = HEAD_HEIGHT_OVER_STATURE_RANGE
+    if not low <= ratio <= high:
+        raise ValueError(f"head height_over_stature must be within {low} to {high}")
+    model = _head_model(raw, defaults)
+    if picked["cap_style"] != "none" and model != "cc0_mesh":
+        raise ValueError("head cap_style needs the cc0_mesh head model")
     return HeadSettings(
         bool(raw.get("enabled", defaults.enabled)),
         raw.get("headwear", defaults.headwear),
@@ -269,11 +346,21 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         raw.get("forward_axis", defaults.forward_axis),
         raw.get("up_axis", defaults.up_axis),
         override,
-        _head_model(raw, defaults),
+        model,
+        picked["hair_style"],
+        picked["hair_part"],
+        picked["eye_color"],
+        picked["cap_style"],
+        str(raw.get("cap_material", defaults.cap_material)),
+        brim,
+        picked["sizing"],
+        ratio,
+        HeadMorph(**raw.get("morph", {})),
     )
 
 
 def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
+    """Serialize non-default head controls into a compact mapping."""
     out: dict[str, Any] = {
         "enabled": head.enabled,
         "headwear": head.headwear,
@@ -283,6 +370,23 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
     }
     if head.model != HeadSettings().model:
         out["model"] = head.model
+    for key in (
+        "hair_style",
+        "hair_part",
+        "eye_color",
+        "cap_style",
+        "cap_material",
+        "cap_brim",
+        "sizing",
+        "height_over_stature",
+    ):
+        if getattr(head, key) != getattr(HeadSettings(), key):
+            out[key] = getattr(head, key)
+    if head.morph != HeadMorph():
+        out["morph"] = {
+            key: getattr(head.morph, key)
+            for key in ("width", "jaw", "nose", "mouth", "eyes")
+        }
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material
     ovr = head.orientation_override
@@ -298,6 +402,7 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
 
 
 def _ball_settings(raw: Mapping[str, Any]) -> BallSettings:
+    """Parse ball display settings and an optional position vector."""
     defaults = BallSettings()
     position = raw.get("position_m")
     return BallSettings(
@@ -310,6 +415,7 @@ def _ball_settings(raw: Mapping[str, Any]) -> BallSettings:
 
 
 def _ball_to_dict(ball: BallSettings) -> dict[str, Any]:
+    """Serialize ball display settings, including a measured position."""
     out: dict[str, Any] = {"enabled": ball.enabled, "source": ball.source}
     if ball.position_m is not None:
         out["position_m"] = list(ball.position_m)
@@ -360,6 +466,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
 
 
 def _texture_to_dict(texture: Texture) -> dict[str, Any]:
+    """Serialize a texture while omitting optional default values."""
     out: dict[str, Any] = {"kind": texture.kind}
     for key in ("color_a", "color_b"):
         value = getattr(texture, key)
@@ -375,6 +482,7 @@ def _texture_to_dict(texture: Texture) -> dict[str, Any]:
 
 
 def material_to_dict(material: Material) -> dict[str, Any]:
+    """Serialize a material and its optional texture into schema fields."""
     out: dict[str, Any] = {
         "base_color": list(material.base_color),
         "roughness": material.roughness,
@@ -432,13 +540,27 @@ def physics_spec_sha256(spec: bytes | Mapping[str, Any]) -> str:
     """Hash of a spec with all visual-only keys removed (canonical JSON).
 
     Postcondition: identical for two specs that differ only in
-    ``visual_hints`` or an embedded ``appearance`` key.
+    ``visual_hints`` or an embedded ``appearance`` key, and for two specs
+    whose floats differ only below the canonical precision (12 significant
+    digits, 1e-12 zero floor; :mod:`~src.shared.python.core.canonical_floats`,
+    #14397), so BLAS or libm last-bit drift cannot move the hash.  The
+    full-precision digests ``upper_body_sha256`` and
+    ``spec_revision.parent_spec_canonical_sha256`` are left out for the same
+    reason (see ``_FULL_PRECISION_DIGEST_PATHS``).
     """
     data = json.loads(spec) if isinstance(spec, bytes | bytearray) else spec
     stripped = copy.deepcopy(dict(data))
     for key in VISUAL_ONLY_SPEC_KEYS:
         stripped.pop(key, None)
-    canonical = json.dumps(stripped, sort_keys=True, separators=(",", ":"))
+    for *parents, key in _FULL_PRECISION_DIGEST_PATHS:
+        node: Any = stripped
+        for name in parents:
+            node = node.get(name) if isinstance(node, Mapping) else None
+        if isinstance(node, dict):
+            node.pop(key, None)
+    canonical = json.dumps(
+        canonical_floats(stripped), sort_keys=True, separators=(",", ":")
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -449,10 +571,12 @@ def appearance_path_for(spec_path: str | Path) -> Path:
 
 
 def load_appearance(path: str | Path) -> AppearanceDocument:
+    """Load, validate, and parse an appearance sidecar from disk."""
     return document_from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
 
 
 def save_appearance(doc: AppearanceDocument, path: str | Path) -> None:
+    """Write a validated appearance sidecar as formatted JSON."""
     Path(path).write_text(
         json.dumps(document_to_dict(doc), indent=2) + "\n", encoding="utf-8"
     )

@@ -40,6 +40,10 @@ Computed ballistic and rollout quantities:
 
 Trajectories are computed by integrating aerodynamic lift and drag under standard atmospheric conditions (temperature 20 °C, pressure 1013.25 hPa) using the unified aerodynamic model in `src/shared/python/physics/ball_enhanced_simulator.py`. Spin decay is governed by empirical rotational damping, and post-impact bounce is modeled using coefficient of restitution and tangential ground friction.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/impact-mechanics-and-ball-flight.html): *Impact Mechanics and Ball Flight*.
+
 ## Limitations
 
 Ground interaction assumes uniform fairway or green firmness. Sub-surface soil mechanics and aerodynamic effects of localized gusts or turbulence are omitted.

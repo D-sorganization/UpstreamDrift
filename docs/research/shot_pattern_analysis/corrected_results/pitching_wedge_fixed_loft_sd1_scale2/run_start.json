@@ -50,6 +50,6 @@
     "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
     "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e"
   },
-  "native_binary_path": "/home/dieterolson/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
+  "native_binary_path": "<owner-home>/Repositories/UpstreamDrift/.venv/lib/python3.12/site-packages/upstream_physics/upstream_physics.cpython-312-x86_64-linux-gnu.so",
   "native_binary_sha256": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce"
 }

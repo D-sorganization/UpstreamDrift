@@ -32,9 +32,9 @@
         "stimp": 10,
         "seed": 8345
       },
-      "make_rate": 0.125,
-      "holed": 5,
-      "mean_leave_ft": 1.9867687564507066
+      "make_rate": 0.175,
+      "holed": 7,
+      "mean_leave_ft": 1.9384325500559263
     },
     {
       "parameters": {

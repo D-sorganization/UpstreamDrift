@@ -254,6 +254,27 @@ def test_neutral_v_azimuth_and_derived_range_bound() -> None:
         GripPose(lead_v_azimuth_deg=-40.1)
 
 
+def test_trail_v_offset_range_bound() -> None:
+    """TRAIL_V_OFFSET_RANGE_DEG defines evidence-grounded limits (-75, 75)."""
+    from src.shared.python.model_appearance import grip_pose
+    from src.shared.python.motion_matching import grip_contract
+
+    assert hasattr(grip_pose, "TRAIL_V_OFFSET_RANGE_DEG")
+    assert grip_pose.TRAIL_V_OFFSET_RANGE_DEG == (-75.0, 75.0)
+    assert grip_contract.TRAIL_V_OFFSET_RANGE_DEG == grip_pose.TRAIL_V_OFFSET_RANGE_DEG
+
+    # Test boundary enforcement on trail_v_offset_deg
+    valid_lower = GripPose(trail_v_offset_deg=-75.0)
+    assert valid_lower.trail_v_offset_deg == -75.0
+    valid_upper = GripPose(trail_v_offset_deg=75.0)
+    assert valid_upper.trail_v_offset_deg == 75.0
+
+    with pytest.raises(ValueError, match="trail_v_offset_deg"):
+        GripPose(trail_v_offset_deg=-75.1)
+    with pytest.raises(ValueError, match="trail_v_offset_deg"):
+        GripPose(trail_v_offset_deg=75.1)
+
+
 def test_topology_of_pose_helper() -> None:
     """topology_of_pose builds ContactTopology carrying all pose attributes."""
     from src.shared.python.model_appearance.grip_pose import topology_of_pose

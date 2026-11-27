@@ -17,6 +17,7 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python import scene_lighting
 from src.shared.python.model_appearance import library
 from src.shared.python.model_appearance.ball import BALL_RADIUS_M, resolve_ball_visual
 from src.shared.python.model_appearance.club_assembly import (
@@ -38,6 +39,8 @@ _VISUAL_CLASS = "visual"
 # Centre-of-mass and frame spheres sit in a group the renderer hides by
 # default (groups 0 to 2 are shown); enable group 3 to inspect them.
 _MARKER_SPHERE_GROUP = "3"
+# Zero alpha: MuJoCo does not draw the geom; physics never reads rgba.
+_CONTACT_HIDDEN_RGBA = "0.5 0.5 0.5 0"
 
 
 def _numbers(values: Any) -> str:
@@ -155,6 +158,19 @@ def _attach_decorative_ball(
     return {"enabled": True, "position_m": position.tolist(), "source": source}
 
 
+def _hide_contact_spheres(default_root: ET.Element) -> None:
+    """Make the ``contact`` default class fully transparent (not drawn).
+
+    The geoms keep group 0 so the collision-geometry checks still see them.
+    Sites (contact and frame markers) get the same zero alpha by default.
+    """
+    ET.SubElement(default_root, "site", rgba=_CONTACT_HIDDEN_RGBA)
+    for cls in default_root.iter("default"):
+        if cls.get("class") == "contact":
+            for geom in cls.iter("geom"):
+                geom.set("rgba", _CONTACT_HIDDEN_RGBA)
+
+
 def attach_visual_layer(
     root: ET.Element,
     elements: Mapping[str, ET.Element],
@@ -163,6 +179,7 @@ def attach_visual_layer(
     appearance: AppearanceDocument | None = None,
     *,
     with_head: bool = False,
+    show_contact_spheres: bool = False,
 ) -> dict[str, Any]:
     """Attach the shared skeleton to an MJCF document; returns a summary.
 
@@ -172,12 +189,15 @@ def attach_visual_layer(
 
     ``elements`` and ``offsets`` are the exporter's per-body MJCF elements and
     spec-body-to-MJCF-body transforms. Every added geom is class ``visual``:
-    group 1, zero contype/conaffinity, zero mass.
+    group 1, zero contype/conaffinity, zero mass. The contact spheres are
+    drawn only when ``show_contact_spheres`` is true (else alpha 0).
     """
     skeleton: VisualSkeleton = derive_visual_skeleton(spec)
     default_root = root.find("default")
     if default_root is None:
         default_root = ET.SubElement(root, "default")
+    if not show_contact_spheres:
+        _hide_contact_spheres(default_root)
     visual_default = ET.SubElement(
         default_root, "default", attrib={"class": _VISUAL_CLASS}
     )
@@ -292,24 +312,9 @@ def attach_visual_layer(
             else {"rgba": _rgba("floor")}
         ),
     )
-    up = normal * 3.0
-    ET.SubElement(
-        world,
-        "light",
-        name="visual_key",
-        pos=_numbers(up + np.array([1.5, -1.5, 0.0])),
-        dir=_numbers(-(up + np.array([1.5, -1.5, 0.0]))),
-        diffuse="0.8 0.8 0.8",
-        castshadow="true" if appearance is not None else "false",
-    )
-    ET.SubElement(
-        world,
-        "light",
-        name="visual_fill",
-        pos=_numbers(up + np.array([-2.0, 1.0, 0.0])),
-        dir=_numbers(-(up + np.array([-2.0, 1.0, 0.0]))),
-        diffuse="0.4 0.4 0.4",
-    )
+    lighting = scene_lighting.load_scene_lighting()
+    rig = lighting.plain if appearance is None else lighting.studio
+    lights = scene_lighting.add_lights(world, normal, rig)
     ET.SubElement(
         world,
         "camera",
@@ -318,19 +323,6 @@ def attach_visual_layer(
         mode="targetbody",
         target=next(e.get("name", "") for k, e in elements.items() if k != "world"),
     )
-    lights = 2
-    if appearance is not None:
-        rim = up + np.array([0.0, 2.5, 0.0])
-        ET.SubElement(
-            world,
-            "light",
-            name="visual_rim",
-            pos=_numbers(rim),
-            dir=_numbers(-rim),
-            diffuse="0.45 0.47 0.55",
-            castshadow="false",
-        )
-        lights = 3
     return {
         **appearance_meta,
         "capsules": len(skeleton.capsules),

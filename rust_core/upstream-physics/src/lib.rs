@@ -49,7 +49,7 @@ use pyo3::prelude::*;
 /// - `config`: `IntegratorConfig` instance
 #[cfg(feature = "python")]
 #[pyfunction]
-#[pyo3(signature = (pos0, vel0, spin_axis, omega0, gravity, wind, ball, air, config))]
+#[pyo3(signature = (pos0, vel0, spin_axis, omega0, gravity, wind, ball, air, config, *, record_integrated_forces=false))]
 #[allow(clippy::too_many_arguments)]
 fn simulate_ball_trajectory_py(
     pos0: [f64; 3],
@@ -61,16 +61,54 @@ fn simulate_ball_trajectory_py(
     ball: aerodynamics::AeroBallProperties,
     air: aerodynamics::AirProperties,
     config: rk4::IntegratorConfig,
+    record_integrated_forces: bool,
 ) -> PyResult<ball_flight::BallTrajectoryResult> {
     ball_flight::simulate_ball_trajectory(
-        pos0, vel0, spin_axis, omega0, gravity, wind, &ball, &air, &config,
+        pos0,
+        vel0,
+        spin_axis,
+        omega0,
+        gravity,
+        wind,
+        &ball,
+        &air,
+        &config,
+        record_integrated_forces,
     )
     .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
+/// Calculate post-impact ball state from Python (velocity components + contact params).
+#[cfg(feature = "python")]
+#[pyfunction]
+#[pyo3(signature = (vx, vy, vz, spin_rate, params))]
+fn calculate_impact_py(
+    vx: f64,
+    vy: f64,
+    vz: f64,
+    spin_rate: f64,
+    params: contact::ContactParameters,
+) -> PyResult<contact::ContactResult> {
+    let velocity = Vector3::new(vx, vy, vz);
+    contact::calculate_impact(&velocity, spin_rate, &params)
+        .map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
+/// Physics revision of this kernel, exported to Python as `PHYSICS_REVISION`.
+///
+/// Bump this whenever kernel physics changes (the release version is locked
+/// to the project version, so it cannot flag stale wheels).  Python's
+/// `rust_kernel.MIN_PHYSICS_REVISION` must be raised to match.
+/// 2: spin-dependent drag (#15460).
+/// 3: drag crisis refitted to Choi et al. 2006 (#15443).
+#[cfg(feature = "python")]
+const PHYSICS_REVISION: u32 = 3;
+
 #[cfg(feature = "python")]
 #[pymodule]
 fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add("PHYSICS_REVISION", PHYSICS_REVISION)?;
+
     // RK4 Integrator
     m.add_class::<rk4::IntegratorConfig>()?;
     m.add_class::<rk4::IntegrationResult>()?;
@@ -78,6 +116,7 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Contact model
     m.add_class::<contact::ContactParameters>()?;
     m.add_class::<contact::ContactResult>()?;
+    m.add_function(pyo3::wrap_pyfunction!(calculate_impact_py, m)?)?;
 
     // Swing plane (legacy least-squares fitter)
     m.add_class::<swing_plane::SwingPlaneResult>()?;
@@ -105,6 +144,7 @@ fn upstream_physics(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Ball flight trajectory simulation (wires aerodynamics + RK4)
     m.add_class::<ball_flight::TrajectoryPoint>()?;
+    m.add_class::<ball_flight::IntegratedStepForces>()?;
     m.add_class::<ball_flight::BallTrajectoryResult>()?;
     m.add_function(pyo3::wrap_pyfunction!(simulate_ball_trajectory_py, m)?)?;
 
@@ -138,6 +178,7 @@ pub fn create_contact_parameters(cor: f64, friction: f64) -> Result<JsValue, JsV
         friction,
         ..Default::default()
     };
+    params.validate().map_err(|e| JsValue::from_str(&e))?;
     serde_wasm_bindgen::to_value(&params)
         .map_err(|e| JsValue::from_str(&format!("Failed to serialize ContactParameters: {e}")))
 }

@@ -265,6 +265,10 @@ Defining modules: `src/shared/python/model_generation/` (CLI, builders,
 converters, library) and `src/shared/python/humanoid_character_builder`
 (`quick_urdf`, `BodyParameters`, `CharacterBuilder`).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/degrees-of-freedom-and-dimensionality.html): *Degrees of Freedom and Dimensionality*.
+
 ## Limitations
 
 - The spec-native output is unqualified geometry: validated for structure and

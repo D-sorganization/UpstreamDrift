@@ -27,6 +27,9 @@ from src.shared.python.contracts import postcondition, precondition  # noqa: E40
 DEFAULT_LEDGER = (
     REPO_ROOT / "docs" / "development" / "model_matching" / "model_matching_status.json"
 )
+MODELS_DIR = REPO_ROOT / "docs" / "development" / "full_body_models"
+V1_SPEC = MODELS_DIR / "full_body_spec_anthro_driver.json"
+V2_SPEC = MODELS_DIR / "full_body_spec_anthro_driver_v2.json"
 OS9_DIR = "docs/development/opensim_tour_matching/evidence/os9_address_registration"
 GEOMETRY_DIR = "shared/models/opensim/opensim-models/Geometry"
 HEADLESS_ENV = {
@@ -63,6 +66,7 @@ class RenderTarget:
     model_id: str
     ledger_engine: str
     inputs: tuple[PinnedInput, ...]
+    trunk_v2: bool = False  # migrate the fit onto the v2 lumbar+thoracic trunk
 
 
 TARGETS: tuple[RenderTarget, ...] = (
@@ -70,6 +74,7 @@ TARGETS: tuple[RenderTarget, ...] = (
         model_id="mujoco_driver",
         ledger_engine="mujoco",
         inputs=(PinnedInput("bundle", None, BUNDLE_SHA256),),
+        trunk_v2=True,
     ),
     RenderTarget(
         model_id="opensim_os9",
@@ -139,6 +144,29 @@ def load_ledger_entry(ledger_path: Path, engine: str) -> dict[str, Any]:
     raise ValueError(f"ledger has no entry for engine {engine!r}")
 
 
+def bind_ledger_entry(
+    entry: dict[str, Any], target: RenderTarget, input_hashes: dict[str, str]
+) -> dict[str, Any]:
+    """Return ``entry`` only if it was recorded for exactly the verified inputs.
+
+    A ledger row found by engine name alone may describe a different run of the same
+    engine (#14756 P3). The row must carry ``input_sha256`` equal to the hashes
+    ``verify_inputs`` just confirmed; a missing or differing map raises ValueError.
+    """
+    recorded = entry.get("input_sha256")
+    if not isinstance(recorded, dict) or not recorded:
+        raise ValueError(
+            f"{target.model_id}: ledger entry {entry.get('engine')!r} has no "
+            "input_sha256 binding to the rendered run"
+        )
+    if recorded != input_hashes:
+        raise ValueError(
+            f"{target.model_id}: ledger entry {entry.get('engine')!r} describes a "
+            "different run (input_sha256 does not match the verified inputs)"
+        )
+    return entry
+
+
 def _metric(value: float | None, unit: str) -> str:
     return "not measured" if value is None else f"{value:.1f} {unit}"
 
@@ -151,6 +179,16 @@ def _reproduction(target: RenderTarget) -> str:
     placeholders = {p.name: Path(p.repo_path or f"<{p.name}>") for p in target.inputs}
     argv = build_command(target, placeholders, Path("<out>"), "python3")
     return " ".join(arg.replace(str(REPO_ROOT) + "/", "") for arg in argv)
+
+
+def _trunk_lines(target: RenderTarget) -> list[str]:
+    if not target.trunk_v2:
+        return []
+    return [
+        "- Trunk: full-body-v2 lumbar + thoracic segments "
+        f"(`{V2_SPEC.name}`); v1 fit coordinates migrated by TrunkMigrator "
+        "(replay, not a refit; the marker RMS above is the v1 fit's)"
+    ]
 
 
 def render_summary(
@@ -172,9 +210,11 @@ def render_summary(
         f"- Parameters: {entry['key_parameters']}",
         f"- Marker RMS: {_metric(entry['marker_rms_mm'], 'mm')}",
         f"- Joint-angle RMS: {_metric(entry['joint_angle_rms_deg'], 'deg')}",
+        *_trunk_lines(target),
         f"- Verdict: {entry['verdict']}",
         f"- Limitations and blockers: {entry['blocker']}",
         f"- Inputs (SHA-256): {_hash_list(input_hashes)}",
+        "- Ledger binding: verified (ledger input_sha256 equals the inputs above)",
         f"- Outputs (SHA-256): {_hash_list(output_hashes)}",
         "",
         "## Reproduction",
@@ -194,10 +234,20 @@ def _input_paths(target: RenderTarget, mujoco_bundle: Path | None) -> dict[str, 
     }
 
 
+def _migrated_bundle(bundle: Path, out_dir: Path) -> Path:
+    """A v2 same-input bundle from the pinned v1 bundle (lumbar+thoracic trunk)."""
+    from src.shared.python.motion_matching.best_match_v2 import migrate_bundle
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return migrate_bundle(bundle, V1_SPEC, V2_SPEC, out_dir / "bundle_v2.npz")
+
+
 def _render(target: RenderTarget, args: argparse.Namespace, commit: str) -> None:
     paths = _input_paths(target, args.mujoco_bundle)
     input_hashes = verify_inputs(target, paths)
     out_dir = args.out / target.model_id
+    if target.trunk_v2 and not args.dry_run:
+        paths = {**paths, "bundle": _migrated_bundle(paths["bundle"], out_dir)}
     command = build_command(target, paths, out_dir, sys.executable)
     print(" ".join(command))  # noqa: T201
     if args.dry_run:
@@ -210,7 +260,9 @@ def _render(target: RenderTarget, args: argparse.Namespace, commit: str) -> None
         for p in sorted(out_dir.iterdir())
         if p.suffix in VIDEO_SUFFIXES
     }
-    entry = load_ledger_entry(args.ledger, target.ledger_engine)
+    entry = bind_ledger_entry(
+        load_ledger_entry(args.ledger, target.ledger_engine), target, input_hashes
+    )
     summary = render_summary(target, entry, input_hashes, outputs, commit)
     (out_dir / "SUMMARY.md").write_text(summary, encoding="utf-8")
 

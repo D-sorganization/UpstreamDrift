@@ -16,6 +16,7 @@ from src.shared.python.pendulum_simulator.triple_pendulum_spec import (
 )
 
 from ._rk4 import rk4_step
+from .double_pendulum import DEFAULT_PLANE_INCLINATION_DEG
 
 GRAVITATIONAL_ACCELERATION = TRIPLE_PENDULUM_SPEC.gravity_m_s2
 DAMPING_DEFAULT = TRIPLE_PENDULUM_SPEC.damping_nm_s_rad
@@ -47,6 +48,7 @@ class TriplePendulumParameters:
     damping: tuple[float, float, float] = DAMPING_DEFAULT
     gravity_enabled: bool = True
     gravity_m_s2: float = GRAVITATIONAL_ACCELERATION
+    plane_inclination_deg: float = DEFAULT_PLANE_INCLINATION_DEG
 
     @classmethod
     def default(cls) -> TriplePendulumParameters:

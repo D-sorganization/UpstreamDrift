@@ -28,15 +28,15 @@
 
 Focus areas:
 
-- Shared utilities (`shared/python/`)
+- Shared utilities (`src/shared/python/`)
 - Engine manager and registry
 - Video pose pipeline
 - Analysis service
 
 Action items:
 
-- [ ] Add tests for `shared/python/analysis/`
-- [ ] Add tests for `shared/python/engine_manager.py`
+- [ ] Add tests for `src/shared/python/analysis/`
+- [ ] Add tests for `src/shared/python/engine_core/engine_manager.py`
 - [ ] Reduce excessive mocking in existing tests
 - [ ] Fix top 10 most-skipped test modules
 

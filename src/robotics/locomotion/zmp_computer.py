@@ -494,14 +494,14 @@ class ZMPComputer(ContractChecker):
         if point is None:
             raise ValueError("point must be provided")
         if support_polygon is None:
-            # Default support polygon approximating foot dimensions
-            # (26cm x 15cm, approximate adult foot length x width)
+            # Nominal adult single-foot bounding box centered at ankle/foot frame
+            # (0.26 m x 0.15 m ~= 0.152 H foot length per Winter anthropometry).
             logger.warning(
                 "Using default support polygon (0.26m x 0.15m). "
                 "Provide measured foot contact polygon for accurate results."
             )
-            half_length = 0.13  # 26cm / 2
-            half_width = 0.075  # 15cm / 2
+            half_length = 0.13  # 0.26 m / 2
+            half_width = 0.075  # 0.15 m / 2
             support_polygon = np.array(
                 [
                     [-half_length, -half_width],

@@ -59,12 +59,44 @@ shafts are unknown.
   (steel 7-iron).
 - Modulus: calibrated so that the shaft clamped 5 in (0.127 m) from the butt
   with the head as a tip point mass vibrates at the `SHAFT_FLEX_DATA`
-  frequency of the flex (STIFF: 280 cpm). Frequencies scale with
+  frequency of the flex (STIFF: 258 cpm). Frequencies scale with
   $\sqrt{E}$, so one finite-element solve at a trial modulus fixes
   $$E = E_{trial}\left(\frac{f_{flex}}{f_{trial}}\right)^2.$$
-  The result is 95.26 GPa (driver) and 112.79 GPa (7-iron).
+  The result is 80.88 GPa (driver) and 95.76 GPa (7-iron).
 - Torsion: $GJ = G \cdot 2I$ with $G = E / 2(1 + \nu)$, $\nu = 0.3$.
 - The stations are the vendored Tools `ShaftStation` records.
+
+## Flex Rating Frequencies
+
+The flex ratings map to clamped club frequencies held in
+`src/config/shaft_flex_frequencies.json` (reference club length 45 in):
+
+| Flex | Frequency (cpm) | Hireko graphite driver mean | Steadfast 45.5 in |
+|---|---|---|---|
+| Ladies | 220 | 229 at 44 in | not tabulated |
+| Senior | 230 | 234 | 227 |
+| Regular | 244 | 246 | 241 |
+| Stiff | 258 | 258 | 258 |
+| X-Stiff | 272 | 271 | 273 |
+
+Sources and conventions (#15150 C19):
+
+- Hireko Golf, Modern Guide to Shaft Fitting chapter 4 and Dynamic Shaft
+  Fitting Index: assembled club clamped at the butt, head plucked; A through X
+  at 45 in and D-1 swingweight, L at 44 in and C-6.
+  <https://www.hirekogolf.com/pub/media/Modern_Guide_to_Shaft_Fitting_chapter4.pdf>
+- Steadfast Golf replacement driver shaft chart, driver column 45.5 in, clamp
+  not stated.
+  <https://steadfastgolf.com/blogs/shaft-insights/best-replacement-golf-shafts-for-drivers-and-fairway-woods>
+- Length slope 8.6 to 10 cpm per inch (midpoint 9.3; a longer club reads
+  softer): Braly, via
+  <https://www.golfshaftreviews.info/understand-golf-shaft-stiffness-ratings/>
+  and <https://www.tutelman.com/golf/shafts/frequency.php>.
+
+The earlier table (Ladies 220, Senior 240, Regular 260, Stiff 280, X-Stiff 300)
+read 14, 22 and 29 cpm above the Hireko means for Regular, Stiff and X-Stiff.
+The slope is available through `flex_cpm_at_length`; the modulus calibration
+still applies the flex cpm unchanged at each club's own length.
 
 ## Lumping Rule
 
@@ -252,8 +284,12 @@ appends a straight shaft to the tracked reference. `replay` and
 
 A chain bundle of the canonical driver seed run
 (`--duration 1.330 --shaft-model chain`, 1330 steps, ball impact at
-1.323 s) was replayed open loop in each engine. MyoSuite reproduces the
-MuJoCo reference bit for bit over the whole 1.33 s. OpenSim's full-horizon
+1.323 s) was replayed open loop in each engine. The receipt holds two runs
+of that export. The current run (code `46a51da`) covers MuJoCo, OpenSim,
+MyoSuite, Drake and Pinocchio from one bundle. The previous run (code
+`c2e65a2`, kept under `previous_run`) covered MuJoCo, OpenSim and MyoSuite,
+and is the source of the full-horizon numbers in this paragraph. MyoSuite
+reproduces the MuJoCo reference bit for bit over the whole 1.33 s. OpenSim's full-horizon
 open-loop replay separates from the reference after 0.67 s (growth rate
 40 s⁻¹); the rigid-club bundle of the same run gives the same picture in
 OpenSim (0.67 s, 42 s⁻¹), so this is the usual amplification of round-off in
@@ -262,14 +298,28 @@ the reference state, OpenSim stays within $1.1 \times 10^{-4}$ rad and
 0.5 µm (rigid club: $6.1 \times 10^{-5}$ rad and 0.3 µm).
 
 Impact window: replayed open loop from the reference state 80 ms before
-impact to 5 ms after, with the bundle efforts and ball force, every engine
-evaluates the Clubhead deflection
+impact, with the bundle efforts and ball force, every engine evaluates the
+Clubhead deflection
 $d = P\,R_0^{T}\,(p(q) - p(q_{\text{straight}}))$ in the club frame of the
-straight shaft with its own kinematics. OpenSim agrees with MuJoCo to
-$8.5 \times 10^{-14}$ m (coordinates $7.7 \times 10^{-13}$ rad) and MyoSuite
-exactly (`evidence/flex_shaft/r11/r11_chain_deflection_impact_window.png`,
-receipt `r11_chain_receipt.json`, script `chain_deflection.py`). The figure
-is evidence of identical dynamics, not a native render.
+straight shaft with its own kinematics. The deflection difference is scored
+from the window start to contact; the coordinate error covers the whole
+window to 5 ms after impact, including the post-contact divergence.
+
+| Engine | Deflection difference to MuJoCo (m) | Coordinate error to the reference (rad) |
+|---|---|---|
+| MuJoCo | 0 | $1.2 \times 10^{-9}$ |
+| OpenSim | $8.6 \times 10^{-15}$ | $8.8 \times 10^{-10}$ |
+| MyoSuite | 0 | $1.2 \times 10^{-9}$ |
+| Drake | $1.3 \times 10^{-10}$ | $5.4 \times 10^{-6}$ |
+| Pinocchio | $1.3 \times 10^{-10}$ | $5.5 \times 10^{-6}$ |
+
+The engine-free gate `tests/cross_engine/test_flex_shaft_evidence_assets.py`
+holds every chain engine's deflection difference to $10^{-8}$ m, an evidence
+bound and not a parity tolerance. The previous run's engine entries stay in
+the receipt under `previous_run.impact_window.engines`
+(`evidence/flex_shaft/r11/r11_chain_deflection_impact_window.png`, receipt
+`r11_chain_receipt.json`, script `chain_deflection.py`). The figure is
+evidence of identical dynamics, not a native render.
 
 Findings on the MuJoCo chain model itself (R6), reproduced by every engine
 and not resolved here:
@@ -278,8 +328,12 @@ and not resolved here:
   closure projection fails; a 1.40 s export fails, so the bundle ends at
   1.330 s.
 - The Clubhead deflection reaches 0.19 m 60 to 80 ms before impact (chain
-  joint angles to 0.13 rad), outside the small-deflection assumption of the
-  linear springs; at impact it is 42 mm along the club $z$ axis.
+  joint angles to 0.14 rad; 0.13 rad in the previous run), outside the
+  small-deflection assumption of the linear springs; at impact it is 43 mm
+  along the club $z$ axis (42 mm in the previous run). The in-plane $x$
+  component at impact differs between the runs (62 mm against 7 mm), because
+  it is read in the last milliseconds before contact, where the deflection
+  grows fast; the cause was not isolated.
 
 ## Ground-Supported Pipeline Run (#12686)
 

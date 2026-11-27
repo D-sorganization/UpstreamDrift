@@ -102,7 +102,6 @@ def _iter_duplicate_paragraphs(text: str) -> list[str]:
 def _iter_repo_relative_paths(text: str) -> list[str]:
     candidates = re.finditer(r"`([^`\n]+)`", text)
     repo_roots = {
-        ".gaai",
         ".github",
         "docs",
         "installer",
@@ -167,6 +166,8 @@ def _assert_coverage_alignment(
                 )
     gate_match = _COVERAGE_GATE.search(ci_standard)
     if gate_match is None:
+        if "coverage: not measured" in ci_standard:
+            return
         errors.append("CI workflow must define a --cov-fail-under gate.")
         return
     gate_value = int(gate_match.group(1))

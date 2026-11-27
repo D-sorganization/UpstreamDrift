@@ -1,12 +1,12 @@
-"""Learning and Adaptation module for UpstreamDrift.
+"""Learning and Adaptation module for UpstreamDrift (experimental / research).
 
 This module provides machine learning capabilities for robotics:
 - Reinforcement Learning (RL) environments compatible with Gymnasium
-- Imitation Learning algorithms (Behavior Cloning, DAgger, GAIL)
+- Imitation Learning algorithms (Behavior Cloning, DAgger, OfflineAdversarialImitation/GAIL)
 - Sim-to-Real transfer techniques (Domain Randomization, System Identification)
 - Motion Retargeting between different embodiments
 
-Phase 3 of the Robotics Expansion Proposal.
+Phase 3 of the Robotics Expansion Proposal (prototype; ``GAIL`` is offline unless ``rollout_fn`` is passed).
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from src.learning.imitation import (
     Demonstration,
     DemonstrationDataset,
     ImitationLearner,
+    OfflineAdversarialImitation,
 )
 from src.learning.retargeting import (
     MotionRetargeter,
@@ -58,6 +59,7 @@ __all__ = [
     "BehaviorCloning",
     "DAgger",
     "GAIL",
+    "OfflineAdversarialImitation",
     # Sim2Real
     "DomainRandomizationConfig",
     "DomainRandomizer",

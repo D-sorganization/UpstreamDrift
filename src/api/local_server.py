@@ -67,11 +67,13 @@ from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from src.api._version import __version__  # noqa: E402
+from src.api.middleware.trusted_hosts import configure_trusted_hosts  # noqa: E402
 from src.api.debug_guard import debug_endpoints_enabled  # noqa: E402
 from src.api.diagnostics import (  # noqa: E402
     APIDiagnostics,
     get_diagnostic_endpoint_html,
 )
+from src.api.middleware import local_capability  # noqa: E402
 from src.api.route_registry import (  # noqa: E402
     register_routes,
     ws_compatible_auth_dependency,
@@ -245,7 +247,10 @@ def _register_api_routers(app: FastAPI) -> None:
         logger.info("Registered %d route modules under %s", count, prefix or "/")
 
         app.include_router(
-            simulation_ws.router, prefix=prefix, tags=["Simulation WebSocket"]
+            simulation_ws.router,
+            prefix=prefix,
+            tags=["Simulation WebSocket"],
+            dependencies=[Depends(ws_compatible_auth_dependency)],
         )
         app.include_router(
             chat_ws.router,
@@ -987,8 +992,10 @@ def create_local_app() -> FastAPI:
         redoc_url="/api/redoc",
     )
 
+    local_capability.configure_local_capability_guard(app)  # inside CORS
     # CORS: Allow local origins only
     _configure_cors(app)
+    configure_trusted_hosts(app)
 
     # Initialize services (lazy loading)
     engine_manager = _create_engine_manager()
@@ -1188,7 +1195,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-# Clarified web UI as primary entry point (Issue #6096)
-
-# Main entry point documented in issue 6096

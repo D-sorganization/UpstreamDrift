@@ -1,0 +1,50 @@
+[
+  {
+    "id": "variability_toy_matched_chs",
+    "description": "Toy pendulum / layer / muscle fixtures: matched-CHS ranking, matched-effort cap, unconstrained fronts, prior reversals and held-out paired Monte Carlo on implemented arms S1\u2013S3, S5, S7, S8.",
+    "status": "available",
+    "comparison_modes": [
+      "matched_chs",
+      "matched_effort",
+      "unconstrained"
+    ],
+    "requires_holdout_seeds": true,
+    "requires_prior_variants": true,
+    "strategy_ids": [
+      "S1",
+      "S2",
+      "S3",
+      "S5",
+      "S7",
+      "S8"
+    ],
+    "defer_reason": ""
+  },
+  {
+    "id": "variability_full_catalogue_matched_chs",
+    "description": "Same controls as the toy campaign on every catalogue arm S1\u2013S12 once missing evaluators exist.",
+    "status": "deferred",
+    "comparison_modes": [
+      "matched_chs",
+      "matched_effort"
+    ],
+    "requires_holdout_seeds": true,
+    "requires_prior_variants": true,
+    "strategy_ids": [],
+    "defer_reason": "Not implemented: S4, S6, S9, S11, S12 need NSX-00 parameterisation; S10 remains UNAVAILABLE on rigid clubs."
+  },
+  {
+    "id": "muscle_biarticular_matched_effort",
+    "description": "Muscle-driven matched-effort comparison for S9 biarticular coupling on the NSX-94 antagonist frame.",
+    "status": "deferred",
+    "comparison_modes": [
+      "matched_effort"
+    ],
+    "requires_holdout_seeds": false,
+    "requires_prior_variants": false,
+    "strategy_ids": [
+      "S9"
+    ],
+    "defer_reason": "S9: no biarticular comparison on the NSX-94 frame."
+  }
+]

@@ -1,6 +1,6 @@
 # Drake and MuJoCo Address Parity (#12039)
 
-Address-only solves (`--address-only --static-seeds --foot-progression capture`) on ControlTower `ud-sim` for capture-A (reference driver) and capture-B (reference iron).
+Address-only solves (`--address-only --static-seeds --foot-progression capture`) on <host> `ud-sim` for capture-A (reference driver) and capture-B (reference iron).
 
 - `before_*_drake`: `main` @ `afd3340171`.
 - `after_*`: the fix @ `37793f8105`.

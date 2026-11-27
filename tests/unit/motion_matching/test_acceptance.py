@@ -114,6 +114,18 @@ def test_missing_field_fails_closed() -> None:
     assert any("max_normal_force" in g.name for g in missing_gates)
 
 
+def test_missing_kinematic_submetrics_fail_closed() -> None:
+    """Receipts that omit early/terminal/club/yaw cannot pass by skipping gates."""
+    receipt = {"shared_metrics": {"whole_marker_rmse_m": 0.020}}
+    verdict = evaluate(receipt, horizon=Horizon.G1)
+    assert verdict.is_physically_accepted is False
+    missing = {g.name for g in verdict.gates if g.status == GateStatus.MISSING}
+    assert "early_marker_rmse_m" in missing
+    assert "terminal_marker_rmse_m" in missing
+    assert "club_marker_rmse_m" in missing
+    assert "pelvis_yaw_error_pct" in missing
+
+
 def test_thresholds_are_frozen() -> None:
     """TDD Step 4: AcceptanceGates is a frozen dataclass."""
     gates = AcceptanceGates()

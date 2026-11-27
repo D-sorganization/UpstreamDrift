@@ -301,8 +301,13 @@ def test_multiple_shooting_satisfies_its_own_dynamics() -> None:
         max(endpoint.normalized_refinement) <= 1
         for endpoint in reference.reference_resolution
     )
-    assert reference.max_position_defect > 0.1  # rad: intentionally unresolved swing
-    assert reference.max_velocity_defect > 10.0  # rad/s: own-grid success hides this
+    # #14227 / #9830: shared-gravity alignment (#13799) shrank the absolute adaptive
+    # gaps on this benchmark (Optional Stack 2026-11-12: ~0.023 rad, ~1.37 rad/s).
+    # Retain adverse-control checks versus the own discrete map and versus FD.
+    assert reference.max_position_defect > 100 * own.max_position_defect
+    assert reference.max_velocity_defect > 100 * own.max_velocity_defect
+    assert reference.max_position_defect > 0.01  # rad: measured post-#14227 floor
+    assert reference.max_velocity_defect > 1.0  # rad/s: measured post-#14227 floor
     fd = solve_swing_casadi(golfer, club, config, limits, joint_limits, x0)
     fd_reference = dynamics_defect(golfer, club, config, fd.x)
     assert reference.max_position_defect < 0.5

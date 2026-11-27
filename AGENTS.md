@@ -6,7 +6,7 @@ Start with the [Agent Context Usage Guide](docs/agent_context/USAGE.md); its `re
 
 ## Required MATLAB Release
 
-MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On DeskComputer and ControlTower launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
+MATLAB R2025b is the required execution, model-save and validation release for the Simscape golf model and tour-average matching epic #9921. The user has the complete required licensed feature set in R2025b. R2026a is not a requirement; do not select it from PATH or use its successful probes as R2025b acceptance evidence. On <host> and <host> launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly. Preserve historical reports with their actual release; run acceptance checks in R2025b. The full forward-dynamics matching goal remains active with this constraint.
 
 > **Read this first.** This file exists because we kept reinventing
 > infrastructure that already lived in the repo (FK solvers, skeleton
@@ -20,6 +20,49 @@ historical agent-workflow notes see
 
 This file is narrower: a **discovery workflow** for agents and a
 **directory of shared infrastructure** so we stop duplicating work.
+
+## Agent API
+
+UpstreamDrift exposes headless simulation and putting analytics to MCP clients
+through the stdio server **`ud-sim-mcp`** (console script and `.mcp.json` entry).
+The adapter uses the official MCP Python SDK (FastMCP stdio transport) in
+`src/sim_run/mcp_fastmcp.py` with the tool router in `src/sim_run/mcp.py`.
+
+**Launch.** After `pip install -e .`, agents start the server with `ud-sim-mcp`
+(or the `.mcp.json` `ud-sim-mcp` block). See
+[`docs/development/sim_run_mcp.md`](docs/development/sim_run_mcp.md).
+
+**Capability inventory.** Engine and putting-tool runtime status is generated
+from the same probes the service uses (`python3 -m scripts.generate_sim_run_mcp_inventory`).
+The committed inventory is
+[`docs/development/sim_run_mcp_capability_inventory.md`](docs/development/sim_run_mcp_capability_inventory.md).
+Statuses are `available` or `unavailable` only — never `failed`.
+
+**Authentication and Private Mode** (Fleet Agent API naming; UpstreamDrift keeps
+legacy aliases):
+
+| Purpose | Canonical env var | Legacy alias |
+| --- | --- | --- |
+| Bearer token for tool calls when auth is enabled | `UPSTREAMDRIFT_AGENT_API_TOKEN` | `UD_SIM_AUTH_TOKEN` |
+| Deny `submit_run` while leaving read-only tools callable | `UPSTREAMDRIFT_PRIVATE_MODE` | `UD_PRIVATE_MODE` |
+
+When either canonical or legacy variable is set, the token value must be passed
+as `auth_token` on each MCP tool call. Private Mode values accept `1`, `true`, or
+`yes` (case-insensitive). Do not embed tokens in prompts, argv, or logs.
+
+Local listener authentication hardening is tracked in private Repository_Management
+records; public documentation does not describe that surface beyond this pointer.
+
+## Current Golfer Model (Read Before Touching Hands or Body)
+
+The skinned human hands (`hand_visual_backend: skinned_human`) and the skinned
+body (`body_visual_backend: skinned_cc0`) are the main golfer model. The
+capsule hands and loft body are deprecated: do not use them in new work,
+renders, screenshots or fixtures. The single source of truth is
+`src/config/golfer_model_versions.json`, read through
+`model_appearance.golfer_model_versions`; see
+[Golfer Model Versions](docs/agents/golfer_model_versions.md) for how to put a
+spec on the current model and what is still migrating (#15648).
 
 ## Modeling Reference Documentation
 
@@ -562,8 +605,8 @@ Full rule: [fleet-rules/agent-tiers.md](https://github.com/D-sorganization/Repos
 3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
 4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
 5. **Don't switch models mid-session (it throws away the prompt cache).**
-6. **PR size and stacking.** Every PR must stay under 500 changed lines. Target `main` directly; never stack PRs. Deletion-only PRs may exceed 500 lines.
-7. **Issue closure evidence.** Include `Closes #<issue>` on a real newline in PR descriptions (never literal `\n`). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
+6. **PR size and stacking.** ~500 lines is advisory, not a merge gate (#2822; 2026-11-06). Target `main` directly; never stack PRs.
+7. **Issue closure evidence.** Include `Closes #<issue>` on its own line in PR descriptions (not backslash-n). Never run `gh issue close` unless citing a verified merged PR `#<num>` in `--comment` or after applying an exempt label (`duplicate`, `wontfix`, `invalid`, `not-planned`, `roadmap`).
 
 <!-- END FLEET-MANAGED: pr-lifecycle -->
 
@@ -667,3 +710,15 @@ For Runner_Dashboard changes merged to main, do not list per-node redeploy or SS
 Full rule: [fleet-rules/runner-dashboard-rollout-handoff.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/runner-dashboard-rollout-handoff.md) (synced from Repository_Management; edit the source there).
 
 <!-- END FLEET-MANAGED: runner-dashboard-rollout-handoff -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: lane-rules-v2 -->
+
+### Lane Rules v2
+
+Skip drained/hold repos, any-agent open-PR conflicts, and claims under 4h; else claim before code. One issue/PR, ~500 lines advisory (incl. generated/locks), max 2 CI-fix tries, stop on usage limits; branch prefix = lane id.
+
+Full rule: [fleet-rules/lane-rules-v2.md](https://github.com/D-sorganization/Repository_Management/blob/main/fleet-rules/lane-rules-v2.md) (synced from Repository_Management; edit the source there).
+
+<!-- END FLEET-MANAGED: lane-rules-v2 -->

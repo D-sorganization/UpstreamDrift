@@ -3,6 +3,7 @@
  */
 
 import { getApiBase } from './backend';
+import { launcherFetch } from './launcherFetch';
 
 export interface RunCapabilities {
   has_candidate_npz: boolean;
@@ -77,7 +78,7 @@ export async function fetchMatchedSwingLedger(
   if (params.profile) query.set('profile', params.profile);
   if (params.capture) query.set('capture', params.capture);
   const suffix = query.toString() ? `?${query.toString()}` : '';
-  const resp = await fetch(apiUrl(`/api/v1/matched-swings${suffix}`));
+  const resp = await launcherFetch(apiUrl(`/api/v1/matched-swings${suffix}`));
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Failed to load matched-swing ledger: ${resp.status} ${text}`);
@@ -86,7 +87,7 @@ export async function fetchMatchedSwingLedger(
 }
 
 export async function fetchMatchedSwingReceipt(runId: string): Promise<Record<string, unknown>> {
-  const resp = await fetch(apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}`));
+  const resp = await launcherFetch(apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}`));
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Failed to load receipt: ${resp.status} ${text}`);
@@ -109,7 +110,7 @@ export interface MatchedSwingAnimationInfo {
 export async function fetchMatchedSwingAnimationInfo(
   runId: string,
 ): Promise<MatchedSwingAnimationInfo> {
-  const resp = await fetch(
+  const resp = await launcherFetch(
     apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/animation/frames`),
   );
   if (!resp.ok) {
@@ -142,7 +143,7 @@ export async function fetchCandidatePreviewFrame(
 ): Promise<CandidatePreviewFrame> {
   const url = new URL(apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/candidate`));
   url.searchParams.set('preview_frame', String(frameIndex));
-  const resp = await fetch(url.toString());
+  const resp = await launcherFetch(url.toString());
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Failed to load candidate preview: ${resp.status} ${text}`);
@@ -151,7 +152,7 @@ export async function fetchCandidatePreviewFrame(
 }
 
 export async function fetchParityReport(runId: string): Promise<Record<string, unknown>> {
-  const resp = await fetch(apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/parity`));
+  const resp = await launcherFetch(apiUrl(`/api/v1/matched-swings/${encodeURIComponent(runId)}/parity`));
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Failed to load parity report: ${resp.status} ${text}`);
@@ -197,7 +198,7 @@ export async function launchMatchedSwingNativeViewer(
   backend: string = 'meshcat',
   speed: number = 1.0,
 ): Promise<NativeViewerLaunchResponse> {
-  const resp = await fetch(
+  const resp = await launcherFetch(
     apiUrl(`/api/matched-swings/${encodeURIComponent(runId)}/native-viewer`),
     {
       method: 'POST',

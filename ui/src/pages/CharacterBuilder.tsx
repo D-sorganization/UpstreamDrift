@@ -10,6 +10,7 @@ import { SPEC_BODY_DEFAULT_COLOR } from '@/components/character/skinnedBodyPrevi
 import type { AppearancePalette } from '@/components/character/appearanceTypes';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 import { SceneEnvironment } from '@/components/visualization/SceneEnvironment';
+import { launcherFetch } from '../api/launcherFetch';
 
 interface SegmentBreakdown {
   name: string;
@@ -174,7 +175,7 @@ export function CharacterBuilderPage() {
     try {
       // Response is URDF XML text (not JSON), so apiFetch is not suitable.
       // Build the URL via getApiBase() to stay Tauri-safe (#6897).
-      const response = await fetch(`${getApiBase()}/api/character-builder/generate`, {
+      const response = await launcherFetch(`${getApiBase()}/api/character-builder/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

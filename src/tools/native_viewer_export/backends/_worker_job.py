@@ -39,6 +39,10 @@ class WorkerJob:
     #: dict that shades the segments (MuJoCo worker only)
     axial_path: str | None = None
     shading: dict[str, Any] | None = None
+    #: positions whose scene depth (metres) the worker also writes, or ``None``
+    depth_positions: list[bool] | None = None
+    #: opt-in scene lighting (``LightingSettings.to_dict()``; ``None`` = studio)
+    lighting: dict[str, Any] | None = None
 
     def lookat_for(self, view: str, position: int) -> list[float]:
         """Look-at point of ``view`` at ``position`` (static ``lookat_m`` if unset)."""
@@ -56,6 +60,9 @@ class WorkerJob:
 
     def frame_path(self, view: str, position: int) -> Path:
         return Path(self.out_dir) / f"{view}_{position:05d}.npy"
+
+    def depth_path(self, view: str, position: int) -> Path:
+        return Path(self.out_dir) / f"depth_{view}_{position:05d}.npy"
 
     def load_axial_frames(self) -> list[AxialLoadFrame | None] | None:
         """Per-position axial frames staged for this job, or ``None`` if unshaded."""

@@ -9,6 +9,12 @@ exact mirrors. Everything is visual only: no mass, inertia, collision or
 degree of freedom, and a physics contact sphere is never moved to fit the
 shoe.
 
+Golf-shoe shape (#15299)
+    ``assets/shoe_last/shoe_settings.json`` (:class:`ShoeStyle`) adds a toe
+    spring, a sole with a heel, a raised shank and a flat welt ledge, and
+    stitched-on panels (heel counter, saddle, laces, toe cap). Every value is
+    a fraction of the foot length.
+
 Frame and sizing (DbC)
     The foot basis is (forward, left, up) in the calcn spec body frame, from
     :class:`cross_section.BodySection` (``left`` is its ML axis, ``up`` its
@@ -50,10 +56,13 @@ Parameter provenance
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field, fields
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
@@ -70,7 +79,10 @@ __all__ = [
     "FOOT_MODELS",
     "FootModelUnavailableError",
     "FootPart",
+    "SHOE_SETTINGS",
+    "ShoeStyle",
     "foot_parts",
+    "load_shoe_style",
     "sole_frame",
 ]
 
@@ -86,7 +98,12 @@ HINGE_OVERLAP_M = 0.014
 HINGE_INSET_M = 0.0008
 SKIN_INSET_M = 0.002  # the bare foot sits this far inside the shoe
 SOLE_BEVEL_M = 0.007
-ANKLE_RADIUS_M = 0.036
+SHOE_SETTINGS = (
+    Path(__file__).resolve().parents[4] / "assets/shoe_last/shoe_settings.json"
+)
+_WELT_FADE_M = 0.004  # half width over which the welt grows from the shoe ends
+ANKLE_RADIUS_M = 0.034  # inside the trouser cuff (shin end 0.036 * 1.08)
+ANKLE_RISE_M = 0.05  # stub top reaches this far up into the shin, hiding its bulge
 ANKLE_DEPTH_M = 0.040  # stub bottom above the sole plane, inside the shoe
 _TIP_EPS_M = 1e-4
 _STATIONS = 46
@@ -126,13 +143,89 @@ class FootModelUnavailableError(ValueError):
 class FootPart:
     """One closed shell of one foot body, in that body's spec frame.
 
-    ``role`` is ``"garment"`` (the shoe), ``"skin"`` (the bare foot) or
+    ``role`` is ``"garment"`` (the shoe), ``"sole"``, a stitched-on panel
+    (``"saddle"``, ``"lace"``, ``"trim"``), ``"skin"`` (the bare foot) or
     ``"ankle"`` (the stub between the shank and the shoe: it takes the shin
     garment when the outfit has one, else skin).
     """
 
     role: str
     mesh: geometry.Mesh
+
+
+def _smooth(x: float) -> float:
+    x = min(max(x, 0.0), 1.0)
+    return x * x * (3.0 - 2.0 * x)
+
+
+@dataclass(frozen=True)
+class ShoeStyle:
+    """Golf-shoe shape, in fractions of the foot length (``shoe_settings.json``).
+
+    Positions run from the heel back (0) to the toe tip (1); the settings file
+    documents each entry. Invariant: every value is finite and positive and
+    every position lies in (0, 1), in order.
+    """
+
+    toe_spring: tuple[float, ...]  # start, tip rise, exponent
+    heel_height: float
+    forefoot_height: float
+    sole_slope: tuple[float, ...]  # from, to
+    shank: tuple[float, ...]  # from, to, blend, lift, upper cover
+    welt: float
+    insole: float
+    sole_edge_exponent: float
+    heel_counter: tuple[float, ...]  # to, proud
+    saddle: tuple[float, ...]  # from, to, proud
+    toe_cap: tuple[float, ...]  # from, to, proud: the stitched cap seam
+    laces: tuple[float, ...]  # count, width, share of shoe width, proud, stations
+    panel_floor: float
+    panel_stations: int
+    max_vertices: int
+
+    def __post_init__(self) -> None:
+        spans = {
+            "toe_spring": self.toe_spring[:1],
+            "sole_slope": self.sole_slope,
+            "shank": self.shank[:2],
+            "heel_counter": self.heel_counter[:1],
+            "saddle": self.saddle[:2],
+            "toe_cap": self.toe_cap[:2],
+        }
+        for name, span in spans.items():
+            if not all(0.0 < x < 1.0 for x in span) or list(span) != sorted(set(span)):
+                raise ValueError(f"shoe {name} positions must rise within (0, 1)")
+        for f in fields(self):
+            values = np.atleast_1d(np.asarray(getattr(self, f.name), dtype=float))
+            if not (np.isfinite(values).all() and (values > 0).all()):
+                raise ValueError(f"shoe {f.name} must be finite and positive")
+        if self.forefoot_height <= self.shank[3] or self.panel_stations < 2:
+            raise ValueError("shoe forefoot_height must exceed the shank lift")
+
+    def lift(self, f: float) -> float:
+        """Toe spring: sole rise above the ground plane at ``f``."""
+        start, rise, exponent = self.toe_spring
+        return float(rise * max(0.0, (f - start) / (1.0 - start)) ** exponent)
+
+    def shank_lift(self, f: float) -> float:
+        """Rise of the sole underside between the heel breast and the ball."""
+        lo, hi, blend, lift, _ = self.shank
+        return lift * _smooth((f - lo) / blend) * _smooth((hi - f) / blend)
+
+    def sole_top(self, f: float) -> float:
+        """Top of the sole edge above the ground plane at ``f``."""
+        lo, hi = self.sole_slope
+        drop = self.heel_height - self.forefoot_height
+        return self.heel_height - drop * _smooth((f - lo) / (hi - lo))
+
+
+@lru_cache(maxsize=4)
+def load_shoe_style(path: Path | None = None) -> ShoeStyle:
+    """Read ``shoe_settings.json``; raises ``ValueError`` for invalid values."""
+    raw = json.loads((path or SHOE_SETTINGS).read_text(encoding="utf-8"))
+    values: dict[str, Any] = {f.name: raw[f.name] for f in fields(ShoeStyle)}
+    lists = {k: tuple(v) for k, v in values.items() if isinstance(v, list)}
+    return ShoeStyle(**{**values, **lists})
 
 
 @dataclass(frozen=True)
@@ -154,6 +247,7 @@ class _Last:
     a_back: float
     sole_y: float  # sole plane height along ``up``
     width_norm: float  # normalises max(lateral) + max(medial) to ``breadth``
+    style: ShoeStyle = field(default_factory=load_shoe_style)
 
     def section(self, a: float) -> tuple[float, float, float]:
         """(lateral half width, medial half width, top height) at ``a``."""
@@ -204,7 +298,9 @@ def _pchip(xk: Sequence[float], yk: Sequence[float], x: float) -> float:
     )
 
 
-def _ring(wl: float, wm: float, height: float, inset: float) -> Array:
+def _ring(
+    wl: float, wm: float, height: float, inset: float, exponent: float = _DOME_EXPONENT
+) -> Array:
     """Cross-section polyline ``(lateral offset, height above the sole)``.
 
     Flat sole, rounded sole edges, and a super-elliptic dome from the lateral
@@ -222,7 +318,7 @@ def _ring(wl: float, wm: float, height: float, inset: float) -> Array:
         phi = math.radians(-90.0 + 90.0 * k / (_ARC_POINTS + 1))
         out.append((wl - bevel + bevel * math.cos(phi), bevel + bevel * math.sin(phi)))
     zc, half = 0.5 * (wl - wm), 0.5 * (wl + wm)
-    p = 2.0 / _DOME_EXPONENT
+    p = 2.0 / exponent
     for k in range(_DOME_POINTS + 2):  # lateral extreme .. medial extreme
         theta = math.pi * k / (_DOME_POINTS + 1)
         c, s = math.cos(theta), math.sin(theta)
@@ -235,27 +331,43 @@ def _ring(wl: float, wm: float, height: float, inset: float) -> Array:
     return ring
 
 
-def _smooth(x: float) -> float:
-    x = min(max(x, 0.0), 1.0)
-    return x * x * (3.0 - 2.0 * x)
-
-
 def _shell(
     last: _Last,
     basis: _Basis,
     a_lo: float,
     a_hi: float,
     inset: Callable[[float], float],
+    slab: bool = False,
+    stations: int = _STATIONS,
+    narrow: float = 1.0,
 ) -> geometry.Mesh:
-    """Closed shell of the last between two stations along forward."""
+    """Closed shell of the last between two stations along forward.
+
+    Every shell follows the toe spring. ``slab`` builds the sole instead: the
+    last cut off at the style's sole top, lifted under the shank and widened
+    by the welt, with an upright edge. ``narrow`` scales the widths (a lace is
+    a narrow shell that shows only over the instep).
+    """
     lateral = -basis.medial_sign  # lateral offset -> signed +left coordinate
+    style, length = last.style, last.length
     grid = []
-    for s in np.linspace(0.0, 1.0, _STATIONS):
+    for s in np.linspace(0.0, 1.0, stations):
         a = a_lo + (a_hi - a_lo) * 0.5 * (1.0 - math.cos(math.pi * s))
+        f = (a - last.a_back) / length
         wl, wm, height = last.section(a)
-        ring = _ring(wl, wm, height, inset(a))
+        sole, exponent = last.sole_y + length * style.lift(f), _DOME_EXPONENT
+        rise, top = length * style.shank_lift(f), length * style.sole_top(f)
+        # The upper's underside stays inside the sole, also under the shank.
+        floor = max(length * style.insole, rise * style.shank[4])
+        if slab:
+            welt = length * style.welt * min(1.0, wl / _WELT_FADE_M)
+            wl, wm, sole, floor = wl + welt, wm + welt, sole + rise, 0.0
+            height, exponent = min(height, top - rise), style.sole_edge_exponent
+        elif inset(a) < 0.0:  # a panel: its underside is hidden inside the sole
+            floor = max(floor, style.panel_floor * min(height, top))
+        ring = _ring(wl * narrow, wm * narrow, height, inset(a), exponent)
+        ring[:, 1] = np.maximum(ring[:, 1], floor)
         base = basis.fwd * a
-        sole = last.sole_y
         grid.append(
             [base + basis.up * (sole + t) + basis.left * (lateral * z) for z, t in ring]
         )
@@ -382,13 +494,57 @@ def _ankle_stub(
     bottom = ankle - basis.up * (
         float(ankle @ basis.up) - (last.sole_y + ANKLE_DEPTH_M)
     )
-    pts = _to_body(poses, roles["calcn"], roles["talus"], np.stack([ankle, bottom]))
+    top = ankle + basis.up * ANKLE_RISE_M
+    pts = _to_body(poses, roles["calcn"], roles["talus"], np.stack([top, bottom]))
     return geometry.lofted_segment(
         pts[0],
         pts[1],
         ANKLE_RADIUS_M,
         geometry.LoftOptions(rings=10, sides=24),
     )
+
+
+def _panels(
+    last: _Last, basis: _Basis, roles: Mapping[str, str], cut: float
+) -> list[tuple[str, str, geometry.Mesh]]:
+    """(body, role, mesh in the calcn frame) of the stitched-on shoe panels.
+
+    The heel counter and saddle band (``saddle``) and the laces (``lace``) ride
+    on the calcn; the toe-cap seam (``trim``) on the toes. Precondition: the saddle
+    ends behind the MTP plane ``cut`` and the toe cap starts ahead of it.
+    """
+    style, length = last.style, last.length
+    eps = _TIP_EPS_M / length
+    lo, hi, proud = style.saddle
+    hinge = (cut - last.a_back) / length
+    if "toes" in roles and not hi < hinge < style.toe_cap[0]:
+        raise ValueError(f"shoe saddle and toe cap must clear the MTP at {hinge:.2f}")
+
+    def panel(f_lo: float, f_hi: float, out: float, lace: Sequence[float] = ()) -> Any:
+        ends = (last.a_back + f_lo * length, last.a_back + f_hi * length)
+        stations, narrow = lace or (style.panel_stations, 1.0)
+        return _shell(
+            last, basis, *ends, lambda a: -out * length, False, int(stations), narrow
+        )
+
+    count, width, share, lace_proud, lace_stations = style.laces
+    centres = np.linspace(lo, hi, int(count) + 2)[1:-1]
+    laces = [
+        panel(
+            c - 0.5 * width, c + 0.5 * width, proud + lace_proud, (lace_stations, share)
+        )
+        for c in centres
+    ]
+    counter_to, counter_proud = style.heel_counter
+    cap_lo, cap_hi, cap_proud = style.toe_cap
+    saddle = (panel(eps, counter_to, counter_proud), panel(lo, hi, proud))
+    cap = panel(cap_lo, cap_hi, cap_proud, (lace_stations, 1.0))
+    calcn = roles["calcn"]
+    return [
+        (calcn, "saddle", geometry.concat_meshes(*saddle)),
+        (calcn, "lace", geometry.concat_meshes(*laces)),
+        (roles.get("toes", calcn), "trim", cap),
+    ]
 
 
 def _build_side(
@@ -418,6 +574,9 @@ def _build_side(
         base: float,
     ) -> geometry.Mesh:
         return _shell(last, basis, a_lo, a_hi, lambda a: base + ramp(a))
+
+    def build_sole(a_lo: float, a_hi: float, ramp: Callable[[float], float]) -> Any:
+        return _shell(last, basis, a_lo, a_hi, ramp, slab=True)
 
     def frame_out(body: str, mesh: geometry.Mesh) -> geometry.Mesh:
         return geometry.Mesh(
@@ -458,7 +617,12 @@ def _build_side(
                 "skin", frame_out(body, build(s_lo, s_hi, lambda a: 0.0, SKIN_INSET_M))
             ),
             FootPart("garment", frame_out(body, build(a_lo, a_hi, ramp, 0.0))),
+            FootPart("sole", frame_out(body, build_sole(a_lo, a_hi, ramp))),
         )
+    for body, role, mesh in _panels(
+        last, basis, roles, cut if "toes" in roles else tip
+    ):
+        out[body] += (FootPart(role, frame_out(body, mesh)),)
     if "talus" in roles:
         out[roles["talus"]] = (
             FootPart("ankle", _ankle_stub(last, basis, poses, roles)),

@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section*{Iron Divot Pipeline (Supplementary Reference)}
+This editable supplementary reference accompanies IRON\_DIVOT\_PIPELINE.md;
+it is not the governed engineering design manual. Refs issue 15523.
+The existing parabolic sole-path model uses target-relative distance $x$
+and turf-relative height $z$, both in metres. With effective clubhead mass
+$m$ in kg and entry speed $v$ in m/s, turf shear work $W$ in joules gives
+\[
+ K=\tfrac12 mv^2,\qquad r_v=\sqrt{\max(0,1-W/K)},\qquad r_s=r_v^2.
+\]
+The impact solver receives $r_v\mathbf v$; launch spin receives the additional
+factor $r_s$ before the existing spin clamp. The model's shear scale and
+spin exponent are uncalibrated heuristics, inherited unchanged from PR 15545.
+The pipeline uses its impact effective mass and preserves the original input.
+Zero retention refuses flight. Direction and angular velocity are not modeled
+as ground-contact responses. See the companion Markdown for defaults, frames,
+acceptance tests and exact reproduction commands; passing those tests does
+not establish physical accuracy. No compilation or publication approval is claimed.
+\end{document}

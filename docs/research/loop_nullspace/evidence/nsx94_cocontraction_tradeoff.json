@@ -1,0 +1,86 @@
+{
+  "entries": [
+    {
+      "engine": "myosuite",
+      "fiber_nullity": 1,
+      "fixture": "mjcf-antagonist-elbow",
+      "index_name": "total_activation",
+      "joint_stiffness_trace_Nm_per_rad": [
+        0.489796378698964,
+        0.5665309190951351,
+        0.643265459491306,
+        0.719999999887477,
+        0.796734540283648,
+        0.8734690806798193,
+        0.9502036210759905
+      ],
+      "joint_torque_noise_variance_N2m2": [
+        1041.233798417786,
+        1217.1382900182525,
+        1418.5991604887358,
+        1645.6164098292375,
+        1898.1900380397558,
+        2176.3200451202924,
+        2480.006431070848
+      ],
+      "levels": [
+        0.6802726950113379,
+        0.7779671330309902,
+        0.8756615710506425,
+        0.9733560090702947,
+        1.071050447089947,
+        1.1687448851095992,
+        1.2664393231292514
+      ],
+      "net_torque_N_m": 20.0,
+      "noise_monotone_increasing": true,
+      "non_claims": "Declared experiment, not an estimate of the golfer's co-contraction (EMG is a deferred validation). Noise gain and stiffness are declared hypotheses; short-range-stiffness evidence is feline and force-dependent (CIT-CUI-2008). Representatives are minimum-norm per level, not physiology.",
+      "stiffness_monotone_increasing": true,
+      "sweep_status": "COMPUTED",
+      "torque_residual_max": 7.105427357601002e-15
+    },
+    {
+      "engine": "opensim",
+      "fiber_nullity": 1,
+      "fixture": "constructed-millard-elbow",
+      "index_name": "total_activation",
+      "joint_stiffness_trace_Nm_per_rad": [
+        3.5618841387967453,
+        4.471134955202232,
+        5.375796773331438,
+        6.274506618482111,
+        7.164626105850759,
+        8.069191873908968,
+        8.970275804564043
+      ],
+      "joint_torque_noise_variance_N2m2": [
+        696.2309477769062,
+        905.9682245507427,
+        1164.929548129116,
+        1473.1149185120248,
+        1830.52433569947,
+        2237.1577996914525,
+        2693.01531048797
+      ],
+      "levels": [
+        0.5562700676646395,
+        0.6918541910586006,
+        0.8274383144525616,
+        0.9630224378465226,
+        1.0986065612404836,
+        1.2341906846344448,
+        1.369774808028406
+      ],
+      "net_torque_N_m": 15.0,
+      "noise_monotone_increasing": true,
+      "non_claims": "Declared experiment, not an estimate of the golfer's co-contraction (EMG is a deferred validation). Noise gain and stiffness are declared hypotheses; short-range-stiffness evidence is feline and force-dependent (CIT-CUI-2008). Representatives are minimum-norm per level, not physiology.",
+      "stiffness_monotone_increasing": true,
+      "sweep_status": "COMPUTED",
+      "torque_residual_max": 1.0658141036401503e-14
+    }
+  ],
+  "issue": 12723,
+  "non_claims": "Declared experiment, not an estimate of the golfer's co-contraction (EMG is a deferred validation). Noise gain and stiffness are declared hypotheses; short-range-stiffness evidence is feline and force-dependent (CIT-CUI-2008). Representatives are minimum-norm per level, not physiology.",
+  "schema": "nsx94_cocontraction_tradeoff/v1",
+  "validation_status": "UNVALIDATED"
+}

@@ -10,11 +10,11 @@ never held::
     ZTCF: tau = 0, state (q, v) kept            -> a_ZTCF (drift)
     ZVCF: control component, a(tau) - a_ZTCF = P_c tau
           = M^-1 (tau + J^T (lambda - lambda_0))   (#14494)
-    zero-velocity, zero-torque: v = 0 and tau = 0  -> report field ``zvcf``
+    zero-velocity, zero-torque: v = 0 and tau = 0  -> explicit diagnostic
 
 Names follow ``model_aware_matching.tex`` (Section "ZTCF and ZVCF as exact
-projections"): both are *pointwise*; the control-preserved zero-velocity
-acceleration is never called a ZVCF.  Allocation dependence follows
+projections"): both are *pointwise*; ZVCF is the applied-control acceleration
+with velocity and gravity off. Allocation dependence follows
 ``loop_nullspace.tex``: the accelerations and the control-induced total depend
 only on measured motion (``INVARIANT``); the per-actuator split
 ``P_c e_i tau_i`` depends on the individual torques and is
@@ -65,6 +65,7 @@ def is_constrained_provider(
 
 
 def _state(name: str, value: ArrayLike, n: int | None = None) -> Array:
+    """Return value as a finite 1-D float array, optionally checking its length n."""
     arr = np.asarray(value, dtype=np.float64).reshape(-1)
     if arr.size == 0 or not np.isfinite(arr).all():
         raise ValueError(f"{name} must be a non-empty finite vector")
@@ -74,6 +75,7 @@ def _state(name: str, value: ArrayLike, n: int | None = None) -> Array:
 
 
 def _require_constrained(provider: Any) -> None:
+    """Raise TypeError unless the provider supplies the closure rows."""
     if not is_constrained_provider(provider):
         raise TypeError(
             "provider must satisfy ConstrainedEquationsOfMotionProvider "
@@ -108,6 +110,34 @@ def constrained_acceleration_at(
     )
 
 
+def drift_and_control_states(
+    provider: ConstrainedEquationsOfMotionProvider,
+    q: ArrayLike,
+    v: ArrayLike,
+    tau: ArrayLike,
+) -> tuple[tuple[Array, Array], tuple[Array, Array]]:
+    """``((a, lambda) drift, (a, lambda) control)`` at one state (#15150 Z2).
+
+    Drift (ZTCF) is the constrained solve at ``tau = 0`` with ``q``, ``v``,
+    gravity and passive terms kept. Control (ZVCF) solves the same KKT system
+    with the load ``tau`` alone: no bias, no closure drift, so gravity is
+    counted once, in the drift (owner decision #14497, restated 2026-11-24).
+    Postcondition: each part's ``a`` and ``lambda`` sum to the solve under
+    ``tau``, to rounding. Preconditions as :func:`drift_and_control_reactions`.
+    """
+    _require_constrained(provider)
+    q_arr = _state("q", q)
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
+    n = mass.shape[0]
+    tau_arr = _state("tau", tau, n)
+    drift = constrained_acceleration_at(provider, q_arr, v, np.zeros(n))
+    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
+    control = constrained_acceleration(
+        mass, np.zeros(n), tau_arr, jacobian, np.zeros(jacobian.shape[0])
+    )
+    return drift, control
+
+
 def drift_and_control_reactions(
     provider: ConstrainedEquationsOfMotionProvider,
     q: ArrayLike,
@@ -134,16 +164,7 @@ def drift_and_control_reactions(
     Postcondition: ``lambda_drift + lambda_control`` equals the reaction under
     ``tau`` to rounding (minimum-norm multipliers if ``J_c`` is rank deficient).
     """
-    _require_constrained(provider)
-    q_arr = _state("q", q)
-    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
-    n = mass.shape[0]
-    tau_arr = _state("tau", tau, n)
-    _, drift = constrained_acceleration_at(provider, q_arr, v, np.zeros(n))
-    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
-    _, control = constrained_acceleration(
-        mass, np.zeros(n), tau_arr, jacobian, np.zeros(jacobian.shape[0])
-    )
+    (_, drift), (_, control) = drift_and_control_states(provider, q, v, tau)
     return drift, control
 
 
@@ -153,9 +174,9 @@ class ConstrainedCounterfactuals:
 
     Attributes:
         ztcf: ``a`` with ``tau = 0`` at the measured ``(q, v)``.
-        zvcf: ``a`` with ``v = 0`` and ``tau = 0`` at the measured ``q``; the
-            zero-velocity, zero-torque acceleration under its pre-#14494 name.
-            ZVCF proper (the control component) is ``control_total``.
+        zero_velocity_zero_torque: ``a`` with ``v = 0`` and ``tau = 0`` at the
+            measured ``q``; a gravity-only diagnostic, not ZVCF.
+        zvcf: alias for ``control_total``, the applied-control component.
         control_total: ``a(tau) - a_ZTCF = P_c tau`` (``INVARIANT``), equal to
             ``ztcf_zvcf.zvcf_acceleration(provider, q, tau)``.
         per_actuator: column ``i`` is ``P_c e_i tau_i`` (``FAMILY_DEPENDENT``);
@@ -166,7 +187,7 @@ class ConstrainedCounterfactuals:
     """
 
     ztcf: Array
-    zvcf: Array
+    zero_velocity_zero_torque: Array
     control_total: Array
     per_actuator: Array
     reaction_ztcf: Array
@@ -175,9 +196,10 @@ class ConstrainedCounterfactuals:
     hypotheses: Mapping[str, tuple[str, ...]]
 
     def __post_init__(self) -> None:
+        """Freeze each report array as a finite, read-only copy."""
         for name in (
             "ztcf",
-            "zvcf",
+            "zero_velocity_zero_torque",
             "control_total",
             "per_actuator",
             "reaction_ztcf",
@@ -188,6 +210,11 @@ class ConstrainedCounterfactuals:
                 raise ValueError(f"{name} must be finite")
             arr.flags.writeable = False
             object.__setattr__(self, name, arr)
+
+    @property
+    def zvcf(self) -> Array:
+        """Applied-control component; kept as the canonical ZVCF name."""
+        return self.control_total
 
 
 def constrained_counterfactual_report(
@@ -201,8 +228,11 @@ def constrained_counterfactual_report(
     Preconditions: ``provider`` is constrained (``TypeError``); ``q``, ``v``
     finite and ``tau`` a finite generalised load of length ``n`` (``ValueError``).
     Postconditions: ``ztcf + control_total`` equals the closed-loop acceleration
-    under ``tau`` to rounding; ``per_actuator.sum(axis=1) == control_total``;
-    every acceleration satisfies the closure at acceleration level.  The
+    under ``tau`` to rounding; ``per_actuator.sum(axis=1) == control_total`` at
+    the measured ``(q, v)`` under the q-only ``closure_jacobian`` contract (KKT
+    linear in torque; active-set changes need a future contact-mode hook);
+    every acceleration satisfies the closure at acceleration level.  Per-actuator
+    columns use the same ``(q, v)`` and ZTCF baseline as ``control_total``.  The
     reactions are re-solved, so no quantity assumes a held ``lambda``.
     """
     _require_constrained(provider)
@@ -216,21 +246,22 @@ def constrained_counterfactual_report(
     full, _ = constrained_acceleration_at(provider, q_arr, v_arr, tau_arr)
     control_total = full - ztcf
     columns = [
-        constrained_acceleration_at(provider, q_arr, zeros, tau_arr[i] * np.eye(n)[i])[
+        constrained_acceleration_at(provider, q_arr, v_arr, tau_arr[i] * np.eye(n)[i])[
             0
         ]
-        - zvcf
+        - ztcf
         for i in range(n)
     ]
     dependence = {
         "ztcf": AllocationDependence.INVARIANT,
+        "zero_velocity_zero_torque": AllocationDependence.INVARIANT,
         "zvcf": AllocationDependence.INVARIANT,
         "control_total": AllocationDependence.INVARIANT,
         "per_actuator": AllocationDependence.FAMILY_DEPENDENT,
     }
     return ConstrainedCounterfactuals(
         ztcf=ztcf,
-        zvcf=zvcf,
+        zero_velocity_zero_torque=zvcf,
         control_total=control_total,
         per_actuator=np.stack(columns, axis=1),
         reaction_ztcf=lam0,

@@ -3,10 +3,10 @@
   "classification": "synthetic_numerical_verification_not_human_evidence",
   "constrained_motion": {
     "all_gates_pass": true,
-    "cross_engine_multiplier_relative_residual": 3.2912406029630147e-13,
+    "cross_engine_multiplier_relative_residual": 3.2920955509305444e-13,
     "equilibrium_relative_residual": 6.865049657261163e-13,
     "independent_engine_difference_detected": true,
-    "multiplier_relative_residual": 3.349443310154366e-13,
+    "multiplier_relative_residual": 3.350286903869652e-13,
     "position_residual_m": 0.0,
     "velocity_residual_m_s": 0.0,
     "virtual_power_residual_w": 0.0
@@ -77,7 +77,7 @@
     "all_gates_pass": true,
     "gravity_free_zero_torque_relative_drift": {
       "angular_momentum": 1.5118394581355118e-06,
-      "kinetic_energy": 8.665719958000917e-07,
+      "kinetic_energy": 8.665719958278473e-07,
       "linear_momentum": 1.008023158469804e-06
     },
     "independent_engine_difference_detected": true,
@@ -103,7 +103,7 @@
     "Agreement verifies the declared model and operators, not anatomy or coaching strategy."
   ],
   "model": {
-    "canonical_sha256": "8bbe68f454ca4463286d70342ac28b7382bbdc63e604a97acf1d2d90bc090ff3",
+    "canonical_sha256": "3449bb72b85d9f5446fd6b5569d97171071c441da27c23b42fb6c4df0d5d8413",
     "closed_state_index": [
       0,
       6
@@ -121,14 +121,14 @@
     "scripts/research/proximal_distal_energy/register_articulated_manufactured_solution_claims.py": "459e2026bbd99c15be3fc04459bdc89ea7b583bd874d35a41e673a7f73140694",
     "scripts/research/proximal_distal_energy/requirements/articulated-authority-py311.in": "08a13bcfc8b7e534f778da266cb7e45784a8095eb76f0a48c005ae5da2437d23",
     "scripts/research/proximal_distal_energy/run_articulated_manufactured_solution.py": "f3eabeafdcfc5d06cf3b5cb4a5b3b29de13c9765f014231353f5b735cd4ec179",
-    "scripts/research/proximal_distal_energy/spatial_full_body.py": "b386ec2119ebc10f18a404ceba8b304827e418b9c2973641e644b2953d5f17d2",
+    "scripts/research/proximal_distal_energy/spatial_full_body.py": "e815bdd6cd46aa8f46a08c336a3b91bde78c7cf7b302bae278deddb601b867b2",
     "scripts/research/proximal_distal_energy/subject_scaled_spatial_geometry.py": "c2b01f1d8de0b25daa39c03ae97d3ef51512264f3a2978766a7360aed5d9cda8",
     "src/shared/python/anthropometrics/estimators/_base.py": "bc91d7c83920f9cb53b82681c8bb3119beb54745bfd0ee35dc82a2e8d85a9a10",
     "src/shared/python/anthropometrics/estimators/from_de_leva.py": "ef07007658b0e2dc8f8c310c366e8119074097a6d386a760847523ccb061104f",
     "src/shared/python/body_segment_parameters/data/de_leva_1996_table4.json": "f9afb52b883ede994b1048f8b759611a890b20af663287921290e30cbda104c4",
     "src/shared/python/body_segment_parameters/de_leva_1996.py": "aff003de696bc888a19abc0578c12ca40cb3b3585c3218958a40f1a9dc93754d",
     "tests/ci/test_articulated_manufactured_authority_anthropometry_provenance_red.py": "995dbe88b89548257a6d8276d1fe3e846535c4873c14fc0dd58817ac2690863c",
-    "tests/research/test_articulated_manufactured_hybrid_authority_red.py": "8ff08d1921401a21f06ead188c262b1721b6531d8f8b234daaf07adca9727818",
+    "tests/research/test_articulated_manufactured_hybrid_authority_red.py": "441062feea5074495e313695d9d240b41c5d0509aaaf4448802272a2d61b10b1",
     "tests/research/test_articulated_manufactured_hybrid_policy_completeness_red.py": "03c94ef0fb53ab469cb694b217c8d74430191c385ca4919f5bbf67900d985486",
     "tests/research/test_articulated_manufactured_hybrid_semantics_red.py": "d24e8bcd44effdbc4d5618de443ac0b0f7010514be5caab57bf28cd984c20422",
     "tests/research/test_articulated_manufactured_solution.py": "08000ac1bf63462b559967e0b4d2c1aeb7afa53c18e952fddcb7db104550d302"

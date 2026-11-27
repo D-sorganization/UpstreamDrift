@@ -149,7 +149,7 @@ UPSTREAM_DRIFT_STRICT_ENGINE_PROBES=true \
 pytest tests/integration/test_cross_engine_validation.py -v
 ```
 
-### End-to-End Tests (`tests/e2e/`)
+### End-to-End Tests (`tests/integration/test_end_to_end.py`)
 
 **Purpose**: Test complete user workflows from start to finish
 
@@ -166,11 +166,10 @@ Before running E2E tests:
    pip install mujoco
    ```
 
-2. **Test Data**: E2E test datasets are in `tests/assets/e2e/`
+2. **Test Data**: Sample URDF models are in `tests/assets/` and `tests/fixtures/models/`
 
-   - `golf_swing_capture.c3d` - Sample motion capture data
-   - `simple_humanoid.urdf` - Minimal humanoid model
-   - `7iron.urdf` - Standard golf club model
+   - `tests/assets/simple_arm.urdf` - Minimal arm URDF fixture
+   - `tests/fixtures/models/double_pendulum.urdf` - Double-pendulum URDF fixture
 
 3. **Display**: GUI tests require a display (or `xvfb-run` on Linux)
 
@@ -180,16 +179,16 @@ Before running E2E tests:
 
 ```bash
 # Run all E2E tests
-pytest tests/e2e/ -v
+pytest -m e2e -v
 
 # Run specific workflow test
-pytest tests/e2e/test_swing_analysis_workflow.py -v
+pytest tests/integration/test_end_to_end.py -v
 
 # Skip GUI tests (headless mode)
-pytest tests/e2e/ -v -m "not gui"
+pytest tests/integration/test_end_to_end.py -v -m "not gui"
 
 # With verbose output for debugging
-pytest tests/e2e/ -v --capture=no
+pytest tests/integration/test_end_to_end.py -v --capture=no
 ```
 
 #### Swing Analysis Workflow Test
@@ -207,10 +206,10 @@ def test_complete_swing_analysis_workflow():
     """
     # 1. Load humanoid + club model
     engine = EngineManager().get_engine(EngineType.MUJOCO)
-    engine.load_from_path("tests/assets/e2e/simple_humanoid.urdf")
+    engine.load_from_path("tests/assets/simple_arm.urdf")
 
     # 2. Load motion capture data
-    motion_data = load_c3d("tests/assets/e2e/golf_swing_capture.c3d")
+    motion_data = load_c3d(sample_c3d_path)  # e.g., from golf_test_data archive
 
     # 3. Run inverse kinematics
     ik_result = engine.compute_inverse_kinematics(motion_data)

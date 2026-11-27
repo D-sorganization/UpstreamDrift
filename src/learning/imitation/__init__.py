@@ -14,6 +14,7 @@ from src.learning.imitation.learners import (
     BehaviorCloning,
     DAgger,
     ImitationLearner,
+    OfflineAdversarialImitation,
     TrainingConfig,
 )
 
@@ -24,5 +25,6 @@ __all__ = [
     "BehaviorCloning",
     "DAgger",
     "GAIL",
+    "OfflineAdversarialImitation",
     "TrainingConfig",
 ]

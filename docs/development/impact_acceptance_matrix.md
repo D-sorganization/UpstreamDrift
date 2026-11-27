@@ -42,7 +42,7 @@ The provider follow-up #12246 advances the Tools dependency to the merged
 triangle-lamina provider revision. The existing exact-pin test first failed
 against the old reconciliation record. Before updating that record, all 26
 other matrix/capability probes passed. An archive of the exact new Tools pin
-was built on DeskComputer with Node 25.9.0/npm 11.12.1, then the transferred
+was built on <host> with Node 25.9.0/npm 11.12.1, then the transferred
 bundle was actually served and verified locally with Python 3.13.5,
 FastAPI 0.128.0 and httpx 0.28.1. Verification covered 76 assets, five
 JavaScript assets, 2,801,426 bytes, exact revision/mount/digests and the
@@ -68,7 +68,7 @@ and the missing-file 404. The complete matrix suite then passed all 27 tests.
 Retain the original pin-drift RED receipt. The new served receipt is
 `docs/development/feedback_controls/F09O-IMPACT-SERVED-RECEIPT.json`.
 
-The diagnostic build used DeskComputer's Node 25.9.0/npm 11.12.1. Its existing
+The diagnostic build used <host>'s Node 25.9.0/npm 11.12.1. Its existing
 native SDK environment lacked FastAPI, so the transferred built bundle was
 verified locally with Python 3.13/FastAPI 0.128.0/httpx 0.28.1. No native SDK
 environment was modified. These actual versions are separate from the CI
@@ -111,7 +111,7 @@ longer exists.
 | Model           | Contact                                   | Tangential spin               | Gear effect                           | Inertia                         | COR                         | Shaft / grip | Numerical limits                                                                                                                                       |
 | --------------- | ----------------------------------------- | ----------------------------- | ------------------------------------- | ------------------------------- | --------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `rigid_body`    | instantaneous (0 s)                       | supported (Coulomb, capped)   | empirical overlay via solver API only | scalar MOI effective mass       | constant (`params.cor`)     | not modelled | closed form; friction impulse capped at 2/7·m·v_t; needs non-zero face normal                                                                          |
-| `spring_damper` | finite, integrated (~1.26 ms at defaults) | **unavailable / normal-only** | empirical overlay via solver API only | ignored (offset and MOI unused) | constant (parameter unused) | not modelled | semi-implicit Euler, dt 1e-7 s, 5 ms / 1e5 N caps; converges to rtol 1e-4 at dt 5e-8; default k = 1e6 N/m gives smash 0.82, i.e. uncalibrated defaults |
+| `spring_damper` | finite, integrated (~0.61 ms at defaults) | supported (Coulomb, capped; as rigid_body) | empirical overlay via solver API only | scalar MOI in tangential cap only | constant (`params.cor` sets the damping) | not modelled | semi-implicit Euler, dt 1e-7 s, 5 ms / 1e5 N caps; damping derived from COR; smash ~1.47 at defaults |
 | `finite_time`   | finite, **reported only**                 | supported (as rigid_body)     | empirical overlay via solver API only | scalar MOI effective mass       | constant                    | not modelled | delegates to rigid_body; duration is the input parameter (0.5 ms default)                                                                              |
 
 A model lacking spin support returns the pre-impact spin unchanged; the

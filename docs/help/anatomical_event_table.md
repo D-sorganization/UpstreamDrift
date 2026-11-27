@@ -14,6 +14,10 @@ Show the wrist, forearm, trunk and pelvis terms at address, top, pelvis reversal
 
 The desktop dock opens an event-table export (`anatomical_angles.event_table.to_json`, the body `POST /api/biomechanics/anatomical-event-table` returns) with **Open Event Table JSON…**. The web page posts calibrated frames to that route. `anatomical_angles.event_table_view` turns the document into rows; a missing value shows "missing" with its reason.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/The_Physics_of_Golf/quarto/ch04_forces_and_torques.html): *The Physics of Golf — Forces and Torques*.
+
 ## Limitations
 
 The table formats the export; it does not detect events or change any angle. An unreadable or invalid file is reported and the table keeps what it showed; no surface substitutes sample data. Angles are software outputs, not clinical measurements.

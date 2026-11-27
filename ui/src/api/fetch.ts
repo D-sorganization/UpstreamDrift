@@ -17,6 +17,7 @@
  */
 
 import { getApiBase } from './backend';
+import { launcherFetch } from './launcherFetch';
 
 /**
  * Default request timeout (issue #8080).
@@ -187,7 +188,7 @@ export async function apiFetchWithHeaders<T>(
 
   let response: Response;
   try {
-    response = await fetch(url, mergedInit);
+    response = await launcherFetch(url, mergedInit);
   } catch (err) {
     if (err instanceof DOMException && err.name === 'TimeoutError') {
       throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
@@ -272,7 +273,7 @@ export async function apiFetchForm<T>(
 
   let response: Response;
   try {
-    response = await fetch(url, mergedInit);
+    response = await launcherFetch(url, mergedInit);
   } catch (err) {
     if (err instanceof DOMException && err.name === 'TimeoutError') {
       throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);
@@ -320,7 +321,7 @@ export async function apiFetchBlob(
 
   let response: Response;
   try {
-    response = await fetch(url, mergedInit);
+    response = await launcherFetch(url, mergedInit);
   } catch (err) {
     if (err instanceof DOMException && err.name === 'TimeoutError') {
       throw new Error(`Request timed out after ${timeoutMs}ms — ${path}`);

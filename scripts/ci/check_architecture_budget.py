@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import argparse
 import ast
+import inspect
 import json
 import logging
+import os
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -214,11 +216,102 @@ def analyze_python_file(
     return visitor.findings
 
 
-def _exception_is_active(exc: dict[str, Any]) -> bool:
+@dataclass(frozen=True)
+class ExpiringBudgetException:
+    """An active budget exception nearing expiration."""
+
+    path: str
+    owner: str
+    expires_on: date
+    days_remaining: int
+    reason: str
+    symbol: str | None = None
+    rule: str | None = None
+
+    def format(self) -> str:
+        """Return human-readable warning description."""
+        ident = (
+            f"{self.path}:{self.symbol} [{self.rule}]"
+            if self.symbol and self.rule
+            else self.path
+        )
+        return (
+            f"{ident} expires in {self.days_remaining}d on "
+            f"{self.expires_on.isoformat()} (owner={self.owner})"
+        )
+
+
+ExpiringArchitectureException = ExpiringBudgetException
+
+
+def resolve_reference_date(
+    *,
+    repo_root: Path | None = None,
+    base_ref: str = DEFAULT_BASE_REF,
+    as_of: str | date | None = None,
+) -> date:
+    """Resolve evaluation reference date using the deterministic hierarchy."""
+    if isinstance(as_of, date):
+        return as_of
+    if as_of:
+        return date.fromisoformat(as_of.strip())
+
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        try:
+            return datetime.fromtimestamp(int(epoch.strip()), tz=timezone.utc).date()
+        except (ValueError, OverflowError, OSError):
+            pass
+
+    target_root = repo_root
+    if target_root is None:
+        try:
+            target_root = _repo_root()
+        except (OSError, RuntimeError, ValueError):
+            target_root = None
+
+    if target_root is not None:
+        for ref_args in (["merge-base", "HEAD", base_ref], ["rev-parse", "HEAD"]):
+            try:
+                commit = _run_git(ref_args, target_root).strip()
+                if commit:
+                    date_str = _run_git(
+                        ["show", "-s", "--format=%cs", commit], target_root
+                    ).strip()
+                    if date_str:
+                        return date.fromisoformat(date_str)
+            except (OSError, RuntimeError, ValueError):
+                continue
+
+    return datetime.now(timezone.utc).date()
+
+
+def _exception_is_active(
+    exc: dict[str, Any], reference_date: date | None = None
+) -> bool:
     expires_on = exc.get("expires_on")
     if not expires_on:
         return True
-    return date.today() <= date.fromisoformat(str(expires_on))
+    ref = reference_date if reference_date is not None else resolve_reference_date()
+    return ref <= date.fromisoformat(str(expires_on))
+
+
+def _evaluate_exception_is_active(fn: Any, exc: dict[str, Any], ref_date: date) -> bool:
+    """Evaluate whether an exception is active, honoring legacy 1-arg patches."""
+    try:
+        sig = inspect.signature(fn)
+        if "reference_date" in sig.parameters or any(
+            p.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+            for p in sig.parameters.values()
+        ):
+            return bool(fn(exc, reference_date=ref_date))
+        return bool(fn(exc))
+    except (TypeError, ValueError):
+        pass
+    try:
+        return bool(fn(exc, reference_date=ref_date))
+    except TypeError:
+        return bool(fn(exc))
 
 
 def _exception_key(exc: dict[str, Any]) -> tuple[str, str, str]:
@@ -231,10 +324,14 @@ def _exception_key(exc: dict[str, Any]) -> tuple[str, str, str]:
 
 def _collect_active_exceptions(
     config: dict[str, Any],
+    reference_date: date | None = None,
 ) -> tuple[set[tuple[str, str, str]], list[str]]:
     active: set[tuple[str, str, str]] = set()
     invalid: list[str] = []
     valid_rules = {"function-lines", "parameters"}
+    ref_date = (
+        reference_date if reference_date is not None else resolve_reference_date()
+    )
 
     for raw_exc in config.get("exceptions", []):
         if not isinstance(raw_exc, dict):
@@ -255,7 +352,7 @@ def _collect_active_exceptions(
             invalid.append(f"Exception missing linked issue in reason: {path}:{symbol}")
             continue
         try:
-            if _exception_is_active(raw_exc):
+            if _evaluate_exception_is_active(_exception_is_active, raw_exc, ref_date):
                 active.add((path, symbol, rule))
             else:
                 invalid.append(
@@ -269,6 +366,45 @@ def _collect_active_exceptions(
             )
 
     return active, invalid
+
+
+def collect_expiring_exceptions(
+    config: dict[str, Any],
+    reference_date: date | None = None,
+    within_days: int = 21,
+) -> list[ExpiringArchitectureException]:
+    """Return active exceptions expiring within ``within_days`` of ``reference_date``."""
+    ref_date = (
+        reference_date if reference_date is not None else resolve_reference_date()
+    )
+    expiring: list[ExpiringArchitectureException] = []
+
+    for raw in config.get("exceptions", []):
+        if not isinstance(raw, dict) or not raw.get("expires_on"):
+            continue
+        try:
+            exp_date = date.fromisoformat(str(raw["expires_on"]))
+        except ValueError:
+            continue
+
+        days = (exp_date - ref_date).days
+        if 0 <= days <= within_days:
+            path = str(raw.get("path", "")).strip()
+            symbol = str(raw["symbol"]).strip() if raw.get("symbol") else None
+            rule = str(raw["rule"]).strip() if raw.get("rule") else None
+            expiring.append(
+                ExpiringBudgetException(
+                    path=path,
+                    symbol=symbol,
+                    rule=rule,
+                    owner=str(raw.get("owner", "")).strip(),
+                    expires_on=exp_date,
+                    days_remaining=days,
+                    reason=str(raw.get("reason", "")).strip(),
+                )
+            )
+
+    return sorted(expiring, key=lambda x: (x.expires_on, x.path, x.symbol or ""))
 
 
 def _load_baseline(repo_root: Path, baseline_path: Path) -> set[tuple[str, str, str]]:
@@ -329,11 +465,14 @@ def collect_unexcepted_findings(
     repo_root: Path,
     paths: list[Path],
     config: dict[str, Any],
+    reference_date: date | None = None,
 ) -> list[tuple[str, str, str]]:
     """Return all unexcepted (path, symbol, rule) findings across specified paths."""
     max_function_lines = int(config.get("max_function_lines", 100))
     max_parameters = int(config.get("max_parameters", 8))
-    active_exceptions, _ = _collect_active_exceptions(config)
+    active_exceptions, _ = _collect_active_exceptions(
+        config, reference_date=reference_date
+    )
     findings_list: list[tuple[str, str, str]] = []
     for path in sorted(paths):
         if not _is_production_python(path, repo_root):
@@ -357,6 +496,7 @@ def collect_violations(
     paths: list[Path],
     config: dict[str, Any],
     baseline: set[tuple[str, str, str]] | None = None,
+    reference_date: date | None = None,
 ) -> list[str]:
     """Return architecture budget violations for production Python files.
 
@@ -372,7 +512,14 @@ def collect_violations(
 
     max_function_lines = int(config.get("max_function_lines", 100))
     max_parameters = int(config.get("max_parameters", 8))
-    active_exceptions, invalid_exceptions = _collect_active_exceptions(config)
+    ref_date = (
+        reference_date
+        if reference_date is not None
+        else resolve_reference_date(repo_root=repo_root)
+    )
+    active_exceptions, invalid_exceptions = _collect_active_exceptions(
+        config, reference_date=ref_date
+    )
     violations = list(invalid_exceptions)
 
     for path in sorted(paths):
@@ -395,7 +542,28 @@ def collect_violations(
     return violations
 
 
-def main(argv: list[str] | None = None) -> int:
+def _report_expiring_exceptions(
+    config: dict[str, Any], reference_date: date, within_days: int
+) -> None:
+    """Log warnings for exceptions nearing their expiration date."""
+    if within_days < 0:
+        return
+    expiring = collect_expiring_exceptions(
+        config, reference_date=reference_date, within_days=within_days
+    )
+    if expiring:
+        logger.info(
+            "EXPIRING SOON (%d exceptions expiring within %d days as of %s):",
+            len(expiring),
+            within_days,
+            reference_date.isoformat(),
+        )
+        for item in expiring:
+            logger.info("  %s", item.format())
+        logger.info("")
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--config-path",
@@ -415,6 +583,18 @@ def main(argv: list[str] | None = None) -> int:
         help="Base ref for changed-file scanning.",
     )
     parser.add_argument(
+        "--as-of",
+        type=str,
+        default=None,
+        help="Evaluation reference date (YYYY-MM-DD).",
+    )
+    parser.add_argument(
+        "--expiring-within-days",
+        type=int,
+        default=21,
+        help="Report active exceptions expiring within N days (default: 21).",
+    )
+    parser.add_argument(
         "--all",
         action="store_true",
         help="Scan all tracked Python files instead of changed files.",
@@ -424,6 +604,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Write current unexcepted findings to the baseline file.",
     )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_arg_parser()
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -431,10 +616,19 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         config = _load_config(repo_root, args.config_path)
+        ref_date = resolve_reference_date(
+            repo_root=repo_root,
+            base_ref=args.base_ref,
+            as_of=args.as_of,
+        )
+
         if args.write_baseline:
             paths = _tracked_python_files(repo_root)
             unexcepted = collect_unexcepted_findings(
-                repo_root=repo_root, paths=paths, config=config
+                repo_root=repo_root,
+                paths=paths,
+                config=config,
+                reference_date=ref_date,
             )
             _write_baseline(repo_root, args.baseline_path, unexcepted)
             logger.info(
@@ -464,6 +658,12 @@ def main(argv: list[str] | None = None) -> int:
             paths=paths,
             config=config,
             baseline=baseline,
+            reference_date=ref_date,
+        )
+        _report_expiring_exceptions(
+            config,
+            reference_date=ref_date,
+            within_days=args.expiring_within_days,
         )
     except (OSError, RuntimeError, SyntaxError, ValueError) as exc:
         logger.error("architecture budget failed: %s", exc)

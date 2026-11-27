@@ -1,6 +1,6 @@
 # OSL-7 Predictive Deadlift Run History (#13044)
 
-Every ControlTower stage-1 (torque-driven) run of
+Every <host> stage-1 (torque-driven) run of
 `scripts/measure_opensim_predictive_deadlift.py`, 15 Hermite–Simpson mesh
 intervals, forward finite differences and at most 3000 IPOPT iterations unless
 noted. Values are copied from each run's `receipts.json`; runs without a
@@ -60,7 +60,7 @@ is 0.01.
   report the weld reaction as the ground reaction. A deadlift keeps the feet
   fixed, but this removes contact from the prediction.
 - Keep contact and refine the mesh (30–50 intervals) with a contact-free
-  warm start. Each run then costs several hours on ControlTower.
+  warm start. Each run then costs several hours on <host>.
 - Keep contact and tune the sphere stiffness and dissipation for a 180 kg
   load. The calibrated foot spheres sank 0.119 m before OSL-12.
 

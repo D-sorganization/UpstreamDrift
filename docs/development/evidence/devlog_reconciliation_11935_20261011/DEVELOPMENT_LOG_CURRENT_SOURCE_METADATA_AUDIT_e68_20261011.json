@@ -8613,7 +8613,7 @@
       ]
     },
     "10003": {
-      "historical_last_verified": "2026-09-13 (SELF; 17 unit tests in tests/opensim pass locally with Ruff; OpenSim 4.6 runtime qualified on ControlTower; OS-3 IK on 33 frames reaches 6.5 cm marker RMS, unscaled model)",
+      "historical_last_verified": "2026-09-13 (SELF; 17 unit tests in tests/opensim pass locally with Ruff; OpenSim 4.6 runtime qualified on <host>; OS-3 IK on 33 frames reaches 6.5 cm marker RMS, unscaled model)",
       "paths": "src/engines/physics_engines/opensim/python/tour_matching; src/shared/python/motion_matching/tour_capture_contract.py; tests/opensim; docs/development/opensim_tour_matching",
       "source_path_bindings": [
         {
@@ -13943,7 +13943,7 @@
       ]
     },
     "10342": {
-      "historical_last_verified": "2026-09-21 at HEAD (16 unit tests pass in test_native_lane_freshness.py and test_run_native_engine_lane.py; ruff clean; architecture budget passed; bootstrap receipts committed pending ControlTower SDK refresh)",
+      "historical_last_verified": "2026-09-21 at HEAD (16 unit tests pass in test_native_lane_freshness.py and test_run_native_engine_lane.py; ruff clean; architecture budget passed; bootstrap receipts committed pending <host> SDK refresh)",
       "paths": "scripts/ci/run_native_engine_lane.py; scripts/ci/run_native_engine_lane.sh; docs/development/matched_swing_program/evidence/nightly/; tests/docs/test_native_lane_freshness.py; tests/scripts/test_run_native_engine_lane.py",
       "source_path_bindings": [
         {
@@ -14219,7 +14219,7 @@
       ]
     },
     "10385": {
-      "historical_last_verified": "2026-09-22 at SELF — unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native ControlTower desk claim.",
+      "historical_last_verified": "2026-09-22 at SELF — unit suite green for MS-111 contracts; PR #10723 opened with squash auto-merge; no native <host> desk claim.",
       "paths": "src/shared/python/motion_matching/pinocchio_g2_g3.py; src/engines/physics_engines/pinocchio/python/full_body_fit.py; tests/unit/motion_matching/test_pinocchio_g2_g3.py; docs/development/matched_swing_program/evidence/ms111/; docs/development/matched_swing_program/README.md; docs/development/matched_swing_program/MS31_PINOCCHIO_CROCODDYL_TURNOVER.md; docs/development/DEVELOPMENT_LOG.md; SPEC.md",
       "source_path_bindings": [
         {

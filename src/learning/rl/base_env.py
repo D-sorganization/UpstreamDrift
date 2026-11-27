@@ -95,6 +95,7 @@ class RoboticsGymEnv:
 
         # Get dimensions from engine
         self._n_joints = self._get_n_joints()
+        self._n_velocities = self._get_n_velocities()
         self._n_actuators = self._get_n_actuators()
         self._n_ee = self._get_n_end_effectors()
 
@@ -111,12 +112,38 @@ class RoboticsGymEnv:
         self._np_random: np.random.Generator | None = None
 
     def _get_n_joints(self) -> int:
-        """Get number of joints from engine."""
+        """Get configuration position count (``n_q``) from engine."""
         return int(self.engine.n_q)
 
-    def _get_n_actuators(self) -> int:
-        """Get number of actuators from engine."""
+    def _get_n_velocities(self) -> int:
+        """Get generalized velocity DOF count (``n_v``) from engine."""
         return int(self.engine.n_v)
+
+    def _get_n_actuators(self) -> int:
+        """Get actuated DOF count (excluding unactuated quaternion floating base)."""
+        for attr in ("n_u", "n_actuators", "nu"):
+            val = getattr(self.engine, attr, None)
+            if isinstance(val, (int, np.integer)) and not isinstance(val, bool):
+                return int(val)
+        n_q = int(self.engine.n_q)
+        n_v = int(self.engine.n_v)
+        if n_q == n_v + 1 and n_v > 6:
+            return n_v - 6
+        return n_v
+
+    def _resolve_contact_force_dim(self) -> int:
+        """Resolve contact-force vector dimension when contact observations are enabled."""
+        if not self.obs_config.include_contact_forces:
+            return 0
+        if self.obs_config.contact_force_dim > 0:
+            return self.obs_config.contact_force_dim
+        fn = getattr(self.engine, "get_contact_forces", None)
+        if not callable(fn):
+            return 0
+        raw = fn()
+        if isinstance(raw, (np.ndarray, list, tuple)):
+            return int(np.asarray(raw).size)
+        return 0
 
     def _get_n_end_effectors(self) -> int:
         """Get number of end-effectors."""
@@ -171,7 +198,13 @@ class RoboticsGymEnv:
         Returns:
             Gymnasium Box space for observations.
         """
-        obs_dim = self.obs_config.get_obs_dim(self._n_joints, self._n_ee)
+        obs_dim = self.obs_config.get_obs_dim(
+            self._n_joints,
+            self._n_ee,
+            n_vel=self._n_velocities,
+            n_actuators=self._n_actuators,
+            contact_force_dim=self._resolve_contact_force_dim(),
+        )
         return spaces.Box(
             low=-np.inf,
             high=np.inf,

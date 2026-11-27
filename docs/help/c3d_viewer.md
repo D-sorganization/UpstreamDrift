@@ -62,6 +62,10 @@ cylinders, ellipsoids, capsules, library shapes or imported meshes) and
 C3D's place in the wider ingestion story is described in the
 [format matrix](../motion_pipeline/formats.md).
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 - **It is a viewer and an exporter, not an editor.** There is no gap

@@ -476,6 +476,14 @@ class TestCIEnvironmentCompatibility:
         guard = next(s for n, s in steps.items() if "actually ran" in n)
         assert "scripts/ci/require_junit_test_passed.py" in guard["run"]
         assert "${{ matrix.evidence }}" in guard["run"]
+        install_step = next(
+            s for n, s in steps.items() if n.startswith("Install ") and "parity" in n
+        )
+        install_run = install_step["run"]
+        assert "python -m ensurepip --upgrade" in install_run
+        ensurepip_pos = install_run.index("python -m ensurepip --upgrade")
+        matrix_install_pos = install_run.index("${{ matrix.install }}")
+        assert ensurepip_pos < matrix_install_pos
         names = list(steps)
         isolate = next(n for n in names if n.startswith("Isolate Python tool cache"))
         setup = next(n for n in names if n.startswith("Set up Python"))
@@ -540,6 +548,7 @@ class TestCIEnvironmentCompatibility:
         )
 
         assert install_index < uninstall_index < pytest_index
+        assert "--no-build-isolation" in workflow
 
     def test_cross_engine_workflows_let_pydantic_resolve_core(self) -> None:
         """Cross-engine jobs must not force an incompatible pydantic-core wheel."""
@@ -968,20 +977,6 @@ class TestCIEnvironmentCompatibility:
             f"Standard aggregate alone, but found: {publishers}"
         )
 
-    def test_helper_workflows_use_pr_scoped_concurrency(self) -> None:
-        """Helper checks must not cancel another PR's current check status."""
-        workflows = [
-            "Jules-Redundant-PR-Closer.yml",
-        ]
-
-        for workflow_name in workflows:
-            workflow = (REPO_ROOT / ".github" / "workflows" / workflow_name).read_text(
-                encoding="utf-8"
-            )
-            assert (
-                "${{ github.event.pull_request.number || github.run_id }}" in workflow
-            )
-
     def test_ci_standard_runner_guard_invokes_real_audit(self) -> None:
         """The required local-only status must not be a no-op."""
         workflow = (REPO_ROOT / ".github" / "workflows" / "ci-standard.yml").read_text(
@@ -1079,7 +1074,13 @@ class TestCIEnvironmentCompatibility:
         jobs = workflow["jobs"]
         gate = jobs["quality-gate"]
         aggregated = set(gate["needs"])
-        not_gating = {"quality-gate", "matlab-tests", "arduino-build", "parity-smoke"}
+        # lighthouse-mobile: informational scores, PR-only (#14698).
+        not_gating = {
+            "quality-gate",
+            "arduino-build",
+            "parity-smoke",
+            "lighthouse-mobile",
+        }
 
         missing = sorted(set(jobs) - aggregated - not_gating)
         assert not missing, (

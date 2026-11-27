@@ -17,7 +17,7 @@ context, divergence and monolith views are regenerated from integrated source.
 
 ## Actual Native Evidence
 
-The existing DeskComputer MyoSuite 3.0.0/MuJoCo 3.6.0 environment ran the nine
+The existing <host> MyoSuite 3.0.0/MuJoCo 3.6.0 environment ran the nine
 F09i–F09n/shared-kernel modules listed in the F09n reproduction section:
 **170 passed, zero failures/errors/skips, 208.34 seconds** (JUnit 208.176 s).
 The suite retains actual original driver/iron probes, complete native-state

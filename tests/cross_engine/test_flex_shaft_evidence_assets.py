@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / "docs/development/full_body_models/evidence/flex_shaft/r11"
 RECEIPT = EVIDENCE / "r11_chain_receipt.json"
 FIGURE = EVIDENCE / "r11_chain_deflection_impact_window.png"
+CHAPTER = ROOT / "manuals/upstreamdrift/chapters/67-flexible-golf-shaft.qmd"
 #: Evidence-gate bound (not a parity tolerance) on the Clubhead deflection
 #: difference to the MuJoCo chain from the window start to contact, metres.
 #: Recorded differences are at most 1.3e-10 m against deflections of 0.1 m or
@@ -64,3 +65,31 @@ def test_receipt_does_not_claim_a_supported_engine_is_refused(receipt: dict) -> 
 
 def test_overlay_figure_is_committed() -> None:
     assert FIGURE.is_file() and FIGURE.stat().st_size > 10_000
+
+
+#: Engines the previous run (#12951) replayed before Drake and Pinocchio joined.
+PREVIOUS_RUN_ENGINES = {"mujoco", "opensim", "myosuite"}
+
+
+def test_previous_run_keeps_its_engine_block(receipt: dict) -> None:
+    engines = receipt["previous_run"]["impact_window"]["engines"]
+    assert set(engines) == PREVIOUS_RUN_ENGINES
+    assert engines[REFERENCE_ENGINE]["max_deflection_difference_vs_mujoco_m"] == 0.0
+    for name, entry in engines.items():
+        assert entry["max_deflection_difference_vs_mujoco_m"] <= DEFLECTION_ATOL_M, name
+
+
+def _latex_sci(value: float) -> str:
+    mantissa, exponent = f"{value:.1e}".split("e")
+    return f"{mantissa} \\times 10^{{{int(exponent)}}}"
+
+
+def test_manual_chapter_quotes_the_current_receipt(receipt: dict) -> None:
+    text = CHAPTER.read_text(encoding="utf-8")
+    for name, entry in receipt["impact_window"]["engines"].items():
+        difference = entry["max_deflection_difference_vs_mujoco_m"]
+        if difference:
+            assert _latex_sci(difference) in text, name
+    previous = receipt["previous_run"]["impact_window"]["engines"]["opensim"]
+    stale = _latex_sci(previous["max_deflection_difference_vs_mujoco_m"])
+    assert f"to ${stale}$ m" not in text

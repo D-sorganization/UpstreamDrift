@@ -15,6 +15,7 @@ import {
   VideoForceOverlay,
   type ProjectedGlyphSetPayload,
 } from '@/components/video/VideoForceOverlay';
+import { launcherFetch } from '../api/launcherFetch';
 
 
 /** Video analysis result from the API. See issue #1206 */
@@ -213,7 +214,7 @@ export function VideoAnalyzerPage() {
     const sourceId = encodeURIComponent(analysis.filename);
     const url = `/api/overlays/video/${sourceId}/frames/${currentFrameIdx}/glyphs?scale=${forceScale}`;
     let isMounted = true;
-    fetch(url)
+    launcherFetch(url)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: ProjectedGlyphSetPayload | null) => {
         if (isMounted && data) {

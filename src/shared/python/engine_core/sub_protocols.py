@@ -478,17 +478,7 @@ class CounterfactualComputable(Protocol):
 
     @abstractmethod
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
-
-        Compute instantaneous acceleration at fixed configuration/internal
-        state with joint velocities and declared applied control set to zero.
-
-        Args:
-            q: Joint positions (n_q,).
-
-        Returns:
-            q_ddot_ZVCF: Acceleration with v=0 and u=0 (n_v,).
-        """
+        """Deprecated shim; SPEC §4 ZVCF is the control component (see DynamicsInterface)."""
         ...
 
 

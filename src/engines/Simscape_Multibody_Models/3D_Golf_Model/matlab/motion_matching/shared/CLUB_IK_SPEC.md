@@ -36,6 +36,10 @@ club-length-independent target for the body kinematics; the modeled club's clubh
 then a deterministic rigid extension of that grip pose. See COST_FUNCTION_SPEC.md
 for the corresponding cost-term reweighting.
 
+`grip_quat` is the club's mid-hands frame, not a hand roll. The hand roll on the
+shaft follows the SHOW-A7 zero (#14731) in
+[GRIP_FIT_PLAYBOOK.md](GRIP_FIT_PLAYBOOK.md#grip-roll-convention-show-a7).
+
 Python mirror is a `dataclass`:
 
 ```python

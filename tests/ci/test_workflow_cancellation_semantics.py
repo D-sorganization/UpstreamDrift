@@ -89,6 +89,23 @@ def test_workflow_lint_enforces_merge_queue_cancellation_audit() -> None:
     assert "merge-queue cancellation semantics" in lint
 
 
+def test_retired_jules_noise_workflow_not_on_cancel_false_allowlist(
+    audit_module,
+) -> None:
+    """Jules push-noise disable was retired; it must not stay on the publish allowlist."""
+    assert "jules-push-pr-noise-disable.yml" not in audit_module.CANCEL_FALSE_ALLOWLIST
+
+
+def test_docker_publish_workflows_on_cancel_false_allowlist(audit_module) -> None:
+    for name in (
+        "docker-security-scan.yml",
+        "docker-size-gates.yml",
+        "docker-smoke.yml",
+    ):
+        assert name in audit_module.CANCEL_FALSE_ALLOWLIST
+        assert (WORKFLOWS / name).is_file()
+
+
 def test_inventory_lists_cancel_and_readonly_queue_compliance(audit_module) -> None:
     """Inventory helper returns structured rows for reporting."""
     rows = []

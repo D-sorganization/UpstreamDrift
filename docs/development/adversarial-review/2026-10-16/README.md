@@ -55,7 +55,7 @@ test_pinocchio_interface.py`, `tests/cross_engine/test_cross_engine_equivalence.
 Swept with grep/ruff/ad-hoc scripts: all of `src/` (4,320 files) for defect patterns, gravity constants, RK4/quaternion
 duplicates, `allow_pickle`, `sys.path`, deprecation shims; all of `tests/` (4,475 files) for assertion anti-patterns and
 markers; `docs/` (5,674 files) for dangling source references and size; agent-config dirs for duplication; vendor shadowing
-against `/home/claude/tools` (Tools HEAD b630cd3, which is newer than the pinned `e3cf5a43`).
+against `<owner-home>/tools` (Tools HEAD b630cd3, which is newer than the pinned `e3cf5a43`).
 
 Ran: pinned `ruff 0.15.17` check+format, 16 of the repo's own `scripts/ci/check_*.py`, `scripts.check_design_manual_governance`,
 `check_spec_paths`, `check_agent_docs_consistency`, `architecture_map_contract`; `tests/config` (all pass), `tests/unit/

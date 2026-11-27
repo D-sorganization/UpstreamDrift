@@ -21,6 +21,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 from src.shared.python.core.constants import AIR_VISCOSITY_KG_M_S
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+)
 from src.shared.python.physics.aerodynamics import (
     MIN_AIR_DENSITY_KG_M3,
     AerodynamicsConfig,
@@ -270,7 +273,9 @@ class TestDragModel:
         """Test tuned Cd scales smoothly through the Reynolds transition."""
         air_density = 1.225
         model_default = DragModel()
-        model_tuned = DragModel(base_coefficient=0.20)
+        model_tuned = DragModel(
+            base_coefficient=0.8 * float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT)
+        )  # 0.8 x the default floor
         probe_velocity = np.array([10.0, 0.0, 0.0])
 
         default_cd = model_default.get_effective_coefficient(

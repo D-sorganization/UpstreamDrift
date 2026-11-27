@@ -7,18 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from scripts.ci.jules_push_pr_noise_retirement import (
-    check_not_required_contexts,
-    load_config,
-)
-
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_CHECKS = REPO_ROOT / "scripts" / "config" / "ci-required-checks-live.json"
-JULES_RETIREMENT = (
-    REPO_ROOT / "scripts" / "config" / "jules_push_pr_noise_retirement.json"
-)
 LEADERBOARD_PUBLISH_CONTEXT = "publish cross-engine leaderboard JSON"
 
 
@@ -45,8 +37,3 @@ def test_leaderboard_publish_is_not_a_required_context() -> None:
     required = _payload()["required_contexts"]
     assert LEADERBOARD_PUBLISH_CONTEXT not in required
     assert "cross-engine-leaderboard-publish" not in required
-
-
-def test_retired_jules_noise_workflows_not_required() -> None:
-    config = load_config(JULES_RETIREMENT)
-    assert check_not_required_contexts(config) == []

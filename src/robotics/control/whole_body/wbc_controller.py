@@ -42,6 +42,15 @@ class WBCConfig:
         acceleration_limits: Joint acceleration limits (n_v,) or None.
         contact_force_regularization: Weight for contact force minimization.
         use_hierarchical: Use strict task hierarchy (HQP) vs weighted sum.
+        floating_base_dofs: Unactuated (floating-base) rows in the dynamics
+            equality. ``None`` infers the count from the engine state (or an
+            engine ``floating_base_velocity_dofs`` attribute). When zero,
+            contact dynamics are not over-constrained on actuated DOFs (torques
+            remain free). Set explicitly when inference is ambiguous.
+        friction_coeff: Coulomb contact friction coefficient ``mu`` (dimensionless;
+            nominal dry rubber/floor default 0.5). Used with an inscribed pyramid.
+        max_contact_force: Symmetric component box bound ``[N]`` on contact force
+            decision variables for QP numerical conditioning (default 10000.0 N).
     """
 
     dt: float = 0.001
@@ -51,6 +60,9 @@ class WBCConfig:
     acceleration_limits: NDArray[np.float64] | None = None
     contact_force_regularization: float = 1e-4
     use_hierarchical: bool = True
+    floating_base_dofs: int | None = None
+    friction_coeff: float = 0.5
+    max_contact_force: float = 10000.0
 
 
 @dataclass
@@ -176,7 +188,7 @@ class WholeBodyController:
     def add_task(self, task: Task) -> None:
         """Add task to controller.
 
-        Tasks are sorted by priority (highest first).
+        Tasks are sorted by priority (level 0 = highest, listed first).
 
         Args:
             task: Task to add.
@@ -245,6 +257,57 @@ class WholeBodyController:
             jacobians: List of contact Jacobians, each (3, n_v) or (6, n_v).
         """
         self._contact_jacobians = list(jacobians)
+
+    def _read_engine_floating_base_dofs(self) -> int | None:
+        """Return engine-reported floating-base velocity DOF count if present."""
+        for attr in ("floating_base_velocity_dofs", "n_floating_base_velocity_dofs"):
+            if not hasattr(self._engine, attr):
+                continue
+            raw = getattr(self._engine, attr)
+            if callable(raw):
+                raw = raw()
+            value = int(raw)
+            if value < 0:
+                raise ValueError(f"Engine {attr} must be non-negative")
+            return value
+        return None
+
+    def _resolve_floating_base_dofs(self, n_v: int) -> int:
+        """Resolve unactuated row count for the dynamics equality."""
+        if n_v < 0:
+            raise ValueError("n_v must be non-negative")
+
+        configured = self._config.floating_base_dofs
+        if configured is not None:
+            if configured < 0:
+                raise ValueError("floating_base_dofs must be non-negative")
+            return min(configured, n_v)
+
+        from_engine = self._read_engine_floating_base_dofs()
+        if from_engine is not None:
+            return min(from_engine, n_v)
+
+        q, qd = self._engine.get_state()
+        n_q = len(q)
+        if len(qd) != n_v:
+            raise ValueError(
+                "Engine velocity dimension does not match solve context "
+                f"(len(v)={len(qd)}, n_v={n_v})"
+            )
+        if n_q == n_v:
+            return 0
+        if n_q == n_v + 1:
+            if n_v < 6:
+                raise ValueError(
+                    "Cannot infer floating_base_dofs for this model; set "
+                    "WBCConfig.floating_base_dofs explicitly"
+                )
+            return min(6, n_v)
+
+        raise ValueError(
+            "Cannot infer floating_base_dofs from engine coordinates "
+            f"(n_q={n_q}, n_v={n_v}); set WBCConfig.floating_base_dofs explicitly"
+        )
 
     def solve(self) -> WBCSolution:
         """Solve whole-body control problem.
@@ -406,32 +469,54 @@ class WholeBodyController:
             return WBCSolution(success=False, status="No valid tasks")
 
         n_vars = n_v + n_contact_vars
-        accumulated_A: list[NDArray[np.float64]] = []
         x_solution = np.zeros(n_vars)
+        hierarchy_A: list[NDArray[np.float64]] = []
+        hierarchy_b: list[NDArray[np.float64]] = []
 
-        for _priority, tasks in sorted(priority_groups.items(), reverse=True):
-            H, g, accumulated_A = self._build_priority_level_cost(
-                tasks, n_v, n_vars, accumulated_A
-            )
+        for _priority, tasks in sorted(priority_groups.items(), key=lambda kv: kv[0]):
+            H, g = self._build_level_soft_cost(tasks, n_v, n_vars)
             self._apply_regularization(H, n_v, n_contact_vars)
 
-            problem = self._build_level_qp(H, g, n_v, n_contact_vars, M, nle, qd)
+            problem = self._build_level_qp(
+                H,
+                g,
+                n_v,
+                n_contact_vars,
+                M,
+                nle,
+                qd,
+                (hierarchy_A, hierarchy_b),
+            )
             qp_solution = self._solver.solve(problem)
 
-            if qp_solution.success and qp_solution.x is not None:
-                x_solution = qp_solution.x  # type: ignore[assignment]
+            if not qp_solution.success or qp_solution.x is None:
+                return WBCSolution(
+                    success=False,
+                    status=(
+                        f"Hierarchical QP failed at priority {_priority}: "
+                        f"{qp_solution.status}"
+                    ),
+                )
+
+            x_solution = qp_solution.x  # type: ignore[assignment]
+
+            for task in tasks:
+                if task.jacobian is None or task.jacobian.shape[1] != n_v:
+                    continue
+                J = task.jacobian
+                achieved = J @ x_solution[:n_v]
+                hierarchy_A.append(J)
+                hierarchy_b.append(achieved)
 
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)
 
-    def _build_priority_level_cost(
+    def _build_level_soft_cost(
         self,
         tasks: list[Task],
         n_v: int,
         n_vars: int,
-        accumulated_A: list[NDArray],
-    ) -> tuple[NDArray, NDArray, list]:
-        if tasks is None:
-            raise ValueError("tasks must be provided")
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Build quadratic cost for tasks at a single hierarchy level."""
         H = np.zeros((n_vars, n_vars))
         g = np.zeros(n_vars)
 
@@ -446,20 +531,11 @@ class WholeBodyController:
             J_full = np.zeros((J.shape[0], n_vars))
             J_full[:, :n_v] = J
 
-            if accumulated_A:
-                A_stack = np.vstack(accumulated_A)
-                N = self._compute_nullspace_projector(A_stack, n_vars)
-                J_proj = J_full @ N
-            else:
-                J_proj = J_full
-
             W = task.get_weight_matrix()
-            H += J_proj.T @ W @ J_proj
-            g += -J_proj.T @ W @ task.target
+            H += J_full.T @ W @ J_full
+            g += -J_full.T @ W @ task.target
 
-            accumulated_A.append(J_full)
-
-        return H, g, accumulated_A
+        return H, g
 
     def _apply_regularization(self, H: NDArray, n_v: int, n_contact_vars: int) -> None:
         H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
@@ -477,10 +553,25 @@ class WholeBodyController:
         M: NDArray,
         nle: NDArray,
         qd: NDArray,
+        hierarchy_equalities: tuple[
+            list[NDArray[np.float64]], list[NDArray[np.float64]]
+        ]
+        | None = None,
     ) -> QPProblem:
         if H is None:
             raise ValueError("H must be provided")
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
+        hierarchy_A: list[NDArray[np.float64]] | None = None
+        hierarchy_b: list[NDArray[np.float64]] | None = None
+        if hierarchy_equalities is not None:
+            hierarchy_A, hierarchy_b = hierarchy_equalities
+        A_eq, b_eq = self._append_equality_rows(
+            A_eq,
+            b_eq,
+            hierarchy_A,
+            hierarchy_b,
+            n_v + n_contact_vars,
+        )
         A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
             n_v, n_contact_vars, qd
         )
@@ -498,6 +589,35 @@ class WholeBodyController:
             x_ub=x_ub,
         )
 
+    @staticmethod
+    def _append_equality_rows(
+        A_eq: NDArray[np.float64] | None,
+        b_eq: NDArray[np.float64] | None,
+        extra_A: list[NDArray[np.float64]] | None,
+        extra_b: list[NDArray[np.float64]] | None,
+        n_vars: int,
+    ) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None]:
+        """Stack optional hierarchy equalities onto dynamics equalities."""
+        if not extra_A:
+            return A_eq, b_eq
+
+        blocks_A: list[NDArray[np.float64]] = []
+        blocks_b: list[NDArray[np.float64]] = []
+        if A_eq is not None and b_eq is not None:
+            blocks_A.append(A_eq)
+            blocks_b.append(b_eq)
+
+        for J_row, b_row in zip(extra_A, extra_b or [], strict=False):
+            row_block = np.zeros((J_row.shape[0], n_vars))
+            row_block[:, : J_row.shape[1]] = J_row
+            blocks_A.append(row_block)
+            blocks_b.append(np.asarray(b_row, dtype=np.float64).reshape(-1))
+
+        if not blocks_A:
+            return A_eq, b_eq
+
+        return np.vstack(blocks_A), np.concatenate(blocks_b)
+
     def _build_dynamics_constraint(
         self,
         n_v: int,
@@ -509,7 +629,8 @@ class WholeBodyController:
 
         M @ qdd + nle = tau + J_c^T @ f_c
 
-        For floating base: first 6 rows have no actuation (tau = 0).
+        Only the unactuated floating-base rows are constrained here (tau = 0).
+        Actuated rows are left free so recovered torques are not forced to zero.
 
         Args:
             n_v: Number of velocity DOFs.
@@ -536,12 +657,16 @@ class WholeBodyController:
                 J_c = J_c[:3]
             J_c_T[:, 3 * i : 3 * (i + 1)] = J_c.T
 
-        # Dynamics: M @ qdd - J_c^T @ f_c = -nle
-        A_eq = np.zeros((n_v, n_vars))
-        A_eq[:, :n_v] = M
-        A_eq[:, n_v:] = -J_c_T
+        n_unactuated = self._resolve_floating_base_dofs(n_v)
+        if n_unactuated <= 0:
+            return None, None
 
-        b_eq = -nle
+        # Floating-base rows: M @ qdd - J_c^T @ f_c = -nle (tau = 0)
+        A_eq = np.zeros((n_unactuated, n_vars))
+        A_eq[:, :n_v] = M[:n_unactuated, :]
+        A_eq[:, n_v:] = -J_c_T[:n_unactuated, :]
+
+        b_eq = -nle[:n_unactuated]
 
         return A_eq, b_eq
 
@@ -575,9 +700,9 @@ class WholeBodyController:
 
         n_vars = n_v + n_contact_vars
 
-        # Friction cone constraints for contact forces
+        # Inscribed 4-face friction pyramid constraints for contact forces (||f_t|| <= mu * f_z)
         if n_contact_vars > 0:
-            mu = 0.5  # Default friction coefficient
+            mu_inscribed = self._config.friction_coeff / float(np.sqrt(2.0))
             n_contacts = n_contact_vars // 3
 
             for i in range(n_contacts):
@@ -588,12 +713,12 @@ class WholeBodyController:
                 constraints_lb.append(np.array([-np.inf]))
                 constraints_ub.append(np.array([0.0]))
 
-                # Friction pyramid constraints
-                for sign_x, sign_y in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                # Inscribed pyramid faces: |f_x| + |f_y| <= sqrt(2) * mu_inscribed * f_z = mu * f_z
+                for sign_x, sign_y in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
                     A_row = np.zeros((1, n_vars))
-                    A_row[0, n_v + 3 * i] = sign_x
-                    A_row[0, n_v + 3 * i + 1] = sign_y
-                    A_row[0, n_v + 3 * i + 2] = -mu
+                    A_row[0, n_v + 3 * i] = sign_x / float(np.sqrt(2.0))
+                    A_row[0, n_v + 3 * i + 1] = sign_y / float(np.sqrt(2.0))
+                    A_row[0, n_v + 3 * i + 2] = -mu_inscribed
                     constraints_A.append(A_row)
                     constraints_lb.append(np.array([-np.inf]))
                     constraints_ub.append(np.array([0.0]))
@@ -645,8 +770,8 @@ class WholeBodyController:
             x_lb[:n_v] = np.maximum(x_lb[:n_v], qdd_lb_from_v)
             x_ub[:n_v] = np.minimum(x_ub[:n_v], qdd_ub_from_v)
 
-        # Contact force bounds for numerical stability
-        max_force = 10000.0
+        # Contact force bounds [N] for QP numerical conditioning (WBCConfig.max_contact_force)
+        max_force = self._config.max_contact_force
         if n_contact_vars > 0:
             x_lb[n_v:] = -max_force
             x_ub[n_v:] = max_force
@@ -790,8 +915,8 @@ class WholeBodyController:
         return groups
 
     def _sort_tasks(self) -> None:
-        """Sort tasks by priority (highest first)."""
-        self._tasks.sort(key=lambda t: t.priority, reverse=True)
+        """Sort tasks by priority (0 = highest, ascending order)."""
+        self._tasks.sort(key=lambda t: t.priority)
 
     def _compute_nullspace_projector(
         self,

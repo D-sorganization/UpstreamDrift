@@ -101,6 +101,14 @@ def test_dual_terminal_disclosure_emits_disclosed_status() -> None:
     assert gates[0].reason == "terminal full/body/head metrics disclosed"
 
 
+def test_is_verdict_accepted_rejects_when_any_gate_failed() -> None:
+    gates = (
+        GateResult("whole_marker_rmse_m", GateStatus.PASSED, 0.025, 0.010),
+        GateResult("terminal_marker_rmse_m", GateStatus.FAILED, 0.030, 0.120),
+    )
+    assert is_verdict_accepted(gates) is False
+
+
 def test_verdict_with_only_disclosed_or_not_applicable_not_accepted() -> None:
     """A verdict whose only gates are DISCLOSED/NOT_APPLICABLE is NOT accepted (needs >= 1 PASSED)."""
     gates = (
@@ -135,7 +143,7 @@ def test_verdict_with_only_disclosed_or_not_applicable_not_accepted() -> None:
 def test_evaluate_with_only_disclosed_or_not_applicable_not_accepted(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """End-to-end evaluate() with only DISCLOSED / NOT_APPLICABLE gates returns rejected verdict."""
+    """End-to-end evaluate() with only DISCLOSED / NOT_APPLICABLE / MISSING gates returns rejected verdict."""
     # Patch the module objects, not dotted strings: a string target is resolved
     # through ``src.shared.python`` attributes, which other tests can rebind.
     monkeypatch.setattr(acceptance, "_evaluate_marker_rmse", lambda *a, **k: [])
@@ -154,7 +162,8 @@ def test_evaluate_with_only_disclosed_or_not_applicable_not_accepted(
     verdict = evaluate(receipt, horizon=Horizon.G1)
     assert len(verdict.gates) > 0
     assert all(
-        g.status in (GateStatus.DISCLOSED, GateStatus.NOT_APPLICABLE)
+        g.status
+        in (GateStatus.DISCLOSED, GateStatus.NOT_APPLICABLE, GateStatus.MISSING)
         for g in verdict.gates
     )
     assert verdict.is_physically_accepted is False

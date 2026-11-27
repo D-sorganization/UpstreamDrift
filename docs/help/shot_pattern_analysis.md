@@ -65,3 +65,7 @@ attack angle) and an approximate face/path correlation.
 
 The tool does not draw confidence ellipses or report apex or landing angle.
 Confidence intervals in the summaries cover Monte Carlo sampling only.
+
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/shot-pattern-analysis.html): *Shot Pattern Analysis*.

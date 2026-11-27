@@ -268,7 +268,7 @@ volumes:
 ```bash
 #!/bin/bash
 # Golf Modeling Suite - Quick Install Script
-# Usage: curl -fsSL https://golf-suite.io/install.sh | bash
+# Usage: verify install.sh.sha256, then: sha256sum -c install.sh.sha256 && bash install.sh
 
 set -e
 

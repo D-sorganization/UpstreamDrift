@@ -32,7 +32,7 @@ task: MS-104 (#10378).
 ```powershell
 PYTHONPATH=. python scripts/matlab/materialize_ms61_topology_receipts.py
 powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103
-# Licensed Fit (DeskComputer R2025b only; currently fail-closed until wired):
+# Licensed Fit (<host> R2025b only; currently fail-closed until wired):
 powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_103 -Fit
 # Parent replay:
 powershell scripts/matlab/run_simscape_candidate.ps1 -Run two_window_fit_9967_102 -Replay

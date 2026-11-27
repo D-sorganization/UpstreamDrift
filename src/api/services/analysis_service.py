@@ -589,7 +589,9 @@ class AnalysisService:
             request_data = self._resolve_request_payload(request)
         raw_times = request_data.get("times", request_data.get("time"))
         if raw_times is None:
-            return np.arange(trajectory_length, dtype=float)
+            raise ValueError(
+                "Missing timestamps: kinematic sequence requires explicit time array (no frame-index fallback allowed)"
+            )
 
         times = np.asarray(raw_times, dtype=float).reshape(-1)
         if times.size != trajectory_length:
@@ -645,14 +647,16 @@ class AnalysisService:
         if x_factor is None or x_factor.size == 0:
             return None
 
-        stretch = context.compute_x_factor_stretch(int(shoulder_idx), int(hip_idx))
+        vel_res = context.compute_x_factor_velocity(int(shoulder_idx), int(hip_idx))
         payload: dict[str, Any] = {
             "values": x_factor.tolist(),
             "peak": float(np.max(np.abs(x_factor))),
         }
-        if stretch is not None:
-            payload["stretch_rate"] = stretch[0].tolist()
-            payload["peak_stretch_rate"] = stretch[1]
+        if vel_res is not None:
+            payload["x_factor_velocity"] = vel_res[0].tolist()
+            payload["peak_x_factor_velocity"] = vel_res[1]
+            payload["stretch_rate"] = vel_res[0].tolist()
+            payload["peak_stretch_rate"] = vel_res[1]
         return payload
 
     def _detect_swing_phase(self, state: dict[str, Any]) -> str | None:

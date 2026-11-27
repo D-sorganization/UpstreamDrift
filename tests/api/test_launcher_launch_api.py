@@ -92,15 +92,18 @@ def client(_reset_startup_metrics) -> Generator[TestClient, None, None]:
 
             def post_with_launcher_token(url, *args, **kwargs):
                 """Preserve existing launcher mutation tests as authorized UI calls."""
-                if (
-                    isinstance(url, str)
-                    and url.startswith(("/api/launcher/launch/", "/api/launcher/stop/"))
-                    and "headers" not in kwargs
-                ):
-                    kwargs["headers"] = tc._launcher_headers
+                kwargs.setdefault("headers", tc._launcher_headers)
                 return original_post(url, *args, **kwargs)
 
             tc.post = post_with_launcher_token
+            original_get = tc.get
+
+            def get_with_launcher_token(url, *args, **kwargs):
+                """Read endpoints are called as the launcher UI calls them."""
+                kwargs.setdefault("headers", tc._launcher_headers)
+                return original_get(url, *args, **kwargs)
+
+            tc.get = get_with_launcher_token
             yield tc
 
 

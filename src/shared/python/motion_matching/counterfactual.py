@@ -21,6 +21,9 @@ from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.core.contracts import require
+from src.shared.python.engine_core.counterfactual_contract import (
+    COUNTERFACTUAL_DEFINITION_VERSION,
+)
 from src.shared.python.simulation_backends.constrained_ztcf_zvcf import (
     constrained_acceleration_at,
     is_constrained_provider,
@@ -91,6 +94,7 @@ class AccelerationDecomposition:
     a_grav: NDArray[np.float64]
     a_drift: NDArray[np.float64]
     a_ctrl: NDArray[np.float64]
+    definition_version: str = field(default=COUNTERFACTUAL_DEFINITION_VERSION)
 
     def __post_init__(self) -> None:
         if not (
@@ -161,6 +165,10 @@ class AccelerationDecomposition:
         res = self.a_ctrl.copy()
         res.flags.writeable = False
         return res
+
+    def export_stamp(self) -> dict[str, str]:
+        """Metadata stamped onto counterfactual exports (#14943)."""
+        return {"counterfactual_definition_version": self.definition_version}
 
     @property
     def zero_velocity_zero_torque(self) -> NDArray[np.float64]:

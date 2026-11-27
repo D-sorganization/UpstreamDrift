@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "direction": [
+    0.35,
+    0.25,
+    -1.0
+  ],
+  "color": [
+    1.0,
+    0.98,
+    0.94
+  ],
+  "intensity": 0.7,
+  "castshadow": false,
+  "sources": {
+    "enabled": "Add the sun at all. The exported scene's own lights are spot lights hung 3 m above the golfer; their cones end a few metres out, so on the 400 m ground the far turf was lit by the camera headlight alone at a grazing angle and read nearly black (down-the-line flight review, 2026-11-21).",
+    "direction": "Direction the light travels (x, y, z in the world frame, z up). Mostly downward (about 17 degrees from the vertical) so the surface normal of level ground makes the same angle with the light everywhere: a directional light has no position, so the turf is as bright at 300 m as at the tee. A low sun would darken the far ground again.",
+    "color": "Linear RGB of the light, a very slightly warm white.",
+    "intensity": "Scales the colour into the diffuse term. Measured on the matched driver address frame, down-the-line wide view, 1280x720 (mean pixel level, 0-255): near turf (rows 600-700) 23 without the sun, 35 at 0.4, 44 at 0.7; far turf just below the horizon (rows 330-380) 21, 33 and 41. 0.4 left the horizon band visibly darker than the turf at the golfer's feet; 0.7 lights the turf evenly to the horizon. The price is a near turf that is brighter (about 1.9x in level, same hue) and a shadow of the golfer with less contrast.",
+    "castshadow": "The sun draws no shadow map. The key light already shadows the golfer, a second shadow from another direction doubles the shadow of the body and its saw-tooth fringes on lit skin (see engines/physics_engines/mujoco/python/scene_lighting.py)."
+  }
+}

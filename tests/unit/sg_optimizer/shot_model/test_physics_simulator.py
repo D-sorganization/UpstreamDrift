@@ -7,7 +7,9 @@ import pytest
 
 from src.shared.python.sg_optimizer.shot_model.physics_simulator import (
     CLUB_LOFT_DEG,
+    REPRESENTATIVE_CLUB,
     PipelineLandingSimulator,
+    pipeline_club,
     swing_state_from_impact,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_family import SKILL_NAMES
@@ -40,7 +42,27 @@ def test_strike_offsets_map_to_metres() -> None:
     np.testing.assert_allclose(s.impact_offset, [0.010, -0.005])
 
 
+def test_real_pipeline_driver_rest_exceeds_carry() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+    from src.shared.python.sg_optimizer.shot_model.ground_runout import SlopeAwareGround
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
+    sim_carry = PipelineLandingSimulator()
+    sim_land = PipelineLandingSimulator(landing_state=True)
+    ground = SlopeAwareGround()
+    impacts = np.array([_ZERO])
+    carry = sim_carry(impacts, "driver", (0.0, 0.0))
+    landing = sim_land(impacts, "driver", (0.0, 0.0))
+    rest = ground(landing, "fairway", "flat", "driver")
+    assert rest[0, 0] > carry[0, 0] + 0.5
+
+
 def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     sim = PipelineLandingSimulator()
     out = sim(np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]]), "driver", (0.0, 0.0))
     assert 150.0 < out[0, 0] < 330.0  # yards; a 100 mph driver
@@ -49,9 +71,82 @@ def test_real_pipeline_driver_carry_is_plausible_and_face_curves_ball() -> None:
 
 
 def test_landing_state_mode_adds_velocity_and_matches_carry_columns() -> None:
+    from src.shared.python.physics.rust_kernel import is_rust_available
+
+    if not is_rust_available():
+        pytest.skip("upstream-physics Rust kernel required for flight pipeline")
     rows = np.stack([_ZERO, _ZERO + [0, 4.0, 0, 0, 0, 0]])
     carry = PipelineLandingSimulator()(rows, "mid_iron", (0.0, 0.0))
     state = PipelineLandingSimulator(landing_state=True)(rows, "mid_iron", (0.0, 0.0))
-    assert state.shape == (2, 5)
+    assert state.shape == (2, 6)
+    assert np.all(state[:, 5] > 0.0)  # backspin at landing
     np.testing.assert_allclose(state[:, :2], carry)
     assert np.all(state[:, 4] < 0.0)  # descending at first ground contact
+
+
+def _clubs_passed(monkeypatch, skill: str) -> list[object]:
+    """Run one row of ``skill`` and return the ``club`` given to ``pipe.run``."""
+    from src.shared.python.physics.swing_ball_flight_pipeline import (
+        SwingBallFlightPipeline,
+    )
+
+    seen: list[object] = []
+
+    def _run(self, swing, **kw):  # noqa: ANN001, ANN202 - spy on the real run
+        seen.append(kw.get("club"))
+        raise _Stop
+
+    monkeypatch.setattr(SwingBallFlightPipeline, "run", _run)
+    with pytest.raises(_Stop):
+        PipelineLandingSimulator()(np.array([_ZERO]), skill, (0.0, 0.0))
+    return seen
+
+
+class _Stop(Exception):
+    """Ends a spied pipeline run before flight."""
+
+
+def test_wedge_skill_runs_the_pipeline_with_the_wedge_spin_cap(monkeypatch) -> None:
+    """#15443: the skill's own club, not the driver fallback, sets the spin cap."""
+    from src.shared.python.physics.ball_flight_validity import (
+        MAX_DRIVER_LAUNCH_SPIN_RPM,
+        launch_spin_envelope,
+    )
+
+    (club,) = _clubs_passed(monkeypatch, "wedge")
+    assert club == REPRESENTATIVE_CLUB["wedge"]
+    envelope = launch_spin_envelope(club)
+    assert envelope.club_class == "wedge"
+    assert envelope.max_rpm > MAX_DRIVER_LAUNCH_SPIN_RPM
+
+
+@pytest.mark.parametrize(
+    ("skill", "club_class"),
+    [
+        ("driver", "driver"),
+        ("fairway_wood", "wood"),
+        ("long_iron", "iron"),
+        ("mid_iron", "iron"),
+        ("short_iron", "iron"),
+    ],
+)
+def test_full_swing_skills_pass_their_bag_club(monkeypatch, skill, club_class) -> None:
+    from src.shared.python.physics.ball_flight_validity import club_class_of
+
+    (club,) = _clubs_passed(monkeypatch, skill)
+    assert club == REPRESENTATIVE_CLUB[skill]
+    assert club_class_of(club) == club_class
+
+
+def test_short_game_skill_without_a_club_class_warns_and_falls_back(
+    monkeypatch, caplog
+) -> None:
+    """No bag club -> the pipeline's documented driver fallback, logged, not silent."""
+    from src.shared.python.physics.ball_flight_validity import club_class_of
+
+    pipeline_club.cache_clear()  # the warning is logged once per skill
+    with caplog.at_level("WARNING"):
+        (club,) = _clubs_passed(monkeypatch, "pitch")
+    assert club == REPRESENTATIVE_CLUB["pitch"]
+    assert club_class_of(club) is None
+    assert "pitch" in caplog.text and "fallback" in caplog.text

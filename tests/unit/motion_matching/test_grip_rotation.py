@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.motion_matching import grip_fit
+from src.shared.python.motion_matching.arm_mirror import native_wrist_rotation
 from src.shared.python.motion_matching.execution.grip_rotation import (
     apply_grip_rotation,
 )
@@ -84,8 +85,9 @@ def test_fitted_angles_follow_the_recomposed_chain(document: dict) -> None:
     rng = np.random.default_rng(0)
     # Hand-body rotations (frames, 3, 3); relative = hand @ c2f.
     hand = grip_fit.wrist_rotation(rng.uniform(-0.5, 0.5, size=(20, 3)), BASE)
-    old = hand @ _c2f(document, side)[:3, :3]
-    new = hand @ _c2f(out, side)[:3, :3]
+    # The fit chain is stated in the native axis convention (G1 #14746 un-flips R).
+    old = hand @ native_wrist_rotation(document, _c2f(document, side)[:3, :3], side)
+    new = hand @ native_wrist_rotation(out, _c2f(out, side)[:3, :3], side)
     shifted = old @ current.T @ grip_fit.grip_rotation(target)
     assert np.allclose(new, shifted, atol=1e-12)
     assert np.allclose(

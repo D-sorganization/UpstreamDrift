@@ -252,6 +252,8 @@ class MuJoCoOffscreenRenderer:
             logger.warning("MuJoCo not available")
             return False
 
+        self.release()
+
         try:
             from pathlib import Path
 
@@ -308,8 +310,7 @@ class MuJoCoOffscreenRenderer:
 
         except ImportError as e:
             logger.error(f"Failed to load URDF file: {e}")
-            self._model = None
-            self._data = None
+            self.release()
             return False
 
     def _fix_urdf_inertials(self, urdf_content: str) -> str:
@@ -391,6 +392,7 @@ class MuJoCoOffscreenRenderer:
         if not MUJOCO_AVAILABLE:
             logger.warning("MuJoCo not available")
             return False
+        self.release()
         try:
             self._model = mujoco.MjModel.from_xml_string(mjcf_content)
             self._data = mujoco.MjData(self._model)
@@ -413,9 +415,25 @@ class MuJoCoOffscreenRenderer:
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to load MJCF: {e}")
-            self._model = None
-            self._data = None
+            self.release()
             return False
+
+    def release(self) -> None:
+        """Free GL resources held by the offscreen renderer (UD #12884)."""
+        if self._renderer is not None:
+            try:
+                from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf._renderer_lifecycle import (
+                    release_renderer,
+                )
+
+                release_renderer(self._renderer)
+            except (ImportError, TypeError, ValueError, OSError) as exc:
+                logger.debug("MuJoCo renderer release failed: %s", exc)
+            self._renderer = None
+        self._model = None
+        self._data = None
+        self._camera = None
+        self._scene_option = None
 
     def _apply_visualization_flags(self) -> None:
         """Apply visualization flags to MuJoCo scene options.

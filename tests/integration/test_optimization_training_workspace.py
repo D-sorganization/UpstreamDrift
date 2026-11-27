@@ -236,7 +236,8 @@ def test_deterministic_optimization_input_sensitivity(
         constraints=[],
     )
     res_1 = workspace_coordinator.run_optimization_synchronous(config_1)
-    assert res_1.success is True
+    assert res_1.success is False
+    assert res_1.status == "placeholder"
     assert res_1.optimal_speed > 0.0
 
     # Target 2: carry 220m
@@ -250,7 +251,7 @@ def test_deterministic_optimization_input_sensitivity(
         constraints=[],
     )
     res_2 = workspace_coordinator.run_optimization_synchronous(config_2)
-    assert res_2.success is True
+    assert res_2.success is False
     assert res_2.optimal_speed > res_1.optimal_speed
     assert not np.isclose(res_1.optimal_speed, res_2.optimal_speed, atol=1e-3)
 
@@ -278,9 +279,10 @@ def test_controller_publishes_metrics_and_registers_result(
     # Process job to completion
     workspace_coordinator.step_all_jobs()
     job = workspace_coordinator.get_job(job_id)
-    assert job.state == WorkspaceJobState.COMPLETED
+    assert job.state == WorkspaceJobState.FAILED
     assert job.result is not None
-    assert job.result.success is True
+    assert job.result.success is False
+    assert job.result.provenance.get("synthetic") is True
     assert len(job.metrics) > 0
     assert "objective_value" in job.metrics
 

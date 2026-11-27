@@ -29,13 +29,13 @@ UPPER = Path(
     "native_geometry_spec_9967.json"
 )
 EXTERNAL_INPUT_DIRECTORY = Path(
-    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "<owner-home>/native_engine_parity_telemetry_20261012/"
     "mujoco_v1_candidate_lift_20261011_root_attempt2"
 )
 CANDIDATE = EXTERNAL_INPUT_DIRECTORY / "returned81_candidate.json"
 OBSERVATION_SHA256 = "9986c0791134234f3d3b4e19b2784b48d3758965f1f5fbac23261211f5922ac3"
 OBSERVATION = Path(
-    "/home/dieterolson/native_engine_parity_telemetry_20261012/"
+    "<owner-home>/native_engine_parity_telemetry_20261012/"
     "mujoco_v1_candidate_lift_20261011_root_attempt2/native-observation.json"
 )
 CANDIDATE_SHA256 = "2caa3ce94e596dd61d50172229ad04a98c5235be6388566b4376be4ba41e2fcf"

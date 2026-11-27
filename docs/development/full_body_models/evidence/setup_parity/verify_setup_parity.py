@@ -5,7 +5,7 @@ from it and takes a pose as ``{coordinate name: value}`` in the document's
 ``coordinate_order`` (``frame_poses`` on each adapter), so a pose translates
 between engines by name, never by index. This script takes the fitted
 address (frame 0 of the ground-support IK trajectory), evaluates every spec
-frame in MuJoCo locally and in Drake and Pinocchio on ControlTower (their
+frame in MuJoCo locally and in Drake and Pinocchio on <host> (their
 environments live there, as for FB-3), and writes ``receipt_<run>.json`` with the
 largest position and rotation deviation per engine. Gate: positions within 1e-5 m
 and rotations within 2e-5 rad of MuJoCo (URDF text precision), plus the masses and
@@ -36,10 +36,9 @@ RUN = "anthro_driver"  # overridden by --run (a ground-support output folder)
 SPEC = GROUND_SUPPORT / RUN / "full_body_spec_hipcal_scaled.json"
 TRAJECTORY = GROUND_SUPPORT / RUN / "ik_trajectory.npz"
 POSE = HERE / "address_pose.json"
-REMOTE_BASE = "/home/dieterolson/fb3_pinocchio_test"
-REMOTE_PYTHON = {
-    "drake": "/home/dieterolson/drake-native-10022/bin/python",
-    "pinocchio": "/home/dieterolson/simscape-pinocchio-9967/.venv/bin/python",
+REMOTE_PYTHON_REL = {
+    "drake": "drake-native-10022/bin/python",
+    "pinocchio": "simscape-pinocchio-9967/.venv/bin/python",
 }
 SYNC = [
     "src/engines/physics_engines/drake/python/full_body_model.py",
@@ -103,16 +102,23 @@ def frame_poses(engine: str, spec: dict, pose: dict[str, float]) -> dict[str, li
 
 
 def run_remote(engine: str) -> dict[str, list]:
+    from docs.development.full_body_models.evidence._remote import resolve_remote_target
+
+    host, distro, remote_home = resolve_remote_target(
+        "Ubuntu-24.04", run_fn=subprocess.run
+    )
+    remote_base = f"{remote_home}/fb3_pinocchio_test"
+    remote_python = f"{remote_home}/{REMOTE_PYTHON_REL[engine]}"
     for rel in SYNC:
         local = ROOT / rel
-        remote = f"{REMOTE_BASE}/{rel}"
+        remote = f"{remote_base}/{rel}"
         mk = subprocess.run(
             [
                 "ssh",
-                "controltower",
+                host,
                 "wsl",
                 "-d",
-                "ControlTower-Runner",
+                distro,
                 "mkdir",
                 "-p",
                 str(Path(remote).parent.as_posix()),
@@ -122,19 +128,19 @@ def run_remote(engine: str) -> dict[str, list]:
         if mk.returncode != 0:
             raise RuntimeError(mk.stderr.decode(errors="ignore"))
         tee = subprocess.run(
-            ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "tee", remote],
+            ["ssh", host, "wsl", "-d", distro, "tee", remote],
             input=local.read_bytes(),
             capture_output=True,
         )
         if tee.returncode != 0:
             raise RuntimeError(f"sync {rel}: {tee.stderr.decode(errors='ignore')}")
     script = (
-        f"cd {REMOTE_BASE}\n{REMOTE_PYTHON[engine]} "
+        f"cd {remote_base}\n{remote_python} "
         f"docs/development/full_body_models/evidence/setup_parity/verify_setup_parity.py "
         f"--engine {engine} --local\n"
     ).encode()
     res = subprocess.run(
-        ["ssh", "controltower", "wsl", "-d", "ControlTower-Runner", "bash"],
+        ["ssh", host, "wsl", "-d", distro, "bash"],
         input=script,
         capture_output=True,
     )

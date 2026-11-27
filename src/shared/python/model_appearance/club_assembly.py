@@ -9,14 +9,28 @@ Everything here is visual only; masses and inertias stay as specified.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
 
+from src.shared.python.core.handedness import (
+    DEFAULT_HANDEDNESS,
+    Handedness,
+    subject_handedness,
+    validate_handedness,
+)
 from src.shared.python.model_appearance import library
+from src.shared.python.model_appearance.club_face_marking import (
+    FaceMarkingSettings,
+    load_face_marking_settings,
+    marked_head_parts,
+)
+from src.shared.python.model_appearance.club_head_seat import head_slide_m
 from src.shared.python.model_appearance.club_head_mesh import (
     DEFAULT_AXIS_OFFSET_M,
     club_face_normal,
@@ -57,7 +71,11 @@ PART_MATERIALS = {
     "shaft": None,
     "grip": "grip_rubber",
     "head": None,
+    "head_face": "club_face",  # face marking only (club_face_marking)
+    "face_lines": "club_score_lines",
 }
+#: Parts that ride the head (and follow it onto a chain shaft's tip link).
+HEAD_PARTS = ("head", "head_face", "face_lines")
 HAND_PART_ROLES = {"lead_hand": Hand.LEAD, "trail_hand": Hand.TRAIL}
 
 
@@ -84,10 +102,19 @@ class ClubAssembly:
     shaft_radius_m: float
     axis_offset_m: float = DEFAULT_AXIS_OFFSET_M
     face_roll_deg: float = 0.0  # head roll about the shaft axis (club frame)
+    head_slide_m: float = 0.0  # drawn head moved down the shaft (club_head_seat)
+    #: Face marking of the drawn head; ``None`` draws it as built.
+    face_marking: FaceMarkingSettings | None = None
+    #: Golfer the club is built for; a left-handed head is the right-handed
+    #: one mirrored in the swing plane (:func:`mirror_to_handedness`, #15652).
+    handedness: Handedness = DEFAULT_HANDEDNESS
 
     def __post_init__(self) -> None:
+        validate_handedness(self.handedness)
         if not math.isfinite(self.face_roll_deg):
             raise ValueError("face_roll_deg must be finite")
+        if not math.isfinite(self.head_slide_m):
+            raise ValueError("head_slide_m must be finite")
         for name in ("length_m", "grip_length_m", "shaft_radius_m"):
             value = getattr(self, name)
             if not math.isfinite(value) or value <= 0.0:
@@ -115,6 +142,7 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
     length from the Grip solid placement (or, for the native Simscape export
     that has no ``Grip`` solid, from its ``2.5" Butt`` grip segment). A club
     longer than 1.05 m gets the driver head, a shorter one the 7-iron head.
+    The club is built for the spec's ``subject.handedness`` (#15652).
     """
     solids = _club_solids(spec)
     club = spec.get("club") or {}
@@ -136,18 +164,82 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
         else DEFAULT_AXIS_OFFSET_M
     )
     roll = club.get("face_roll_deg", ADDRESS_SQUARE_FACE_ROLL_DEG.get(alias, 0.0))
-    return ClubAssembly(alias, length, grip, 0.0065, offset, float(roll))
+    slide = head_slide_m(club, length)
+    marking = _face_marking_for(club)
+    return ClubAssembly(
+        alias,
+        length,
+        grip,
+        0.0065,
+        offset,
+        float(roll),
+        slide,
+        marking,
+        subject_handedness(spec),
+    )
+
+
+def _face_marking_for(club: Mapping[str, Any]) -> FaceMarkingSettings | None:
+    """Spec ``face_marking`` over the settings file; ``None`` when off."""
+    base = load_face_marking_settings()
+    over = club.get("face_marking")
+    if over:
+        base = dataclasses.replace(base, **dict(over))
+    return base if base.face_marking else None
+
+
+@lru_cache(maxsize=8)
+def _marked_parts(alias: str, settings: FaceMarkingSettings) -> dict[str, Mesh]:
+    return marked_head_parts(load_club_head(alias), settings)
+
+
+def _swing_plane_normal(club: ClubAssembly) -> np.ndarray:
+    """Unit normal of the swing plane of the right-handed ``club``: its face
+    normal taken off the shaft axis (club ``y``). The plane holds the shaft
+    axis and the top of the grip."""
+    normal = club_face_normal(load_club_head(club.head_alias), club.face_roll_deg)
+    normal[1] = 0.0
+    return np.asarray(normal / np.linalg.norm(normal), dtype=float)
+
+
+def mirror_to_handedness(
+    club: ClubAssembly, points: np.ndarray, *, vectors: bool = False
+) -> np.ndarray:
+    """Right-handed club-frame ``points`` as ``club``'s golfer has them.
+
+    Identity for a right-handed club; for a left-handed one, the reflection in
+    the swing plane through the shaft axis (club ``y`` at ``z =
+    axis_offset_m``). With ``vectors`` the points are directions (no shift).
+    Postcondition: ``(n, 3)`` (or the input's shape), a fresh array.
+    """
+    pts = np.array(points, dtype=float)
+    if club.handedness == "right":
+        return pts
+    normal = _swing_plane_normal(club)
+    origin = np.zeros(3) if vectors else np.array([0.0, 0.0, club.axis_offset_m])
+    return pts - 2.0 * np.multiply.outer((pts - origin) @ normal, normal)
+
+
+def _handed_mesh(club: ClubAssembly, mesh: Mesh) -> Mesh:
+    """``mesh`` mirrored for ``club``'s golfer, rewound to stay outward."""
+    if club.handedness == "right":
+        return mesh
+    return Mesh(mirror_to_handedness(club, mesh.vertices), mesh.faces[:, ::-1])
 
 
 def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
     """``{"shaft", "grip", "head"}`` meshes in the club-body frame.
 
     The head mesh includes the hosel; the shaft runs from the hosel top to the
-    grip. Postcondition: every mesh is closed with outward winding.
+    grip. The head, and the shaft tip with it, sit ``head_slide_m`` down the
+    shaft. A left-handed club's head parts are mirrored in the swing plane; the
+    shaft and grip are round about the shaft axis, so their own mirror images.
+    Postcondition: every mesh is closed with outward winding.
     """
     head = load_club_head(club.head_alias)
     z = club.axis_offset_m
-    shaft_top = -head.hosel_top_m
+    slide = np.array([0.0, club.head_slide_m, 0.0])
+    shaft_top = club.head_slide_m - head.hosel_top_m
     grip_top = -(club.length_m - club.grip_length_m)
     shaft = tapered_tube(
         np.array([0.0, shaft_top, z]),
@@ -161,38 +253,47 @@ def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
         GRIP_TIP_RADIUS_M,
         GRIP_BUTT_RADIUS_M,
     )
-    return {
-        "shaft": shaft,
-        "grip": grip,
-        "head": club_frame_mesh(
+    out = {"shaft": shaft, "grip": grip}
+    if club.face_marking is None:
+        seated = club_frame_mesh(
             head, axis_offset_m=z, face_roll_deg=club.face_roll_deg
-        ),
-    }
+        )
+        out["head"] = _handed_mesh(club, Mesh(seated.vertices + slide, seated.faces))
+        return out
+    for label, part in _marked_parts(club.head_alias, club.face_marking).items():
+        moved = head_points_to_club(
+            head, part.vertices, axis_offset_m=z, face_roll_deg=club.face_roll_deg
+        )
+        out[label] = _handed_mesh(club, Mesh(moved + slide, part.faces))
+    return out
 
 
 def clubface_vector(club: ClubAssembly) -> np.ndarray:
     """The spec ``Clubface Vector``: unit face normal (with loft) in the club frame.
 
     Rolled by the assembly's ``face_roll_deg``, so it is the direction the
-    rendered head's face points in every engine.
+    rendered head's face points in every engine (mirrored for a left-hander).
     """
-    return club_face_normal(load_club_head(club.head_alias), club.face_roll_deg)
+    normal = club_face_normal(load_club_head(club.head_alias), club.face_roll_deg)
+    return mirror_to_handedness(club, normal, vectors=True)
 
 
 def clubface_centre(club: ClubAssembly) -> np.ndarray:
     """Face-centre point (where the ball is struck) in the club-body frame.
 
-    Same placement and roll as the rendered head, so it is the point every
-    engine's head mesh shows at the middle of the face.
+    Same placement, roll and slide as the rendered head, so it is the point
+    every engine's head mesh shows at the middle of the face.
     """
     head = load_club_head(club.head_alias)
     centre = face_centre(head.head_mesh)[None, :]
-    return head_points_to_club(
+    seated = head_points_to_club(
         head,
         centre,
         axis_offset_m=club.axis_offset_m,
         face_roll_deg=club.face_roll_deg,
     )[0]
+    centre = np.asarray(seated + [0.0, club.head_slide_m, 0.0], dtype=float)
+    return mirror_to_handedness(club, centre)
 
 
 def club_body_name(spec: Mapping[str, Any]) -> str | None:

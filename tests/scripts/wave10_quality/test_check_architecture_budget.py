@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -330,3 +331,111 @@ def test_checked_in_architecture_budget_baseline_matches_repository() -> None:
     assert violations == [], (
         f"Unexpected architecture violations outside baseline: {violations}"
     )
+
+
+@pytest.mark.unit
+def test_resolve_reference_date_precedence(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Hierarchy: as_of > SOURCE_DATE_EPOCH > git commit date > UTC fallback."""
+    monkeypatch.setenv("SOURCE_DATE_EPOCH", "1762740000")
+    assert mod.resolve_reference_date(as_of="2026-11-05") == date(2026, 11, 5)
+    assert mod.resolve_reference_date(as_of=None) == date(2025, 11, 10)
+
+    monkeypatch.delenv("SOURCE_DATE_EPOCH", raising=False)
+    monkeypatch.setattr(mod, "_run_git", lambda args, repo: "2026-06-15\n")
+    assert mod.resolve_reference_date(repo_root=tmp_path, as_of=None) == date(
+        2026, 6, 15
+    )
+
+
+@pytest.mark.unit
+def test_architecture_deterministic_expiry_and_pre_expiry_report() -> None:
+    """Evaluation uses reference_date to determine active vs expired and pre-expiry window."""
+    cfg = {
+        "max_function_lines": 10,
+        "max_parameters": 3,
+        "exceptions": [
+            {
+                "path": "src/soon.py",
+                "symbol": "near",
+                "rule": "function-lines",
+                "owner": "@t",
+                "reason": "issue #1",
+                "expires_on": "2026-11-25",
+            },
+            {
+                "path": "src/later.py",
+                "symbol": "far",
+                "rule": "parameters",
+                "owner": "@t",
+                "reason": "issue #2",
+                "expires_on": "2026-12-31",
+            },
+        ],
+    }
+    active, invalid = mod._collect_active_exceptions(
+        cfg, reference_date=date(2026, 11, 20)
+    )
+    assert ("src/soon.py", "near", "function-lines") in active and invalid == []
+
+    active, invalid = mod._collect_active_exceptions(
+        cfg, reference_date=date(2026, 11, 30)
+    )
+    assert active == {("src/later.py", "far", "parameters")} and any(
+        "Expired exception" in msg for msg in invalid
+    )
+
+    expiring = mod.collect_expiring_exceptions(
+        cfg, reference_date=date(2026, 11, 10), within_days=21
+    )
+    assert (
+        len(expiring) == 1
+        and expiring[0].path == "src/soon.py"
+        and expiring[0].days_remaining == 15
+        and "expires in 15d on 2026-11-25" in expiring[0].format()
+    )
+
+
+@pytest.mark.unit
+def test_main_with_as_of_and_expiring_within_days(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """CLI --as-of and --expiring-within-days drive deterministic pre-expiry report."""
+    import logging
+
+    cfg_file = tmp_path / "architecture_budget.json"
+    cfg_file.write_text(
+        json.dumps(
+            {
+                "max_function_lines": 10,
+                "max_parameters": 3,
+                "exceptions": [
+                    {
+                        "path": "src/m.py",
+                        "symbol": "f",
+                        "rule": "parameters",
+                        "owner": "@t",
+                        "reason": "issue #1",
+                        "expires_on": "2026-11-20",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mod, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(mod, "_changed_python_files", lambda repo, base: [])
+
+    with caplog.at_level(logging.INFO):
+        code = mod.main(
+            [
+                "--config-path",
+                "architecture_budget.json",
+                "--as-of",
+                "2026-11-10",
+                "--expiring-within-days",
+                "15",
+            ]
+        )
+    assert code == 0 and "EXPIRING SOON" in caplog.text and "src/m.py:f" in caplog.text

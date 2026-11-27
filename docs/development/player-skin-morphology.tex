@@ -1,0 +1,83 @@
+\documentclass{article}
+\usepackage{amsmath,hyperref}
+\title{Player Skin Morphology: Visual Contract and Reproduction}
+\author{UpstreamDrift}
+\date{26 November 2026}
+\begin{document}
+\maketitle
+\section{Scope and Provenance}
+This editable research reference accompanies issues 15814, 15815, 15832 and
+15833; it is
+separate from the governed engineering design manual. The existing CC0
+MakeHuman-derived head and its provenance remain unchanged. Morphs are artistic
+controls, not measured player anatomy, fitted video evidence or biometric scans.
+They operate only on the shared visual meshes, leaving bodies, joints, marker
+attachments, masses, inertias, collision geometry and motion coordinates intact.
+The same full-body MuJoCo exporter remains authoritative.
+\section{Frames, Units and Equations}
+The input vertex $(x,y,z)$ uses the canonical unit-head frame: origin at the
+neck plane, $x$ forward, $y$ left and $z$ up. Output coordinates are multiplied
+by the existing head length in metres. Heights are unchanged.
+Let $u=\mathrm{clip}(z/0.2,0,1)$, $n=u^2(3-2u)$,
+$f=\mathrm{clip}((x+0.05)/0.35,0,1)$ and
+$G(c,r)=\exp(-((z-c)/r)^2)$. For width $w$, jaw $j$, nose $a$,
+mouth $m$ and eye-spacing $e$:
+\begin{align*}
+y' &= y[1+n(w+jG(0.28,0.16)
+       +f(mG(0.276,0.08)+eG(0.532,0.08)))],\\
+x' &= x+0.12nafG(0.43,0.12)\exp(-(y/0.10)^2),\\
+z' &= z.
+\end{align*}
+Every parameter must be finite and lie in $[-0.2,0.2]$; missing parameters
+are zero. All-zero parameters return an exact copy. Skin, eyes, brows, mouth,
+hair and cap receive the identical spatial mapping, preserving attachment.
+The neck plane is fixed. Triangle indices are preserved; no remeshing or
+physical parameter estimation occurs. Bounds constrain artistic edits but do
+not establish anatomical accuracy or certify every possible morph combination.
+\section{Source-Attested Legend Candidates}
+Imperial priors use exact factors of 0.0254 m per inch and 0.45359237 kg per
+pound; conversion precision does not remove source uncertainty. Seve
+Ballesteros uses 1.83 m / 80 kg from the Japan Golf Tour profile
+\url{https://www.jgto.org/en/player/10161/profile}; its measurement date is
+not stated. The PGA Tour Seve profile also lists 195 lb at the same rounded
+height, with no measurement date. Jack Nicklaus uses 1.778 m / 83.91458845 kg from the PGA Tour
+biography \url{https://www.pgatour.com/player/01869/jack-nicklaus/bio}
+(5 ft 10 in / 185 lb), while the Nicklaus Museum
+\url{https://www.nicklausmuseum.org/} lists 5 ft 11 in / 190 lb.
+Bobby Jones uses a nominal 1.7272 m / 74.84274105 kg from the Encyclopedia.com
+entry \url{https://www.encyclopedia.com/people/sports-and-games/sports-biographies/bobby-jones}'s
+approximate 5 ft 8 in / 165 lb at the height of his golf career; no primary
+measurement record was located. Sam Snead uses 1.8034 m / 86.1825503 kg
+from the PGA Tour biography \url{https://www.pgatour.com/player/02119/sam-snead/bio}
+(5 ft 11 in / 190 lb), while the World Golf Hall of Fame
+\url{https://worldgolfhalloffame.org/members/sam-snead.html} lists 5 ft 10 in
+/ 185 lb. Byron Nelson uses 1.8542 m / 79.37866475 kg from the PGA Tour
+biography \url{https://www.pgatour.com/player/01863/byron-nelson/bio}
+(6 ft 1 in / 175 lb); a retrospective
+\url{https://www.latimes.com/archives/la-xpm-2006-sep-27-me-nelson27-story.html}
+describes him at 170 lb in 1945.
+The source catalog links reviewed video for each candidate: an R\&A Ballesteros
+Open compilation and the 1979 official film, the 1986 Nicklaus Masters clip,
+the USGA Jones instructional archive, a Snead swing clip and 1949 newsreel,
+and a Nelson frame-by-frame clip plus PGA Tour retrospective. Clothing,
+hair and face morphs are source-inspired illustrations, not frame-by-frame
+outfit identification, measured anatomy or likeness qualification.
+\section{Acceptance and Reproduction}
+Schema round-trips, invalid-input rejection, identity, unchanged heights and
+neck, closed outward mesh topology and native physics equivalence are tested.
+The native gate compares compiled model parameters and forward computations
+with and without nonzero morphs. Visual review remains a separate gate:
+passing numerical tests does not establish resemblance to a named player.
+From the repository root with the pinned Tools dependency initialized:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl python3 -m pytest \
+ tests/unit/model_appearance/test_head_morph.py -q -o addopts=''
+\end{verbatim}
+\section{Limits and Failed Experiments}
+The initial red test failed because the morphology module was absent.
+The old generic head controls could change colors and headwear but not face
+shape. A shared deformation was selected so accessories follow the same
+surface transformation. No historical motion training, physical playback
+qualification, player scan, period-specific mass measurement or precise
+reconstruction is claimed by this change.
+\end{document}

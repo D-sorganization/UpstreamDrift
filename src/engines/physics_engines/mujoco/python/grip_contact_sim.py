@@ -994,3 +994,15 @@ def simulate_grip_contact(
         },
         topology_model=topology_model,
     )
+
+
+def hand_attachment_rotation_for_pose(pose, hand):
+    """Hand-to-club attachment rotation (MuJoCo path, HRG-GB1b #15138)."""
+    from src.shared.python.grip_spec.shaft_roll import hand_to_club_relative_rotation
+    from src.shared.python.model_appearance.grip_pose import GripPose, Hand
+
+    if not isinstance(pose, GripPose):
+        raise TypeError(f"pose must be a GripPose, got {type(pose).__name__}")
+    if not isinstance(hand, Hand):
+        raise TypeError(f"hand must be a Hand, got {hand!r}")
+    return hand_to_club_relative_rotation(pose, hand)

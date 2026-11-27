@@ -1,23 +1,39 @@
 # Launchers
 
-The suite provides a unified entry point that gracefully wraps the entire UpstreamDrift ecosystem, with an intelligent router and desktop GUI.
+UpstreamDrift provides unified entry points that wrap the simulation web UI, PyQt6 desktop Control Tower, Sidekick assistant, and headless batch runner.
 
-## 1. Primary Entry Point (`launch_golf_suite.py`)
+## 1. Primary Entry Point (`launch_upstream_drift.py` and `upstream-drift`)
 
-This is the recommended way to launch the application. It provides a simple CLI that delegates to the proper internal module based on your arguments.
+This is the recommended way to launch the application. It provides a simple CLI that routes to the web UI, classic PyQt6 desktop launcher, local API server, or an individual engine.
 
 **Usage:**
 
 ```bash
-# Launch web UI (default, recommended for web-capable environments)
-python launch_golf_suite.py
+# Launch web UI (default, opens browser on port 8000)
+upstream-drift
+# or: python launch_upstream_drift.py
 
 # Launch the classic desktop GUI (PyQt6-based UpstreamDriftLauncher)
-python launch_golf_suite.py --classic
+python launch_upstream_drift.py --classic
 
-# Start the local API server only
-python launch_golf_suite.py --api-only
+# Start the local API server only (custom port, no browser)
+python launch_upstream_drift.py --api-only --port 8080 --no-browser
+
+# Launch a specific engine directly
+python launch_upstream_drift.py --engine mujoco
+
+# Install desktop application shortcuts
+python launch_upstream_drift.py --install-shortcuts
 ```
+
+Installed console scripts in `pyproject.toml`:
+
+- `upstream-drift`: Same CLI as `python launch_upstream_drift.py`
+- `sidekick`: Standalone Sidekick assistant (`sidekick.__main__:main`)
+- `ud-sim`: Headless simulation runner (`src.sim_run.cli:main`)
+- `ud-sim-mcp`: Stdio MCP server for `sim_run` (`src.sim_run.mcp:main`)
+
+_Note: `launch_golf_suite.py` is retained only as a deprecated compatibility shim for older scripts._
 
 ## 2. Desktop GUI (`src/launchers/upstream_drift_launcher.py`)
 

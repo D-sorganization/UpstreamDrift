@@ -65,6 +65,10 @@ The tile shares the video-analysis walkthrough at
 [Video analysis tutorial](../tutorials/content/04_video_analysis.md) with
 the MediaPipe and OpenPose tiles.
 
+## Background
+
+Theory and notation for this surface are on [AffineDrift](https://affinedrift.com/articles/markerless-mocap-camera-selection.html): *Markerless Motion Capture Camera Selection*.
+
 ## Limitations
 
 - **It is not a PyQt tool and cannot be docked.** There is no

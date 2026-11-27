@@ -217,10 +217,7 @@ def test_resolver_and_cli_match_the_fixture(case: dict[str, Any]) -> None:
         _spec_builder_overrides(case["picks"]),
     ):
         document, grip = apply_grip_selection(DRIVER, overrides)
-        allowed_driver_shas = {expected["driver_physics_spec_sha256"]}
-        if "driver_physics_spec_sha256_win" in expected:
-            allowed_driver_shas.add(expected["driver_physics_spec_sha256_win"])
-        assert physics_spec_sha256(document) in allowed_driver_shas
+        assert physics_spec_sha256(document) == expected["driver_physics_spec_sha256"]
         if expected["grip"] is not None:
             assert grip is not None
             assert grip_spec_to_physical(grip) == expected["grip"]
@@ -242,11 +239,9 @@ def test_desktop_and_web_api_match_the_fixture(case: dict[str, Any]) -> None:
     summary = grip_revision_summary(
         CharacterBuilderModel().compile(), GripOverrides.from_picks(case["picks"])
     )
-    allowed_char_shas = {expected["character_physics_spec_sha256"]}
-    if "character_physics_spec_sha256_win" in expected:
-        allowed_char_shas.add(expected["character_physics_spec_sha256_win"])
-    assert physics_spec_sha256(compiled.document) in allowed_char_shas
-    assert summary["physics_spec_sha256"] in allowed_char_shas
+    char_sha = expected["character_physics_spec_sha256"]
+    assert physics_spec_sha256(compiled.document) == char_sha
+    assert summary["physics_spec_sha256"] == char_sha
     assert summary["spec_sha256"] == compiled.sha256
     assert summary["refit_required"] == expected["refit_required"]
     if expected["grip"] is not None:
@@ -325,10 +320,14 @@ def test_precedence_pick_then_document_then_default() -> None:
 
 def test_a_fit_outside_the_golf_ranges_needs_a_full_pick() -> None:
     # The shipped driver grip is the neutral golf grip (SHOW-A2, #14551), so a
-    # partial pick is accepted; the pre-A2 fitted triple (gamma ~ 94 deg) is not.
+    # partial pick is accepted; a fitted triple outside the trail-offset range is not (#14751).
     apply_grip_selection(DRIVER, GripOverrides(lead_palm_diagonal=45.0))
     fitted, _ = apply_grip_rotation(
-        DRIVER, {"L": [-36.864, 57.315, 70.926], "R": [9.769, 52.918, 83.914]}
+        DRIVER,
+        {
+            "L": [-69.7694757, -17.6044419, 17.5745601],
+            "R": [-72.8842499, 53.6070875, -22.6605507],
+        },
     )
     with pytest.raises(ValueError, match="not a golf grip"):
         apply_grip_selection(fitted, GripOverrides(lead_palm_diagonal=45.0))
@@ -362,6 +361,14 @@ def test_library_lists_the_grip_presets_and_styles() -> None:
     assert grip["styles"] == ["overlap", "interlock", "ten_finger"]
 
 
+def _assert_grip_picks_then_current_model(doc: dict[str, Any]) -> None:
+    """The builder records the grip picks (revision 1), then poses the current
+    model's skinned hands from them (revision 2, #15654)."""
+    assert doc["spec_revision"]["configuration"] == "skinned_hand_wrists"
+    assert doc["spec_revision"]["version"] == 2
+    assert doc["subject"]["hand_visual_backend"] == "skinned_human"
+
+
 def _build(tmp_path: Path, *flags: str) -> tuple[Path, dict[str, Any]]:
     from src.shared.python.motion_matching.execution import assets
 
@@ -390,6 +397,7 @@ def _build(tmp_path: Path, *flags: str) -> tuple[Path, dict[str, Any]]:
     return spec, json.loads(spec.read_text(encoding="utf-8"))
 
 
+@pytest.mark.slow  # builds skinned hand pairs for picked grips (#15654)
 def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
     tmp_path: Path,
 ) -> None:
@@ -405,7 +413,7 @@ def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
         "--grip-thumb-offset-deg",
         "20",
     )
-    assert doc["spec_revision"]["configuration"] == "grip"
+    _assert_grip_picks_then_current_model(doc)
     assert doc["subject"]["grip_config"]["lead"]["alpha_deg"] == -15.0
     assert doc["subject"]["grip_config"]["hand_spacing_m"] == 0.09
     assert doc["subject"]["grip_config"]["style"] == "interlock"
@@ -421,17 +429,19 @@ def test_spec_builder_flags_write_a_revision_and_a_picture_sidecar(
     assert not parent_spec.with_name("grip_case.appearance.json").exists()
 
 
+@pytest.mark.slow  # builds skinned hand pairs for picked grips (#15654)
 def test_spec_builder_style_only_writes_a_revision_without_a_sidecar(
     tmp_path: Path,
 ) -> None:
     parent_spec, parent = _build(tmp_path / "a")
     spec, doc = _build(tmp_path / "b", "--grip-style", "ten_finger")
     assert physics_spec_sha256(doc) != physics_spec_sha256(parent)
-    assert doc["spec_revision"]["configuration"] == "grip"
+    _assert_grip_picks_then_current_model(doc)
     assert doc["subject"]["grip_config"]["style"] == "ten_finger"
     assert not spec.with_name("grip_case.appearance.json").exists()
 
     same_spec, same_doc = _build(tmp_path / "c", "--grip-style", "overlap")
     assert physics_spec_sha256(same_doc) == physics_spec_sha256(parent)
-    assert "spec_revision" not in same_doc
+    # No grip revision: the same current-model revision as no pick (#15648).
+    assert same_doc["spec_revision"] == parent["spec_revision"]
     assert same_spec.read_bytes() == parent_spec.read_bytes()

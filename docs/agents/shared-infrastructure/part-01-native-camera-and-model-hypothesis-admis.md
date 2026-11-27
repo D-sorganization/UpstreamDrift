@@ -415,8 +415,14 @@ forward-dynamics matching. Design reference:
   and legs, hip to ankle via `garment_coverage`); grey plain palette:
   `library.PLAIN_PALETTE` / `plain_rgba`. Reference:
   `docs/development/full_body_models/appearance_reference/shared_appearance_spec.tex`.
+- `club_face_marking` (#15150) — opt-in score lines and face colour for the drawn
+  head (`club_face_marking_settings.json`, default off). Reuses `club_head_mesh`
+  for the face normal and centre; adds `head_face` / `face_lines` parts that
+  follow the head on a chain shaft. OpenSim STL assets keep three parts.
 - `grip_pose` — the one two-hand grip definition (`DEFAULT_GRIP_POSE`, lead above trail, positions mirroring the spec `GripInterface`, spacing, V angles, overlap/interlock/ten-finger, `HAND_GRIP_ANCHOR_IN_HAND_M`). Engines import it; never keep per-engine hand offsets. Residual series: `grip_contact.closure_series` (`GripClosureSeries`, unavailable is `None`, never zero); report: `python3 -m scripts.grip_closure_report`.
-- `grip_hand_mesh` / `grip_hands` — curled-finger hand meshes wrapped on the grip
+- `grip_hand_mesh` / `grip_hands` — **deprecated capsule hands** (#15648; the current
+  model is the skinned human pair, `skinned_club_hands`, see
+  [Golfer Model Versions](../golfer_model_versions.md)) — curled-finger hand meshes wrapped on the grip
   (`build_grip_hand_mesh`, hand-grip frame) and their placement on a `ClubAssembly`
   grip in the club-body frame (`grip_hand_frame`, `grip_hand_meshes`,
   `assembly_meshes_with_hands`). Draw the hands on the club body with the club;
@@ -443,6 +449,26 @@ forward-dynamics matching. Design reference:
   places it per frame. Axes: x forward, y left, z up; yaw left-positive, pitch
   up-positive, roll toward the right shoulder. OSV-3 #11729 drives it for engines
   without a neck.
+- `body_skin_*` — **Skinned CC0 body** (#15299, opt-in with
+  `subject.body_visual_backend: "skinned_cc0"`; the loft stays the default): one
+  MakeHuman CC0 surface in `assets/body_skin_cc0/body_skin_cc0.npz` (rebuilt and
+  checked by `build_body_skin.py`, sources in `PROVENANCE.json`), drawn over the
+  model instead of the per-body loft meshes. Hands, head, feet and club keep their
+  own models. Appearance only: masses, inertias and coordinates are unchanged.
+  - `body_skin_fit` — `load_body_skin`, `fit_body_skin` (each limb to its own
+    model joints, per side), `match_wrists` (forearm ends under the skinned
+    hand's wrist section), `slim_share` mix of the stored slim build.
+  - `body_skin_dress` — `dress_skin` cuts skin, shirt and trousers layers;
+    `shaped_body` is the evened chest the clothes hang on.
+  - `body_skin_pose` — shoulder and neck weight smoothing, `pose_skin`.
+  - `body_skin_export` — body roles, bind pose and bones per layer.
+  - `body_skin_mesh` — normals, areas, relaxation, level-set cut, and the
+    surface checks `folded_faces` and `area_ratio`.
+  - Every number is a setting with its source in `assets/body_skin_cc0/*.json`;
+    `subject.body_skin_profile` (for example `showpiece`) selects overrides.
+  - MuJoCo: `body_skin_layer.attach_body_skin` writes one `<skin>` per layer;
+    `posed_skin_layers(model, data)` returns the drawn surface at a pose
+    without a renderer.
 - MuJoCo translation: `src/engines/physics_engines/mujoco/python/appearance_layer.py`
   via `attach_visual_layer(..., appearance=doc)`; the head is `head_visual.py`
   (`with_head=True` adds only the head to the legacy capsule layer, used by MyoSuite).

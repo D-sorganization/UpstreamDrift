@@ -19,7 +19,7 @@ not evidence.
 ## Engine Scope and Model Hashes
 
 - **Engine:** MyoSuite (MuJoCo-backed musculoskeletal model)
-- **Host Platform:** Linux (ControlTower) / Windows (Development)
+- **Host Platform:** Linux (<host>) / Windows (Development)
 - **Actuation:** Musculoskeletal forward excitation-activation dynamics with Hill-type force-length-velocity multipliers
 - **Driver Model Hash:** `8e941be1c5a7d4b2a32a6fb7949ff527200eda069fee00a05664a81850fbc39b`
 - **7-Iron Model Hash:** `ddd93a125771f5712c1f8e62d676510b6df138290a58b20c2555817906f31086`

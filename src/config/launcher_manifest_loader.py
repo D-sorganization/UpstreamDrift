@@ -36,6 +36,7 @@ from src.config.capability_state import (
     adapt_engine_matrix_qualification,
     resolve_canonical_display_name,
 )
+from src.shared.python.config.maturity_scale import meets_min_maturity
 from src.config.engine_probe_cache import is_cached_engine_runtime_available
 from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
@@ -1115,6 +1116,26 @@ class LauncherManifest:
     def visible_tiles(self) -> list[LauncherTile]:
         """Tiles excluding entries flagged ``hidden`` (legacy aliases)."""
         return [t for t in self.tiles if not t.hidden]
+
+    def visible_tiles_meeting(
+        self, min_maturity: str | None = None
+    ) -> list[LauncherTile]:
+        """Visible tiles whose maturity meets ``min_maturity``.
+
+        ``min_maturity`` defaults to the ``MIN_MATURITY`` setting, whose
+        default (``deprecated``) keeps every visible tile.
+
+        Raises:
+            ValueError: ``min_maturity`` is not a canonical maturity level.
+        """
+        if min_maturity is None:
+            # Lazy: the settings module needs pydantic-settings, which light
+            # importers of src.config (the capability atlas job) do not install.
+            from src.shared.python.config.typed_settings import get_settings
+
+            min_maturity = get_settings().min_maturity
+        floor = min_maturity
+        return [t for t in self.visible_tiles if meets_min_maturity(t.maturity, floor)]
 
     @property
     def physics_engines(self) -> list[LauncherTile]:

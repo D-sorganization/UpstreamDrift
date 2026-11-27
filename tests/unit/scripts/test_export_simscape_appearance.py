@@ -27,6 +27,11 @@ _MATLAB_ROOT = (
     REPO_ROOT / "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab"
     "/exploratory_gs3dx"
 )
+_MATLAB_READER = _MATLAB_ROOT / "tools" / "gs3dx_read_appearance.m"
+_MATLAB_APPLY = _MATLAB_ROOT / "tools" / "gs3dx_apply_appearance.m"
+_MATLAB_UNITTEST = _MATLAB_ROOT / "tests" / "test_gs3dx_appearance.m"
+_DEFERRED_CATALOG = REPO_ROOT / "docs/development/deferred-catalog-bundle.json"
+_COMMITTED_APPEARANCE = _MATLAB_ROOT / "appearance" / "gs3dx_appearance.v1.json"
 
 
 def _load() -> Any:
@@ -174,3 +179,68 @@ def test_hands_follow_the_glove_option_by_side(exporter: Any) -> None:
         other = "hand_right" if gloved == "hand_left" else "hand_left"
         assert colours[gloved] == pytest.approx(white, abs=1e-6)
         assert colours[other] != pytest.approx(white, abs=1e-6)
+
+
+def test_export_check_mode_freshness_and_drift(exporter: Any, tmp_path: Path) -> None:
+    """Committed gs3dx_appearance.v1.json is up to date and --check fails on drift."""
+    assert _COMMITTED_APPEARANCE.is_file()
+    assert exporter.main(["--check"]) == 0
+    drift = tmp_path / "gs3dx_appearance.v1.json"
+    drift.write_text(
+        _COMMITTED_APPEARANCE.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    assert exporter.main(["--output", str(drift), "--check"]) == 0
+    data = json.loads(drift.read_text(encoding="utf-8"))
+    data["colours"]["top"][0] = 0.99
+    drift.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    assert exporter.main(["--output", str(drift), "--check"]) == 1
+
+
+def test_matlab_read_appearance_consumer_contract() -> None:
+    """Thin MATLAB reader fails closed and does not duplicate Python validation law."""
+    assert _MATLAB_READER.is_file()
+    code = _MATLAB_READER.read_text(encoding="utf-8")
+    assert "gs3dx_appearance.v1.json" in code
+    assert "simscape-appearance/v1" in code
+    assert "jsondecode" in code
+    assert "gs3dx:appearance" in code
+    for token in ("skin =", "shirt =", "pants =", "0.93 0.76", "0.22 0.33"):
+        assert token not in code
+
+
+def test_matlab_apply_appearance_graphics_only_contract() -> None:
+    """GS3DX_APPLY_APPEARANCE must not touch mass, inertia, frames or joints."""
+    assert _MATLAB_APPLY.is_file()
+    code = _MATLAB_APPLY.read_text(encoding="utf-8")
+    assert "EllipsoidRadii" in code
+    assert "GraphicDiffuseColor" in code
+    body = "\n".join(
+        line
+        for line in code.splitlines()
+        if line.strip() and not line.lstrip().startswith("%")
+    )
+    for forbidden in (
+        "'Mass'",
+        "MomentsOfInertia",
+        "add_block",
+        "add_line",
+        "InertiaType",
+    ):
+        assert forbidden not in body
+
+
+def test_matlab_unittest_and_deferred_r2025b_catalog() -> None:
+    """MATLAB acceptance for #12690 is cataloged; Python tests are the CI gate."""
+    assert _MATLAB_UNITTEST.is_file()
+    src = _MATLAB_UNITTEST.read_text(encoding="utf-8")
+    assert "gs3dx_inertia_audit" in src
+    assert "reader_fails_closed" in src
+
+    catalog = json.loads(_DEFERRED_CATALOG.read_text(encoding="utf-8"))
+    items = [item for item in catalog["deferred_items"] if item.get("issue") == 12690]
+    assert len(items) == 1, "Expected one R9c (#12690) deferred item"
+    entry = items[0]
+    assert entry["id"] == "R9c-12690"
+    assert entry["status"] == "deferred"
+    assert "C:/Program Files/MATLAB/R2025b/bin/matlab.exe" in entry["executable"]
+    assert entry["export_script"] == "scripts/export_simscape_appearance.py"

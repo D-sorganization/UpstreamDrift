@@ -372,11 +372,13 @@ def shooting_fit(
     log: logging.Logger,
     config: ShootingFitConfig,
 ) -> tuple[np.ndarray, dict[str, Any], dict[str, Any]]:
-    """Contact-aware shooting fit of the tracked reference (FB-5, MM-7b).
+    """Iterative-learning pelvis-drift correction of the tracked reference (FB-5, MM-7b).
 
-    The simulator is the plant: each iteration replays the current reference,
-    measures how far the pelvis drifted from the reference pelvis path, moves
-    the pelvis command against that drift by ``config.gain``, re-solves the
+    Despite the legacy ``shooting_fit`` name, this is an iterative-learning
+    (ILC) coordinate update rather than a boundary-value or dynamics-defect
+    shooting solver: each iteration replays the current reference, measures
+    how far the pelvis drifted from the reference pelvis path, shifts the
+    pelvis command against that drift by ``config.gain``, re-solves the
     joints against the markers with the command pinned (``SHOOTING_LOCKED``),
     and low-passes the result.
 

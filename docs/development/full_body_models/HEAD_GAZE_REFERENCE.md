@@ -271,7 +271,7 @@ Findings:
   reference (13.6°) is worse than its IK reference (7.9°).
 
 Evidence: `evidence/head_gaze/fd_neck_tracking.json`. Runs were made on
-ControlTower (`ud-sim`) at `b298115bb0` (IK rows) and `4a83b6b7cf` (gaze rows;
+<host> (`ud-sim`) at `b298115bb0` (IK rows) and `4a83b6b7cf` (gaze rows;
 the step order changed only for `--fd-neck gaze`). Reproduce with:
 
 ```
@@ -282,7 +282,7 @@ python3 -m scripts.render_head_gaze_clips RUN_IK RUN_GAZE OUT/driver_fd_ikneck_v
 ```
 
 Clips of the forward-dynamics replay (IK neck on the left, gaze neck on the
-right; 1920x1080, 60 fps, 1x, 0.5x and impact 0.25x) are on host brick under
+right; 1920x1080, 60 fps, 1x, 0.5x and impact 0.25x) are on `<host>` under
 `~/Videos/Parity Audit/golfer_realism/head_gaze/osv3c/`.
 
 ### Closed-Loop Gaze Neck
@@ -337,7 +337,7 @@ Findings:
   because head markers do not drive this neck.
 
 Evidence: `evidence/head_gaze/fd_neck_closed_loop.json`. The runs were made on
-ControlTower (`ud-sim`): the open-loop rows at `c1f9ee5a56` and the
+<host> (`ud-sim`): the open-loop rows at `c1f9ee5a56` and the
 closed-loop rows at `8a24ce41db`. The open-loop code path is the same at both
 commits, because the second commit only changes the hook. Canonical commands
 (`CANONICAL_RUN.md` §2A) plus `--fd-neck gaze` or `--fd-neck gaze-closed`:
@@ -350,7 +350,7 @@ python3 -m scripts.render_head_gaze_clips RUN_OPEN RUN_CLOSED OUT/driver_fd_gaze
 ```
 
 Clips (open loop on the left, closed loop on the right; 1920x1080, 60 fps, 1x,
-0.5x and impact 0.25x) are on host brick under
+0.5x and impact 0.25x) are on `<host>` under
 `~/Videos/Parity Audit/golfer_realism/head_gaze/osv3d/`.
 
 ## Head-Gaze Clips

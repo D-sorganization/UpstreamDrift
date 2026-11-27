@@ -711,7 +711,7 @@ class TestAIPMethods:
 
     def test_system_capabilities(self) -> None:
         """Capabilities returns structured data."""
-        from src.api.aip.methods import create_registry
+        from src.api.aip.methods import create_registry, methods_passing_self_check
 
         registry = create_registry()
         handler = registry.get_method("system.capabilities")
@@ -720,38 +720,41 @@ class TestAIPMethods:
         assert "server_name" in result
         assert "capabilities" in result
         assert "supported_methods" in result
-        assert len(result["supported_methods"]) > 0
+        assert result["supported_methods"] == methods_passing_self_check(registry)
+        assert "simulation.start" not in result["supported_methods"]
 
     def test_simulation_start(self) -> None:
         """Start returns status."""
+        from src.api.aip.errors import AIPMethodNotImplemented
         from src.api.aip.methods import create_registry
 
         registry = create_registry()
         handler = registry.get_method("simulation.start")
         assert handler is not None
-        result = handler(engine_type="pendulum", duration=1.0)
-        assert result["status"] == "started"
-        assert result["engine_type"] == "pendulum"
+        with pytest.raises(AIPMethodNotImplemented):
+            handler(engine_type="pendulum", duration=1.0)
 
     def test_simulation_stop(self) -> None:
         """Stop returns stopped status."""
+        from src.api.aip.errors import AIPMethodNotImplemented
         from src.api.aip.methods import create_registry
 
         registry = create_registry()
         handler = registry.get_method("simulation.stop")
         assert handler is not None
-        result = handler()
-        assert result["status"] == "stopped"
+        with pytest.raises(AIPMethodNotImplemented):
+            handler()
 
     def test_simulation_status_no_engine(self) -> None:
         """Status with no engine returns not running."""
+        from src.api.aip.errors import AIPMethodNotImplemented
         from src.api.aip.methods import create_registry
 
         registry = create_registry()
         handler = registry.get_method("simulation.status")
         assert handler is not None
-        result = handler()
-        assert result["running"] is False
+        with pytest.raises(AIPMethodNotImplemented):
+            handler()
 
     def test_model_load_requires_path(self) -> None:
         """Model load with empty path returns error."""
@@ -765,14 +768,14 @@ class TestAIPMethods:
 
     def test_model_load_valid_path(self) -> None:
         """Model load with valid path returns loaded."""
+        from src.api.aip.errors import AIPMethodNotImplemented
         from src.api.aip.methods import create_registry
 
         registry = create_registry()
         handler = registry.get_method("model.load")
         assert handler is not None
-        result = handler(path="test.urdf")
-        assert result["status"] == "loaded"
-        assert result["format"] == "urdf"
+        with pytest.raises(AIPMethodNotImplemented):
+            handler(path="test.urdf")
 
     def test_model_list_uses_public_discovery_contract(self) -> None:
         """model.list returns discovered models through the public route helper."""
@@ -788,11 +791,11 @@ class TestAIPMethods:
 
     def test_analysis_export(self) -> None:
         """Analysis export returns status."""
+        from src.api.aip.errors import AIPMethodNotImplemented
         from src.api.aip.methods import create_registry
 
         registry = create_registry()
         handler = registry.get_method("analysis.export")
         assert handler is not None
-        result = handler(format="csv")
-        assert result["status"] == "ok"
-        assert result["format"] == "csv"
+        with pytest.raises(AIPMethodNotImplemented):
+            handler(format="csv")

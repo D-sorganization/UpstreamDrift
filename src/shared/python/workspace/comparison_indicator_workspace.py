@@ -23,6 +23,9 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.contracts import require
+from src.shared.python.injury.heuristic_disclaimers import (
+    NON_CLINICAL_ENGINEERING_DISCLAIMER,
+)
 from src.shared.python.injury.injury_risk import (
     InjuryRiskReport,
     InjuryRiskScorer,
@@ -52,11 +55,7 @@ __all__ = [
     "validate_run_compatibility",
 ]
 
-_NON_CLINICAL_DISCLAIMER = (
-    "DISCLAIMER: Numerical scores are biomechanical engineering indicators and do NOT "
-    "constitute clinical diagnosis, medical validation, or return-to-play clearance. "
-    "Calculations reflect simplified or qualified mechanical models rather than clinical outcomes."
-)
+_NON_CLINICAL_DISCLAIMER = NON_CLINICAL_ENGINEERING_DISCLAIMER
 
 
 class ModelFidelityLevel(str, Enum):

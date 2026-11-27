@@ -336,10 +336,13 @@ class TestAPIDiagnosticsPerformance:
 def client() -> Generator[TestClient, None, None]:
     """Create test client for local server."""
     try:
-        from src.api.local_server import create_local_app
+        from src.api.local_server import LAUNCHER_CSRF_HEADER, create_local_app
 
         app = create_local_app()
-        with TestClient(app, base_url="http://localhost") as test_client:
+        capability = {LAUNCHER_CSRF_HEADER: app.state.launcher_csrf_token}
+        with TestClient(
+            app, base_url="http://localhost", headers=capability
+        ) as test_client:
             yield test_client
     except ImportError:
         pytest.skip("local_server not available")

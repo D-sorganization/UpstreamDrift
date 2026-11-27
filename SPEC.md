@@ -72,9 +72,9 @@ At a fixed achieved state, **ZTCF is the drift component**: set the declared
 applied torque to zero while retaining the velocity-dependent, gravity, and
 other autonomous terms of the declared plant. **ZVCF is the control
 component**: evaluate `M(q)^{-1} τ` with velocity and gravity terms zeroed.
-This is the instantaneous split `xdot = f(x) + g(x)u`: ZTCF is `f(x)` and
-ZVCF is `g(x)u` (here `g(x)` is the input map; `g(q)` in mechanics notation
-means gravity generalized force). Their sum matches total acceleration at the
+This is the instantaneous split `xdot = f(x) + G(x)u`: ZTCF is `f(x)` and
+ZVCF is `G(x)u` (here `G(x)` is the input map; lowercase `g(q)` is reserved
+for gravity generalized force). Their sum matches total acceleration at the
 same fixed state under the declared split. The decomposition is exact at a
 fixed state and is **not additive over integrated trajectories**. This
 restores the original MATLAB meaning and reverses #11553's later naming.
@@ -1036,7 +1036,7 @@ study,vandv,provenance,units}`, with subpackages re-exported by name and a
   Tauri Rust/npm package minors. The Linux Tauri lanes also install
   `libdbus-1-dev` because the updated Rust graph contains `libdbus-sys`.
 - **2026-06-18** - Hardened the Tauri Build check after the UI audit recovery
-  PR exposed DeskComputer runner PATH drift: `CARGO_HOME` is now rooted at the
+  PR exposed <host> runner PATH drift: `CARGO_HOME` is now rooted at the
   workspace, the Rust toolchain verifier persists `$CARGO_HOME/bin` into
   `$GITHUB_PATH`, and CI infrastructure tests pin that Cargo remains reachable
   before rustfmt/clippy/check steps run.
@@ -2754,6 +2754,196 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-15 | #15118 | Desktop UI sends the launcher capability token on backend API requests through one shared fetch helper |
+| 2026-11-15 | #15116 | Local API app applies the shared allowed-host policy |
+| 2026-11-15 | #15114 | Fail closed on per-crate maturin build errors in Dockerfile and enforce in check_dockerfile_contracts.py. |
+| 2026-11-15 | #15109 | Scope tests/unit/conftest.py engine MagicMocks to tests/unit and guard OpenSim dynamics parity (#15108) |
+| 2026-11-15 | #15113 | Fix broken repo paths in curated testing, architecture, and manual docs and enforce in check_spec_paths.py. |
+| 2026-11-15 | #15102 | Join or retain retiring BinderThread and CameraWorker instances until Qt finishes thread teardown so Capture Rig preview never aborts in ~QThread. |
+| 2026-11-15 | #15099 | Isolate sidekick sys.modules and sys.meta_path state across overlay tests (#15097) |
+| 2026-11-15 | #15092 | Drain child output streams before transitioning ManagedProcess exit state and exposing exit_code |
+| 2026-11-15 | #15090 | Align SPEC Section 4 G(x)u control input notation, launcher manifest tile honesty, and ch10 canonical ZVCF call |
+| 2026-11-15 | #15072 | Restore UdAttachmentManifestMixin so rejected file_upload clears dedup SHA and retry sends WebSocket again; re-add reject-then-retry regression tests.; Reconcile SG putting logistic with registry; require launch-monitor length units; document green-terminal expected strokes scope; wire chat file-upload rejection to WebSocket errors and release dedup manifest on reject. |
+| 2026-11-15 | #15083 | Inscribed friction cone + Euclidean projection, floating-base RL obs/action dimensions, inertia-coupled opt-in domain randomization, offline GAIL honesty, and documented WBC/learning defaults |
+| 2026-11-15 | #15082 | Recompute candidate AcceptanceGates from stored metrics, catch unanchored host paths, and ratchet ledger counts. |
+| 2026-11-15 | #15120 | Honest candidate acceptance flags and fail-closed gates_imply_accepted guard (#14935) |
+| 2026-11-15 | #14850 | Redact host/home literals in batch 5 docs and add shell placeholder regression test |
+| 2026-11-15 | #14849 | Parameterize remote evidence runners and finish batch 3 host redaction |
+| 2026-11-15 | #15100 | Guard NP-09 lexical test against collated changelog fragment removal |
+| 2026-11-15 | #15098 | Headless Qt/matplotlib teardown after each test and MuJoCo offscreen renderer release (#14310) |
+| 2026-11-15 | #15089 | Preserve running_processes fallback in LauncherService.get_running_processes when list_processes is auto-mocked |
+| 2026-11-15 | #15076 | Add HILL_MTU drive mode to 3DOF FTLE study with matched nominal excitation and four-mode receipt. |
+| 2026-11-15 | #15075 | ML-WS-5 MuJoCo corpus run receipt, manifest-verified loader, and CI evidence |
+| 2026-11-15 | #15086 | Bump dnspython to 2.9.2 and tornado to 6.6.1; remove stale tornado pip-audit waivers. |
+| 2026-11-15 | #15077 | Regression-test address reserve share; wire study allow_implausible and OS-9 asset gate |
+| 2026-11-15 | #15085 | Ratify ADR-0061 realtime provider split ruling, replace sunset_date with adr_ruling in shadow_modules.yaml, and verify ADR references |
+| 2026-11-14 | #15096 | Fix SwingMetricsMixin test harness after velocity delegation and add unit marker (#15095) |
+| 2026-11-14 | #15094 | Guard NP-05 lexical test against collated changelog fragment removal (#15093) |
+| 2026-11-14 | #15052 | SCI-10/12/13/14: shaft FEM scope docs, pendulum inertia param, static-opt cost, spatial ordering |
+| 2026-11-14 | #15054 | Hill f_v zero beyond Vmax; exponential activation substeps for mocap dt |
+| 2026-11-14 | #15056 | SO(3) quat_inverse_distance (relative-quaternion angle), interpolated ball-flight ground landing |
+| 2026-11-14 | #15051 | Align rigid-body off-center COR impulse with validator budget via club torque; solver integration test. |
+| 2026-11-14 | #15053 | Use transverse spin in Magnus/lift magnitude; document frame and parity fixtures (#15042). |
+| 2026-11-14 | #15049 | Evaluate constrained per-actuator columns at measured (q, v) with ZTCF baseline |
+| 2026-11-14 | #15048 | Fix turf contact impact: joule energy loss, receding guard, coupled friction-spin; release-safe mass/radius validation |
+| 2026-11-14 | #15069 | Quantize spatial model canonical hashes for cross-runtime manufactured authority parity, regenerate publication evidence, and re-pick optional-stack shooting defect floor after #14227 gravity alignment. |
+| 2026-11-14 | #15074 | Wave 0.1: independent triage of 67 budget exceptions that expired 2026-11-30 (measured sizes, regression tests). |
+| 2026-11-14 | #15073 | Agent API v1 conformance CI and FastMCP migration for ud-sim-mcp |
+| 2026-11-14 | #15061 | Expose ZTCF and golf-simulator golden capabilities via sim_run with REST/MCP parity and 64 KiB artifact spill. |
+| 2026-11-14 | #15079 | Align ZVCF user-manual formulas, _dynamics_interface q-shape docstring, and chapter 64 OpenSim geometry link |
+| 2026-11-14 | #15080 | Update user-guide install/launcher/examples docs, knowledge pack includes, and root README CLI/engine documentation for #15016. |
+| 2026-11-14 | #15063 | Link tile help to AffineDrift theory; register six provisional core calculations and dedupe registry blocker ids |
+| 2026-11-14 | #15037 | Fail-closed motion-matching gates; archive run-102 evidence script with restore ref. |
+| 2026-11-14 | #15035 | URDF/MJCF converter preserves joint and visual rotations; Simscape translation import matches export header. |
+| 2026-11-14 | #15036 | Fix Dempster/Zatsiorsky segment mass expansion and C3D export placeholder (part a) |
+| 2026-11-14 | #15025 | Fix WBC zero torques with contact and hierarchical task enforcement |
+| 2026-11-14 | #15026 | Correct putting slope rolling (5/7 g), unify stimp friction, impact club spin, flight spin sign docs, Rust air temperature K |
+| 2026-11-14 | #15081 | Track WSL/MATLAB/Docker child lifecycles, surface fast-fail stderr diagnostics without false Running state, log observer errors via narrow_catch, and add container naming/PID labels, port avoidance, stop-on-close, and startup orphan sweep. |
+| 2026-11-14 | #14956 | Managed local child-process lifecycle; concurrent stdout/stderr drain avoids pipe deadlock (Refs #14949). |
+| 2026-11-14 | #15004 | Wire UD_REQUIRE_ENGINES makereport hook and fail-closed JUnit floor |
+| 2026-11-14 | #15007 | MuJoCo/Pinocchio gravity-only shims, MuJoCo export definition_version, motion_matching export_stamp (#14943 follow-on); MuJoCo ZVCF at-state kernels treat tau as nv generalized force, not nu actuator ctrl (#15007 review) |
+| 2026-11-14 | #14973 | Regression tests for MuJoCo nu==nv control-at-state and pendulum counterfactual exports |
+| 2026-11-14 | #15005 | State-aware counterfactual defaults, simscape lifecycle, putting control (#14943 follow-up) |
+| 2026-11-14 | #14961 | EngineManager reloads LOADED engines; cleanup resets status (#14942). |
+| 2026-11-14 | #15017 | EngineManager reloads LOADED engines; cleanup resets status and closes active engine (#14942). |
+| 2026-11-14 | #14959 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
+| 2026-11-14 | #14966 | MuJoCo canonical I/O: preserve imported qacc and data.time on round-trip; Wire canonical-v2 get/set on BasePhysicsEngine; checkpoint engine_type guard |
+| 2026-11-14 | #15038 | JaxSim canonical-v2 round-trip; rename velocity constant to SPATIAL_WRENCH_REPRESENTATION |
+| 2026-11-14 | #14960 | Committed evidence scan calls receipt taxonomy validation; missing fields and conflicts are tested (#14935). |
+| 2026-11-14 | #14825 | NP-09 policy input-output sensitivity at stated operating points (#14502) |
+| 2026-11-14 | #14834 | Event-relative time normalisation (101-point resampling) between named swing events |
+| 2026-11-14 | #14836 | GM-3 Cheetham X-factor stretch and kinematic sequence (#14426) |
+| 2026-11-14 | #14837 | GRF and COP observability, event-anchored peaks, and normalisation contracts (GM-2). |
+| 2026-11-14 | #15062 | Add Hill MTU joint actuator (agonist/antagonist, compliant tendon, linearisation API). |
+| 2026-11-14 | #15059 | ML-WS-4 native MuJoCo episode corpus generator, manifest hashes, and CI fixture |
+| 2026-11-14 | #15066 | NSX-98: document A(t)/B(t) assembly in derivative conformance harness |
+| 2026-11-14 | #15068 | NSX-95 campaign catalogue, JSON strategy mirror, first toy matched-CHS campaign |
+| 2026-11-14 | #15067 | NSX-94: commit cross-engine co-contraction trade-off evidence JSON and validation harness |
+| 2026-11-14 | #15065 | R9c: catalog MATLAB R2025b appearance acceptance as deferred; extend headless export and MATLAB consumer contract tests. |
+| 2026-11-14 | #15064 | Verify hip adduction and rotation torque capacities from Swake 2026 and Gonçalves 2021. |
+| 2026-11-14 | #14929 | Interim 30-day realtime shadow ledger sunset (#12046) so hygiene tests pass pending Tools migration |
+| 2026-11-12 | #15057 | README onboarding: venv-first install, toolchains, ud-sim, engines, layout tree. |
+| 2026-11-12 | #15031 | Renew or delete 67 budget exceptions expiring 2026-11-30 (Wave 0 #15028). |
+| 2026-11-12 | #15032 | Re-bootstrap pip with ensurepip before force-overlay-parity engine installs (#15027). |
+| 2026-11-12 | #15033 | Label injury spinal-load heuristics honestly; disclaim unvalidated screening bands. |
+| 2026-11-12 | #15024 | Fix OpenSim IAA gravity sign and moment-arm mapping; MuJoCo constraint-consistent control acceleration; minor docs/dead code |
+| 2026-11-12 | #14957 | Agent control stubs return honest not_implemented results (#14939). |
+| 2026-11-12 | #14828 | NP-05 benchmark localized edit vs constrained fine-tune (#14480) |
+| 2026-11-11 | #15023 | Register ud-sim-mcp console script, generated capability inventory, and Agent API auth docs. |
+| 2026-11-10 | #15000 | AIP JSON-RPC stubs return not_implemented; capabilities self-check (#14940). |
+| 2026-11-10 | #14962 | BallFlightSimulator reports per-step forces from the Rust integrator with legacy post-hoc path tagged |
+| 2026-11-10 | #14995 | Remove default-true success flags on solver and calc outputs with Oracle 1 and 8 AST gates |
+| 2026-11-10 | #15001 | Replace simulation boolean soup with lifecycle reducer, stale-socket identity guard, and ordered speed control |
+| 2026-11-10 | #14998 | CounterfactualKind/Result, simscape/putting defaults, conformance (#14943 slices 1–4) |
+| 2026-11-10 | #14992 | Enforce Tauri Cargo.toml version parity, correct production readiness doc, and add frontend dynamic port resolution |
+| 2026-11-10 | #14990 | Typed non-finite failure for syngas water router and canonical lifecycle vocabulary gate |
+| 2026-11-10 | #14993 | Wire engine lane guards into nightly, enforce MuJoCo in CI, and remove dead MATLAB job |
+| 2026-11-10 | #14986 | Enable UD_AUTO_MARK_BY_DIRECTORY in unit-test-gate and enforce suite marker reach gate in CI |
+| 2026-11-10 | #14988 | Tauri BackendState supervisor with ephemeral port and stderr tail (Part of #14951). |
+| 2026-11-10 | #14985 | Add per-repo stdlib lifecycle transition kernel and contract tests |
+| 2026-11-10 | #14979 | Implement ZTCF RNEA joint reaction contract and honest scope docs |
+| 2026-11-10 | #14977 | Enforce required physics engine execution, JUnit floor checks, and JaxSim heavy test lane |
+| 2026-11-10 | #14967 | Simulation lifecycle reducer with runId and stale-socket guard; Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
+| 2026-11-10 | #14981 | Add sharded coverage collection, combination, and per-package ratchet gate |
+| 2026-11-10 | #14976 | Fix syngas water unit conversions and router fallback on 60F_14.696psia basis (paired with Tools#6009) |
+| 2026-11-10 | #14980 | Add directory-based suite marker inference, opt-out marker, gate selectability summary, and audit utility (Part of #14947, Part of #14934) |
+| 2026-11-10 | #14963 | Workspace synchronous optimization returns explicit synthetic placeholder; RECEIPT registration refused for synthetic results |
+| 2026-11-10 | #14974 | \ Marker IK exposes convergence status,reports NO_MARKERS and NaN RMS for empty frames,and routes LM with finite bounds to TRF\ |
+| 2026-11-10 | #14972 | Make coverage truth explicit in CI summary and remove dead cov-fail-under flags |
+| 2026-11-10 | #14958 | Simulation WS error frame handling and isPaused reset on stop (Part of #14950). |
+| 2026-11-10 | #14954 | Make architecture and file-size budget expiry evaluation deterministic |
+| 2026-11-10 | #14953 | ZTCF: guard multi-body misuse of compute_ztcf_forces; double-pendulum regression (#14944, Part of #14934) |
+| 2026-11-10 | #14923 | Document CI Optional Stack slice 1 (Pinocchio gravity) and add runbook contract tests |
+| 2026-11-10 | #14924 | Contract tests: Bruno B2, Pearcy P1, Hosea G1 provenance flags (#12737) |
+| 2026-11-10 | #14930 | NSX salvage tracker: unit receipts for merged NSX-22/NSX-24 rows on main (#13604) |
+| 2026-11-10 | #14933 | Redact fleet host and home literals batch 4 recovery |
+| 2026-11-10 | #14926 | UD docs and CI contract tests reaffirm PR size is advisory only (Dieter 2026-11-06) |
+| 2026-11-10 | #14925 | NSX-04 verification status doc plus registry inventory contract test |
+| 2026-11-10 | #14931 | Align realtime shadow-ledger sunset_date with Q4 baseline and validate against UTC date (#14928, #12046) |
+| 2026-11-10 | #14921 | Explorer contract: engine-tagged playback archives and per-engine MP4 distinctness test (#12878 workstream C) |
+| 2026-11-09 | #14920 | Correct SHOW-A10 evidence provenance manifest and summary attribution without regenerating artifacts |
+| 2026-11-08 | #14916 | CI: qualify job-specific checkout depth, transfer budgets, and sparse-state regression contracts |
+| 2026-11-08 | #14914 | Assets: selective LFS policy, source-asset inventory contracts, and fail-closed hydration verification |
+| 2026-11-08 | #14912 | Research artifacts: checksum-bound durable storage contracts and evidence policy |
+| 2026-11-08 | #14910 | LIFT-6: OpenSim lift composition, 80-muscle count, and static hold contracts |
+| 2026-11-08 | #14908 | Preserve #14733 proposal durable change-history evidence across normal change-fragment collation and log archival |
+| 2026-11-08 | #14901 | Point driver motion-matching smoke to canonical capture-fit spec (full_body_spec_anthro_driver_capture.json) and align anthro_driver receipt base_spec_file metadata |
+| 2026-11-08 | #14890 | SHOW-A19: re-characterise wrist and scapula ROM from evidence and evaluate option (c) address reachability |
+| 2026-11-08 | #14900 | SHOW-A10: styled full-swing render evidence and summary comparing improved model against baseline |
+| 2026-11-08 | #14888 | Proposal (write-up only): #13560 OpenSim net-moment gap - recorder inconsistency finding, conditioning math, options |
+| 2026-11-08 | #14898 | Build the D51 reference from the Drake IK q_track migrated onto the v2 spec, keeping the observed face at impact and the hand closure inside the 5 mm gate (step 2) |
+| 2026-11-08 | #14824 | NP-07 loop-constraint projection of policy output (grip loop, diagnostic) (#14500) |
+| 2026-11-08 | #14839 | NP-02 demonstration fixture and behavior-cloned 64x64 MLP baseline (#14477) |
+| 2026-11-08 | #14899 | physics_spec_sha256 and the saved-comparison receipts compare floats at a canonical precision (12 significant digits, 1e-12 absolute) so BLAS/libm last-bit drift cannot move them (owner option A) |
+| 2026-11-08 | #14902 | Grip Contact: verify MuJoCo and OpenSim net-moment parity gap closure and remove strict xfails |
+| 2026-11-08 | #14907 | OSL-19: grip closure contracts and OpenSim reach hook on back-squat bundles |
+| 2026-11-08 | #14903 | OSL-17: put back-squat bar on BackTop high-bar rack, verify lead-in settle and whole-window OpenSim Hicks and marker gates |
+| 2026-11-08 | #14904 | OSL-15: verify bar-load balance in IK provenance (combined CoM over mid-foot) on back squat barbell and source bundles |
+| 2026-11-08 | #14909 | LIFT-5: four-engine bar path parity contract and tests covering MuJoCo, Drake, Pinocchio, and OpenSim |
+| 2026-11-07 | #14886 | SHOW-A18: ROM diagnostic decomposing A2 trail-wrist excursions against pre-A2 capture and G2 options |
+| 2026-11-07 | #14883 | SHOW-A20: refit capture club pose per trail-grip option removing copy-grip bias |
+| 2026-11-07 | #14877 | Refs #11745: Add reproducible back-squat trajectory metrics and sourced comparison limits |
+| 2026-11-07 | #14882 | SHOW-A21: evidence-based grip guards (dorsal separation >= 90 deg and trail V-offset bound in [-75, 75] deg grounded in biomechanical literature and tour data) |
+| 2026-11-07 | #14880 | Key-frame PNG writer and grip-clock inset helper for styled renders (SHOW-A10) |
+| 2026-11-07 | #14878 | SHOW-A9: Refit best-match MuJoCo driver on A7 grip + A8 trunk spec; record candidate receipt and baseline comparison |
+| 2026-11-07 | #14875 | Fleet grip guard: PR-tier test that every model and binding reads 15° ± 1° under A7 convention (SHOW-A13, #14738) |
+| 2026-11-07 | #14873 | Apply A7 grip roll zero to Drake, Pinocchio, OpenSim and MyoSuite via the shared metric |
+| 2026-11-07 | #14869 | SHOW-A11: Validate active MuJoCo spec and grip bindings against A7 grip roll convention (+15 deg neutral) |
+| 2026-11-07 | #14832 | Add GM-5 posture, translation, club-at-impact, and Han et al. (2019) GRF pivoting moment metrics. |
+| 2026-11-07 | #14863 | Split address-relative and target-line/lab-frame shoulder and hip turn conventions with declared segment proxies and Chu 2010 event reporting (GM-1c). |
+| 2026-11-07 | #14865 | Re-zero grip roll to the owner's A7 convention: wrists on top of shaft, + CCW toward target |
+| 2026-11-07 | #14788 | Optional-stack CI runs loop_nullspace snapshot vs spatial fixture with real pinocchio |
+| 2026-11-07 | #14862 | SHOW-A17: mirror the right arm in full_body_spec_anthro_iron7 and regenerate its two ground-support receipts |
+| 2026-11-07 | #14858 | Orient the drawn grip hands from the wrist follower frames: the drawn dorsum shell now lies on the wrist dorsal axis (was 35 deg lead / 75 deg trail off) |
+| 2026-11-07 | #14855 | SHOW-A8: v2 lumbar+thoracic trunk into best-match mujoco_driver model with styled render |
+| 2026-11-07 | #14856 | Controller synergy audit slice 2: minimum-intervention TVLQR and full-state LQR on the #13837 plant with the seeded discrimination test |
+| 2026-11-07 | #14842 | Catalog exact existing regression nodes and merged provenance for six resolved board findings |
+| 2026-11-07 | #14852 | B5: the lie spin factor now reaches the ball flight in a B3 table (with_spin on the lie modifiers, spin_factor on the pipeline and landing simulator) |
+| 2026-11-07 | #14819 | G2: trail-hand grip option (b15) with explicit 15 deg alpha and widened trail V-offset bound |
+| 2026-11-07 | #14827 | Calibrate tour, scratch, 10, and 20 handicap putting skill presets against published reference make-rate tables and validate tour make rates and expected putts against Broadie (2014) |
+| 2026-11-07 | #14843 | Reload pinocchio in OpenSim dynamics parity when unit mocks left stubs in sys.modules |
+| 2026-11-07 | #14809 | Native viewer export: bootstrap imports and lazy modules so --help works without matplotlib in minimal envs. |
+| 2026-11-07 | #14784 | TableShotModel reads the dispersion cell for the shot's lie and the conditions' wind/slope bins (CourseConditions gains wind/slope, default calm/flat); absent wind/slope bins are rejected instead of silently using calm/flat. |
+| 2026-11-06 | #14833 | SHOW-B3b: omit ground_model from carry-only dispersion tables and deduplicate runout entry points |
+| 2026-11-06 | #14820 | PR changed-line count is advisory-only in CI: warnings, optional size:large label, allowlist; --strict for optional enforcement (RD #4118 parity) |
+| 2026-11-06 | #14813 | CI: Lighthouse mobile baseline runs in its own lighthouse-mobile job on d-sorg-fleet-docker (fork-PR guarded, informational) |
+| 2026-11-06 | #14823 | NP-08: offline SVD-direction ablation vs high-frequency jitter benchmark (#14501) |
+| 2026-11-06 | #14818 | Map X-factor variants to literature families and add publish payload + unit tests (GM-1b). |
+| 2026-11-06 | #14768 | Controller synergy audit slice 1: ControllerAuditSpec, #13837 trace adapter and ControllerAuditReport (UCM, TNC fail-closed below 30 trials, null-space gain norm) with an analytic Lyapunov golden |
+| 2026-11-06 | #14802 | OSL-14 scoping: osl_scoping.osl14 fixture and lift-body contract tests; OSL-15 scoping: load balance IK provenance contract and tests; OSL-17 scoping: rack + lead-in bundle provenance tests; OSL-19 scoping: grip closure tests and OpenSim receipt hook |
+| 2026-11-06 | #14805 | LIFT-5 epic evidence contract (bundles + parity JSON); LIFT-6 OpenSim lift composition/kinetics contracts |
+| 2026-11-06 | #14815 | rewrite pose_studio test_widgets against real Qt widgets with qapp fixture (#14812) |
+| 2026-11-06 | #14811 | pose_studio test_gui requests a real QApplication via an autouse qapp fixture, so it no longer crashes an xdist worker when no QApplication exists yet |
+| 2026-11-06 | #14808 | Drake UI abort regression tests request qapp via an autouse fixture, so they no longer crash an xdist worker when no QApplication exists yet |
+| 2026-11-06 | #14783 | Leaderboard freshness gate moved to scripts/ci/check_leaderboard_freshness.py; a PR that changes no motion_matching solver input passes despite a squash-orphaned git_head, solver changes still need a rerun. |
+| 2026-11-06 | #14770 | P5: parity report candidate resolution fails closed; canonical checksum/schema/manifest failures never fall through to legacy loading, legacy numeric archives detected explicitly, no allow_pickle=True |
+| 2026-11-06 | #14793 | strategy CLI: --shot-table / --shot-model inject the selected shot model into the personal solve and report its provenance in text and HTML |
+| 2026-11-06 | #14785 | Commit the v1 source spec of the trunk_visuals driver v2 bundle and pin the generator against the committed rollout on its true inputs (step 1) |
+| 2026-11-06 | #14639 | Re-base HX grip alpha to face-on zero at flagship address; preserve fitted Euler triples. |
+| 2026-11-06 | #14641 | Flight model validity: launch spin cap, trajectory guard, pipeline metadata |
+| 2026-11-06 | #14817 | NP-10 offline weight inspector and lexical CI guardrail (#14503) |
+| 2026-11-06 | #14791 | Bump PR Body Lint caller pin to the post-RM#2697 reusable workflow (RM#2427) |
+| 2026-11-06 | #14803 | docs: ADR-0060 OpenSim scaling and fit plan (#13991) |
+| 2026-11-06 | #14775 | MJX L-BFGS: parameter scale, SciPy ftol/gtol/pgtol, receipt stop_reason and gradient norm (#13779) |
+| 2026-11-06 | #14806 | NSX-55: document DV-12583 as present on main, add catalog regression test, fix publication_gate checklist |
+| 2026-11-06 | #14787 | Document Anderson 2007 Table 3 scope for hip adduction/rotation torque slots and extend UNVERIFIED notes |
+| 2026-11-06 | #14777 | Ground-support segment-scale tie-break, receipt canonical compare (#14771) |
+| 2026-11-06 | #14759 | NSX-13 spatial-fixture test double builds the R11 shaft springs like NativePinocchioModel (rigid club), so test_snapshot_vs_spatial_fixture is green again |
+| 2026-11-06 | #14762 | SHOW-G1: mirror the right-arm joint axes in driver v1/v2 (R scapula, shoulder, forearm, wrist) so positive L and R coordinates give mirrored motion |
+| 2026-11-06 | #14774 | Add PR size gate workflow and git numstat checker (500-line cap, exemptions). |
+| 2026-11-06 | #14642 | SHOW-B3b: bounce/roll ground model, slope bins, lie modifier, club column on dispersion tables |
+| 2026-11-06 | #14778 | NP-03/04 toy MLP rank-1 edit and LoRA comparator (#14478 #14479) |
+| 2026-11-06 | #14776 | Add Pydantic golf metric-definitions registry schema (GM-1a) with filter descriptor. |
+| 2026-11-06 | #14761 | S6 catalogue reason now names the missing arm on the NSX-97 UCM split |
+| 2026-11-06 | #14779 | xfail placeholder for anthro noise-aware receipt (#12721) |
+| 2026-11-06 | #14782 | event_outcome_rows refuses a near-grazing impact (transversality below GRAZING_TRANSVERSALITY) instead of returning unreliable linear rows |
+| 2026-11-06 | #14773 | Manual ch. 67 quotes the five-engine R11 chain receipt; previous run keeps its engine block |
+| 2026-11-06 | #14769 | native_viewer_export CLI explains a foreign shared package shadowing the vendored Tools tree |
+| 2026-11-06 | #14772 | Simscape grip docs state the SHOW-A7 grip zero (#14731); a MATLAB test checks the gs3dx topology frames; the R2025b address-roll check is cataloged as deferred |
+| 2026-11-06 | #14711 | OpenSim grip net_moment_com: restore Simbody patch torque (drop #14354 lever), derive static friction by least-squares fit of the Hollars curve to the shared law, run the slow OpenSim parity tests in CI, integrate swings at accuracy 5e-10 and holds at 5e-8 (chosen by motion) so all six net-moment cases pass with the xfails removed |
+| 2026-11-06 | #14760 | SPN-0b data_extraction.md: DOIs and full author lists for Pearcy 1984, Fujii 2007, Wilke 1999 and Wu 2002 from Crossref; no verified_from_primary flag changed |
+| 2026-11-06 | #14758 | Pin the R4 capture-mode address knee on the canonical receipts and record their marker RMS before/after (acceptance 6) |
+| 2026-11-06 | #14766 | OSL-7 predictive deadlift receipt now records the tracked comparison as unavailable (non-converged solve) via a no-solve --refresh-comparison mode; lift_models.tex notes the exploratory status. |
 | 2026-11-06 | #14752 | Fix lod-quality-gate regression: TableShotModel asks DispersionTable.club_label instead of reaching into provenance (Law of Demeter) |
 | 2026-11-06 | #14709 | Putting studio: exact imperial ft factor, a parity test for the core green edge clamp, and locked slope sliders that read the core green's slope at the ball |
 | 2026-11-06 | #14726 | SHOW-B3b remainder: dispersion_table --ground CLI (rest positions, lie model, slope bins), per-skill club labels, convergence in provenance |

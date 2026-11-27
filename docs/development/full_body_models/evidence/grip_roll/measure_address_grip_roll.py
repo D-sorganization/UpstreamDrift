@@ -2,7 +2,8 @@
 
 Poses the MuJoCo model of ``--spec`` at the first frame of ``--q`` (``ik_trajectory.npz``
 ``q`` in ``coordinate_order``), reads the native club frame from the ``LW`` site and
-reports ``motion_matching.grip_roll`` (0 deg = vertical, + = strong). Writes
+reports ``motion_matching.grip_roll`` (0 deg = back of wrist up, + = counterclockwise,
+SHOW-A7 #14731; A1 used 0 deg = palm plane vertical). Writes
 ``receipt_<tag>.json`` and a face-on PNG with the hand normals (lead red, trail blue) and
 a dial of the roll as the golfer sees it down the shaft. Headless: ``MUJOCO_GL=egl``.
 """
@@ -78,7 +79,7 @@ def _draw_dial(draw: Any, result: dict[str, Any], cx: int, cy: int) -> None:
 
     def at(deg: float, scale: float = 1.0) -> tuple[float, float]:
         rad = math.radians(deg)
-        return cx - scale * r * math.cos(rad), cy - scale * r * math.sin(rad)
+        return cx - scale * r * math.sin(rad), cy - scale * r * math.cos(rad)
 
     draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(200, 200, 200))
     draw.line((cx - r, cy, cx + r, cy), fill=(90, 90, 90))
@@ -88,7 +89,9 @@ def _draw_dial(draw: Any, result: dict[str, Any], cx: int, cy: int) -> None:
     draw.text((cx - 8, cy - r - 14), "up", fill=WHITE)
     for key, rgb in COLORS.items():
         draw.line((cx, cy, *at(result[key])), fill=rgb, width=4)
-    draw.text((cx - r, cy + r + 6), "roll down the shaft (green = 15 deg)", fill=WHITE)
+    draw.text(
+        (cx - r, cy + r + 6), "wrist roll, 12 = 0 deg (green = 15 deg)", fill=WHITE
+    )
 
 
 def render_face_on(result: dict[str, Any], path: Path, tag: str) -> bool:
@@ -141,8 +144,8 @@ def main() -> int:
         "tag": args.tag,
         "spec": args.spec.name,
         "spec_sha256": hashlib.sha256(spec_bytes).hexdigest(),
-        "convention": "face-on; 0 = vertical, + = strong; lead = back of hand, "
-        "trail = palm (motion_matching/grip_roll.py)",
+        "convention": "face-on; 0 = back of wrist up, + = counterclockwise toward the "
+        "target; same wrist axis for both hands (motion_matching/grip_roll.py)",
         "lead_roll_deg": round(result["lead"], 2),
         "trail_roll_deg": round(result["trail"], 2),
         "png": f"face_on_{args.tag}.png" if drawn else None,

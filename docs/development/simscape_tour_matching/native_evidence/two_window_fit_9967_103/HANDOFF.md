@@ -7,7 +7,7 @@ directory does not invent a physical pass.
 ## R2025b Runtime / License
 
 - Release: **R2025b** (`25.2.0.3177638 (R2025b) Update 5`)
-- Host: **DeskComputer** (from run-102 manifest)
+- Host: **<host>** (from run-102 manifest)
 - License cap assumed: **false** (no inferred 1000-block ceiling)
 
 ## Derived From Run-102
@@ -26,7 +26,7 @@ directory does not invent a physical pass.
 - `runtime_license_receipt.json`
 - `parity_receipt.json`
 
-## Next Native Action (DeskComputer / R2025b Only)
+## Next Native Action (<host> / R2025b Only)
 
 ```powershell
 PYTHONPATH=. python scripts/matlab/materialize_ms61_topology_receipts.py

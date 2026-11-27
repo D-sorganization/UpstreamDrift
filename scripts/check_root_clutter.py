@@ -36,6 +36,7 @@ ALLOWLIST: frozenset[str] = frozenset(
         "Dockerfile.modular",
         "docker-compose.yml",
         "docker-compose.gpu.yml",
+        "docker-compose.override.yml",
         "docker-compose.profiles.yml",
         "build_hooks.py",
         "conftest.py",
@@ -48,6 +49,8 @@ ALLOWLIST: frozenset[str] = frozenset(
         "install.sh",
         "VERSION",
         "sidekick.spec",
+        # Agent / LLM discovery index for ud-sim-mcp (#15022).
+        "llms.txt",
     }
 )
 

@@ -16,7 +16,10 @@ import math
 from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass, field
 from types import MappingProxyType, SimpleNamespace
-from typing import Any, Final, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Final, Literal, Protocol, runtime_checkable
+
+if TYPE_CHECKING:
+    from src.shared.python.model_appearance.grip_pose import GripPose
 
 import numpy as np
 
@@ -400,6 +403,7 @@ def bind_rigid_hand_sites(
     lead_hand_to_grip: np.ndarray | None = None,
     trail_hand_to_grip: np.ndarray | None = None,
     handedness: Handedness = DEFAULT_HANDEDNESS,
+    grip_pose: GripPose | None = None,
 ) -> tuple[SiteBinding, ...]:
     """Build ``rigid_proxy`` :class:`SiteBinding` tuples for all sites in ``topology``."""
     if not isinstance(topology, ContactTopology):
@@ -416,6 +420,12 @@ def bind_rigid_hand_sites(
         if trail_hand_to_grip is None
         else _validate_transform_4x4(trail_hand_to_grip, "trail_hand_to_grip")
     )
+    if grip_pose is not None:
+        from src.shared.python.grip_spec.shaft_roll import attachment_base_transform
+        from src.shared.python.model_appearance.grip_pose import Hand
+
+        t_lead = attachment_base_transform(grip_pose, Hand.LEAD, base=t_lead)
+        t_trail = attachment_base_transform(grip_pose, Hand.TRAIL, base=t_trail)
     l_side = lead_side(handedness)
     t_side = trail_side(handedness)
     bindings: list[SiteBinding] = []

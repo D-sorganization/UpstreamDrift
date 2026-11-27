@@ -826,7 +826,7 @@
     "NeckInputZ": [-80.0, 80.0],
     "REInput": [-150.0, 5.0],
     "RFInput": [-90.0, 90.0],
-    "RScapInputX": [-30.0, 10.0],
+    "RScapInputX": [-10.0, 30.0],
     "RScapInputY": [-40.0, 40.0],
     "RWInputX": [-40.0, 25.0],
     "RWInputY": [-70.0, 70.0],
@@ -1293,17 +1293,17 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
       "child_to_follower": [
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Hips and Torso Inputs/COMRod",
       "parent_to_base": [
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.42261093595634686],
+        [0.0, 0.0, -1.0, 0.42261093595634686],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1320,17 +1320,17 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/RUpperArm",
       "child_to_follower": [
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Shoulder Joint/Gimbal Joint/Kinetically Driven",
       "parent": "solid_reference:GolfSwing3D_Kinetic/HubtoRS",
       "parent_to_base": [
-        [0.0, 0.0, -1.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
         [0.0, 1.0, 0.0, -0.19494],
-        [1.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1375,16 +1375,16 @@
       "child": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
       "child_to_follower": [
         [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
+        [0.0, -1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Forearm/Revolute Joint/Kinetically Driven Revolute",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Right Elbow Joint/Spherical Solid1",
       "parent_to_base": [
         [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, -0.14526160252728315],
+        [0.0, -1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0, -0.14526160252728315],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "primitives": [
@@ -1397,18 +1397,18 @@
     {
       "child": "solid_reference:GolfSwing3D_Kinetic/Grip/RHandStandoff",
       "child_to_follower": [
-        [0.8268993350110894, -0.18808890286663893, 0.529962314109826, 0.0],
-        [-0.33885406631702486, -0.9187579240847278, 0.20263711079646607, 0.0],
-        [0.4487932837049091, -0.3471403772970612, -0.8234550060272988, 0.0127],
+        [0.8268993350110894, 0.18808890286663893, -0.529962314109826, 0.0],
+        [-0.33885406631702486, 0.9187579240847278, -0.20263711079646607, 0.0],
+        [0.4487932837049091, 0.3471403772970612, 0.8234550060272988, 0.0127],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "name": "GolfSwing3D_Kinetic/Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint",
       "parent": "solid_reference:GolfSwing3D_Kinetic/Right Forearm/RLowerForearm",
       "parent_to_base": [
-        [1.2246063538223773e-16, -2.220446049250313e-16, 1.0, 0.0],
-        [-1.0, 1.2246063538223773e-16, 1.2246063538223775e-16, 0.0],
+        [1.2246063538223773e-16, 2.220446049250313e-16, -1.0, 0.0],
+        [-1.0, -1.2246063538223773e-16, -1.2246063538223775e-16, 0.0],
         [
-          -1.2246063538223775e-16, -1.0, -2.220446049250313e-16,
+          -1.2246063538223775e-16, 1.0, 2.220446049250313e-16,
           -0.14526160252728315
         ],
         [0.0, 0.0, 0.0, 1.0]

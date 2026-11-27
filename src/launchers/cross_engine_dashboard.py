@@ -62,6 +62,7 @@ from src.shared.python.plot_style import (
     PlotStyleSpec,
     PresetLibrary,
 )
+from src.launchers.cross_engine_dashboard_theme import release_theme_manager
 from src.launchers.launcher_settings_store import persist_window_geometry
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -1049,6 +1050,7 @@ def _create_dashboard_window_class() -> type:
                 return
             if callable(apply_theme_to_window):
                 apply_theme_to_window(self)
+                self.destroyed.connect(lambda *_: release_theme_manager(self))
 
         def _build_window_layout(self) -> None:
             """Create the central dashboard layout."""
