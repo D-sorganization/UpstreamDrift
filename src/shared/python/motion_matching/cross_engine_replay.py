@@ -48,6 +48,7 @@ class CrossEngineReplayConfig:
     tolerance_rad: float = 0.05
 
     def __post_init__(self) -> None:
+        """Reject a missing candidate or a non-positive replay specification."""
         p = Path(self.candidate_path)
         if not p.is_file():
             raise FileNotFoundError(f"Candidate file not found: {p}")
@@ -109,6 +110,7 @@ class StepSizeTolerance:
     qd_rad_s: float | None = None
 
     def __post_init__(self) -> None:
+        """Reject a non-positive optional velocity tolerance."""
         if self.qd_rad_s is not None and not self.qd_rad_s > 0.0:
             raise ValueError("qd_rad_s must be positive when provided")
 
@@ -124,6 +126,7 @@ class StepSizeConvergenceResult:
     is_converged: bool
 
     def as_dict(self) -> dict[str, Any]:
+        """Return the convergence fields as a plain dictionary."""
         return {
             "h_nominal": self.h_nominal,
             "h_refined": self.h_refined,
@@ -198,6 +201,7 @@ class EngineReplayOutcome:
     aligned_model_markers_m: Array | None = None
 
     def __post_init__(self) -> None:
+        """Reject a non-finite or negative closure residual."""
         if (
             not math.isfinite(self.max_closure_residual_m)
             or self.max_closure_residual_m < 0.0
@@ -223,6 +227,7 @@ class EngineReplayOutcome:
                 )
 
     def as_dict(self) -> dict[str, Any]:
+        """Return the outcome fields as a plain dictionary."""
         return {
             "engine": self.engine,
             "status": self.status,
@@ -265,6 +270,7 @@ class CrossEngineComparisonReport:
         return "PASSED" if self.is_physically_accepted else "REJECTED"
 
     def as_dict(self) -> dict[str, Any]:
+        """Return the comparison report as a plain dictionary."""
         return {
             "status": self.status,
             "is_physically_accepted": self.is_physically_accepted,

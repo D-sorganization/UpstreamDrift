@@ -24,11 +24,13 @@ pytestmark = pytest.mark.unit
 
 
 def _config(path: Path) -> CrossEngineReplayConfig:
+    """Build a one-engine replay config for the given archive."""
     return CrossEngineReplayConfig(path, duration_s=0.5, engines=("mujoco",))
 
 
 @pytest.fixture
 def canonical_path(tmp_path: Path) -> Path:
+    """Write a canonical archive that also carries returned81 fields."""
     candidate = MatchedSwingCandidate(
         metadata=CandidateMetadata(
             schema_version=CANDIDATE_SCHEMA_VERSION,
@@ -53,6 +55,7 @@ def canonical_path(tmp_path: Path) -> Path:
 def test_valid_canonical_preserves_identity(
     canonical_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """A valid mixed archive keeps canonical identity and skips conversion."""
     legacy = Mock(wraps=candidate_convert.convert_returned81_replay)
     monkeypatch.setattr(candidate_convert, "convert_returned81_replay", legacy)
 
@@ -81,6 +84,7 @@ def test_invalid_canonical_never_falls_back(
     damage: str,
     message: str,
 ) -> None:
+    """Corrupt canonical archives raise and never use the legacy converter."""
     with np.load(canonical_path, allow_pickle=False) as data:
         arrays = {key: data[key] for key in data.files}
     if damage == "checksum":
@@ -107,6 +111,7 @@ def test_invalid_canonical_never_falls_back(
 def test_unexpected_canonical_error_propagates(
     canonical_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """An unexpected canonical loader error propagates unchanged."""
     monkeypatch.setattr(
         candidate_io, "load_candidate", Mock(side_effect=RuntimeError("loader failed"))
     )
@@ -115,6 +120,7 @@ def test_unexpected_canonical_error_propagates(
 
 
 def test_numeric_returned81_still_converts(tmp_path: Path) -> None:
+    """A manifest-free numeric returned81 archive still converts."""
     path = tmp_path / "returned81.npz"
     native_state = np.arange(24, dtype=float).reshape(6, 4)
     np.savez(path, time_s=np.linspace(0.0, 0.5, 6), native_state=native_state)
@@ -128,6 +134,7 @@ def test_numeric_returned81_still_converts(tmp_path: Path) -> None:
 
 
 def test_object_returned81_is_refused(tmp_path: Path) -> None:
+    """An object-array returned81 archive is refused."""
     path = tmp_path / "object.npz"
     np.savez(
         path,
@@ -141,6 +148,7 @@ def test_object_returned81_is_refused(tmp_path: Path) -> None:
 def test_unknown_archive_is_not_sent_to_converter(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """An unrecognised archive is refused without calling the converter."""
     path = tmp_path / "unknown.npz"
     np.savez(path, unrelated=np.zeros(2))
     legacy = Mock(wraps=candidate_convert.convert_returned81_replay)
