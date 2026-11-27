@@ -69,15 +69,18 @@ def _is_commented(block: str) -> bool:
 
 
 def test_flexible_beam_is_present_but_commented_out() -> None:
+    """The committed Flexible Beam Model block is bypassed."""
     assert _is_commented(_block_xml(BEAM))
 
 
 def test_rigid_shaft_is_the_active_club_body() -> None:
+    """Rigid Shaft is the active club body in the committed model."""
     assert not _is_commented(_block_xml(RIGID))
 
 
 @pytest.mark.parametrize("state", ["on", "through"])
 def test_rigid_shaft_guard_rejects_any_bypass_state(state: str) -> None:
+    """Commented on and through both count as bypassing Rigid Shaft."""
     block = _block_xml(RIGID)
     opening = re.match(r"<Block[^>]*>", block)
     assert opening is not None
@@ -89,10 +92,12 @@ def test_rigid_shaft_guard_rejects_any_bypass_state(state: str) -> None:
 
 
 def test_simscape_stays_outside_the_chain_engines() -> None:
+    """Simscape stays refused for chain bundles."""
     assert "simscape" not in CHAIN_ENGINES
 
 
 def test_design_report_does_not_claim_an_active_flexible_shaft() -> None:
+    """The design report describes a rigid shaft and cites the guard issue."""
     text = DESIGN_REPORT.read_text(encoding="utf-8")
     assert "with a flexible shaft" not in text
     assert "rigid shaft" in text.lower()
