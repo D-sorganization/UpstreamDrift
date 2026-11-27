@@ -290,16 +290,11 @@ def _selected_players(
     return tuple(selected)
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Export or render selected player models with optional validated review poses."""
-    from src.shared.python.model_appearance.player_models import (
-        export_player,
-        player_ids,
-    )
+def _parse_args(argv: list[str] | None, catalog: tuple[str, ...]) -> argparse.Namespace:
+    """Parse export options and reject incompatible modes before any writes."""
     from src.shared.python.model_appearance.schema import CAP_STYLES
 
     parser = argparse.ArgumentParser(description=__doc__)
-    catalog = player_ids()
     parser.add_argument(
         "--player", nargs="+", choices=(*catalog, "both", "all"), default=("both",)
     )
@@ -325,6 +320,18 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--base-spec cannot be used with --render-existing")
     if args.render_existing and args.cap_style is not None:
         parser.error("--cap-style cannot be used with --render-existing")
+    return args
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Export or render selected player models with optional validated review poses."""
+    from src.shared.python.model_appearance.player_models import (
+        export_player,
+        player_ids,
+    )
+
+    catalog = player_ids()
+    args = _parse_args(argv, catalog)
     args.output.mkdir(parents=True, exist_ok=True)
     selected = _selected_players(tuple(args.player), catalog)
     items: list[dict[str, Any]] = []

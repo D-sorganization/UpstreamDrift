@@ -71,6 +71,15 @@ use zero joint coordinates. Review poses are authored inspections, not captured
 swings; grip closure does not establish cuff alignment, contact or balance.
 Preview grounding places the lowest sole at zero, not both feet on the ground.
 
+## Period Hat Options
+
+`hat-options/flat_cap/` contains Hogan and Snead with a short snapped peak;
+`hat-options/newsboy_cap/` contains Nelson with a fuller crown. Each has sized
+and reference-physics versions. Snead's default straw hat has a flatter crown.
+Use `--cap-style flat_cap` or `--cap-style newsboy_cap` with the player exporter;
+add `--base-spec existing_match.json` to preserve a fitted model's physics.
+The override selects a short peak and cloth material for these period caps.
+
 ## Reference Footage
 
 Video files and extracted frames remain in private storage. The bundled source
