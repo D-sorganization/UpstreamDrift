@@ -7,7 +7,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15834: Shared `straw_hat` visual style and its [calculation reference](docs/development/full_body_models/appearance_reference/straw_hat.tex); preserve physical model and existing cap meshes.
+- #15848: Named visual hair silhouettes and [calculation reference](docs/development/full_body_models/appearance_reference/hair_styles.tex); capped hair retains the existing clearance crop.
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.

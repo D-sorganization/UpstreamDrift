@@ -223,6 +223,12 @@ def build_mesh_parts(
             # Under a cap the hair is cut flatter than the crown stands off.
             under = cap_crop.hair_under if capped else None
             unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
+        elif settings is not None and settings.hair_style != "dome":
+            from src.shared.python.model_appearance.head_hair_styles import (
+                build_hair_style,
+            )
+
+            unit = build_hair_style(asset.skin, settings.hair_part, settings.hair_style)
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
         )
