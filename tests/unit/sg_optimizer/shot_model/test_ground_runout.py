@@ -166,6 +166,33 @@ def test_more_backspin_bounces_shorter_until_the_ball_slides() -> None:
     np.testing.assert_allclose(hop[~rolling], hop[-1])
 
 
+def test_penner_rebound_low_liner_vz_positive() -> None:
+    """#15861 bug 1: theta_c must be clamped so a low-liner landing gives vz > 0.
+
+    At h=55, d=2 m/s (phi ~88 deg from vertical) eq. 8 extrapolates tc past pi/2,
+    producing cos(tc) < 0 and vz ~-4.7 m/s (into the ground) without the clamp.
+    """
+    out = gr.penner_rebound(55.0, 2.0, 500.0)
+    assert float(out.vz) > 0.0, f"vz={float(out.vz):.3f}: ball bounced into ground"
+
+
+def test_penner_rebound_topspin_slip_classified_and_directed_correctly() -> None:
+    """#15861 bug 2: when topspin gives mu_c < 0 with |mu_c| > mu, must classify as slip.
+
+    At h=15, d=25, w=-3000 (topspin) mu_c ~-0.51, |mu_c| > friction_mu=0.40.
+    Without the fix rolling=True (wrong); with fix rolling=False (correct).
+    """
+    out = gr.penner_rebound(15.0, 25.0, -3000.0)
+    assert float(out.mu_c) < 0.0, f"expected topspin mu_c < 0, got {float(out.mu_c):.3f}"
+    p = {k[7:]: v.value for k, v in gr.GROUND_PARAMETERS.items() if k[:7] == "bounce."}
+    assert abs(float(out.mu_c)) > p["friction_mu"], (
+        f"|mu_c|={abs(float(out.mu_c)):.3f} not > friction_mu={p['friction_mu']:.3f}"
+    )
+    assert not bool(out.rolling), (
+        f"topspin |mu_c| > friction_mu must slip, got rolling=True; mu_c={float(out.mu_c):.3f}"
+    )
+
+
 def test_landing_backspin_decays_with_the_flight_kernel_rate() -> None:
     w0 = 6000.0 * 2.0 * np.pi / 60.0
     assert gr.landing_backspin_rads(6000.0, 0.0) == pytest.approx(w0)
