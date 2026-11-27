@@ -11,12 +11,12 @@ All lengths are head-length units; ``brim_length`` is the user setting.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.model_appearance.geometry import Array, Mesh
+from src.shared.python.model_appearance.geometry import Array, Mesh, ellipsoid_mesh
 from src.shared.python.model_appearance.schema import CAP_BRIM_RANGE
 from src.shared.python.model_appearance.head_hair import (
     HairCrop,
@@ -87,6 +87,39 @@ def flat_cap_crop() -> CapCrop:
             heavy_side_gain=0.0,
         ),
     )
+
+
+def newsboy_cap_crop() -> CapCrop:
+    """Return a fuller period crown over the same closely cropped hair."""
+    return replace(flat_cap_crop(), offset=0.085, front_overhang=0.16)
+
+
+def build_period_cap(
+    skin: Mesh, length: float, crop: CapCrop
+) -> list[tuple[str, Mesh]]:
+    """Add a small crown-to-peak snap to the closed flat-cap assembly."""
+    parts = build_cap(skin, length, crop)
+    crown_mesh, brim_mesh = (part for _, part in parts)
+    crown, brim = crown_mesh.vertices, brim_mesh.vertices
+    central_crown = crown[(np.abs(crown[:, 1]) < 0.035) & (crown[:, 0] > 0.3)]
+    central_brim = brim[(np.abs(brim[:, 1]) < 0.035) & (brim[:, 0] > 0.3)]
+    # Long configurable bills retain a bounded pull; short bills join at the tip.
+    eligible = central_brim[central_brim[:, 0] <= central_crown[:, 0].max() + 0.05]
+    target = eligible[eligible[:, 0].argmax()]
+    anchor = central_crown[np.linalg.norm(central_crown - target, axis=1).argmin()]
+    delta = target - anchor
+    weight = np.exp(
+        -np.sum(((crown - anchor) / np.array([0.18, 0.18, 0.15])) ** 2, axis=1)
+    )
+    crown = crown + weight[:, None] * delta
+    parts[0] = ("cap_crown", Mesh(crown, crown_mesh.faces))
+    snap = ellipsoid_mesh(
+        target,
+        np.array([0.002, 0.012, 0.006]),
+        np.array([0.0, 0.0, 1.0]),
+        width_hint=np.array([1.0, 0.0, 0.0]),
+    )
+    return [*parts, ("cap_snap", snap)]
 
 
 def cap_line_height(crop: CapCrop, azimuth: Array) -> Array:
@@ -214,6 +247,15 @@ def straw_hat_crop() -> CapCrop:
     )
 
 
+def _straw_crown_shape(mesh: Mesh, rise: float) -> Mesh:
+    """Raise the upper crown or band together into a broad flat top."""
+    vertices = mesh.vertices.copy()
+    t = np.clip((vertices[:, 2] - 0.82) / rise, 0.0, 1.0)
+    high = vertices[:, 2] > 0.82
+    vertices[high, 2] = 0.82 + rise * (0.15 * t[high] + 0.85 * (1 - (1 - t[high]) ** 3))
+    return Mesh(vertices, mesh.faces)
+
+
 def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
     """Build closed rounded crown, circumferential brim and narrow dark band.
 
@@ -221,7 +263,9 @@ def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
     The brim extends 0.32 radially from the crown and is 0.012 thick.
     """
     cfg = straw_hat_crop()
-    crown = build_cap(skin, 0.3, cfg)[0][1]
+    rounded = build_cap(skin, 0.3, cfg)[0][1]
+    rise = rounded.vertices[:, 2].max() - 0.82
+    crown = _straw_crown_shape(rounded, rise)
     v0, n0 = skin.vertices, _vertex_normals(skin)
     v, n, faces = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.73)
     rim = open_rim(faces)
@@ -246,6 +290,7 @@ def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
     if mesh.volume() < 0:
         mesh = Mesh(mesh.vertices, mesh.faces[:, ::-1].copy())
     vb, nb, fb = _clip_above(v0, n0, skin.faces, v0[:, 2] - 0.76)
-    vb, nb, fb = _clip_above(vb, nb, fb, 0.82 - vb[:, 2])
+    vb, nb, fb = _clip_above(vb, nb, fb, 0.80 - vb[:, 2])
     band = closed_shell(vb, nb, fb, np.full(len(vb), 0.006), cfg.offset, 0.006)
+    band = _straw_crown_shape(band, rise)
     return [("straw_crown", crown), ("straw_brim", mesh), ("straw_band", band)]
