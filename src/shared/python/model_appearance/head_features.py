@@ -232,6 +232,17 @@ def _blob(centre: Array, half_xyz: tuple[float, float, float], axis: Array) -> M
     )
 
 
+def moustache_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
+    """Two closed tapered hair strips conformed above the existing upper lip."""
+    out = []
+    for side, sign in (("l", 1.0), ("r", -1.0)):
+        mesh = _strip(
+            (sign * 0.04, 0.315), (0.002, 0.043, 0.008), sign, (-0.06, 0.12, 0.3)
+        )
+        out.append((f"moustache_{side}", _on_cover(skin, mesh, 0.001, 0.002), "brow"))
+    return out
+
+
 def face_parts(
     skin: Mesh, marks: FaceLandmarks | None = None
 ) -> list[tuple[str, Mesh, str]]:
