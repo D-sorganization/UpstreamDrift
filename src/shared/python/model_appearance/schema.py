@@ -17,7 +17,7 @@ import hashlib
 import json
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
@@ -28,7 +28,7 @@ from src.shared.python.core.handedness import (
     HANDEDNESS_CHOICES,
 )
 from src.shared.python.model_appearance.defaults import default_fields
-from src.shared.python.model_appearance.head_morph import HeadMorph
+from src.shared.python.model_appearance.head_morph import LEGACY_MORPH_FIELDS, HeadMorph
 
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
@@ -137,10 +137,17 @@ class BallSettings:
 HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 HEADWEAR = ("none", "hair", "cap")
 HEAD_MODELS = ("parametric", "cc0_mesh")
-HAIR_STYLES = ("short_crop", "dome")
+HAIR_STYLES = (
+    "short_crop",
+    "dome",
+    "side_swept",
+    "swept_back",
+    "slick_part",
+    "receding_crop",
+)
 HAIR_PARTS = ("left", "right", "none")
 EYE_COLORS = ("blue_grey", "hazel", "brown")
-CAP_STYLES = ("none", "baseball_cap", "flat_cap", "straw_hat")
+CAP_STYLES = ("none", "baseball_cap", "flat_cap", "straw_hat", "newsboy_cap")
 CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
 DEFAULT_CAP_BRIM = 0.30
 #: ``stature``: menton to vertex is ``height_over_stature`` of the subject's
@@ -206,6 +213,7 @@ class HeadSettings:
     height_over_stature: float = DEFAULT_HEAD_HEIGHT_OVER_STATURE
     #: Artistic face shape controls, in the canonical CC0 head frame.
     morph: HeadMorph = field(default_factory=HeadMorph)
+    facial_hair: str = "none"
 
     def __post_init__(self) -> None:
         """Require a CC0 head whenever non-identity face morphs are set."""
@@ -213,6 +221,10 @@ class HeadSettings:
             raise ValueError("head morph must be a HeadMorph")
         if self.morph != HeadMorph() and self.model != "cc0_mesh":
             raise ValueError("head morph needs the cc0_mesh head model")
+        if self.facial_hair not in ("none", "moustache"):
+            raise ValueError("head facial_hair must be none or moustache")
+        if self.facial_hair != "none" and self.model != "cc0_mesh":
+            raise ValueError("facial hair needs the cc0_mesh head model")
 
 
 @dataclass(frozen=True)
@@ -356,6 +368,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         picked["sizing"],
         ratio,
         HeadMorph(**raw.get("morph", {})),
+        str(raw.get("facial_hair", "none")),
     )
 
 
@@ -379,13 +392,15 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
         "cap_brim",
         "sizing",
         "height_over_stature",
+        "facial_hair",
     ):
         if getattr(head, key) != getattr(HeadSettings(), key):
             out[key] = getattr(head, key)
     if head.morph != HeadMorph():
         out["morph"] = {
-            key: getattr(head.morph, key)
-            for key in ("width", "jaw", "nose", "mouth", "eyes")
+            key: value
+            for key, value in asdict(head.morph).items()
+            if key in LEGACY_MORPH_FIELDS or value != 0
         }
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material

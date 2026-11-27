@@ -7,6 +7,7 @@ interpretations, not measured player anatomy or fitted historical motion.
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -58,18 +59,37 @@ def build_player_spec(player: str, club: str = "driver") -> dict[str, Any]:
 
 
 def export_player(
-    player: str, output: Path, club: str = "driver", *, base_spec: Path | None = None
+    player: str,
+    output: Path,
+    club: str = "driver",
+    *,
+    base_spec: Path | None = None,
+    cap_style: str | None = None,
 ) -> Path:
     """Write MJCF, spec, sidecar and receipt; a supplied base keeps all physics.
 
     Without ``base_spec`` this builds a separately sized anatomy candidate.
     Never applies published dimensions implicitly to an existing fitted spec.
+    ``cap_style`` overrides only the visual head setting and is schema-validated
+    before the output directory or any export files are created.
     """
     from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
         export_full_body_mjcf,
     )
 
     profile, doc = player_profile(player), player_appearance(player)
+    if cap_style is not None:
+        head_changes: dict[str, Any] = {"cap_style": cap_style}
+        if cap_style in {"flat_cap", "newsboy_cap"}:
+            head_changes["cap_brim"] = 0.12
+        if cap_style == "straw_hat":
+            head_changes["cap_material"] = "hat_straw"
+        elif cap_style in {"baseball_cap", "flat_cap", "newsboy_cap"} and (
+            doc.head.cap_material == "hat_straw"
+        ):
+            head_changes["cap_material"] = "cap_white"
+        overridden = replace(doc, head=replace(doc.head, **head_changes))
+        doc = document_from_dict(document_to_dict(overridden))
     spec = (
         build_player_spec(player, club)
         if base_spec is None
@@ -99,5 +119,11 @@ def export_player(
         if base_spec
         else "published-dimension candidate; motion unqualified",
     }
+    if cap_style is not None:
+        receipt["appearance_override"] = {
+            "head.cap_style": doc.head.cap_style,
+            "head.cap_material": doc.head.cap_material,
+            "head.cap_brim": doc.head.cap_brim,
+        }
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     return target

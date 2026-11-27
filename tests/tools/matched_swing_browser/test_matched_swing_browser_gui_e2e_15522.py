@@ -36,6 +36,7 @@ def app():
 
 @pytest.fixture
 def window(app):
+    """Open the browser on the committed ledger."""
     try:
         from src.tools.matched_swing_browser.gui import MatchedSwingBrowserWindow
     except ImportError as exc:  # uninitialised vendor/ud-tools submodule in CI
@@ -55,6 +56,7 @@ def window(app):
 
 
 def _button(widget, text: str):
+    """Return the named button."""
     from PyQt6.QtWidgets import QPushButton
 
     return next(b for b in widget.findChildren(QPushButton) if b.text() == text)
@@ -72,6 +74,7 @@ def _click(button, pos=None) -> None:
 
 
 def _key(widget, key) -> None:
+    """Send a key to the focused widget."""
     from PyQt6.QtTest import QTest
 
     QTest.keyClick(widget, key)  # type: ignore[call-overload]
@@ -87,6 +90,7 @@ def _click_row(widget, app, row: int) -> None:
 
 
 def _driver_row(widget) -> int:
+    """Return the driver_g1_drake row."""
     for r in range(widget.table.rowCount()):
         item = widget.table.item(r, 6)
         if item is not None and _DRIVER in item.text():
@@ -95,6 +99,7 @@ def _driver_row(widget) -> int:
 
 
 def _type(line_edit, text: str) -> None:
+    """Type text into the focused widget."""
     from PyQt6.QtTest import QTest
 
     line_edit.setFocus()
@@ -102,6 +107,7 @@ def _type(line_edit, text: str) -> None:
 
 
 def test_launch_shows_ledger_and_autoselects_best_row(window, app) -> None:
+    """Test launch shows ledger and autoselects best row."""
     widget = window.widget
     assert window.isVisible()
     assert window.windowTitle() == "Matched Swing Results Browser"
@@ -112,6 +118,7 @@ def test_launch_shows_ledger_and_autoselects_best_row(window, app) -> None:
 
 
 def test_typing_in_search_filters_then_reset_click_restores(window, app) -> None:
+    """Test typing in search filters then reset click restores."""
     widget = window.widget
     total = widget.table.rowCount()
 
@@ -128,6 +135,7 @@ def test_typing_in_search_filters_then_reset_click_restores(window, app) -> None
 
 
 def test_no_match_search_clears_details_and_disables_actions(window, app) -> None:
+    """Test no match search clears details and disables actions."""
     widget = window.widget
     _type(widget.search_input, "zz-no-such-run-zz")
     app.processEvents()
@@ -149,6 +157,7 @@ def test_no_match_search_clears_details_and_disables_actions(window, app) -> Non
 
 
 def test_engine_combo_keyboard_selection_filters_rows(window, app) -> None:
+    """Test engine combo keyboard selection filters rows."""
     from PyQt6.QtCore import Qt
     from PyQt6.QtTest import QTest
 
@@ -167,6 +176,7 @@ def test_engine_combo_keyboard_selection_filters_rows(window, app) -> None:
 
 
 def test_mouse_row_click_and_arrow_keys_update_details(window, app) -> None:
+    """Test mouse row click and arrow keys update details."""
     from PyQt6.QtCore import Qt
     from PyQt6.QtTest import QTest
 
@@ -189,12 +199,33 @@ def test_mouse_row_click_and_arrow_keys_update_details(window, app) -> None:
 
 
 def test_playback_buttons_drive_the_gif_movie(window, app) -> None:
+    """Test playback buttons drive the gif movie."""
     from PyQt6.QtGui import QMovie
 
     widget = window.widget
     _click_row(widget, app, _driver_row(widget))
     movie = widget.movie
     assert movie is not None and movie.state() == QMovie.MovieState.Running
+
+
+def test_one_frame_gif_keeps_running_past_its_frame_delay(window, app) -> None:
+    """A still playback.gif must stay Running after its single frame delay."""
+    from PyQt6.QtCore import QElapsedTimer
+    from PyQt6.QtGui import QMovie
+
+    widget = window.widget
+    _click_row(widget, app, _driver_row(widget))
+    movie = widget.movie
+    assert movie is not None and movie.frameCount() == 1
+    delay_ms = max(int(movie.nextFrameDelay()), 0)
+    timer = QElapsedTimer()
+    timer.start()
+    while timer.elapsed() < delay_ms + 80:
+        app.processEvents()
+    assert movie.state() == QMovie.MovieState.Running
+    _click(_button(widget, "Pause"))
+    app.processEvents()
+    assert movie.state() == QMovie.MovieState.Paused
 
     _click(_button(widget, "Pause"))
     assert movie.state() == QMovie.MovieState.Paused
@@ -205,6 +236,7 @@ def test_playback_buttons_drive_the_gif_movie(window, app) -> None:
 
 
 def test_view_receipt_json_opens_modal_closed_by_real_click(window, app) -> None:
+    """Test view receipt json opens modal closed by real click."""
     from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import QDialog, QPushButton, QTextEdit
 
@@ -213,6 +245,7 @@ def test_view_receipt_json_opens_modal_closed_by_real_click(window, app) -> None
     seen: dict[str, str] = {}
 
     def close_dialog() -> None:
+        """Close the modal by clicking its real button."""
         dialog = app.activeModalWidget()
         if not isinstance(dialog, QDialog):
             QTimer.singleShot(10, close_dialog)
