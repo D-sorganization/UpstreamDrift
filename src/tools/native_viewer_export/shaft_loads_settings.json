@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "description": "Look of the shaft internal-load arrows of the native export (--shaft-loads, #15150 Track Z, Z9c).",
+  "max_length_m": 0.4,
+  "shaft_radius_m": 0.005,
+  "head_radius_ratio": 2.2,
+  "head_length_ratio": 0.25,
+  "station_stride": 1,
+  "quantities": {
+    "bending": {
+      "units": "N m",
+      "scale_m": 0.025,
+      "floor": 0.05,
+      "legend": "Shaft bending, {part} [N m]: proximal-on-tip-side moment at each shaft joint, right-hand rule; 1 m = {per_m:g} N m",
+      "key": "Shaft bending, {part}"
+    },
+    "shear": {
+      "units": "N",
+      "scale_m": 0.005,
+      "floor": 0.25,
+      "legend": "Shaft shear, {part} [N]: proximal-on-tip-side force normal to the shaft at each joint; 1 m = {per_m:g} N",
+      "key": "Shaft shear, {part}"
+    }
+  },
+  "parts": {
+    "total": {"hex": "#00E5FF", "text": "total (ZTCF + ZVCF)"},
+    "ztcf": {"hex": "#B8F000", "text": "ZTCF drift"},
+    "zvcf": {"hex": "#B266FF", "text": "ZVCF control"}
+  },
+  "sources": {
+    "bending.scale_m": "Arrow metres per N m. Bending at a chain joint is its spring moment (stiffness times bend); on the synthetic seed driver chain a 0.02 rad bend gives 3 to 7.6 N m tip to grip, drawn 7.5 to 19 cm, legible at preview size; 16 N m reaches max_length_m.",
+    "shear.scale_m": "Arrow metres per N. On the synthetic seed driver chain the shear is 3 to 11 N through the downswing, drawn 1.5 to 5.5 cm; 80 N reaches max_length_m.",
+    "parts.hex": "Cyan, lime and violet: outside the force-kind palette (palette.py), the hand tip-to-tail blue/vermillion/white, the lead/trail blue/yellow and the tension blue/compression red, so a shaft arrow is never read as a joint torque or a grip force.",
+    "sign_convention": "Frame of shaft_load_split.py: the wrench the proximal side (toward the grip) applies to the distal, tip-ward chain, world frame; bending is its moment normal to the shaft axis, shear its force normal to the axis."
+  }
+}

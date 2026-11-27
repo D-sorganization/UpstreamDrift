@@ -59,12 +59,44 @@ shafts are unknown.
   (steel 7-iron).
 - Modulus: calibrated so that the shaft clamped 5 in (0.127 m) from the butt
   with the head as a tip point mass vibrates at the `SHAFT_FLEX_DATA`
-  frequency of the flex (STIFF: 280 cpm). Frequencies scale with
+  frequency of the flex (STIFF: 258 cpm). Frequencies scale with
   $\sqrt{E}$, so one finite-element solve at a trial modulus fixes
   $$E = E_{trial}\left(\frac{f_{flex}}{f_{trial}}\right)^2.$$
-  The result is 95.26 GPa (driver) and 112.79 GPa (7-iron).
+  The result is 80.88 GPa (driver) and 95.76 GPa (7-iron).
 - Torsion: $GJ = G \cdot 2I$ with $G = E / 2(1 + \nu)$, $\nu = 0.3$.
 - The stations are the vendored Tools `ShaftStation` records.
+
+## Flex Rating Frequencies
+
+The flex ratings map to clamped club frequencies held in
+`src/config/shaft_flex_frequencies.json` (reference club length 45 in):
+
+| Flex | Frequency (cpm) | Hireko graphite driver mean | Steadfast 45.5 in |
+|---|---|---|---|
+| Ladies | 220 | 229 at 44 in | not tabulated |
+| Senior | 230 | 234 | 227 |
+| Regular | 244 | 246 | 241 |
+| Stiff | 258 | 258 | 258 |
+| X-Stiff | 272 | 271 | 273 |
+
+Sources and conventions (#15150 C19):
+
+- Hireko Golf, Modern Guide to Shaft Fitting chapter 4 and Dynamic Shaft
+  Fitting Index: assembled club clamped at the butt, head plucked; A through X
+  at 45 in and D-1 swingweight, L at 44 in and C-6.
+  <https://www.hirekogolf.com/pub/media/Modern_Guide_to_Shaft_Fitting_chapter4.pdf>
+- Steadfast Golf replacement driver shaft chart, driver column 45.5 in, clamp
+  not stated.
+  <https://steadfastgolf.com/blogs/shaft-insights/best-replacement-golf-shafts-for-drivers-and-fairway-woods>
+- Length slope 8.6 to 10 cpm per inch (midpoint 9.3; a longer club reads
+  softer): Braly, via
+  <https://www.golfshaftreviews.info/understand-golf-shaft-stiffness-ratings/>
+  and <https://www.tutelman.com/golf/shafts/frequency.php>.
+
+The earlier table (Ladies 220, Senior 240, Regular 260, Stiff 280, X-Stiff 300)
+read 14, 22 and 29 cpm above the Hireko means for Regular, Stiff and X-Stiff.
+The slope is available through `flex_cpm_at_length`; the modulus calibration
+still applies the flex cpm unchanged at each club's own length.
 
 ## Lumping Rule
 

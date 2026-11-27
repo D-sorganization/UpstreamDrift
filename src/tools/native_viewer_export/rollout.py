@@ -2,8 +2,8 @@
 
 The flight model ends at first ground contact (the carry). The roll comes from
 the repository's existing runout model (``sg_optimizer.shot_model.
-ground_runout``, id ``sg_runout_v1``), driven by the landing state of the
-flight on a flat fairway: it is a labelled model assumption with documented
+ground_runout``, id ``sg_runout_v2``), driven by the landing state and
+landing backspin of the flight on a flat fairway: it is a labelled model assumption with documented
 unmeasured coefficients, not a physical contact simulation. Total distance is
 the carry plus the roll along the landing direction.
 """
@@ -23,6 +23,7 @@ from src.shared.python.core.physics_constants import YARD_TO_M
 from src.shared.python.sg_optimizer.shot_model.ground_runout import (
     GROUND_MODEL_ID,
     GROUND_PARAMETERS,
+    landing_backspin_rads,
     SlopeAwareGround,
 )
 from src.shared.python.sg_optimizer.shot_model.skill_fit import club_to_skill
@@ -119,7 +120,11 @@ def _source() -> str:
 
 
 def _landing_state(flight: Any) -> np.ndarray:
-    """``(1, 5)`` row (x, y yd; vx, vy, vz m/s) from the flight's last two points."""
+    """``(1, 6)`` row (x, y yd; vx, vy, vz m/s; backspin rad/s) at landing.
+
+    The velocity is the last finite difference of the path; the backspin is the
+    launch spin decayed over the flight, times ``cos`` of the spin-axis tilt.
+    """
     path = np.asarray(flight.trajectory_m, dtype=float)
     times = flight.times_s
     times = (
@@ -129,7 +134,9 @@ def _landing_state(flight: Any) -> np.ndarray:
     require(len(path) >= 2 and step > 0.0, "landing velocity needs two timed points")
     velocity = (path[-1] - path[-2]) / step
     xy = path[-1, :2] / float(YARD_TO_M)
-    return np.array([[xy[0], xy[1], *velocity]], dtype=float)
+    tilt = math.radians(flight.spin_axis_deg or 0.0)
+    spin = landing_backspin_rads(flight.spin_rpm, flight.flight_time_s, math.cos(tilt))
+    return np.array([[xy[0], xy[1], *velocity, spin]], dtype=float)
 
 
 def compute_rollout(

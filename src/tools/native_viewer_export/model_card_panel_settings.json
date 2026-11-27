@@ -1,0 +1,39 @@
+{
+  "enabled_by_default": false,
+  "position": "bottom-right",
+  "font_px": 13,
+  "opacity": 0.62,
+  "title": "Model Card",
+  "fields": [
+    {"field": "replay_kind", "label": "Replay"},
+    {"field": "fit_error", "label": "Fit error", "keys": ["max_pose_drift_m", "kinetic_match.closure_gap_max_m"]},
+    {"field": "golfer_model", "label": "Golfer", "keys": ["spec_revision"]},
+    {"field": "club", "label": "Shaft", "keys": ["shaft_model"]},
+    {"field": "shot_setup", "label": "Shot shape", "keys": ["shot_shape"]},
+    {"field": "impact_model", "label": "Impact", "keys": ["flight_launch", "bundle_impact"]}
+  ],
+  "line_format": "{label}: {value}",
+  "tag_format": "{tag}",
+  "unknown_text": "unknown",
+  "number_format": "{:.4g}",
+  "max_value_chars": 40,
+  "tag_colours": {
+    "measured": [120, 220, 120],
+    "fitted": [110, 180, 255],
+    "assumed": [255, 190, 80],
+    "unknown": [200, 200, 200]
+  },
+  "sources": {
+    "enabled_by_default": "Default of ExportSettings.model_card_panel and of the --model-card-panel flag. Off: the card is always in the manifest; the panel is shown on request only (#15150 E2).",
+    "position": "Corner of the frame: top-left, top-right, bottom-left or bottom-right. Top corners start under the view label (where the colour key, top-left, and the impact card, top-right, also sit); bottom corners sit hud_layout_settings.json panel_gap_px above the bottom HUD rows.",
+    "font_px": "Panel font size in pixels (13 px stays legible at 640x480 and keeps six rows clear of the HUD at 1280x720).",
+    "opacity": "Darkening under the panel (0.62, as the impact card and the ellipsoid panel).",
+    "fields": "Card fields in panel order, each with its row label and the value keys, in order, whose first present entry is shown for a record value (a dotted key reads a nested record). A field missing from the list is not drawn.",
+    "line_format": "Row text; placeholders {label}, {value} and {tag}. The tag is also drawn as the right-hand column with tag_format.",
+    "tag_format": "Text of the right-hand tag column; placeholder {tag}.",
+    "max_value_chars": "Longest value text; a longer one is cut with '...' so the panel stays compact.",
+    "unknown_text": "Shown for a field tagged unknown, or a record value with none of its keys.",
+    "number_format": "Format of a numeric value.",
+    "tag_colours": "8-bit RGB of a row per provenance tag (model_card.TAGS)."
+  }
+}

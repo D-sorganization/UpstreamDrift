@@ -1,0 +1,26 @@
+{
+  "views": ["down_the_line_flight"],
+  "sample_color_rgba": [255, 170, 60, 110],
+  "sample_width_px": 2,
+  "hole_sample_width_pt": 1.2,
+  "hole_sample_zorder": 4,
+  "hole_nominal_zorder": 7.5,
+  "hole_clip_margin": 0.0,
+  "key_samples": "Dispersion samples",
+  "key_nominal": "Nominal shot",
+  "hole_key_samples": "{n} dispersion samples",
+  "label_format": "Dispersion of {n} shots: carry {carry_mean:.1f} +/- {carry_sd:.1f} {unit}, side {side_mean:+.1f} +/- {side_sd:.1f} {unit} (+ right)",
+  "sources": {
+    "views": "View presets that get the sample traces: the wide down-the-line view that keeps the whole flight in the picture. Other views keep the single shot so the swing stays readable.",
+    "sample_color_rgba": "Colour and opacity (0..255) of every sample trace: an orange apart from the red nominal tracer, translucent so the overlapping samples read as one spread and the nominal shot stays on top.",
+    "sample_width_px": "Line width in pixels of each sample trace, thinner than tracer_width_px of flight_tracer_settings.json so the nominal shot is the emphasised one.",
+    "hole_sample_width_pt": "Line width in points of each sample trace on the hole stills (hole_view and the shot_dispersion_cli --hole still), half the line_width of golf_environment/shots_settings.json that the nominal shot keeps, so the nominal shot is the emphasised one; the colour is sample_color_rgba.",
+    "hole_sample_zorder": "Matplotlib drawing order of the sample traces on the export hole still: above the hole's target line (3), beneath the shot traces of golf_environment/hole_figure.py (5), so the nominal shot is drawn on top.",
+    "hole_nominal_zorder": "Drawing order of the nominal shot on the shot_dispersion_cli --hole still: above the sample traces and their carry and rest points (7), beneath the mean landing marker (8) and the legend.",
+    "hole_clip_margin": "Fraction of the axis span a sample trace may run past the hole still's axis limits before it is cut: zero cuts it exactly at the edge of the picture, so nothing is drawn off the canvas.",
+    "key_samples": "Name of the sample colour in the clip's colour key (one swatch of sample_color_rgba, opaque).",
+    "key_nominal": "Name of the nominal shot colour in the clip's colour key (the flight tracer colour, opaque).",
+    "hole_key_samples": "Legend line of the sample traces on the export hole still, filled with the number of samples; the nominal shot keeps its own legend line.",
+    "label_format": "HUD line of the spread: mean +/- population standard deviation of the flight model's carry and side over the available sample shots, in display units (side positive to the right). A replay-level dispersion of the varied shot setup, not a measured one."
+  }
+}
