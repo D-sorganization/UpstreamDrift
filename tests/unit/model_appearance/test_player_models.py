@@ -104,9 +104,118 @@ def test_skin_export_retains_supplied_spec(tmp_path, monkeypatch):
     assert json.loads((result.parent / "model.json").read_text()) == spec
     receipt = json.loads((result.parent / "receipt.json").read_text())
     assert receipt["mode"] == "appearance_only"
+    assert "appearance_override" not in receipt
     visual = json.loads((result.parent / "model.visual.json").read_text())
     assert visual.pop("appearance")["name"] == "tiger_woods_stylized"
     assert visual == spec
+
+
+def test_cap_style_override_preserves_physics_and_records_override(
+    tmp_path, monkeypatch
+):
+    """Apply cap styling without rewriting source profile or base physics."""
+    from src.shared.python.model_appearance import player_models
+    from src.shared.python.model_appearance.schema import physics_spec_sha256
+    from src.shared.python.motion_matching.execution.golfer_reference_specs import (
+        reference_spec,
+    )
+    from src.engines.physics_engines.mujoco.python import full_body_mjcf
+
+    spec = reference_spec("driver")
+    source = tmp_path / "base.json"
+    source.write_text(json.dumps(spec))
+    monkeypatch.setattr(
+        full_body_mjcf,
+        "export_full_body_mjcf",
+        lambda raw, appearance=None: ("<mujoco/>", {"mocked": True}),
+    )
+
+    xml = player_models.export_player(
+        "sam_snead", tmp_path / "flat-cap", base_spec=source, cap_style="flat_cap"
+    )
+
+    assert xml.read_text() == "<mujoco/>"
+    assert json.loads((xml.parent / "model.json").read_text()) == spec
+    appearance = json.loads((xml.parent / "model.appearance.json").read_text())
+    assert appearance["head"]["cap_style"] == "flat_cap"
+    assert appearance["head"]["cap_material"] == "cap_white"
+    assert appearance["head"]["cap_brim"] == 0.12
+    receipt = json.loads((xml.parent / "receipt.json").read_text())
+    assert receipt["physics_spec_sha256"] == physics_spec_sha256(spec)
+    assert receipt["profile"]["appearance"]["head"]["cap_style"] == "straw_hat"
+    assert receipt["appearance_override"] == {
+        "head.cap_style": "flat_cap",
+        "head.cap_material": "cap_white",
+        "head.cap_brim": 0.12,
+    }
+
+
+def test_unknown_cap_style_fails_before_output_creation(tmp_path):
+    """Reject unknown cap styles before creating export destinations."""
+    from src.shared.python.model_appearance.player_models import export_player
+
+    output = tmp_path / "must-not-exist"
+    with pytest.raises(ValueError):
+        export_player("tiger_woods", output, cap_style="invented")
+    assert not output.exists()
+
+
+def test_cli_forwards_cap_style_to_exporter(tmp_path, monkeypatch):
+    """Forward a selected cap override to each fresh appearance export."""
+    from scripts import export_player_models
+
+    received = []
+
+    def fake_export(player, folder, *, base_spec=None, cap_style=None):
+        """Record the override and create the minimum exporter outputs."""
+        received.append(cap_style)
+        folder.mkdir(parents=True)
+        (folder / "model.json").write_text(json.dumps({"coordinate_order": []}))
+        xml = folder / "model.xml"
+        xml.write_text("<mujoco/>")
+        return xml
+
+    monkeypatch.setattr(export_player_models, "_common_camera_distance", lambda _: 4.0)
+    monkeypatch.setattr(
+        export_player_models,
+        "_render",
+        lambda _xml, out, *_args: (out.mkdir(parents=True), {"previews": {}})[1],
+    )
+    from src.shared.python.model_appearance import player_models
+
+    monkeypatch.setattr(player_models, "export_player", fake_export)
+    export_player_models.main(
+        [
+            "--player",
+            "tiger_woods",
+            "--output",
+            str(tmp_path),
+            "--cap-style",
+            "flat_cap",
+        ]
+    )
+    assert received == ["flat_cap"]
+
+
+def test_cli_rejects_cap_override_for_render_existing_before_writes(tmp_path):
+    """Reject applying a new cap to XML that is only being rendered."""
+    from scripts.export_player_models import main
+
+    output = tmp_path / "render-existing"
+    with pytest.raises(SystemExit) as error:
+        main(
+            [
+                "--player",
+                "tiger_woods",
+                "--output",
+                str(output),
+                "--render-existing",
+                "--cap-style",
+                "flat_cap",
+            ]
+        )
+    assert error.value.code == 2
+    assert not output.exists()
 
 
 def test_skin_preserves_native_physics_and_joint_order():

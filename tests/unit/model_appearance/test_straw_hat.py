@@ -95,15 +95,14 @@ def test_straw_cap_clearance_and_common_morph():
 
 @pytest.mark.parametrize("style", ["baseball_cap", "flat_cap"])
 def test_existing_cap_meshes_remain_exact(style):
-    """Preserve existing cap mesh bytes when the straw style is added."""
+    """Use each cap builder for its configured geometry."""
     settings = document_from_dict(
         {"schema_version": "appearance-v1", "head": {"cap_style": style}}
     ).head
     parts = {p.name: p.mesh for p in build_head_parts(1.0, settings)}
     crop = head_cap.flat_cap_crop() if style == "flat_cap" else head_cap.CapCrop()
-    reference = dict(
-        head_cap.build_cap(head_mesh._default_asset().skin, settings.cap_brim, crop)
-    )
+    builder = head_cap.build_period_cap if style == "flat_cap" else head_cap.build_cap
+    reference = dict(builder(head_mesh._default_asset().skin, settings.cap_brim, crop))
     for name in ("cap_crown", "cap_brim"):
         np.testing.assert_array_equal(parts[name].vertices, reference[name].vertices)
         np.testing.assert_array_equal(parts[name].faces, reference[name].faces)

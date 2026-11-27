@@ -49,6 +49,7 @@ from src.shared.python.model_appearance.geometry import Mesh
 from src.shared.python.grip_spec import GripSpec
 from src.shared.python.model_appearance.grip_hand_mesh import (
     DEFAULT_HAND_MESH_PARAMS,
+    GripHandMesh,
     HandMeshParams,
     build_grip_hand_mesh,
 )
@@ -239,6 +240,28 @@ def _grip_spec_for_pose(
     )
 
 
+def baked_grip_hand(
+    club: ClubAssembly,
+    hand: Hand,
+    pose: GripPose,
+    *,
+    hand_length_m: float | None = None,
+) -> GripHandMesh:
+    """Hand mesh baked on the butt-most on-grip grip radius for ``club``'s taper."""
+    _check_club(club)
+    if not isinstance(hand, Hand):
+        raise TypeError(f"hand must be a Hand, got {hand!r}")
+    _check_pose(pose)
+    params = _mesh_params(hand_length_m)
+    depth = pose.distance_below_butt_m(hand)
+    nominal = build_grip_hand_mesh(
+        hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
+    )
+    nearest, _ = nominal.on_grip_extent_below_butt_m()
+    radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
+    return build_grip_hand_mesh(hand, grip_radius_m=radius, pose=pose, params=params)
+
+
 def _placed_hand(
     club: ClubAssembly,
     hand: Hand,
@@ -255,19 +278,11 @@ def _placed_hand(
     (ADR-0057 A3) draws that backend's visual mesh instead. Contact stays on
     the capsule pads either way.
     """
-    params = _mesh_params(hand_length_m)
-    depth = pose.distance_below_butt_m(hand)
     if hand_backend is None:
-        nominal = build_grip_hand_mesh(
-            hand, grip_radius_m=grip_radius_at(club, depth), pose=pose, params=params
-        )
-        nearest, _ = nominal.on_grip_extent_below_butt_m()
-        radius = grip_radius_at(club, min(max(nearest, 0.0), club.grip_length_m))
-        baked = build_grip_hand_mesh(
-            hand, grip_radius_m=radius, pose=pose, params=params
-        ).mesh
+        baked = baked_grip_hand(club, hand, pose, hand_length_m=hand_length_m).mesh
     else:
         side: HandSide = "trail" if hand == Hand.TRAIL else "lead"
+        depth = pose.distance_below_butt_m(hand)
         baked = build_registered_hand_visual(
             _unrolled(_grip_spec_for_pose(pose, grip_spec)),
             side,

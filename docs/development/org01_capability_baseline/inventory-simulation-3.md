@@ -6,6 +6,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 
 | ID | Name | Entity Kind | Primary Workspace | Secondary Links | Authority | Lifecycle | Evidence | Acceptance Owner |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `mujoco_models_shared` | MuJoCo Models | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `MuJoCo_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_unified` | MuJoCo | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `myosim_suite` | MyoSuite | `model` | `simulation` | — | `opensim` | 🟢 active_feature | `src/engines/physics_engines/myosuite/python/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `native_viewer_export` | Tools Package: native_viewer_export | `cli_tool` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/native_viewer_export/__init__.py` | `tests/config/test_registry_exclusions.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `pinocchio_models-deadlift` | Deadlift | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/deadlift` | `tests/config/test_launcher_registry_parity.py` |
 | `pinocchio_models-gait` | Gait | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/gait` | `tests/config/test_launcher_registry_parity.py` |
 | `pinocchio_models-sit_to_stand` | Sit To Stand | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/sit_to_stand` | `tests/config/test_launcher_registry_parity.py` |
-| `pinocchio_models-snatch` | Snatch | `model` | `simulation` | — | `pinocchio` | 🟢 active_feature | `src/pinocchio_models/exercises/snatch` | `tests/config/test_launcher_registry_parity.py` |

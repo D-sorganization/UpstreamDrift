@@ -104,7 +104,22 @@ def test_morph_preserves_current_mujoco_reference_physics():
             {
                 "schema_version": "appearance-v1",
                 "head": {
-                    "morph": {"width": 0.15, "jaw": -0.12, "nose": 0.12, "eyes": 0.08}
+                    "morph": {
+                        "width": 0.15,
+                        "jaw": -0.12,
+                        "nose": 0.12,
+                        "eyes": 0.08,
+                        "cheeks": 0.18,
+                        "chin": 0.18,
+                        "brow": 0.16,
+                        "nose_width": -0.12,
+                        "nose_bridge": 0.18,
+                        "nose_length": 0.12,
+                        "eye_opening": -0.18,
+                        "face_length": 0.12,
+                        "ears": 0.1,
+                    },
+                    "facial_hair": "moustache",
                 },
             }
         ),
