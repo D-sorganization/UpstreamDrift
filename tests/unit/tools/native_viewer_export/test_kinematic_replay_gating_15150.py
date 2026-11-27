@@ -17,6 +17,7 @@ from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export import kinematic_replay as kr
 from src.tools.native_viewer_export import overlay
+from src.tools.native_viewer_export.cli import build_parser, build_settings, vector_option_fields
 from src.tools.native_viewer_export.core import ExportSettings
 from src.tools.native_viewer_export.overlay import OverlayOptions
 from src.tools.native_viewer_export.runner import ExportJob, run_export
@@ -318,3 +319,85 @@ def test_runner_is_unchanged_for_a_bundle_with_efforts(tmp_path, flags) -> None:
     result, backend = _run(tmp_path, 1.0, **flags)
     assert backend.settings.shading_enabled and result.grip_json is None
     assert REASON not in str(result.inset_strip)
+
+
+# ---- CLI argument-to-visibility regression -----------------------------------
+
+_MINIMAL = ["--bundle", "/dev/null", "--out", "/tmp", "--swing", "test"]
+
+
+def _parse_settings(*extra: str) -> ExportSettings:
+    """Parse minimal CLI args plus ``extra`` into ExportSettings."""
+    return build_settings(build_parser().parse_args([*_MINIMAL, *extra]))
+
+
+@pytest.mark.parametrize(
+    ("argv", "force_vectors", "torque_vectors", "force_requested", "torque_requested"),
+    [
+        # default (omitted): both shown, neither explicitly requested
+        ([], True, True, False, False),
+        # explicit enable: shown AND requested
+        (["--force-vectors"], True, True, True, False),
+        (["--torque-vectors"], True, True, False, True),
+        (["--force-vectors", "--torque-vectors"], True, True, True, True),
+        # explicit disable: not shown, not requested
+        (["--no-force-vectors"], False, True, False, False),
+        (["--no-torque-vectors"], True, False, False, False),
+    ],
+)
+def test_cli_vector_flags_map_to_correct_settings(
+    argv, force_vectors, torque_vectors, force_requested, torque_requested
+) -> None:
+    """Each vector CLI flag maps to exactly the right ExportSettings fields."""
+    s = _parse_settings(*argv)
+    assert s.force_vectors == force_vectors
+    assert s.torque_vectors == torque_vectors
+    assert s.force_requested == force_requested
+    assert s.torque_requested == torque_requested
+
+
+@pytest.mark.parametrize(
+    ("argv", "exp_show_force", "exp_show_torque"),
+    [
+        # kinematic replay: neither shown unless explicitly requested
+        ([], False, False),
+        (["--force-vectors"], True, False),
+        (["--torque-vectors"], False, True),
+        (["--force-vectors", "--torque-vectors"], True, True),
+        (["--no-force-vectors"], False, False),
+        (["--no-torque-vectors"], False, False),
+    ],
+)
+def test_cli_vector_flags_gate_per_vector_on_kinematic_replay(
+    argv, exp_show_force, exp_show_torque
+) -> None:
+    """On a kinematic replay, each CLI flag gates only its own vector type."""
+    settings = _parse_settings(*argv)
+    opts = OverlayOptions(**vector_option_fields(settings))
+    vis = kr.vector_visibility(_bundle(0.0), opts)
+    assert vis.show_force == exp_show_force
+    assert vis.show_torque == exp_show_torque
+    assert vis.replay
+
+
+@pytest.mark.parametrize(
+    ("argv", "exp_show_force", "exp_show_torque"),
+    [
+        # dynamic bundle: flags follow show_ directly (replay gate does not apply)
+        ([], True, True),
+        (["--force-vectors"], True, True),
+        (["--torque-vectors"], True, True),
+        (["--no-force-vectors"], False, True),
+        (["--no-torque-vectors"], True, False),
+    ],
+)
+def test_cli_vector_flags_pass_through_on_dynamic_bundle(
+    argv, exp_show_force, exp_show_torque
+) -> None:
+    """On a bundle with efforts, the replay gate never fires and flags pass through."""
+    settings = _parse_settings(*argv)
+    opts = OverlayOptions(**vector_option_fields(settings))
+    vis = kr.vector_visibility(_bundle(1.0), opts)
+    assert vis.show_force == exp_show_force
+    assert vis.show_torque == exp_show_torque
+    assert not vis.replay
