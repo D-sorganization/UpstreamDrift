@@ -163,6 +163,7 @@ def test_bad_cap_style_material_and_model_are_refused() -> None:
         library.check_references(_doc(**CAP, cap_material="no_such_material"))
 
 
+@pytest.mark.unit
 def test_newsboy_hair_is_cropped_below_the_crown() -> None:
     """Keep the fuller newsboy crown outside the existing cap hair crop."""
     skin = head_mesh._default_asset().skin
@@ -172,6 +173,7 @@ def test_newsboy_hair_is_cropped_below_the_crown() -> None:
     _assert_hair_under_crown(crown, hair, np.array([crop.centre_x, 0.0, 0.55]))
 
 
+@pytest.mark.unit
 def test_short_snapped_caps_clear_hair() -> None:
     """Check actual reshaped crowns at the short period-peak setting."""
     skin = head_mesh._default_asset().skin
