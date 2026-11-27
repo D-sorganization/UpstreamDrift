@@ -173,21 +173,6 @@ def head_proportions(
     return out
 
 
-def _warp_parts(
-    parts: list[tuple[str, Mesh, str]], length_m: float, morph: HeadMorph
-) -> list[tuple[str, Mesh, str]]:
-    """Apply one shared unit-head deformation while preserving part order."""
-    from src.shared.python.model_appearance.head_morph import warp_vertices
-
-    if morph == HeadMorph():
-        return parts
-    warped = []
-    for name, mesh, role in parts:
-        vertices = warp_vertices(mesh.vertices / length_m, morph) * length_m
-        warped.append((name, Mesh(vertices, mesh.faces), role))
-    return warped
-
-
 def _feature_mesh_parts(
     skin: Mesh, length_m: float, settings: HeadSettings
 ) -> list[tuple[str, Mesh, str]]:
@@ -209,6 +194,21 @@ def _feature_mesh_parts(
         (name, Mesh(mesh.vertices * length_m, mesh.faces), role)
         for name, mesh, role in head_features.face_parts(skin, marks)
     ]
+
+
+def _warp_parts(
+    parts: list[tuple[str, Mesh, str]], length_m: float, morph: HeadMorph
+) -> list[tuple[str, Mesh, str]]:
+    """Apply one shared unit-head deformation while preserving part order."""
+    from src.shared.python.model_appearance.head_morph import warp_vertices
+
+    if morph == HeadMorph():
+        return parts
+    warped = []
+    for name, mesh, role in parts:
+        vertices = warp_vertices(mesh.vertices / length_m, morph) * length_m
+        warped.append((name, Mesh(vertices, mesh.faces), role))
+    return warped
 
 
 def build_mesh_parts(
