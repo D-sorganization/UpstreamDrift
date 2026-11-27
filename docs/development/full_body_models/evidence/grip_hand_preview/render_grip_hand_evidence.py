@@ -50,10 +50,12 @@ _VIEWS: dict[str, tuple[float, float]] = {
 
 
 def _club() -> ClubAssembly:
+    """Build the club cylinder used by the evidence render."""
     return ClubAssembly("iron7", 0.95, 0.25, 0.0065)
 
 
 def _hand_in_club_frame(hand: Hand, club: ClubAssembly):
+    """Place the hand mesh in the club frame."""
     radius = grip_radius_at(club, DEFAULT_GRIP_POSE.distance_below_butt_m(hand))
     baked = build_grip_hand_mesh(hand, grip_radius_m=radius, pose=DEFAULT_GRIP_POSE)
     frame = grip_hand_frame(club, hand, DEFAULT_GRIP_POSE)
@@ -79,6 +81,7 @@ def _render_hand_view(
     *,
     legacy_camera: bool,
 ) -> dict[str, float]:
+    """Render one hand view of the grip evidence."""
     club = _club()
     hand_mesh, hand_world, centre = _hand_in_club_frame(hand, club)
     elev, azim = _VIEWS[view]
@@ -112,6 +115,7 @@ def _render_hand_view(
 
 
 def _render_grip_region(out: Path, *, legacy_camera: bool) -> dict[str, object]:
+    """Render the grip-region close-up."""
     club = _club()
     parts = assembly_meshes_with_hands(club, DEFAULT_GRIP_POSE)
     mesh = concat_meshes(parts["lead_hand"], parts["trail_hand"], parts["grip"])
@@ -135,6 +139,7 @@ def _render_grip_region(out: Path, *, legacy_camera: bool) -> dict[str, object]:
 
 
 def render_all(out_dir: Path, *, legacy_camera: bool) -> dict[str, object]:
+    """Render every grip-hand evidence view."""
     tag = "before" if legacy_camera else "after"
     receipt: dict[str, object] = {
         "tag": tag,
@@ -201,6 +206,7 @@ def _render_acceptance_views(out_dir: Path) -> dict[str, object]:
 
 
 def main() -> int:
+    """Run the command-line entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--out",

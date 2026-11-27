@@ -34,6 +34,7 @@ def thumb_ip_cap_rad(hand_spec: HandGripSpec) -> float:
 
 
 def thumb_radial_unit(azimuth_rad: float) -> np.ndarray:
+    """Return the unit vector along the thumb radius."""
     return np.array(
         [math.cos(azimuth_rad), math.sin(azimuth_rad), 0.0], dtype=np.float64
     )

@@ -58,6 +58,7 @@ COLOURS = {"L": "#1f77b4", "R": "#d62728"}
 
 
 def load(club: str, variant: str) -> tuple[GripKineticsSeries, str]:
+    """Load the recorded clip."""
     ev = HERE
     if variant == "contact":
         return ContactRun.load_npz(ev / f"contact/mujoco_{club}_series.npz").series, (
@@ -75,6 +76,7 @@ def load(club: str, variant: str) -> tuple[GripKineticsSeries, str]:
 
 
 def main() -> int:
+    """Run the command-line entry point."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--club", choices=("driver", "iron7"), required=True)
     ap.add_argument(

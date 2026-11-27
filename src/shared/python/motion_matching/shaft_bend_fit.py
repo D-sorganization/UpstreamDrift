@@ -53,6 +53,7 @@ class BendSettings:
     solver_tolerance: float
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         weights = (self.smoothness_weight_m_per_rad, self.ridge_weight_m_per_rad)
         if not (
             self.shapes_per_plane in range(1, MAX_SHAPES + 1)
@@ -79,6 +80,7 @@ class ChainGeometry:
     bend_stiffness: Array
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         points = self.joint_points_m
         if not (
             points.ndim == 2
@@ -97,6 +99,7 @@ class ChainGeometry:
 
     @property
     def n_joints(self) -> int:
+        """Return the joint count."""
         return len(self.joint_points_m)
 
 
@@ -274,11 +277,13 @@ def fit_shaft_bend(
         return np.stack([z[..., 1], z[..., 0] - z[..., 1]], axis=-1)
 
     def bend_of(x: Array) -> Array:
+        """Return the bend for a named segment."""
         return np.asarray(
             np.einsum("kps,sn->knp", amplitudes_of(x), basis), dtype=np.float64
         )
 
     def residuals(x: Array) -> Array:
+        """Return the residuals."""
         raw = amplitudes_of(x)
         amps = raw.reshape(frames, n_par)
         error = (_positions(geometry, bend_of(x), offsets) - goal) * valid[..., None]

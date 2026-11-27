@@ -68,6 +68,7 @@ def _signed_distance(
     normal: NDArray[np.float64],
     norm2: NDArray[np.float64],
 ) -> float:
+    """Return the signed distance from a point to the mesh."""
     relative = point - triangles[:, 0]
     height = np.einsum("ij,ij->i", relative, normal)
     projected = point - normal * (height / norm2)[:, None]

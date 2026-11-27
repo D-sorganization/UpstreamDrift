@@ -20,6 +20,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_equal_half_width_uses_one_span_for_all_axes():
+    """Verify equal half width uses one span for all axes."""
     pts = np.array(
         [
             [0.0, 0.0, 0.0],
@@ -34,6 +35,7 @@ def test_equal_half_width_uses_one_span_for_all_axes():
 
 
 def test_apply_equal_axis_limits_yields_equal_spans():
+    """Verify apply equal axis limits yields equal spans."""
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
     tube = np.linspace(0, 1, 10)
@@ -50,6 +52,7 @@ def test_unequal_per_axis_limits_fail_guard():
     """Regression: independent per-axis club limits must not be used for hands."""
 
     def legacy_club_limits(ax, points: np.ndarray) -> None:
+        """Legacy club limits."""
         lo = points.min(axis=0)
         hi = points.max(axis=0)
         pad = 0.06

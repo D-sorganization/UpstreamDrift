@@ -23,6 +23,7 @@ _GENERATED = _REPO / "src/engines/physics_engines/opensim/models/generated/club"
     ],
 )
 def test_generated_hand_stl_matches_geometry(name: str) -> None:
+    """Verify generated hand stl matches geometry."""
     canonical = _GEOMETRY / name
     generated = _GENERATED / name
     assert canonical.is_file(), name

@@ -38,6 +38,7 @@ _DEFAULT_STYLE = GripMeshPreviewStyle()
 
 
 def _unit(vec: Array) -> Array:
+    """Return a unit vector."""
     n = float(np.linalg.norm(vec))
     if n < 1e-12:
         raise ValueError("zero-length vector")

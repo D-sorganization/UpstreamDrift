@@ -87,6 +87,7 @@ class ThumbPatch:
 
 
 def _vec3(x: Sequence[float] | Array) -> Vec3:
+    """Return a length-3 float vector."""
     return (float(x[0]), float(x[1]), float(x[2]))
 
 
@@ -97,6 +98,7 @@ def _check(
     handedness: object,
     params: object,
 ) -> Array:
+    """Check contact-patch preconditions and return the lead frame."""
     validate_handedness(handedness)
     frame = np.asarray(lead_frame, dtype=float)
     if frame.shape != (4, 4) or not np.isfinite(frame).all():

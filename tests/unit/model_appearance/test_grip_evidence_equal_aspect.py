@@ -19,6 +19,7 @@ _SCRIPTS = (
 
 @pytest.mark.parametrize("path", _SCRIPTS)
 def test_grip_kinetics_renderers_use_equal_axis_helper(path: Path) -> None:
+    """Verify grip kinetics renderers use equal axis helper."""
     text = path.read_text(encoding="utf-8")
     assert "apply_equal_axis_limits" in text, path.name
     assert (

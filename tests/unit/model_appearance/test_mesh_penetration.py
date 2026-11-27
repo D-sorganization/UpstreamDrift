@@ -10,6 +10,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_cube_distinguishes_deep_inside_outside_and_face_contact():
+    """Verify cube distinguishes deep inside outside and face contact."""
     vertices = np.array(
         [[x, y, z] for x in (-1.0, 1.0) for y in (-1.0, 1.0) for z in (-1.0, 1.0)]
     )
@@ -46,12 +47,14 @@ def test_cube_distinguishes_deep_inside_outside_and_face_contact():
 
 
 def test_open_triangle_surface_is_refused():
+    """Verify open triangle surface is refused."""
     mesh = Mesh(np.eye(3), np.array([[0, 1, 2]]))
     with pytest.raises(ValueError, match="closed"):
         signed_mesh_distances(np.zeros((1, 3)), mesh)
 
 
 def test_concave_notch_is_outside_even_inside_the_convex_hull():
+    """Verify concave notch is outside even inside the convex hull."""
     outline = np.array([[0, 0], [2, 0], [2, 1], [1, 1], [1, 2], [0, 2]])
     vertices = np.vstack(
         [np.column_stack([outline, np.full(6, z)]) for z in (0.0, 1.0)]

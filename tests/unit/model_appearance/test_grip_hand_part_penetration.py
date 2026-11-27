@@ -23,6 +23,7 @@ _CONFIG = (
 
 
 def _load_limits() -> tuple[dict[str, float], float]:
+    """Load limits."""
     raw = json.loads(_CONFIG.read_text(encoding="utf-8"))
     limits = {str(k): float(v) for k, v in raw["max_part_penetration_fraction"].items()}
     clearance = float(raw["part_penetration_depth_m"])
@@ -36,6 +37,7 @@ def _penetration_fraction(source: np.ndarray, targets, clearance_m: float) -> fl
 
 
 def _max_finger_block_overlap(result, block: str, clearance_m: float) -> float:
+    """Max finger block overlap."""
     parts = {p.name: p for p in result.components}
     return max(
         _penetration_fraction(
@@ -48,6 +50,7 @@ def _max_finger_block_overlap(result, block: str, clearance_m: float) -> float:
 @pytest.mark.parametrize("hand", [Hand.LEAD, Hand.TRAIL])
 @pytest.mark.parametrize("radius", [0.0127, 0.014, 0.0145])
 def test_hand_parts_do_not_over_penetrate(hand, radius):
+    """Verify hand parts do not over penetrate."""
     limits, clearance_m = _load_limits()
     result = build_grip_hand_mesh(hand, grip_radius_m=radius, pose=DEFAULT_GRIP_POSE)
     parts = {p.name: p for p in result.components}

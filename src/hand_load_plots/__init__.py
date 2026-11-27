@@ -50,6 +50,7 @@ class StrategyLoads:
     midhands_moment_nm: Mapping[str, np.ndarray]
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         if self.strategy_id not in _IDS:
             raise ValueError(f"unknown strategy_id {self.strategy_id!r}")
         if self.evidence not in _EVIDENCE:
@@ -81,6 +82,7 @@ class HandLoadPlotInput:
     strategies: tuple[StrategyLoads, ...]
 
     def __post_init__(self) -> None:
+        """Check field invariants after initialization."""
         time = _floats(self.time_s, "time_s")
         if time.ndim != 1 or time.size < 2 or not np.isfinite(time).all():
             raise ValueError("time_s must be a finite vector of length >= 2")
@@ -133,11 +135,13 @@ def plot_invariant_dashboard(record: HandLoadPlotInput) -> Figure:
 
 
 def _ordered(record: HandLoadPlotInput) -> tuple[StrategyLoads, ...]:
+    """Return strategies in dashboard order."""
     by_id = {item.strategy_id: item for item in record.strategies}
     return tuple(by_id[name] for name in _IDS)
 
 
 def _stamp(fig: Figure, record: HandLoadPlotInput) -> None:
+    """Stamp the objective title and provenance on the figure."""
     fig.suptitle(f"Objective: {record.objective}")
     badge = " ".join(dict.fromkeys(item.evidence for item in _ordered(record)))
     footer = f"Provenance: git {record.git_sha} | data {record.data_hash}"
@@ -169,6 +173,7 @@ def _draw(
     color: str,
     style: str,
 ) -> None:
+    """Draw one load series on an axis."""
     drawn = _magnitude(values)
     if not np.isfinite(drawn).any():
         axis.text(
@@ -185,6 +190,7 @@ def _draw(
 
 
 def _invariants(axis: Axes, record: HandLoadPlotInput, kind: str) -> None:
+    """Plot the invariant force or moment series."""
     attr = "midhands_force_n" if kind == "force" else "midhands_moment_nm"
     for part, color in _PART_COLOR.items():
         for strategy in _ordered(record):
@@ -201,6 +207,7 @@ def _invariants(axis: Axes, record: HandLoadPlotInput, kind: str) -> None:
 
 
 def _hands(axis: Axes, record: HandLoadPlotInput, side: str) -> None:
+    """Plot the left-hand or right-hand series."""
     attr = "force_left_n" if side == "LH" else "force_right_n"
     for strategy in _ordered(record):
         _draw(
@@ -214,6 +221,7 @@ def _hands(axis: Axes, record: HandLoadPlotInput, side: str) -> None:
 
 
 def _floats(values: object, name: str) -> np.ndarray:
+    """Return a float array from a numeric sequence."""
     try:
         return np.asarray(values, dtype=np.float64)
     except (TypeError, ValueError) as exc:
@@ -221,6 +229,7 @@ def _floats(values: object, name: str) -> np.ndarray:
 
 
 def _shaped(values: object, shape: tuple[int, ...], name: str) -> np.ndarray:
+    """Return an array with the expected sample shape."""
     arr = _floats(values, name)
     if arr.shape != shape:
         raise ValueError(f"{name} must have shape {shape}, got {arr.shape}")
@@ -228,6 +237,7 @@ def _shaped(values: object, shape: tuple[int, ...], name: str) -> np.ndarray:
 
 
 def _channels(values: object, n: int, *, force: bool) -> Mapping[str, np.ndarray]:
+    """Return the channel layout allowed for this series."""
     if not isinstance(values, Mapping):
         raise TypeError("midhands channels must be a mapping")
     allowed: set[tuple[int, ...]] = {(n, 3)} if force else {(n,), (n, 3)}
@@ -243,12 +253,14 @@ def _channels(values: object, n: int, *, force: bool) -> Mapping[str, np.ndarray
 
 
 def _token(value: object, pattern: re.Pattern[str], name: str) -> str:
+    """Return a short strategy token for the legend."""
     if not isinstance(value, str) or pattern.fullmatch(value) is None:
         raise ValueError(f"{name} must be a hex string")
     return value
 
 
 def _objective(value: object) -> str:
+    """Return the objective label for the plot."""
     if not isinstance(value, str) or not value.strip():
         raise ValueError("objective must be a non-empty string")
     banned = ("wasted energy", "biological optimality")
@@ -258,6 +270,7 @@ def _objective(value: object) -> str:
 
 
 def _check_strategies(strategies: tuple[StrategyLoads, ...], n: int) -> None:
+    """Check that each strategy id is known."""
     if sorted(item.strategy_id for item in strategies) != sorted(_IDS):
         raise ValueError("strategies must be baseline and min_squared_force")
     if any(item.force_left_n.shape[0] != n for item in strategies):
@@ -265,6 +278,7 @@ def _check_strategies(strategies: tuple[StrategyLoads, ...], n: int) -> None:
 
 
 def _from_mapping(item: Mapping[str, Any], n: int) -> StrategyLoads:
+    """Build a strategy load from a mapping."""
     forces = item.get("midhands_force_n") or {}
     moments = item.get("midhands_moment_nm") or {}
     return StrategyLoads(
@@ -278,6 +292,7 @@ def _from_mapping(item: Mapping[str, Any], n: int) -> StrategyLoads:
 
 
 def _gap(mapping: Mapping[str, Any], key: str, shape: tuple[int, ...]) -> np.ndarray:
+    """Return the gap series stored under a mapping key."""
     raw = mapping.get(key)
     if raw is None:
         return np.full(shape, np.nan)
