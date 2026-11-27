@@ -155,6 +155,80 @@ def test_replay_harness_captures_first_excursion_and_chatter_window():
 
     chatter_window = harness.get_first_chatter_window()
     assert chatter_window is not None
-    assert chatter_window["start_frame"] in {"frame_0005", "frame_0006"}
+    # With dwell_time_s=0.015 and 5ms frames, the pending flight state accumulates across
+    # the hysteresis-band frames (fz=15N) and commits at frame_0009 (elapsed 20ms >= 15ms).
+    assert chatter_window["start_frame"] == "frame_0009"
     assert len(chatter_window["transitions"]) >= 2
+
+
+def test_bilateral_double_support_bos_valid_uses_convex_hull():
+    """FC-016a Defect 1: bilateral CoP against combined double-support hull → bos_valid=True.
+
+    With per-foot max(margins), the CoP at (0.1, 0.05) lies between both foot hulls
+    (outside each individual polygon), so bos_valid=False.  The fix computes the
+    convex hull of all active-foot vertices; the CoP is inside → bos_valid=True.
+    """
+    # Left foot: x in [0, 0.2], y in [-0.10, 0.00]
+    # Right foot: x in [0, 0.2], y in [+0.10, 0.20]
+    # Gap between y=0.0 and y=0.1 — CoP at y=0.05 falls in that gap.
+    left_hull = [(0.0, -0.1), (0.2, -0.1), (0.2, 0.0), (0.0, 0.0)]
+    right_hull = [(0.0, 0.1), (0.2, 0.1), (0.2, 0.2), (0.0, 0.2)]
+
+    harness = ReplayHarness(
+        foot_hulls={"left": left_hull, "right": right_hull},
+        engage_threshold_n=20.0,
+        release_threshold_n=10.0,
+        dwell_time_s=0.015,
+    )
+
+    # 50/50 bilateral: each foot 150 N → CoP computed at (0.1, 0.05, 0.0)
+    contacts = [
+        ContactPointRecord("lh", "calcn_l", "left",  (0.1, -0.05, 0.0), (0.0, 0.0, 150.0)),
+        ContactPointRecord("rh", "calcn_r", "right", (0.1,  0.15, 0.0), (0.0, 0.0, 150.0)),
+    ]
+    rec = harness.record_frame("frame_0001", time_s=0.0, source_ref="test:15858", contacts=contacts)
+
+    # Sanity-check that wrench CoP really is at (0.1, 0.05) — between the two feet.
+    assert rec.wrench_cop is not None
+    assert rec.wrench_cop[0] == pytest.approx(0.1)
+    assert rec.wrench_cop[1] == pytest.approx(0.05)
+
+    # FC-016a Defect 1: must report bos_valid=True using double-support convex hull.
+    assert rec.bos_valid is True, (
+        f"50/50 bilateral stance must yield bos_valid=True using double-support hull; "
+        f"got bos_valid={rec.bos_valid}, bos_margin_m={rec.bos_margin_m:.4f}"
+    )
+    assert rec.bos_margin_m > 0.0
+
+
+def test_dwell_time_suppresses_rapid_threshold_oscillations():
+    """FC-016a Defect 2: dwell_time_s must gate rapid sub-dwell threshold oscillations.
+
+    fz alternates 5 N / 25 N every 10 ms with dwell_time_s=0.05 s.  Neither candidate
+    state ever stays in its zone for a full 50 ms, so zero transitions are committed and
+    get_first_chatter_window() must return None.
+    """
+    harness = ReplayHarness(
+        foot_hulls={"left": [(0.0, 0.0), (0.2, 0.0), (0.2, 0.1), (0.0, 0.1)]},
+        engage_threshold_n=20.0,
+        release_threshold_n=10.0,
+        dwell_time_s=0.05,  # 50 ms — longer than the 10 ms oscillation period
+    )
+
+    # Quiet stance (10 frames, 100 ms)
+    for i in range(10):
+        c = [ContactPointRecord(f"s{i}", "calcn_l", "left", (0.1, 0.05, 0.0), (0.0, 0.0, 300.0))]
+        harness.record_frame(f"s{i:04d}", i * 0.01, "test:15858", c)
+
+    # Rapid oscillation: 5 N / 25 N every 10 ms — well below 50 ms dwell
+    for i in range(20):
+        fz = 5.0 if i % 2 == 0 else 25.0
+        c = [ContactPointRecord(f"o{i}", "calcn_l", "left", (0.1, 0.05, 0.0), (0.0, 0.0, fz))]
+        harness.record_frame(f"o{i:04d}", 0.10 + i * 0.01, "test:15858", c)
+
+    chatter_window = harness.get_first_chatter_window()
+    assert chatter_window is None, (
+        f"dwell_time_s not wired: {len(chatter_window['transitions'])} transitions from "
+        f"sub-dwell oscillations; expected 0 with dwell_time_s=0.05 s"
+    )
 # fmt: on
