@@ -30,6 +30,7 @@ def _run_compositor_pil_ops() -> None:
 def _render_3d_glyphs_rgba() -> np.ndarray:
     """Return an RGBA buffer from a 3-D glyph render (same setup as the canonical test)."""
     import matplotlib
+
     matplotlib.use("Agg")
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
@@ -40,7 +41,9 @@ def _render_3d_glyphs_rgba() -> np.ndarray:
         WrenchKind,
     )
     from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, build_glyphs
-    from src.shared.python.force_overlay.renderers.matplotlib_glyphs import draw_glyphs_3d
+    from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (
+        draw_glyphs_3d,
+    )
 
     frame = ForceTorqueFrame(
         time_s=0.5,
