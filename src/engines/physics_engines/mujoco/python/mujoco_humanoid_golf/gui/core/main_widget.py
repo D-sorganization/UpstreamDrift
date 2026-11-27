@@ -69,7 +69,8 @@ class MainWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._inner)
 
-        self.destroyed.connect(lambda: self.cleanup())
+        widget = self
+        self.destroyed.connect(lambda bound=widget: bound.cleanup())
 
         logger.info("MuJoCo MainWidget initialized")
 

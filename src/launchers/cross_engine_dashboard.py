@@ -1050,7 +1050,13 @@ def _create_dashboard_window_class() -> type:
                 return
             if callable(apply_theme_to_window):
                 apply_theme_to_window(self)
-                self.destroyed.connect(lambda *_: release_theme_manager(self))
+                # Bind the widget by value. A lambda that loads ``self`` raises
+                # NameError once teardown clears the method cell, and pytest-qt
+                # then fails an unrelated test.
+                dashboard = self
+                self.destroyed.connect(
+                    lambda *_args, bound=dashboard: release_theme_manager(bound)
+                )
 
         def _build_window_layout(self) -> None:
             """Create the central dashboard layout."""
