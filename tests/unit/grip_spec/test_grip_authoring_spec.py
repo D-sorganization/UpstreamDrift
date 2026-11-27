@@ -33,7 +33,10 @@ from src.shared.python.model_appearance.grip_pose import (
 pytestmark = pytest.mark.unit
 
 _SHELLS_13997 = frozenset({"dorsum"})
-_GOLDEN_MESH_DIGEST = "65a0961c60b66324326c0b962e19650cbfab2e9426360ff3868304f0ed0a63a4"
+# The 10 degree knuckle-shell inset (#15141) shortens palm and dorsum from
+# 1090 to 994 vertices. Dorsum stays out of the digest. This hash is that
+# repaired overlap summary, regenerated from build_grip_hand_mesh.
+_GOLDEN_MESH_DIGEST = "69c9f8a1359f391fc3673e168b808280ab6dc5fb348bf362d5fbcb36260a7fb9"
 
 
 def _mesh_summary_digest(pose: GripPose | None = None) -> str:

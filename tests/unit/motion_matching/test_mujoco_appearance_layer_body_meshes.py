@@ -3,7 +3,9 @@
 - **Equivalence.** A golden per-body summary (material, vertex count, bbox in
   the MJCF body frame) captured from the pre-refactor appearance layer pins
   every non-trunk body exactly; trunk bodies keep their materials and become
-  one trunk solid each (the documented sizing change).
+  one trunk solid each (the documented sizing change). Lead and trail hands
+  are the #15141 10 degree knuckle-shell inset: 4848 vertices, with bboxes
+  regenerated from that shorter palm and dorsum.
 - **Frames.** The v1 chest body (COMRod) has a non-identity
   ``child_to_follower`` rotation, so its MJCF body frame is not the spec body
   frame. The chest is checked in the WORLD frame after MuJoCo compiles the
