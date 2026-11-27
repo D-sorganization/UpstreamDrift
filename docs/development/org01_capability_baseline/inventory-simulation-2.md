@@ -11,6 +11,7 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `golf_environment` | Golf Environment | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_environment/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulation_suite` | Golf Simulation Suite | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulation_suite/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulator` | Golf Simulator Console | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulator/gui.py` | `tests/config/test_launcher_registry_parity.py` |
+| `grip_build_preview` | Tools Package: grip_build_preview | `cli_tool` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/grip_build_preview/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `hmr2_sidecar` | Tools Package: hmr2_sidecar | `library` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/hmr2_sidecar/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `jaxsim_dashboard` | JaxSim Dashboard | `model` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/jaxsim_dashboard.py` | `tests/config/test_engine_tile_coverage.py` |
 | `launcher.docker_management` | Docker engine management dialog | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/docker_manager.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
@@ -30,4 +31,3 @@ Part of the [ORG-01 baseline index](../ORG01_CAPABILITY_BASELINE.md).
 | `mujoco_models-sit_to_stand` | Sit To Stand | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/mujoco_models/exercises/sit_to_stand` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_models-snatch` | Snatch | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/mujoco_models/exercises/snatch` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_models-squat` | Squat | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/mujoco_models/exercises/squat` | `tests/config/test_launcher_registry_parity.py` |
-| `mujoco_models_shared` | MuJoCo Models | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `MuJoCo_Models` | `tests/config/test_launcher_registry_parity.py` |
