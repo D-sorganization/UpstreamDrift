@@ -12,6 +12,8 @@ from src.shared.python.optimization.root_wrench_audit import (
     audit_root_wrench,
 )
 
+pytestmark = pytest.mark.unit
+
 N = 200
 T = np.linspace(0.0, 1.0, N)
 BW_N = 800.0
