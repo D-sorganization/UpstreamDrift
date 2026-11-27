@@ -129,6 +129,7 @@ class TestAPIDiagnostics:
         assert "executable" in result.details
 
     def test_python_environment_reports_realtime_bind_env(self) -> None:
+        """test python environment reports realtime bind env."""
         diag = APIDiagnostics()
         with patch.dict(
             "os.environ",
@@ -174,10 +175,12 @@ class TestAPIDiagnostics:
 
         @app.get("/test")
         def test_endpoint() -> dict[str, str]:
+            """test endpoint."""
             return {"status": "ok"}
 
         @app.get("/health")
         def health() -> dict[str, str]:
+            """health."""
             return {"status": "healthy"}
 
         diag = APIDiagnostics(app)
@@ -391,6 +394,17 @@ class TestLocalServerDiagnostics:
         data = response.json()
         assert "status" in data
         assert "ui_available" in data
+
+    @pytest.mark.unit
+    def test_health_endpoint_reports_bind_port_identity(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Tauri health probes match ``bind_port`` to the supervised child (#14964)."""
+        monkeypatch.setenv("GOLF_PORT", "38427")
+        response = client.get("/api/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["bind_port"] == 38427
 
 
 if __name__ == "__main__":

@@ -1,0 +1,85 @@
+{
+  "schema": "opensim-catchup-a1/v1",
+  "epic": 15793,
+  "package": "A1",
+  "capture": {
+    "id": "capture-A",
+    "where": "public",
+    "relative_path": "data/C3D_TA_Driver.c3d",
+    "sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "bytes": 402432,
+    "sample_rate_hz": 360.0,
+    "frame_count": 654
+  },
+  "markers": {
+    "count": 38,
+    "labels": [
+      "Marker_0:0:0",
+      "WaistLeft",
+      "WaistRight",
+      "WaistLBack",
+      "WaistRBack",
+      "BackTop",
+      "BackLeft",
+      "BackRight",
+      "HeadTop",
+      "HeadFront",
+      "HeadSide",
+      "LShoulderTop",
+      "LShoulderBack",
+      "LElbowOut",
+      "LUArmHigh",
+      "LWristTop",
+      "RShoulderTop",
+      "RShoulderBack",
+      "RElbowOut",
+      "RUArmHigh",
+      "RWristTop",
+      "LKneeOut",
+      "LToeIn",
+      "LToeOut",
+      "LAnkleOut",
+      "RKneeOut",
+      "RToeIn",
+      "RToeOut",
+      "RAnkleOut",
+      "Marker_2:2:1",
+      "Marker_2:2:2",
+      "Marker_2:2:3",
+      "Marker_3:3:1",
+      "Marker_3:3:2",
+      "Marker_3:3:3",
+      "Uname*36",
+      "Uname*37",
+      "Uname*38"
+    ]
+  },
+  "timebase": {
+    "sample_rate_hz": 360.0,
+    "frame_count": 654,
+    "dt_s": 0.002777777777777778,
+    "t0_s": 0.0
+  },
+  "model": {
+    "convention": "canonical-v2",
+    "frame": "world_Zup",
+    "units": "SI",
+    "quaternion_order": "wxyz",
+    "base_linear_velocity_frame": "world",
+    "base_angular_velocity_frame": "body",
+    "gravity_m_s2": [0.0, 0.0, -9.80665]
+  },
+  "frame_transforms": {
+    "world": "Z-up-right-handed",
+    "length_unit": "m",
+    "angle_unit": "rad"
+  },
+  "reference_trajectory": {
+    "best_match_location": "external",
+    "best_match_env": "UD_DEFAULT_MATCH_BUNDLE",
+    "bundle_schema": "same-input-bundle/v1",
+    "in_repo_demo_is_best_match": false,
+    "in_repo_demo_relative_path": "docs/development/full_body_models/evidence/trunk_visuals/driver_v2_bundle.npz",
+    "in_repo_demo_sha256": "eaf196ed10e4c8b14c92de3d9b22ae0391570e15b5485517f4b41580d8814159"
+  }
+}
