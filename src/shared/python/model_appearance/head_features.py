@@ -29,10 +29,12 @@ _RING = np.array([[0.0, 0.0], [1, 0], [-1, 0], [0, 1], [0, -1]])  # cover stenci
 
 @lru_cache(maxsize=1)
 def _settings() -> dict[str, Any]:
+    """Read and cache the authored CC0 facial landmark settings."""
     return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
 
 
 def _frozen(value: Any) -> Any:
+    """Convert mutable JSON lists into tuples for frozen landmark records."""
     return tuple(_frozen(v) for v in value) if isinstance(value, list) else value
 
 
@@ -82,6 +84,7 @@ class FaceLandmarks:
     mouth_lift: float = 0.003
 
     def __post_init__(self) -> None:
+        """Reject non-finite sizes, non-positive dimensions, and negative lifts."""
         for item in fields(self):
             value = np.atleast_1d(np.asarray(getattr(self, item.name), dtype=float))
             sized = item.name.endswith(("_half", "_cover", "_radius"))
@@ -184,6 +187,7 @@ class FaceSurface:
         blur: float = 0.006,
         min_x: float = 0.2,
     ) -> None:
+        """Build interpolated front-surface depth from the outer skin vertices."""
         front = skin.vertices[skin.vertices[:, 0] > min_x]
         outer: dict[tuple[int, int], Array] = {}
         for p in front:
@@ -257,6 +261,7 @@ def face_parts(
     front = Mesh(skin.vertices, skin.faces[(skin.vertices[skin.faces, 0] > 0).all(1)])
 
     def decal(centre_yz, half, axis, lift):
+        """Place one facial detail against the interpolated skin surface."""
         c = np.array([surf.depth(centre_yz[0], centre_yz[1]), *centre_yz])
         return surf.conform(_blob(c, half, axis), c, lift)
 
