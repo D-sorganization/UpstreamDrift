@@ -5,6 +5,7 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .models import create_impact_model
+from .rigid_gear import rigid_gear_spin
 from .types import (
     ImpactEvent,
     ImpactModelType,
@@ -188,14 +189,7 @@ class ImpactSolverAPI:
         post_state = self.model.solve(pre_state, self.params)
 
         if pre_state.impact_offset is not None:
-            gear_spin = compute_gear_effect_spin(
-                impact_offset=np.asarray(pre_state.impact_offset),
-                clubhead_velocity=np.asarray(pre_state.clubhead_velocity),
-                clubface_normal=np.asarray(pre_state.clubhead_orientation),
-                gear_factor=self.params.gear_effect_factor,
-                h_scale=self.params.gear_effect_h_scale,
-                v_scale=self.params.gear_effect_v_scale,
-            )
+            gear_spin = self._gear_spin(pre_state)
             post_state = PostImpactState(
                 ball_velocity=post_state.ball_velocity,
                 ball_angular_velocity=post_state.ball_angular_velocity + gear_spin,
@@ -303,6 +297,22 @@ class ImpactSolverAPI:
             )
 
         return post_state
+
+    def _gear_spin(self, pre_state: PreImpactState) -> np.ndarray:
+        """Gear spin of the strike offset: rigid-contact law if a head is set."""
+        head = self.params.rigid_gear_head
+        if head is not None:
+            return rigid_gear_spin(
+                pre_state, head, self.params.cor, self.params.friction_coefficient
+            )
+        return compute_gear_effect_spin(
+            impact_offset=np.asarray(pre_state.impact_offset),
+            clubhead_velocity=np.asarray(pre_state.clubhead_velocity),
+            clubface_normal=np.asarray(pre_state.clubhead_orientation),
+            gear_factor=self.params.gear_effect_factor,
+            h_scale=self.params.gear_effect_h_scale,
+            v_scale=self.params.gear_effect_v_scale,
+        )
 
     def solve_with_gear_effect(
         self,

@@ -1,0 +1,14 @@
+{
+  "level_color_tokens": {
+    "experimental": "sidekick.color.warning",
+    "prototype": "sidekick.color.info",
+    "beta": "sidekick.color.accent",
+    "deprecated": "sidekick.color.error"
+  },
+  "text_token": "sidekick.color.text",
+  "radius_token": "sidekick.radius.lg",
+  "pad_v_token": "sidekick.space.1",
+  "pad_h_token": "sidekick.space.2",
+  "border_width_px": 1,
+  "sources": "Maturity chip look for launcher tiles (epic #15150). Every colour, radius and padding is a Sidekick design token name resolved against the active theme, so the chip follows theme changes and no hex literal lives in code. 'level_color_tokens' tints the border per level (levels in maturity_scale.json 'chip_hidden_levels' draw no chip). The chip height is fixed to the font line height plus twice the vertical padding and plus twice border_width_px, and its text never wraps, so adding a chip cannot change the height of the row that holds it at any card width (a narrow phone-width window previously grew and clipped the row)."
+}

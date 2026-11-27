@@ -29,6 +29,7 @@ def _pairwise_min_distances(
     samples_b: np.ndarray,
     chunk: int = 128,
 ) -> float:
+    """Return the smallest distance between samples in the two clouds."""
     best = float("inf")
     for i in range(0, len(samples_a), chunk):
         block = samples_a[i : i + chunk]
@@ -95,7 +96,7 @@ def anthropometric_vs_reference(
     palm_width_m: float | None = None,
 ) -> dict[str, float | bool]:
     """Compare measured mesh extents to :class:`HandAnthropometryReference`."""
-    from src.shared.python.model_appearance.hand_backends.settings import (
+    from src.shared.python.model_appearance.hand_backends.procedural_settings import (
         HandAnthropometryReference,
     )
 
@@ -134,6 +135,7 @@ def anthropometric_vs_reference(
 
 
 def _within(measured: float, target: float, rel_tol: float) -> bool:
+    """Return whether ``measured`` is within a relative tolerance of ``target``."""
     if target <= 0.0:
         return False
     return abs(measured - target) / target <= rel_tol

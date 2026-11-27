@@ -22,6 +22,7 @@ class GripArticulation:
 
     @classmethod
     def from_grip_spec(cls, spec: GripSpec, role: HandSide) -> GripArticulation:
+        """Build articulation from the lead or trail hand of ``spec``."""
         hand = spec.lead if role == "lead" else spec.trail
         return cls(
             palm_finger_depth=float(hand.palm_finger_depth),

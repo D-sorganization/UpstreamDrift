@@ -1,0 +1,91 @@
+{
+  "source_repository": "https://github.com/makehumancommunity/makehuman",
+  "source_commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "source_files": [
+    "makehuman/data/3dobjs/base.obj",
+    "makehuman/data/rigs/default.mhskel",
+    "makehuman/data/rigs/default_weights.mhw"
+  ],
+  "download_date": "2026-10-16",
+  "mix_settings": "assets/body_cc0/section_settings.json",
+  "mix": "male_athletic",
+  "stature_m": 1.82,
+  "quantum_m": 0.0001,
+  "weight_levels": 255,
+  "max_influences": 4,
+  "cut_weight": 0.5,
+  "slim": {
+    "mix": {"muscle": 0.5, "weight": 0.5},
+    "min_offset_m": 0.005,
+    "max_offset_m": 0.04,
+    "volume_ratio_bounds": [0.8, 0.97]
+  },
+  "sources": {
+    "slim": "A leaner build of the same mesh: the athletic mix with MakeHuman's average muscle and weight (0.5 each), the #15299 prototype's showpiece build (2026-11-20 review). MakeHuman's muscle and weight targets move no joint, so the landmarks are shared and the build refuses a mix that moves one. It is stored as int16 offsets of the vertices so the runtime fit can mix any share of it in (fit_settings.json: slim_share). The bounds fence the stored offsets: the largest lies between min_offset_m and max_offset_m and the enclosed volume is 80 to 97 % of the athletic build's.",
+    "mix": "The athletic male macro mix already used for the body sections (assets/body_cc0/section_settings.json), read from there so the two assets cannot drift.",
+    "stature_m": "Owner prior for the default golfer: about the PGA Tour average, 1.82 m. The runtime fit rescales each segment to the subject, so this is only the reference size of the stored mesh.",
+    "quantum_m": "0.1 mm, the head asset's order of precision; int16 then spans +/-3.27 m, more than the body.",
+    "weight_levels": "uint8 skin weights, the hand asset's precision (1/255).",
+    "max_influences": "Four influences per vertex, as in assets/hand_cc0.",
+    "neck_cut_m": "The skin is kept to 90 mm above the neck joint (the #15299 prototype's value), under the jaw of the separate head model, so a collar has a neck to close on and the neck can bend with the head. Faces the head bones own (cut_roots) stay with the head model: jaw and chin would add 1,900 triangles, past the budget. The four neck and head groups let the skinning step share that length between thorax and head.",
+    "cut_weight": "A face belongs to the hands, feet or head when their bones carry at least half of its mean weight (the hand asset's cut); those parts and the head stay separate models."
+  },
+  "landmarks": {
+    "neck": "neck01",
+    "hip_l": "upperleg01.L",
+    "hip_r": "upperleg01.R",
+    "knee_l": "lowerleg01.L",
+    "knee_r": "lowerleg01.R",
+    "ankle_l": "foot.L",
+    "ankle_r": "foot.R",
+    "shoulder_l": "upperarm01.L",
+    "shoulder_r": "upperarm01.R",
+    "elbow_l": "lowerarm01.L",
+    "elbow_r": "lowerarm01.R",
+    "wrist_l": "wrist.L",
+    "wrist_r": "wrist.R"
+  },
+  "neck_plane": "neck",
+  "neck_cut_m": 0.09,
+  "cut_roots": ["wrist.L", "wrist.R", "foot.L", "foot.R", "head"],
+  "central_groups": {
+    "pelvis": ["root", "pelvis.L", "pelvis.R"],
+    "spine05": ["spine05"],
+    "spine04": ["spine04"],
+    "spine03": ["spine03"],
+    "thorax": ["spine02", "spine01", "breast.L", "breast.R"],
+    "neck_lower": ["neck01"],
+    "neck_middle": ["neck02"],
+    "neck_upper": ["neck03"],
+    "head": ["head"]
+  },
+  "side_groups": {
+    "clavicle": ["clavicle"],
+    "shoulder": ["shoulder01"],
+    "upperarm_proximal": ["upperarm01"],
+    "upperarm_distal": ["upperarm02"],
+    "forearm_proximal": ["lowerarm01"],
+    "forearm_distal": ["lowerarm02"],
+    "thigh_proximal": ["upperleg01"],
+    "thigh_distal": ["upperleg02"],
+    "shank": ["lowerleg01"]
+  },
+  "reference_fit": {
+    "source": "Segment lengths between joint centres of the MuJoCo export of the tour-average driver subject at 1.82 m (hang pose), measured 2026-11-19 for the #15299 prototype. They bound how far the runtime fit has to move the stored mesh; they are not physics inputs. Scale bounds: the prototype fit scales run from 0.829 (hip spacing) to 1.120 (upper arm), and beyond the bounds the smooth weights no longer hide the stretch. Symmetry: the base mesh and the macro targets are mirror symmetric, so two quanta of slack.",
+    "segments_mm": {
+      "hip_spacing": ["hip_l", "hip_r", 189.2],
+      "shoulder_spacing": ["shoulder_l", "shoulder_r", 360.0],
+      "upper_arm": ["shoulder_l", "elbow_l", 296.8],
+      "forearm": ["elbow_l", "wrist_l", 283.4],
+      "thigh": ["hip_l", "knee_l", 441.0],
+      "shank": ["knee_l", "ankle_l", 433.0]
+    },
+    "scale_bounds": [0.8, 1.15],
+    "symmetry_mm": 0.2
+  },
+  "budget": {
+    "max_triangles": 8000,
+    "max_asset_bytes": 150000,
+    "source": "Triangle count of the uncut MakeHuman body without head, hands and feet (7,628) with headroom; the loft parts it would replace total 41,440 triangles. The byte cap keeps the asset in the size class of head_cc0.npz."
+  }
+}

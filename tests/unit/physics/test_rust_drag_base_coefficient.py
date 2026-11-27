@@ -2,8 +2,9 @@
 
 ``upstream_physics`` scales its dimpled-sphere drag-crisis curve by
 ``AeroBallProperties.drag_coefficient``, the same way the enhanced Python
-engine scales ``cd_dimpled_sphere`` by ``GOLF_BALL_DRAG_COEFFICIENT`` (0.25).
-``BallProperties.cd0`` (0.21) is the constant term of a *different* model,
+engine scales ``cd_spinning_ball`` by ``GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT``
+(0.187; since #15443 the kernel adds a spin term, so the 0.25 compensation for
+spin drag is gone). ``BallProperties.cd0`` is the constant term of a *different* model,
 the spin polynomial ``cd0 + cd1*S + cd2*S**2``. Passing it across the
 boundary under-predicted drag, so the production simulator carried a
 TrackMan 7-iron 194 yd instead of ~179 yd.
@@ -18,7 +19,9 @@ from typing import Any
 
 import numpy as np
 import pytest
-from src.shared.python.core.physics_constants import GOLF_BALL_DRAG_COEFFICIENT
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT,
+)
 from src.shared.python.physics import rust_kernel
 from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
@@ -69,5 +72,5 @@ def test_rust_kernel_receives_the_reynolds_curve_base_drag_coefficient(
     )
 
     assert captured["ball"]["drag_coefficient"] == pytest.approx(
-        float(GOLF_BALL_DRAG_COEFFICIENT)
+        float(GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT)
     )

@@ -29,6 +29,11 @@ FLEET_WORKFLOWS_CONFLICT_DISARM = (
 )
 # fleet-workflows commit that scopes the App token to the swept repo (#8).
 FLEET_WORKFLOWS_PIN = "367b182c24ae3b01488fc1266130969e775023de"
+# ``workflow_call.secrets`` of the provider at that pin. Re-read them on a pin bump.
+FLEET_WORKFLOWS_PIN_SECRETS = {
+    "JULES_APP_ID": "${{ secrets.FLEET_GENERAL_AGENT_APP_ID }}",
+    "JULES_APP_PRIVATE_KEY": "${{ secrets.FLEET_GENERAL_AGENT_APP_PRIVATE_KEY }}",
+}
 
 pytestmark = pytest.mark.unit
 
@@ -80,7 +85,12 @@ def test_conflict_disarm_keeps_dry_run_and_the_12634_exclusion() -> None:
 
     assert job["with"]["dry_run"] == "${{ inputs.dry_run || 'true' }}"
     assert job["with"]["exclude_prs"] == "${{ inputs.exclude_prs || '12634' }}"
-    assert set(job["secrets"]) == {
-        "FLEET_GENERAL_AGENT_APP_ID",
-        "FLEET_GENERAL_AGENT_APP_PRIVATE_KEY",
-    }
+
+
+def test_conflict_disarm_passes_only_secrets_the_pinned_provider_declares() -> None:
+    """#15246: a key the called workflow does not declare fails every run at startup.
+
+    The provider still names its two optional secrets after the retired Jules App,
+    so the caller keeps those key names and feeds them the rotated credentials.
+    """
+    assert _conflict_disarm_job()["secrets"] == FLEET_WORKFLOWS_PIN_SECRETS

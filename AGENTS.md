@@ -53,6 +53,17 @@ as `auth_token` on each MCP tool call. Private Mode values accept `1`, `true`, o
 Local listener authentication hardening is tracked in private Repository_Management
 records; public documentation does not describe that surface beyond this pointer.
 
+## Current Golfer Model (Read Before Touching Hands or Body)
+
+The skinned human hands (`hand_visual_backend: skinned_human`) and the skinned
+body (`body_visual_backend: skinned_cc0`) are the main golfer model. The
+capsule hands and loft body are deprecated: do not use them in new work,
+renders, screenshots or fixtures. The single source of truth is
+`src/config/golfer_model_versions.json`, read through
+`model_appearance.golfer_model_versions`; see
+[Golfer Model Versions](docs/agents/golfer_model_versions.md) for how to put a
+spec on the current model and what is still migrating (#15648).
+
 ## Modeling Reference Documentation
 
 For future swing-matching outputs, use the refined Human ellipsoid model and

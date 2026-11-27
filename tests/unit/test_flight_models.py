@@ -26,9 +26,32 @@ from src.shared.python.physics.flight_models import (
     _spin_ratio_lift_coefficient,
     compare_models,
 )
+from tests.unit.physics.reference_bands import band_m, reference_row
 
 pytestmark = pytest.mark.unit
 YARDS_TO_METERS = 0.9144
+#: published Trackman PGA Tour driver row (#15443 F7)
+DRIVER_ROW = "pga_tour_driver_2019"
+_MODELS = {m.name: m for m in FlightModelRegistry.get_all_models()}
+#: models measured above the +-5 % carry band of the driver row on
+#: 2026-11-25 (275 yd reference, band 261.3 to 288.8 yd); strict, so a model
+#: that comes into the band fails the suite and must be promoted (#15443 F7)
+_DRIVER_OVERSHOOT = {
+    "Nathan": "carry 294.3 yd, apex 34.4 m",
+    "Ballantyne": "carry 297.2 yd, apex 33.7 m",
+    "Rospie DL": "carry 290.8 yd",
+}
+_MODEL_NAMES = [
+    pytest.param(
+        name,
+        marks=pytest.mark.xfail(
+            strict=True, reason=f"above the driver band: {_DRIVER_OVERSHOOT[name]}"
+        ),
+    )
+    if name in _DRIVER_OVERSHOOT
+    else name
+    for name in _MODELS
+]
 
 # =============================================================================
 # Fixtures
@@ -456,29 +479,31 @@ class TestModelComparison:
 class TestScientificFlightBenchmarks:
     """TrackMan-style regression coverage for issue #7404."""
 
-    def test_driver_lift_matches_trackman_band(self) -> None:
+    @pytest.mark.parametrize("name", _MODEL_NAMES)
+    def test_driver_lift_matches_trackman_band(self, name: str) -> None:
+        """Carry and apex in the sourced band of the published driver row
+        (#15443 F7: the old 238-300 yd band could not catch a 10 % error)."""
+        row = reference_row(DRIVER_ROW)
         launch = UnifiedLaunchConditions.from_imperial(
-            ball_speed_mph=167.0,
-            launch_angle_deg=10.9,
-            spin_rate_rpm=2686.0,
+            ball_speed_mph=row["ball_speed_mph"],
+            launch_angle_deg=row["launch_deg"],
+            spin_rate_rpm=row["spin_rpm"],
         )
-
-        for model in FlightModelRegistry.get_all_models():
-            result = model.simulate(launch, max_time=12.0)
-            carry_yd = result.carry_distance / YARDS_TO_METERS
-
-            assert 238.0 <= carry_yd <= 300.0, (
-                f"{model.name} driver carry {carry_yd:.1f} yd is outside "
-                "TrackMan PGA Tour band"
-            )
-            assert 25.0 <= result.max_height <= 36.0, (
-                f"{model.name} driver apex {result.max_height:.1f} m is outside "
-                "TrackMan PGA Tour band"
-            )
-            assert 5.5 <= result.flight_time <= 7.8, (
-                f"{model.name} driver flight time {result.flight_time:.2f} s "
-                "is outside TrackMan PGA Tour band"
-            )
+        model = _MODELS[name]
+        result = model.simulate(launch, max_time=12.0)
+        low, high = band_m(DRIVER_ROW, "carry")
+        assert low <= result.carry_distance <= high, (
+            f"{name} driver carry {result.carry_distance / YARDS_TO_METERS:.1f} yd "
+            "is outside the Trackman PGA Tour band"
+        )
+        low, high = band_m(DRIVER_ROW, "apex")
+        assert low <= result.max_height <= high, (
+            f"{name} driver apex {result.max_height:.1f} m is outside the band"
+        )
+        assert 5.5 <= result.flight_time <= 7.8, (
+            f"{name} driver flight time {result.flight_time:.2f} s "
+            "is outside TrackMan PGA Tour band"
+        )
 
     def test_iron_lift_keeps_carry_near_reference_band(self) -> None:
         launch = UnifiedLaunchConditions.from_imperial(

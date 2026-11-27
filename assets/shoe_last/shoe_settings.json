@@ -1,0 +1,31 @@
+{
+  "toe_spring": [0.90, 0.027, 2.0],
+  "heel_height": 0.0852,
+  "forefoot_height": 0.045,
+  "sole_slope": [0.26, 0.55],
+  "shank": [0.27, 0.62, 0.05, 0.019, 1.5],
+  "welt": 0.0155,
+  "insole": 0.003,
+  "sole_edge_exponent": 8.0,
+  "heel_counter": [0.17, 0.006],
+  "saddle": [0.36, 0.58, 0.005],
+  "toe_cap": [0.80, 0.815, 0.004],
+  "laces": [5, 0.014, 0.8, 0.006, 3],
+  "panel_floor": 0.5,
+  "panel_stations": 16,
+  "max_vertices": 14000,
+  "notes": {
+    "units": "Every length is a fraction of the foot length (0.2581 m for the reference subject); positions run from the heel back (0) to the toe tip (1).",
+    "toe_spring": "[start, tip rise, exponent]. 7.0 mm at the reference length. It starts ahead of the toe contact sphere (0.937 of the length) so the drawn sole stays within 2 mm of that sphere's lowest point; a dress last's toe spring is commonly quoted as 10 to 15 mm, which this model cannot reach without leaving the contact sphere. Modelling parameter, not a measurement.",
+    "heel_height, forefoot_height": "Top of the sole edge above the ground: 22.0 mm at the heel (the sole thickness used since #15280) and 11.6 mm under the ball. Modelling parameters.",
+    "sole_slope": "[from, to]: the sole top falls from the heel height to the forefoot height over this span.",
+    "shank": "[from, to, blend, lift, cover]: the sole underside is lifted 4.9 mm between the heel breast and the ball, which separates the heel from the forefoot; the upper stays cover times that lift above the ground there. Modelling parameter.",
+    "insole": "Underside of the upper above the ground (0.8 mm), so the sole alone is seen from below.",
+    "welt": "The sole edge stands 4.0 mm outside the upper (3.0 mm before #15299). Modelling parameter.",
+    "sole_edge_exponent": "Super-ellipse exponent of the sole section: 8 gives a flat welt ledge and upright edge.",
+    "heel_counter, saddle, toe_cap": "[.. span .., proud]: stitched-on panels drawn 1.0 to 1.5 mm outside the upper; the heel counter and saddle take the saddle material and the toe cap is its seam, a narrow raised band. Modelling parameters.",
+    "laces": "[count, lace width, share of the shoe width, proud of the saddle, mesh stations].",
+    "panel_floor": "Underside of a panel as a share of the sole-edge height, which hides it inside the sole.",
+    "panel_stations, max_vertices": "Mesh density of a panel and the vertex budget of one foot (ankle stub, bare foot, upper, sole and panels)."
+  }
+}

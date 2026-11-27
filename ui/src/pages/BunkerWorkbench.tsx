@@ -14,6 +14,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import { BunkerFlightView } from '@/components/bunker/BunkerFlightView';
 import {
   exploratoryLeader,
   rankedWinner,
@@ -141,6 +142,7 @@ function EvaluationCard({ record, title }: { record: BunkerWorkbenchEvaluationV1
           <span className="font-mono">{record.digest.slice(0, 12)}</span>
         </Row>
       </dl>
+      <BunkerFlightView record={record} />
     </section>
   );
 }

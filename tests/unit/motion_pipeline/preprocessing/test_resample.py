@@ -126,7 +126,11 @@ def test_resample_keypoints_preserves_endpoints() -> None:
     seq = make_keypoint_sequence(num_frames=30, num_kp=1, fps=30.0)
     out = resample(seq, target_fps=100.0)
     assert out.frames[0].timestamp == pytest.approx(seq.frames[0].timestamp)
-    assert out.frames[-1].timestamp == pytest.approx(seq.frames[-1].timestamp)
+    # The grid keeps the 1/target_fps step, so the last sample is the final
+    # one not past the source end (within one target period of it).
+    last = out.frames[-1].timestamp
+    assert last <= seq.frames[-1].timestamp + 1e-12
+    assert seq.frames[-1].timestamp - last < 1.0 / 100.0
 
 
 def test_resample_markers_increases_frame_count() -> None:

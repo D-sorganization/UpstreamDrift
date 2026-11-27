@@ -223,6 +223,16 @@ class NativePinocchioModel:
         """Chain-shaft springs as applied: ``{coordinate: (k, rest, c)}``."""
         return self._shaft.compiled()
 
+    def shaft_spring_torque(
+        self, q: NDArray[np.float64], v: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Native-order spring and damper torque of the chain shaft (#15150).
+
+        ``-k (q - q_ref) - c v`` on the chain coordinates, zero elsewhere and
+        everywhere for a rigid club. Passive: it is drift, not actuation.
+        """
+        return self._shaft.effort(np.zeros(self.model.nv), q, v)
+
     def _add_joint_primitives(
         self, parent: int, placement: Any, joint_spec: Mapping[str, Any]
     ) -> tuple[int, set[str]]:

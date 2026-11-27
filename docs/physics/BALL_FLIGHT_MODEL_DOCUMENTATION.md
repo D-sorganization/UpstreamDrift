@@ -39,11 +39,11 @@ COR = (V_ball_after - V_club_after) / (V_club_before - V_ball_before)
 
 The suite provides three impact model types:
 
-| Model Type        | Fidelity | Use Case                            |
-| ----------------- | -------- | ----------------------------------- |
-| **Rigid Body**    | Low      | Fast analysis, real-time simulation |
-| **Spring-Damper** | Medium   | Finite-time contact, energy loss    |
-| **Finite Time**   | High     | Detailed impulse-momentum analysis  |
+| Model Type        | Fidelity | Use Case                                               |
+| ----------------- | -------- | ------------------------------------------------------ |
+| **Rigid Body**    | Low      | Fast analysis, real-time simulation                    |
+| **Spring-Damper** | Medium   | Finite-time contact, energy loss                       |
+| **Finite Time**   | Low–Med  | Instantaneous rigid-body impulse with labeled duration |
 
 ### 1.3 Spin Generation at Impact
 
@@ -138,9 +138,12 @@ Where:
 
 - Varies with Reynolds number (velocity-dependent)
 - Higher at low speeds, lower at high speeds ("drag crisis"); the
-  enhanced simulator models this via
-  `src/shared/python/physics/atmosphere.py::cd_dimpled_sphere`
-- Increases with the spin parameter S via the quadratic law below
+  production kernel and enhanced simulator model this via
+  `src/shared/python/physics/atmosphere.py::cd_spinning_ball` (#15443):
+  the Reynolds crisis curve (fitted to Choi et al. 2006) on a 0.187
+  zero-spin floor plus 0.18·S
+  (`GOLF_BALL_POST_CRISIS_DRAG_COEFFICIENT`, `GOLF_BALL_SPIN_DRAG_SLOPE`)
+- The polynomial helper adds spin via the quadratic law below
 - Dimple pattern causes up to 40% variation between ball models
 
 #### Magnus Force (Spin-Induced Lift)
@@ -279,7 +282,11 @@ Symbols: S = transverse spin parameter r·||ω × v̂||/v (dimensionless);
 The constants above govern the **core simulator**
 (`ball_properties.py` + `ball_simulator.py::BallFlightSimulator` and the
 enhanced/Rust engines) — the canonical trajectory authority pinned by this
-sheet.
+sheet. Note that `BallFlightSimulator` / `EnhancedBallFlightSimulator`
+integrate `cd_spinning_ball(Re, S, base_cd=0.187)` with exponential spin decay
+(`0.05 s^-1`; see #15443 for the reference-shot carries), whereas
+`BallProperties.calculate_cd` defines the polynomial helper and
+`WaterlooPennerModel` uses constant spin (`~247.5 m`).
 
 A second, deliberately distinct family lives in
 `src/shared/python/physics/flight_models.py` (the Multi-Model Ball Flight

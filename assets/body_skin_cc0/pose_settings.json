@@ -1,0 +1,33 @@
+{
+  "shoulder_follow": 0.3,
+  "smoothing_iterations": 15,
+  "smoothing_radius_m": 0.17,
+  "girdle_smoothing_iterations": 45,
+  "acromion_half_width_m": 0.025,
+  "acromion_inner_m": 0.04,
+  "acromion_reach_m": 0.1,
+  "neck_follow": [0.2, 0.5, 0.8],
+  "step_limits_mm": {
+    "trail_protracted_50_mm": 8.0,
+    "trail_protracted_110_mm": 16.0,
+    "trail_protracted_110_mm_and_lowered": 16.0
+  },
+  "rigid_step_floor_mm": 40.0,
+  "arm_turn_patch_radius_m": 0.16,
+  "arm_turn_stretch_limits_mm": {"trail_top": 15.0, "lead_finish": 15.6},
+  "neck_test_turn_rad": 0.6,
+  "neck_step_limit_mm": 22.0,
+  "neck_rim_lag_limit_mm": 32.0,
+  "sources": {
+    "shoulder_follow": "Share of the upper arm's motion the deltoid group takes; 0.3 from the #15299 prototype (0, 0.3 and 0.6 differ little by eye).",
+    "smoothing_iterations": "Largest change of an edge length on the acromion path at 110 mm protraction: 34.0 mm with the stored weights, 16.6 mm after 5 passes, 12.7 mm after 15, 10.8 mm after 40 (2026-11-20). Fifteen takes most of the gain and leaves the rib cage alone.",
+    "smoothing_radius_m": "About one shoulder half-spacing (0.18 m on the tour-average subject): the girdle, not the sternum or the elbow.",
+    "girdle_smoothing_iterations": "Further passes that relax only how a vertex shares its thorax, clavicle, deltoid and upper-arm weight among those groups, after the passes above. At the top of a driver backswing the trail upper arm is turned about 77 degrees against its girdle link, 65 of them about its own axis, and the sleeve creased at the back of the armpit. Largest change of an edge length of the drawn shirt within 160 mm of the shoulder joint over a fitted driver swing (showpiece profile, MuJoCo skin, 2026-11-20), 0 against 45 passes: trail shoulder 30.7 against 23.5 mm at the top and 28.2 against 20.7 mm late in the backswing; lead shoulder 22.3 against 18.9 mm at the finish and 27.8 against 21.7 mm at the top; at address 22.0 against 15.1 mm (trail) and 13.4 against 10.8 mm (lead). 100 passes give 22.4 mm at the trail top: little more, and more faces lose over half their area where the arm is raised furthest (trail finish: 83 with 0, 118 with 45, 130 with 100). 60 plain passes measure the same at the trail top (23.5 mm) as 15 plain and 45 of these but leak the pelvis and the head into the neck and arm skin (one more bone). A linear blend of two bodies cannot hand the arm's twist on along the sleeve, so the crease is spread, not removed.",
+    "arm_turn": "Check of girdle_smoothing_iterations on the stored skin: the upper arm turned about the shoulder joint as in tests/fixtures/model_appearance/shoulder_turns.json, trunk and girdle still; the largest change of an edge length within arm_turn_patch_radius_m of the joint may not exceed arm_turn_stretch_limits_mm. Measured 2026-11-20 on the test subject, 0 against 45 passes: trail_top 16.2 against 13.8 mm, lead_finish 16.1 against 15.0 mm.",
+    "acromion": "A 50 mm thick frontal strip through the shoulder joint, from 40 mm off the midline (outside the neck) to 100 mm beyond and below the joint (the sleeve cap); 105 edges, mean length 23 mm.",
+    "step_limits_mm": "Measured 5.6, 12.7 and 12.6 mm on the three girdle poses of tests/fixtures/model_appearance/girdle_poses.json, with margin for a subject of another size. A rigid mesh per body steps 45 to 113 mm on the same path.",
+    "neck_follow": "Share of the head's motion relative to the thorax taken by the lower, middle and upper neck group (the head group takes all of it). 0.2, 0.5 and 0.8 are the #15299 prototype's values, which keep the collar still on the thorax. Measured 2026-11-20 with the head turned 0.6 rad about the vertical and then 0.6 rad about the lateral axis: the rim that meets the head model falls 26.9 mm behind the head (it moves 82 mm) against 45.3 mm for a neck that stays on the thorax, and the largest change of an edge length above the neck joint is 18.0 mm. Shares of 0.5, 0.8 and 1.0 give 14.0 mm and 13.7 mm but turn the collar half way with the head.",
+    "neck_limits": "neck_step_limit_mm and neck_rim_lag_limit_mm bound the two measured values at neck_test_turn_rad with margin for a subject of another size.",
+    "rigid_step_floor_mm": "The criterion must tell the two apart: one body per vertex steps at least 45 mm on every pose."
+  }
+}

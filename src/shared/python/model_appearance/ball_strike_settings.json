@@ -1,0 +1,12 @@
+{
+  "placement": "strike",
+  "search_window_s": 0.02,
+  "max_shift_m": 0.15,
+  "max_tee_height_m": { "driver": 0.1016, "default": 0.0 },
+  "sources": {
+    "placement": "Where the decorative ball of a replayed swing is drawn. \"address\" keeps it at the address face, resting on the ground (#12955). \"strike\" moves it to where the face centre passes nearest that place around impact, so the drawn face meets the drawn ball (#15150, owner request 2026-11-20). Either way the ball is a display object: it is not measured, not simulated, and moving it changes no joint angle and no club dimension.",
+    "search_window_s": "Half width of the time window round the impact time in which the nearest pass of the face centre is looked for. 0.02 s is the window the impact-parameter extractor already uses for its swing plane (impact_parameters.extract.PLANE_WINDOW_S); at a driver head speed of about 45 m/s it spans about 0.9 m of travel each side.",
+    "max_shift_m": "Largest distance the ball may be moved from its address place. Beyond it the swing does not come back to the ball and moving the ball would hide a fault of the fit, so the address ball is kept and the reason is recorded. 0.15 m is a display judgement (about 3.5 ball diameters), not a measurement; the matched driver swing of 2026-11-20 needs about 0.10 m from the ground and 0.04 m from the address face centre.",
+    "max_tee_height_m": "Greatest height of the underside of the ball above the ground, by club head name; \"default\" serves every other club. Driver: 0.1016 m, the longest tee the Rules of Golf allow (Equipment Rules, Part 6: a tee must not be longer than 4 inches). It is an upper bound, not a typical tee: tour drivers are usually teed with the underside about 0.04 m up. Other clubs: 0, the ball lies on the ground. A ball held by a limit is no longer struck at the centre of the face; the placement record states by how much."
+  }
+}

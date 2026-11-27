@@ -12,16 +12,99 @@ layers (SHOW-C7 ``flight_report``).
 
 from __future__ import annotations
 
+import functools
+import json
 import math
+import re
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
 from src.shared.python.contracts import require
 from src.shared.python.physics.ball_launch_conditions import LaunchConditions
 
-# Tour-labelled driver launch spin for face-to-path 10–15 deg (issue #14621).
-MAX_DRIVER_LAUNCH_SPIN_RPM: float = 3500.0
+SETTINGS_PATH = Path(__file__).with_name("ball_flight_validity_settings.json")
+_DRIVER_CLASS = "driver"
+
+
+@dataclass(frozen=True)
+class LaunchSpinEnvelope:
+    """Launch-spin cap of one club class (#15443).
+
+    Invariant: ``max_rpm`` is positive and finite.
+    """
+
+    club_class: str
+    label: str
+    max_rpm: float
+
+    def __post_init__(self) -> None:
+        require(
+            math.isfinite(self.max_rpm) and self.max_rpm > 0.0,
+            "max_rpm must be positive and finite",
+            self.max_rpm,
+        )
+
+
+@functools.lru_cache(maxsize=1)
+def _settings() -> dict[str, Any]:
+    with SETTINGS_PATH.open(encoding="utf-8") as handle:
+        data: dict[str, Any] = json.load(handle)
+    return data
+
+
+def _envelope_of(club_class: str) -> LaunchSpinEnvelope:
+    entry = _settings()["classes"][club_class]
+    return LaunchSpinEnvelope(
+        club_class=club_class,
+        label=str(entry["label"]),
+        max_rpm=float(entry["max_launch_spin_rpm"]),
+    )
+
+
+def report_margin_rpm() -> float:
+    """Spin excess [rpm] tolerated before a report calls a flight invalid."""
+    return float(_settings()["report_margin_rpm"])
+
+
+def launch_spin_envelope(club: str | None) -> LaunchSpinEnvelope:
+    """Launch-spin envelope for the club named ``club``.
+
+    Preconditions: ``club`` is a string or ``None``.
+    Postcondition: an unknown, empty or ``None`` club gets the fallback class
+    of the settings file (the driver envelope, the most conservative one).
+
+    Raises:
+        TypeError: ``club`` is neither a string nor ``None``.
+    """
+    club_class = club_class_of(club)
+    if club_class is None:
+        club_class = str(_settings()["fallback_club_class"])
+    return _envelope_of(club_class)
+
+
+def club_class_of(club: str | None) -> str | None:
+    """Club class whose name pattern matches ``club``, or ``None`` if none does.
+
+    ``None`` means :func:`launch_spin_envelope` would use the fallback class.
+
+    Raises:
+        TypeError: ``club`` is neither a string nor ``None``.
+    """
+    if club is not None and not isinstance(club, str):
+        raise TypeError(f"club must be a string or None, got {type(club).__name__}")
+    name = (club or "").strip().lower()
+    for entry in _settings()["club_name_patterns"]:
+        if re.search(entry["pattern"], name):
+            return str(entry["club_class"])
+    return None
+
+
+# Tour-labelled driver launch spin for face-to-path 10–15 deg (issue #14621);
+# alias of the driver value in the settings file.
+MAX_DRIVER_LAUNCH_SPIN_RPM: float = _envelope_of(_DRIVER_CLASS).max_rpm
 
 # Landing azimuth guard (SHOW-C7 flight card; margin over typical driver flights).
 MAX_LANDING_AZIMUTH_DEG: float = 45.0

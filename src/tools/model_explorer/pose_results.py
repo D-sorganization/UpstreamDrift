@@ -129,9 +129,8 @@ class PoseFrameSource:
 
     @property
     def source_tag(self) -> str:
-        """``run_dir/file`` tag identifying where the run came from."""
-        path = self.path
-        return f"{path.parent.name}/{path.name}"
+        """File name identifying the run (the folder stays out of the UI)."""
+        return self.path.name
 
     @property
     def frame_count(self) -> int:
@@ -144,11 +143,19 @@ class PoseFrameSource:
 
     @property
     def playback_label(self) -> str:
-        """Honest title: native MuJoCo result, or playback of another engine."""
-        title = engine_title(self.engine)
+        """Plain title, e.g. ``Driver swing: matched motion replay (MuJoCo)``.
+
+        A run from another engine is named in the brackets; it is always
+        drawn on the MuJoCo golfer.
+        """
+        club = self.spec.get("club", {})
+        name = club.get("name") if isinstance(club, dict) else None
+        subject = f"{str(name).capitalize()} swing" if name else "Swing"
         if self.is_native_render:
-            return f"{title} result"
-        return f"Playback of {title} result (rendered on the MuJoCo golfer model)"
+            engine = engine_title(RENDER_ENGINE)
+        else:
+            engine = f"{engine_title(self.engine)} result, drawn in MuJoCo"
+        return f"{subject}: matched motion replay ({engine})"
 
     @property
     def spec(self) -> dict[str, Any]:

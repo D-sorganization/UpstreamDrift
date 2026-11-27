@@ -135,3 +135,53 @@ def test_hud_event_caption_names_the_current_event() -> None:
         HudInfo(0.0, "Drake", "Driver", "", event_caption=123)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="finite"):
         event_caption_for_time(float("nan"), document)
+
+
+def test_an_entry_wider_than_the_frame_wraps_at_spaces() -> None:
+    """A single long legend entry is not cut off at the frame edge (#15685)."""
+    from src.tools.native_viewer_export import compositor
+
+    size, width = compositor.HUD_SIZE_PX, 960
+    entry = (
+        "Trail hand on club: ZTCF drift (blue) + ZVCF control (orange) = total "
+        "(white); one null-space solution; hand-force arrows drawn 8x"
+    )
+    line = compositor.HUD_SEPARATOR.join(["Scale: body_weight", entry])
+    rows = compositor.wrap_hud_line(line, width, size)
+    margin = compositor.HUD_LAYOUT.edge_margin_px
+    for row in rows:
+        assert compositor.text_box(row, (margin, 0), size)[2] <= width - margin, row
+    assert rows[-1].endswith("drawn 8x")
+
+    def words(text: str) -> list[str]:
+        return [w for w in text.split() if w != "|"]
+
+    assert words(" ".join(rows)) == words(line)
+
+
+def test_hud_lines_wrap_at_separators_to_fit_the_frame_width() -> None:
+    """A HUD line wider than the frame continues on the next row (#15150)."""
+    from src.tools.native_viewer_export import compositor
+
+    size, width = compositor.HUD_SIZE_PX, 1280
+    entries = [
+        f"{name} mobility: [0.4, 0.7, 0.8] kg^-1/2 (cond=3.7)"
+        for name in ("Lead_hand", "Trail_hand", "Lead_foot", "Trail_foot", "Clubhead")
+    ]
+    long_line = compositor.HUD_SEPARATOR.join(entries)
+    assert compositor.text_box(long_line, (0, 0), size)[2] > width  # was cut off
+    rows = compositor.wrap_hud_line(long_line, width, size)
+    assert len(rows) > 1 and compositor.HUD_SEPARATOR.join(rows) == long_line
+    margin = compositor.HUD_LAYOUT.edge_margin_px
+    for row in rows:
+        assert compositor.text_box(row, (margin, 0), size)[2] <= width - margin, row
+    assert compositor.wrap_hud_line("a | b", width, size) == ["a | b"]
+    words = compositor.wrap_hud_line(entries[0], 40, size)
+    assert " ".join(words) == entries[0]  # an over-wide entry breaks at spaces
+    hud = HudInfo(0.0, "MuJoCo", "Driver", "", extra_lines=(long_line,))
+    blank = np.zeros((720, width, 3), dtype=np.uint8)
+    drawn = draw_hud(blank, hud)
+    boxes = compositor.hud_line_boxes(blank.shape, [hud.lines()[0], *rows], size)
+    top = int(np.flatnonzero(drawn.any(axis=(1, 2)))[0])
+    assert boxes[0][1] <= top < boxes[1][1]  # head row stacked above every row
+    assert not drawn[:, width - margin :].any()  # nothing runs to the edge

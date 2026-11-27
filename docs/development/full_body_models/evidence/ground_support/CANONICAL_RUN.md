@@ -211,3 +211,53 @@ re-execution was deferred on this workstation due to ~2 GB free disk.
 1. **Path-Anchored Metrics:** Every metric cited in documentation must use explicit path-anchored references: `path/to/receipt.json#field.path`.
 2. **Honest Distinctions:** Cite `anthro_driver_seeds/receipt.json` (9.5 mm / 29.5 mm / 99.3 mm) and `anthro_iron_seeds_zmp/receipt.json` (11.3 mm / 30.7 mm / 74.9 mm) as the calibrated tour match, with the replay sensitivity recorded in the #13037 paragraph of §2A. 5.1 mm / 27.3 mm / 74.6 mm (`anthro_driver_shoot_g025`) and 4.4 mm / 28.6 mm / 144.0 mm (`anthro_iron_zmp`) are pre-HO-8 numbers produced with widened leg bounds; cite them only as history. When citing nominal baseline performance without static-trial calibration, cite `anthro_driver/receipt.json` (42.4 mm / 47.0 mm / 63.1 mm); the nominal 7-iron receipt records a known trajectory-IK failure (#12030).
 3. **Automated Enforcement:** Continuous validation is enforced by `tests/unit/motion_matching/test_handoff_numbers_match_receipts.py`.
+
+## 6. Driver Club Marker Registrations (#15296)
+
+Two `club-markers/1` files place the same six-marker driver cluster in the `Clubhead` frame. Both are kinematic registrations. Neither is a measurement of the club, and neither is physical or scientific acceptance. `evidence/club_markers/driver.json` is the default (static-seed calibration of the whole body, #12221); `evidence/club_markers/driver_club_only.json` is selected by `--club-markers club_only` and is derived from the club markers alone (`execution/club_only_registration.py`, settings stored in the file's source; `tests/unit/motion_matching/test_club_only_registration.py` regenerates it).
+
+**Circularity of the Default.** The static-seed calibration moves the club cluster to fit a body-driven pose, so the club placement inherits the body model's error and cannot then be used to judge it. The committed documents and the default builder output still use `driver.json`; nothing changes unless the alternative is selected.
+
+**Club-Only Rule.** Shape: mean marker positions over the first 10 frames (the club moves 0.5 mm in that window). Shaft axis: the line through `Marker_3:3:3` and `Marker_3:3:1`. It is the only pair whose line passes the head (93 mm from the head-triad centroid; the other two pairs pass 369 and 431 mm away); `Marker_3:3:2` is 33.8 mm off it. Along-shaft datum: the model head ellipsoid (`club_models.DRIVER.head_half_size_m`, centred on the axis) has its lowest point on the capture ground (z = 0) at address. Roll: the head-triad centroid azimuth about the shaft is a setting (3.92 deg), which keeps the roll of `driver.json`.
+
+**Measured on `data/C3D_TA_Driver.c3d`** (club placed on its six markers by a rigid fit; address frame 0, impact frame 476):
+
+| Quantity                                                    | `driver.json`  | `driver_club_only.json` |
+| ----------------------------------------------------------- | -------------- | ----------------------- |
+| `Marker_3:3:3` / `Marker_3:3:1` distance from the club axis | 70.5 / 78.0 mm | 0.0 / 0.0 mm (by rule)  |
+| Model head lowest point at address                          | 43.7 mm        | 0.0 mm (by rule)        |
+| Model head lowest point at impact                           | 62.9 mm        | 23.8 mm (not tuned)     |
+
+**What the Club Markers Cannot Identify.** Roll about the shaft relative to the model face, the standoff of the two shaft markers from the true axis (about a shaft radius plus a marker radius, unmeasured), the hover of the head at address (10 mm of hover moves the club 14 mm along the shaft) and the butt end: no marker is on it, so club length is not identifiable. With the head soled the shaft axis meets the ground 63.7 mm beyond the model head centre, so the model butt is 1219.7 mm from that point while `DRIVER.length_m` is 1.156 m. Whether the model club is long by that amount depends on the real club's length and on which point its length is measured to; neither is recorded. The wrist-top markers sit 94 mm (lead) and 165 mm (trail) inside the model butt at address. The club length is unchanged.
+
+## 7. Tour-Average Driver Subject Preset (#15296)
+
+`--subject-preset tour_average_driver` builds the fitted subject of the driver capture from `evidence/subject_presets/tour_average_driver.json` (`execution/subject_preset.py`; every setting carries its provenance, explicit flags override it, and without the flag the builder output and the committed documents are unchanged). The values are kinematic fit settings from the 35-frame bundle adjustment and whole-swing inverse kinematics posted on #15296, in which a typical 1.82 m body fitted the markers as well as the previous candidate (total chi-square 2122 against 2095 with the same priors). They are not measurements of the golfer and not physical or scientific acceptance; stature and club length are owner decisions.
+
+| Quantity (Joint to Joint)             | Previous Candidate | Preset  | Setting                                        |
+| ------------------------------------- | ------------------ | ------- | ---------------------------------------------- |
+| Upper arm / forearm                   | 310 / 296 mm       | 297 / 283 mm | `stature_m` 1.82, `arm_scale` 1.008       |
+| Shoulder joint half-spacing           | 175 mm             | 180 mm  | `shoulder_scale` 0.8675                        |
+| Shoulder joints below the neck joint  | 40 mm              | 95 mm   | `shoulder_below_cervicale_m` (medium-low confidence) |
+| Mid-hip to neck joint                 | 665 mm             | 623 mm  | `trunk_scale` 0.9878 (see `LEG_LENGTHS.md`)    |
+| Club butt to head centre / to sole    | 1156 / 1220 mm     | 1079 / 1143 mm | `club_butt_to_sole_m` 1.143 (45 in)     |
+
+**Club Length Convention.** `ClubSpec.length_m` runs from the butt to the head centre, not to the sole. `club_models.sole_offset_m` gives the distance along the shaft from the head centre to the ground for the head ellipsoid soled at a stated shaft elevation and roll (63.7 mm at the 45.49 deg and 130.4 deg of the club-only registration), and `with_butt_to_sole_length` restates a club by the retail convention; `DRIVER` is unchanged. The club-only marker offsets are measured from the soled head, so they do not depend on club length and the preset uses `driver_club_only.json` as committed; only the hands move 76.7 mm toward the head. Standing at the zero pose the preset model's neck joint is 1.586 m and its de Leva vertex 1.840 m above the lowest contact sphere (joint-based, barefoot, no skin mesh measured); legs are the model's own, and the hip joint half-spacing follows stature (94.6 mm, from 88.9 mm at 1.71 m). Marker attachment seeds per the marker placement review are not part of this preset yet.
+
+## 8. Preset Marker Attachment Seeds (#15296)
+
+The preset file also states where each of the 28 body markers sits on the model (`marker_seeds`) and which capture labels a fit leaves out (`dropped_markers`), so the refit posted on #15296 starts from the repository instead of experiment code. The builder takes them as `marker_seed_overrides` and `dropped_markers` (`execution/marker_seed_overrides.py`); without them the builder's own seeds, the default output and the committed documents are unchanged. Offsets are metres in the named frame (x forward, y left, z up for the trunk, head and arms; the OpenSim leg frames have y up and z right). An entry with `anchor` is measured from the joint between its body and the anchor instead of from the frame origin.
+
+| Markers                    | Frame, Anchor                    | Seed (mm)                                                        | Basis                                                         |
+| -------------------------- | -------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| HeadTop, HeadFront, HeadSide | `Head`                         | Front 142 forward and 65 below Top; Side 9 behind, 88 left, 100 below | Cap triad, rigid to 0.3 mm; HeadFront is not a forehead marker |
+| Waist sides and backs      | `Hip`                            | Sides ±172.5, backs ±84.5 and 147 behind, all 165 above the hip joints | Belt: measured spacings 345 and 169 mm, not ASIS and PSIS |
+| BackTop, BackLeft, BackRight | `Spine`, neck joint            | Top 30 below the neck joint; pair 180 lower, ±90                 | C7-T2 and T7-T8                                               |
+| ShoulderTop, ShoulderBack  | `LScap`, `RScap`                 | 165 and 150 from the midline                                     | Measured spacings 329 and 305 mm                              |
+| UArmHigh, ElbowOut         | `LS`, `RS`; elbow joint          | Posterior at 60 % of the upper arm; 40 lateral of the elbow      | Measured 59-61 %; lateral epicondyle                          |
+| WristTop                   | `LF`, `RF`, wrist joint          | 25 proximal of the joint line, 28 above the forearm axis         | Wristband position; lead side fitted 32 proximal              |
+| KneeOut, AnkleOut, toes    | Leg bodies; knee and ankle joints | 55 and 50 lateral; toes on the shoe at the MTP heads            | Review landmarks; the builder has no leg seeds                |
+
+**Neck Anchor.** The builder's own upper back seeds follow shoulder-joint height, so the preset's 95 mm shoulder drop would carry them 55 mm down the back. The preset ties them to the neck joint, which leaves BackTop 45 mm above the builder's seed.
+
+**Seeds, Not Measurements.** These are starting values for a marker calibration, taken from the placement review's geometry and not from fitted offsets. In the refit both elbow markers and the trail wrist marker ended on a bound, so their fitted offsets are not adopted and the seeds stay. The dropped labels are the three `Uname*36`-`38` waist midpoints (they repeat the waist markers) and the stray `Marker_0:0:0`; a dropped label gets no attachment and is recorded in `subject.dropped_markers`. At the zero pose the 28 seeds are within 0.1 mm of the refit's. No fit was run for this change, and placement confidence is medium for the head, back, shoulder and upper arm markers. Reproduce with `python3 -m src.shared.python.motion_matching.execution.spec_builder --subject-preset tour_average_driver` plus the four path flags.

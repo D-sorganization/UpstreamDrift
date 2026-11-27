@@ -92,6 +92,7 @@ def thumb_polyline(baked: GripHandMesh) -> np.ndarray:
 
 
 def palm_z_extent(baked: GripHandMesh) -> tuple[float, float]:
+    """Axial span of the palm component of ``baked``."""
     palm = next(c for c in baked.components if c.finger == "palm")
     verts = palm.mesh.vertices
     return float(verts[:, 2].min()), float(verts[:, 2].max())
@@ -100,6 +101,7 @@ def palm_z_extent(baked: GripHandMesh) -> tuple[float, float]:
 def scale_points_about_centre(
     points: list[np.ndarray], centre: np.ndarray, scale: float
 ) -> list[np.ndarray]:
+    """Scale ``points`` about ``centre`` by ``scale``."""
     return [centre + (p - centre) * scale for p in points]
 
 
@@ -109,6 +111,7 @@ def uniform_scale_skeleton(
     target_length_m: float,
     measured_length_m: float,
 ) -> list[np.ndarray]:
+    """Scale a skeleton so its length matches ``target_length_m``."""
     if measured_length_m < 1e-6:
         return points_list
     s = target_length_m / measured_length_m
@@ -118,6 +121,7 @@ def uniform_scale_skeleton(
 
 
 def middle_finger_length(points: np.ndarray) -> float:
+    """Polyline length of the middle-finger points."""
     total = 0.0
     for i in range(len(points) - 1):
         total += float(np.linalg.norm(points[i + 1] - points[i]))

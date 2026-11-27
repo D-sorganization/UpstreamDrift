@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from collections.abc import Callable, Iterable, Sequence
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -18,6 +18,16 @@ from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.shared.python.force_overlay.glyphs import EllipsoidGlyph
+from src.tools.native_viewer_export.camera_framing import default_lookat_height_m
+from src.tools.native_viewer_export.ellipsoid_panel import KIND_FIELDS, PanelRow
+from src.tools.native_viewer_export.ellipsoid_visibility import (
+    VisibilitySettings,
+    fade_outer,
+    group_scales,
+    load_visibility_settings,
+)
+from src.tools.native_viewer_export.kinematic_replay import NOTE, vector_visibility
+from src.tools.native_viewer_export import shaft_loads
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
     OverlayFeed,
@@ -26,8 +36,6 @@ from src.tools.native_viewer_export.core import (
 )
 
 logger = logging.getLogger(__name__)
-
-LOOKAT_HEIGHT_M = 0.9
 
 
 @dataclass(frozen=True)
@@ -44,6 +52,30 @@ class OverlayOptions:
     mobility_points: str = "hands"
     max_mobility_points: int = 8
     mobility_condition_cutoff: float | None = None
+    #: ellipsoid colour encodes the point (default) or the kind (#15150)
+    ellipsoid_color_by: str = "point"
+    #: ellipsoid scale grouping, nested alpha and floor; ``None``: packaged file
+    visibility: VisibilitySettings | None = None
+    #: blank axial loads around ball impact (skin_load_settings.json default)
+    axial_impact_blackout: bool = True
+    #: the user passed a vector flag, so a kinematic replay still draws vectors
+    forces_requested: bool = False
+    #: tip-to-tail ZTCF drift + ZVCF control hand-on-club force (#15685)
+    ztcf_zvcf_hand_force: bool = False
+    #: length gain for the tip-to-tail hand-force arrows only (#15685)
+    ztcf_arrow_gain: float = 1.0
+    #: which view of the split, force or torque, and which hands (#15150 Z3b)
+    ztcf_view: str = "tip_to_tail"
+    ztcf_quantity: str = "force"
+    ztcf_hands: str = "both"
+    #: segment shading: recorded loads, or the ZTCF/ZVCF split part (Z4b)
+    shading_part: str = "recorded"
+    #: forces drawn: ``recorded``, or one ZTCF/ZVCF case's ground and kinds (Z4c)
+    force_part: str = "recorded"
+    #: force arrow look in ``arrow_style_settings.json`` (default: its default)
+    arrow_style: str | None = None
+    shaft_loads: str | None = None  # bending, shear or None: off (#15150 Z9c)
+    shaft_loads_part: str = "total"  # or one ZTCF/ZVCF part
 
 
 def _grip_source(swing: SwingInput, engine: str, mujoco_source: Any) -> tuple[Any, str]:
@@ -174,99 +206,223 @@ def _build_hand_hud_lines_fn(
     return hand_hud_lines_fn
 
 
+RGBA = tuple[float, float, float, float]
+
+
+@dataclass(frozen=True)
+class MobilitySelection:
+    """Which mobility points the ellipsoid feed samples, how many, and how its
+    glyphs are sized and shaded (``visibility``: ``None`` = packaged file; #15150)."""
+
+    points: str = "hands"
+    max_points: int = 8
+    condition_cutoff: float | None = None
+    visibility: VisibilitySettings | None = None
+
+
+def _ellipsoid_color_picker(
+    color_by: str,
+) -> Callable[[Any, str, RGBA], RGBA]:
+    """Colour rule of an export ellipsoid: by ``"point"`` or by ``"kind"`` (#15150).
+
+    Raises ``ValueError`` for any other ``color_by``. The returned function
+    maps ``(point, kind, fallback_rgba)`` to the glyph RGBA.
+    """
+    from src.shared.python.force_overlay.palette import (
+        ellipsoid_kind_rgba,
+        require_ellipsoid_color_mode,
+    )
+
+    if require_ellipsoid_color_mode(color_by) == "kind":
+        return lambda _point, kind, _fallback: ellipsoid_kind_rgba(kind)
+    return lambda point, _kind, fallback: (
+        point.color if point.color is not None else fallback
+    )
+
+
+def _semi_axes_series(
+    samples: Iterable[Any], points: Sequence[Any], kind: str
+) -> list[list[float]]:
+    """Physical semi-axes of ``kind`` at ``points`` over the sampled states."""
+    series: list[list[float]] = []
+    for sample in samples:
+        for pt in points:
+            hm = _lookup_point_mobility(sample, pt)
+            if hm is not None:
+                series.append(list(_extract_physical_radii(hm, kind)[1]))
+    return series
+
+
+def _ellipsoid_feed_factory(
+    swing: SwingInput, engine: str, opts: OverlayOptions, active: Sequence[str]
+) -> Callable[[SwingInput], tuple[Any, Any, Any]]:
+    """Feed builder for any re-sampling of ``swing``, on ``swing``'s scale."""
+
+    def ellipsoids_for(shown: SwingInput) -> tuple[Any, Any, Any]:
+        return _build_hand_ellipsoid_feed(
+            shown,
+            active,
+            opts.hand_mobility_mode,
+            opts.ellipsoid_scale,
+            engine=engine,
+            selection=MobilitySelection(
+                opts.mobility_points,
+                opts.max_mobility_points,
+                opts.mobility_condition_cutoff,
+                opts.visibility,
+            ),
+            ellipsoid_color_by=opts.ellipsoid_color_by,
+            scale_from=swing,
+        )
+
+    return ellipsoids_for
+
+
 def _build_hand_ellipsoid_feed(
     swing: SwingInput,
     active_ellipsoids: Sequence[str],
     hand_mobility_mode: str,
     ellipsoid_scale: str,
     engine: str = "mujoco",
-    mobility_points: str = "hands",
-    max_mobility_points: int = 8,
-    mobility_condition_cutoff: float | None = None,
+    selection: MobilitySelection = MobilitySelection(),
+    ellipsoid_color_by: str = "point",
+    scale_from: SwingInput | None = None,
 ) -> tuple[
-    Callable[[int], tuple[EllipsoidGlyph, ...]], Callable[[int], tuple[str, ...]]
+    Callable[[int], tuple[EllipsoidGlyph, ...]],
+    Callable[[int], tuple[str, ...]],
+    Callable[[int], tuple[PanelRow, ...]],
 ]:
-    """Build ellipsoid glyph emitter and HUD capability formatter."""
-    from src.shared.python.force_overlay.ellipsoid_display import (
-        EllipsoidDisplayBuilder,
-        EllipsoidDisplayScale,
-    )
+    """Build ellipsoid glyph emitter, HUD capability formatter and panel rows.
+
+    Index ``k`` of either is evaluated at the pose ``swing.q[k]``. The display
+    scale of each kind (and point, per ``selection.visibility``) comes from the
+    states of ``scale_from`` (default
+    ``swing``), so the clips re-sampled from one source share it (#15150).
+    """
+    scale_swing = swing if scale_from is None else scale_from
+    pick_color = _ellipsoid_color_picker(ellipsoid_color_by)
+    mobility_condition_cutoff = selection.condition_cutoff
     from src.shared.python.spatial_algebra.segment_intersection import (
         resolve_intersection_points,
     )
 
     spec_dict = json.loads(swing.bundle.spec_bytes)
     resolved_pts = resolve_intersection_points(
-        spec_dict,
-        mobility_points,
-        max_points=max_mobility_points,
+        spec_dict, selection.points, max_points=selection.max_points
     )
 
-    _hm_cache: dict[int, Any] = {}
+    _hm_cache: dict[tuple[bool, int], Any] = {}
 
-    def _get_hm(idx: int) -> dict[str, Any]:
-        if idx not in _hm_cache:
-            if hasattr(swing, "segment_mobility_at"):
-                _hm_cache[idx] = swing.segment_mobility_at(
+    def _get_hm(idx: int, of: SwingInput = swing) -> dict[str, Any]:
+        key = (of is swing, idx)
+        if key not in _hm_cache:
+            if hasattr(of, "segment_mobility_at"):
+                _hm_cache[key] = of.segment_mobility_at(
                     idx, points=resolved_pts, mode=hand_mobility_mode, engine=engine
                 )
             else:
-                _hm_cache[idx] = swing.hand_mobility_at(
+                _hm_cache[key] = of.hand_mobility_at(
                     idx, mode=hand_mobility_mode, engine=engine
                 )
-        return _hm_cache[idx]
+        return _hm_cache[key]
 
-    builders: dict[str, EllipsoidDisplayBuilder] = {}
-    scales: dict[str, EllipsoidDisplayScale] = {}
-    stride = max(1, swing.n_states // 20)
-    for kind in active_ellipsoids:
-        semi_axes_series: list[list[float]] = []
-        for idx in range(0, swing.n_states, stride):
-            hm_sample = _get_hm(idx)
-            for pt in resolved_pts:
-                hm = _lookup_point_mobility(hm_sample, pt)
-                if hm is not None:
-                    _, r = _extract_physical_radii(hm, kind)
-                    semi_axes_series.append(list(r))
-        scale = EllipsoidDisplayScale.compute(
-            semi_axes_series,
-            target_radius_m=0.09,
-            kind=kind,
-            mode=ellipsoid_scale,
+    vis = selection.visibility or load_visibility_settings()
+    stride = max(1, scale_swing.n_states // 20)
+    sampled = [_get_hm(i, scale_swing) for i in range(0, scale_swing.n_states, stride)]
+    scales = {
+        kind: group_scales(
+            {pt.name: _semi_axes_series(sampled, [pt], kind) for pt in resolved_pts},
+            kind,
+            ellipsoid_scale,
+            vis,
         )
-        scales[kind] = scale
-        builders[kind] = EllipsoidDisplayBuilder(scale)
+        for kind in active_ellipsoids
+    }
+    hand_ellipsoids_fn = _build_glyph_fn(
+        _get_hm,
+        resolved_pts,
+        active_ellipsoids,
+        scales,
+        (pick_color, vis),
+        mobility_condition_cutoff,
+    )
+    hud_fn = _build_hand_hud_lines_fn(
+        _get_hm,
+        resolved_pts,
+        active_ellipsoids,
+        {kind: next(iter(by_pt.values()), None) for kind, by_pt in scales.items()},
+        mobility_condition_cutoff,
+    )
+    return (
+        hand_ellipsoids_fn,
+        hud_fn,
+        _build_panel_rows_fn(_get_hm, resolved_pts, mobility_condition_cutoff),
+    )
 
-    def hand_ellipsoids_fn(index: int) -> tuple[EllipsoidGlyph, ...]:
-        hm_map = _get_hm(index)
-        glyphs_list: list[EllipsoidGlyph] = []
-        for kind in active_ellipsoids:
-            builder = builders[kind]
-            for pt in resolved_pts:
+
+def _build_glyph_fn(
+    get_hm: Callable[[int], dict[str, Any]],
+    points: Sequence[Any],
+    kinds: Sequence[str],
+    scales: dict[str, dict[str, Any]],
+    style: tuple[Callable[[Any, str, RGBA], RGBA], VisibilitySettings],
+    condition_cutoff: float | None = None,
+) -> Callable[[int], tuple[EllipsoidGlyph, ...]]:
+    """Glyph emitter of the display ``scales`` (kind, point name), styled by
+    ``style`` = (colour rule, visibility settings): flooring, nested alpha."""
+    pick_color, vis = style
+    builders = {
+        (kind, name): vis.builder(scale)
+        for kind, by_point in scales.items()
+        for name, scale in by_point.items()
+    }
+
+    def glyphs_at(index: int) -> tuple[EllipsoidGlyph, ...]:
+        hm_map, out = get_hm(index), []
+        for kind in kinds:
+            for pt in points:
                 hm = _lookup_point_mobility(hm_map, pt)
                 if hm is None or (
-                    mobility_condition_cutoff is not None
-                    and hm.condition > mobility_condition_cutoff
+                    condition_cutoff is not None and hm.condition > condition_cutoff
                 ):
                     continue
-                axes, radii_phys = _extract_physical_radii(hm, kind)
-                disp = builder.build_glyph(
+                axes, radii = _extract_physical_radii(hm, kind)
+                disp = builders[(kind, pt.name)].build_glyph(
                     hm.centre,
                     axes,
-                    radii_phys,
+                    radii,
                     "trail" if "trail" in pt.name else "lead",
                     label=f"{pt.name} {kind}",
                 )
-                c = pt.color if pt.color is not None else disp.rgba
-                glyphs_list.append(
-                    EllipsoidGlyph(disp.centre, disp.axes, disp.radii, c, disp.label)
+                rgba = pick_color(pt, kind, disp.rgba)
+                out.append(
+                    EllipsoidGlyph(disp.centre, disp.axes, disp.radii, rgba, disp.label)
                 )
-        return tuple(glyphs_list)
+        return fade_outer(out, vis.outer_alpha)
 
-    hud_fn = _build_hand_hud_lines_fn(
-        _get_hm, resolved_pts, active_ellipsoids, scales, mobility_condition_cutoff
-    )
-    return hand_ellipsoids_fn, hud_fn
+    return glyphs_at
+
+
+def _build_panel_rows_fn(
+    get_hm: Callable[[int], dict[str, Any]],
+    points: Sequence[Any],
+    condition_cutoff: float | None,
+) -> Callable[[int], tuple[PanelRow, ...]]:
+    """Side-panel rows per frame: largest radii and condition of each point."""
+
+    def rows_fn(index: int) -> tuple[PanelRow, ...]:
+        hm_map, rows = get_hm(index), []
+        for pt in points:
+            hm = _lookup_point_mobility(hm_map, pt)
+            if hm is None or (condition_cutoff and hm.condition > condition_cutoff):
+                continue
+            mobility, mass = (
+                max(_extract_physical_radii(hm, k)[1]) for k in KIND_FIELDS
+            )
+            rows.append(PanelRow(pt.name, mobility, mass, float(hm.condition)))
+        return tuple(rows)
+
+    return rows_fn
 
 
 def _resolve_active_ellipsoids(
@@ -335,7 +491,8 @@ def build_overlay_feed(
     closure wrench is solved from the bundle efforts and injected; around ball
     impact (``impact_time_s``, default the shared detector's; frames within one
     bundle step) the loads are unavailable, as the impact impulse is not
-    modelled (#13179). Options in ``options`` (or ``palm_thumb``) configure
+    modelled (#13179), unless ``options.axial_impact_blackout`` is off: the
+    loads there then come from the motion alone (#15150). Options in ``options`` (or ``palm_thumb``) configure
     vector kinds (``show_force``, ``show_torque``), palm-thumb normal force
     (HRG-H1, #13189), and hand mobility/force interface ellipsoids (HCM-3, #14004).
 
@@ -350,8 +507,7 @@ def build_overlay_feed(
             f"mujoco is not available for overlays: {exc}"
         ) from exc
     opts = options or OverlayOptions()
-    show_force = opts.show_force
-    show_torque = opts.show_torque
+    visibility = vector_visibility(swing.bundle, opts)
     effective_palm_thumb = palm_thumb or opts.palm_thumb
 
     source = MujocoOverlaySource(swing.bundle.spec_bytes)
@@ -369,44 +525,172 @@ def build_overlay_feed(
         provider.with_grip(grip_source, grip_name)
     if axial:
         provider.with_axial_loads(source)
-        impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
+        impact = None
+        if opts.axial_impact_blackout:
+            impact = _impact_or_none(swing) if impact_time_s is None else impact_time_s
         if impact is not None:
             provider.with_axial_impact_window(impact, float(swing.bundle.dt_s))
     if effective_palm_thumb:
         _apply_palm_thumb(provider, source, swing.bundle.spec_bytes)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
-    lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
-    style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+    lookat = (float(com[0]), float(com[1]), default_lookat_height_m())
+    style = default_glyph_style(
+        body_mass_kg=float(source.total_mass_kg), arrow_style=opts.arrow_style
+    )
 
     active_ellipsoids = _resolve_active_ellipsoids(
         opts.hand_mobility, opts.interface_ellipsoids
     )
-    hand_ellipsoids_fn = None
-    hand_hud_lines_fn = None
+    hand_ellipsoids_fn = hand_hud_lines_fn = ellipsoids_for = panel_rows_fn = None
     if active_ellipsoids:
-        hand_ellipsoids_fn, hand_hud_lines_fn = _build_hand_ellipsoid_feed(
-            swing,
-            active_ellipsoids,
-            opts.hand_mobility_mode,
-            opts.ellipsoid_scale,
-            engine=engine,
-            mobility_points=opts.mobility_points,
-            max_mobility_points=opts.max_mobility_points,
-            mobility_condition_cutoff=opts.mobility_condition_cutoff,
-        )
+        ellipsoids_for = _ellipsoid_feed_factory(swing, engine, opts, active_ellipsoids)
+        hand_ellipsoids_fn, hand_hud_lines_fn, panel_rows_fn = ellipsoids_for(swing)
 
+    splits = _part_splits(swing, axial, opts)
+    frame_at, shading_note = part_shading(provider.frame_at, swing, axial, opts, splits)
     feed = OverlayFeed(
-        provider.frame_at,
+        frame_at,
         style,
         grip_analyses=provider.grip_analyses if grip else None,
-        show_force=show_force,
-        show_torque=show_torque,
+        show_force=visibility.show_force,
+        show_torque=visibility.show_torque,
+        forces_note=NOTE if visibility.hidden else "",
+        shading_note=shading_note,
         show_palm_thumb=effective_palm_thumb,
         hand_ellipsoids=hand_ellipsoids_fn,
         hand_hud_lines=hand_hud_lines_fn,
+        hand_panel_rows=panel_rows_fn,
+        ellipsoids_for=ellipsoids_for,
     )
+    if opts.ztcf_zvcf_hand_force:
+        feed = _with_ztcf_zvcf(feed, swing, style, opts)
+    if splits is not None and opts.force_part != "recorded":
+        feed = with_force_part(feed, splits, style, opts.force_part)
+    feed = shaft_loads.feed_with_options(feed, swing, opts)
     return feed, lookat
+
+
+def _part_splits(swing: SwingInput, axial: bool, opts: OverlayOptions) -> Any:
+    """One cached ZTCF/ZVCF split per state, shared by the shading and the
+    force part; ``None`` when neither asks for a part."""
+    if opts.force_part == "recorded" and not (
+        axial and opts.shading_part != "recorded"
+    ):
+        return None
+    from src.tools.native_viewer_export.ztcf_axial import swing_part_splits
+
+    return swing_part_splits(swing)
+
+
+def with_force_part(
+    feed: OverlayFeed, splits: Callable[[int], Any], style: Any, part: str
+) -> OverlayFeed:
+    """``feed`` with ``part``'s force kinds, ground arrow and key row (Z4c)."""
+    from src.tools.native_viewer_export.ztcf_ground import (
+        case_force_key,
+        ground_arrows,
+        load_ground_settings,
+        with_part_wrenches,
+    )
+
+    look = load_ground_settings()
+    arrows = ground_arrows(lambda i: splits(i).ground, part, style, look)
+    hands = feed.extra_arrows
+    return replace(
+        feed,
+        frame_at=with_part_wrenches(feed.frame_at, part),
+        extra_arrows=(arrows if hands is None else (lambda i: (*hands(i), *arrows(i)))),
+        colour_key=(*feed.colour_key, case_force_key(part, look)),
+    )
+
+
+def part_shading(
+    frame_at: Callable[[int], Any],
+    swing: SwingInput | None,
+    axial: bool,
+    opts: OverlayOptions,
+    splits: Callable[[int], Any] | None = None,
+) -> tuple[Callable[[int], Any], str]:
+    """``frame_at`` shaded by ``opts.shading_part`` and its HUD note (Z4b).
+
+    Without axial loads, or for ``recorded``, ``frame_at`` and no note.
+    ``splits`` (by state) is reused when given, else built from ``swing``.
+
+    Raises:
+        ValueError: an unknown shading part, or a kinematic replay ``swing``.
+    """
+    from src.tools.native_viewer_export.ztcf_axial import (
+        SHADING_NOTES,
+        swing_part_splits,
+        with_part_shading,
+    )
+
+    with_part_shading(frame_at, lambda _i: {}, opts.shading_part)  # checks it
+    if not axial or opts.shading_part == "recorded":
+        return frame_at, ""
+    split_at = splits or swing_part_splits(swing)
+    shaded = with_part_shading(frame_at, lambda i: split_at(i).axial, opts.shading_part)
+    return shaded, SHADING_NOTES[opts.shading_part]
+
+
+def _with_ztcf_zvcf(
+    feed: OverlayFeed, swing: SwingInput, style: Any, opts: OverlayOptions
+) -> OverlayFeed:
+    """``feed`` with the ZTCF/ZVCF hand arrows, their legend and colour key."""
+    from src.tools.native_viewer_export.ztcf_feed import (
+        gained_style,
+        hands_colour_key,
+        hands_of,
+        legend_for,
+        ztcf_zvcf_arrows,
+    )
+
+    gain, view, quantity = opts.ztcf_arrow_gain, opts.ztcf_view, opts.ztcf_quantity
+    hands = hands_of(opts.ztcf_hands)
+    if not hands:
+        return _with_midhands(feed, swing, style, view, gain)
+    arrows = ztcf_zvcf_arrows(
+        swing, gained_style(style, gain), None, view, quantity, hands, gain
+    )
+    return replace(
+        feed,
+        extra_arrows=arrows,
+        extra_legend=legend_for(gain, view, quantity, hands),
+        colour_key=hands_colour_key(view, hands),
+    )
+
+
+def _with_midhands(
+    feed: OverlayFeed, swing: SwingInput, style: Any, case: str, gain: float
+) -> OverlayFeed:
+    """``feed`` with both hands' one force + couple at their midpoint, one
+    case per render (#15720); ``gain`` lengthens the couple too."""
+    from src.tools.native_viewer_export import ztcf_feed
+    from src.tools.native_viewer_export.midhands import (
+        MIDHANDS_CASES,
+        load_midhands_settings,
+        midhands_glyphs,
+        midhands_key,
+    )
+
+    if case not in MIDHANDS_CASES:
+        raise ValueError(
+            f"the midhands equivalent draws one case of {MIDHANDS_CASES}; "
+            f"--ztcf-zvcf-view {case!r} is not one"
+        )
+    look = load_midhands_settings()
+    gained = ztcf_feed.gained_style(style, gain)
+    gained = replace(gained, torque_scale_m_per_nm=style.torque_scale_m_per_nm * gain)
+    glyphs = ztcf_feed.split_glyphs(
+        swing, lambda split: midhands_glyphs(split, case, gained, look)
+    )
+    return replace(
+        feed,
+        extra_arrows=glyphs,
+        extra_legend=look.legend(case, gain),
+        colour_key=midhands_key(case, look),
+    )
 
 
 def face_centre_trajectory(

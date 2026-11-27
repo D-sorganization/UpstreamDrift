@@ -9,6 +9,7 @@ from collections.abc import Sequence
 
 from src.shared.python.motion_matching.pipeline.cli import (
     build_parser,
+    run_address_stage,
     run_pipeline,
 )
 
@@ -16,9 +17,12 @@ __all__ = ["build_parser", "main", "run_pipeline"]
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entry point for packaged ground support driver."""
+    """CLI entry point; ``--address-only`` stops after the address (#15296)."""
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.address_only:
+        run_address_stage(args)
+        return 0
     run_pipeline(args)
     return 0
 

@@ -9,12 +9,16 @@ then the part is mapped to a material through the clothing preset.
 
 from __future__ import annotations
 
+import math
 from fnmatch import fnmatchcase
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from src.shared.python.core.handedness import lead_side, trail_side
 from src.shared.python.model_appearance import defaults
+from src.shared.python.model_appearance.club_face_marking import (
+    load_face_marking_settings,
+)
 from src.shared.python.motion_matching.club_models import HAND_STANDOFF_SUFFIX
 from src.shared.python.model_appearance.grip_pose import Hand
 from src.shared.python.model_appearance.schema import (
@@ -58,12 +62,15 @@ def plain_rgba(key: str) -> tuple[float, float, float, float]:
 
 
 def _skin(rgb: tuple[float, float, float]) -> Material:
+    """Build a lightly textured skin swatch from an RGB triplet."""
     return Material(
         (*rgb, 1.0),
         roughness=0.55,
         texture=Texture("noise", noise=0.02, repeat=1.0),
     )
 
+
+_MARKING = load_face_marking_settings()  # club face and score line colours
 
 MATERIALS: dict[str, Material] = {
     "polo_navy": Material(
@@ -87,14 +94,34 @@ MATERIALS: dict[str, Material] = {
     "cap_navy": Material(
         (0.12, 0.20, 0.45, 1.0), 0.85, texture=Texture("noise", noise=0.04)
     ),
+    "cap_black": Material(
+        (0.08, 0.08, 0.09, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
+    "cap_red": Material(
+        (0.62, 0.10, 0.10, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
+    "hat_straw": Material(
+        (0.72, 0.59, 0.35, 1.0), 0.95, texture=Texture("noise", noise=0.05)
+    ),
+    "hat_band_dark": Material((0.12, 0.08, 0.05, 1.0), 0.9),
     "eye_white": Material((0.96, 0.96, 0.94, 1.0), 0.2),
     "iris_dark": Material((0.10, 0.07, 0.05, 1.0), 0.15),
+    "iris_blue_grey": Material((0.36, 0.47, 0.56, 1.0), 0.15),
+    "iris_hazel": Material((0.46, 0.34, 0.14, 1.0), 0.15),
+    "pupil_black": Material((0.02, 0.02, 0.02, 1.0), 0.1),
+    "lid_line": Material((0.20, 0.12, 0.09, 1.0), 0.6),
+    "lip_seam": Material((0.50, 0.24, 0.24, 1.0), 0.5),
     "brow_dark": Material((0.14, 0.09, 0.06, 1.0), 0.9),
     "lip_pink": Material((0.62, 0.30, 0.30, 1.0), 0.5),
     "shoe_white": Material((0.92, 0.92, 0.90, 1.0), 0.4),
+    "shoe_leather": Material((0.72, 0.72, 0.71, 1.0), 0.45),
+    "shoe_saddle": Material((0.50, 0.48, 0.45, 1.0), 0.5),
+    "shoe_sole": Material((0.11, 0.11, 0.12, 1.0), 0.8),
     "shoe_black": Material((0.06, 0.06, 0.07, 1.0), 0.35),
     "glove_white": Material((0.95, 0.95, 0.94, 1.0), 0.7),
     "grip_rubber": Material((0.08, 0.08, 0.09, 1.0), 0.95),
+    "club_face": Material(_MARKING.face_rgba, 0.4, 1.0),
+    "club_score_lines": Material(_MARKING.line_rgba, 0.6, 0.0),
     "satin_steel": Material((0.46, 0.48, 0.52, 1.0), 0.5, 1.0),
     "chrome": Material((0.86, 0.88, 0.92, 1.0), 0.08, 1.0),
     "graphite": Material((0.10, 0.11, 0.13, 1.0), 0.35, 0.6),
@@ -135,10 +162,18 @@ for _swatch in defaults.skin_palette():
 for _legacy, _target in defaults.skin_aliases().items():
     MATERIALS[_legacy] = MATERIALS[_target]
 for _hair in defaults.hair_palette():
+    # noise 0 means flat: MuJoCo multiplies a texture into the material colour,
+    # which squares it and turns a light blonde into brown (#15276).
     MATERIALS[_hair["id"]] = Material(
         (*_hair["srgb"], 1.0),
         _hair["roughness"],
-        texture=Texture("noise", noise=_hair["noise"]),
+        texture=Texture("noise", noise=_hair["noise"]) if _hair["noise"] else None,
+    )
+# Eyebrows match the hair but darker: one derived material per hair colour.
+BROW_DARKEN = 0.62
+for _hair in defaults.hair_palette():
+    MATERIALS[f"brow_{_hair['id']}"] = Material(
+        (*(c * BROW_DARKEN for c in _hair["srgb"]), 1.0), 0.9
     )
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
@@ -147,6 +182,9 @@ PANTS_PART = "thigh"
 # Owner ruling (#12685): the default outfit is charcoal trousers, one trouser
 # token for the pelvis and both legs, hip to ankle, in every engine.
 TROUSERS_MATERIAL = "trousers_charcoal"
+# Dark outsole drawn under every shoe upper (#15280).
+SOLE_MATERIAL = "shoe_sole"
+SADDLE_MATERIAL = "shoe_saddle"  # heel counter and saddle band (#15299)
 
 
 def _outfit(top: str, pants: str, shoes: str, *, full_length: bool) -> dict[str, str]:
@@ -172,7 +210,7 @@ CLOTHING: dict[str, dict[str, str]] = {
         "polo_navy", "shorts_khaki", "shoe_white", full_length=False
     ),
     "golf_polo_trousers": _outfit(
-        "polo_white", TROUSERS_MATERIAL, "shoe_black", full_length=True
+        "polo_white", TROUSERS_MATERIAL, "shoe_leather", full_length=True
     ),
 }
 if DEFAULT_CLOTHING not in CLOTHING:  # pragma: no cover - import-time invariant
@@ -254,18 +292,63 @@ PART_RULES: tuple[tuple[str, str], ...] = (
 PART_RADIUS_M: dict[str, float] = {
     "torso": 0.145,
     "pelvis": 0.125,
-    "upper_arm": 0.043,
+    "upper_arm": 0.0516,  # 20 % over the first 43 mm (owner, 2026-11-17)
     "shoulder": 0.05,
-    "forearm": 0.036,
+    "forearm": 0.0432,  # 20 % over the first 36 mm (owner, 2026-11-17)
     "hand": 0.042,
-    "thigh": 0.078,
-    "shin": 0.052,
+    "thigh": 0.0998,  # spindle parameter: the widest section is about 0.87 of it
+    "shin": 0.058,  # radius at the knee (capsule ends)
     "foot": 0.040,
     "head": 0.095,
 }
 # Distal (far-end) radius over the proximal radius per part. Visual only (#13993):
-# the forearm narrows 20 % toward the wrist so it is no wider than the hand.
-PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.8}
+# the forearm narrows toward the wrist so it is no wider than the hand. The
+# wrist keeps the radius it had before the forearm was thickened (28.5 mm).
+PART_DISTAL_SCALE: dict[str, float] = {"forearm": 0.66}
+
+
+# Parts drawn as ONE shape across a joint that turns about the limb's own axis
+# (#15262): the forearm is two bodies joined by the pronation joint, and two
+# separate spindles there read as a second elbow.
+CONTINUOUS_PARTS: tuple[str, ...] = ("forearm",)
+# Muscle belly per part: (gain, position, width). The radius grows by ``gain``
+# at ``position`` along the whole part and falls to nothing ``width`` away
+# (fractions of its length). Visual only.
+PART_BELLY: dict[str, tuple[float, float, float]] = {
+    "forearm": (0.12, 0.28, 0.45),
+    "shin": (0.29, 0.38, 0.40),  # the calf (#15299)
+}
+# Parts that keep their radius to each joint and end in a ball about the
+# joint (elbow and wrist blends, #15262) instead of a spindle's thin ends.
+CAPSULE_END_PARTS: tuple[str, ...] = ("forearm", "shin")
+# Fraction of the part's length by which its taper has reached the distal
+# radius; the rest (the wrist) stays slim.
+PART_TAPER_END: dict[str, float] = {"forearm": 0.8, "shin": 0.85}
+
+
+# Fraction of the part's length from which a flat far end (``end_aspect``)
+# starts to ease in; before it the section is round. Past the forearm's
+# rotation joint, which needs a round section.
+PART_FLATTEN_FROM: dict[str, float] = {"forearm": 0.55}
+
+
+def taper_end(part: str) -> float:
+    """Fraction of ``part`` by which its taper is complete (1.0 = at the end)."""
+    value = PART_TAPER_END.get(part, 1.0)
+    if not 0.0 < value <= 1.0:
+        raise ValueError(f"taper end of {part!r} must be in (0, 1], got {value!r}")
+    return float(value)
+
+
+NO_BELLY = (0.0, 0.5, 1.0)
+
+
+def belly(part: str) -> tuple[float, float, float]:
+    """Muscle belly ``(gain, position, width)`` of ``part`` (gain 0 = none)."""
+    gain, position, width = PART_BELLY.get(part, NO_BELLY)
+    if not (gain >= 0.0 and 0.0 <= position <= 1.0 and width > 0.0):
+        raise ValueError(f"belly of {part!r} must have gain >= 0, width > 0")
+    return float(gain), float(position), float(width)
 
 
 def validate_distal_scale(scale: float) -> float:
@@ -275,13 +358,70 @@ def validate_distal_scale(scale: float) -> float:
     return float(scale)
 
 
+# Leg taper of the lofted body (#15280, #15299): the thigh ends about as wide as
+# the shin starts and the shin ends at the ankle stub (0.058 * 0.62 ~ 0.036).
+LEG_DISTAL_SCALE: dict[str, float] = {"thigh": 0.70, "shin": 0.62}
+# Leg shape from the sections of a CC0 athletic male body, 1.82 m tall (#15299,
+# visual only). The leg radii above are that body's and scale with the subject's
+# stature. ``PART_OFFSET`` bows a part's centreline forward: (shift over the
+# part radius, position, width), the last two as in ``PART_BELLY``. The
+# quadriceps sit ahead of the hip-knee line and the calf behind the shin.
+LIMB_REFERENCE_STATURE_M = 1.82
+STATURE_SCALED_PARTS: tuple[str, ...] = ("thigh", "shin")
+# The thigh's bow was (0.30, 0.35, 0.60), the CC0 body's offsets about its own
+# leg pivot. That pivot is a rig pivot (114 mm from the midline, 60 % of the
+# way back through the thigh), not a hip joint centre, so the drawn thigh sat
+# 20 mm ahead of the pelvis with the joint at its back (owner, 2026-11-19:
+# upper front of the thigh too far forward). Now the joint is mid-depth at the
+# groin and the quadriceps bow ahead of the hip-knee line from mid-thigh down.
+PART_OFFSET: dict[str, tuple[float, float, float]] = {
+    "thigh": (0.18, 0.40, 0.40),
+    "shin": (-0.53, 0.34, 0.46),
+}
+NO_OFFSET = (0.0, 0.5, 1.0)
+
+
+def stature_scale(part: str, stature_m: float | None) -> float:
+    """Radius factor of ``part`` for a subject ``stature_m`` tall (1.0 = as drawn).
+
+    Only ``STATURE_SCALED_PARTS`` scale; ``None`` (no subject stature) is 1.0.
+    Precondition: a finite stature > 0 (``TypeError`` / ``ValueError``).
+    """
+    if stature_m is None or part not in STATURE_SCALED_PARTS:
+        return 1.0
+    if isinstance(stature_m, bool) or not isinstance(stature_m, int | float):
+        raise TypeError(f"stature must be a number, got {stature_m!r}")
+    if not (math.isfinite(stature_m) and stature_m > 0.0):
+        raise ValueError(f"stature must be finite and positive, got {stature_m!r}")
+    return float(stature_m) / LIMB_REFERENCE_STATURE_M
+
+
+def offset(part: str) -> tuple[float, float, float]:
+    """Forward bow ``(shift over radius, position, width)`` of ``part`` (0 = none)."""
+    shift, position, width = PART_OFFSET.get(part, NO_OFFSET)
+    if not (math.isfinite(shift) and 0.0 <= position <= 1.0 and width > 0.0):
+        raise ValueError(f"offset of {part!r} needs a position in [0, 1], width > 0")
+    return float(shift), float(position), float(width)
+
+
+def limb_distal_scale(part: str) -> float:
+    """Distal-over-proximal radius of a lofted limb: leg taper, else ``distal_scale``."""
+    return validate_distal_scale(LEG_DISTAL_SCALE.get(part, distal_scale(part)))
+
+
 def distal_scale(part: str) -> float:
     """Distal-over-proximal radius of ``part`` (1.0 = no taper)."""
     return validate_distal_scale(PART_DISTAL_SCALE.get(part, 1.0))
 
 
 # Depth/width aspect of the cross-section (1 = round).
-PART_ASPECT: dict[str, float] = {"torso": 0.72, "pelvis": 0.78, "foot": 0.7}
+# The thigh is deeper than wide so the two thighs clear each other (#15299).
+PART_ASPECT: dict[str, float] = {
+    "torso": 0.72,
+    "pelvis": 0.78,
+    "foot": 0.7,
+    "thigh": 1.105,
+}
 GARMENT_THICKNESS = 1.08
 # Fractional extent of a garment along the segment: (start, end). Partial
 # bands are flat-capped; (0, 1) is a closed spindle that encloses the skin.
@@ -292,6 +432,23 @@ GARMENT_COVERAGE: dict[str, tuple[float, float]] = {
 }
 FULL_COVERAGE = (0.0, 1.0)
 LEG_PARTS = ("thigh", "shin")
+# Ease of full-length trousers over ``GARMENT_THICKNESS``: (near, far, from),
+# see ``geometry.LoftOptions.drape`` (#15299, owner 2026-11-19: the drawn legs
+# 10-20 % larger). The skin keeps the measured girths; the cloth is fitted on
+# the upper thigh, where the two legs must clear each other, and from
+# ``TROUSER_FITTED_TO`` of the thigh loosens to ``TROUSER_EASE`` at the knee.
+# The shin keeps that to ``TROUSER_HEM_FROM`` (below the calf) and then hangs
+# off the calf to ``TROUSER_HEM_EASE`` at the ankle: a hem about 330 mm round
+# at 1.82 m, a slim-cut golf trouser, not a legging.
+TROUSER_EASE = 1.14
+TROUSER_FITTED_TO = 0.40
+TROUSER_HEM_EASE = 1.34
+TROUSER_HEM_FROM = 0.45
+TROUSER_DRAPE: dict[str, tuple[float, float, float]] = {
+    "thigh": (1.0, TROUSER_EASE, TROUSER_FITTED_TO),
+    "shin": (TROUSER_EASE, TROUSER_HEM_EASE, TROUSER_HEM_FROM),
+}
+NO_DRAPE = (1.0, 1.0, 0.0)
 
 
 def is_full_length(preset: str) -> bool:
@@ -312,6 +469,17 @@ def garment_coverage(preset: str, part: str) -> tuple[float, float]:
     if is_full_length(preset) and part in LEG_PARTS:
         return FULL_COVERAGE
     return GARMENT_COVERAGE.get(part, FULL_COVERAGE)
+
+
+def garment_drape(preset: str, part: str) -> tuple[float, float, float]:
+    """Cloth ease ``(near, far, from)`` of ``part`` under clothing ``preset``.
+
+    Only the legs of full-length trousers drape; everything else is
+    ``NO_DRAPE``. Precondition: a known preset (``ValueError``).
+    """
+    if is_full_length(preset) and part in LEG_PARTS:
+        return TROUSER_DRAPE.get(part, NO_DRAPE)
+    return NO_DRAPE
 
 
 # Segment smoothness: loft resolution, and ball blends where limbs meet the trunk.
@@ -335,12 +503,135 @@ def blend_scale(garment: bool, part: str = "upper_arm") -> float:
     return base * (GARMENT_THICKNESS if garment else 1.0)
 
 
+# Trunk solids (#15279): cross-sections of the abdomen and the thorax as
+# (along, width, depth), fractions of the body's length, half width and half
+# depth (``torso_profile``). A station of 1.0 is as wide and as deep as the
+# spec hint. Abdomen: lumbar joint to T12; thorax: T12 to the shoulder line,
+# then the trapezius slope up to the neck base, which ends well under the jaw
+# so the neck solid (``neck``) shows above it (#15292). The thorax (#15299) is
+# 1.04 wide from the chest to the armpit (as wide as the hips) and narrows
+# to the waist.
+# Above the chest only its BACK comes in: the depth shrinks while the section
+# shifts forward, so the upper back runs into the back of the neck with no
+# shelf (a hump at address). From the waist up the sections also sit forward
+# of the trunk axis (the sixth entry, in thorax lengths), under a neck that
+# leans forward: a chest centred on the axis reads as a hunch. Its depth is
+# bounded by the spec hint (+5 %) and by the lead arm across it at address.
+# The collar opening shifts forward this fraction of the thorax length, so it is
+# centred on the neck, which leans forward of the trunk axis (#15292).
+THORAX_COLLAR_FORWARD = 0.034
+THORAX_SHOULDER_FORWARD = 0.038  # the same shift at the shoulder line (#15299)
+THORAX_SHOULDER_ALONG = 0.9135  # shoulder joints' height the stations are tuned at
+
+
+def _shoulder_dome(
+    joint: tuple[float, float, float],
+    neck: tuple[float, float, float],
+    slant: float,
+    forward: tuple[float, float] = (0.0, 0.0),
+    steps: int = 6,
+    wall_share: float = 0.7,
+) -> tuple[tuple[float, ...], ...]:
+    """Stations from the shoulder line (along, width, depth) up to the neck.
+
+    The section narrows at ``wall_share`` of the average rate at first and ever
+    faster towards the neck, so the shirt is a rounded slope, steep at the
+    shoulder line and flattening towards the neck, not a shelf. ``forward``
+    is the section's forward shift at the shoulder line and at the neck.
+    """
+    rows = []
+    for i in range(steps + 1):
+        u = i / steps
+        k = wall_share * u + (1.0 - wall_share) * u * u
+        along = joint[0] + (neck[0] - joint[0]) * u
+        width = joint[1] + (neck[1] - joint[1]) * k
+        depth = joint[2] + (neck[2] - joint[2]) * k
+        ease = u * u * (3.0 - 2.0 * u)  # eases in from the shoulder line
+        shift = forward[0] + (forward[1] - forward[0]) * ease
+        rows.append((along, width, depth, slant, 2.4 - 0.4 * u, shift))
+    return tuple(rows)
+
+
+TORSO_PROFILES: dict[str, tuple[tuple[float, ...], ...]] = {
+    "abdomen": (
+        (-0.14, 0.93, 0.92),
+        (0.0, 0.95, 0.96),
+        (0.3, 0.97, 0.97),
+        (0.6, 1.0, 1.0),
+        (0.85, 1.0, 0.97),
+        (1.05, 0.95, 0.93),
+        (1.3, 0.62, 0.7),
+    ),
+    "thorax": (
+        (-0.32, 0.56, 0.66),
+        (-0.1, 0.9, 0.87),
+        (0.08, 0.95, 0.906, 0.0, 0.0, 0.011),
+        (0.3, 0.97, 0.955, 0.0, 2.15, 0.011),
+        (0.5, 1.04, 1.02, 0.0, 2.15, 0.02),
+        (0.62, 1.04, 1.04, 0.0, 2.3, 0.028),
+        (0.72, 1.04, 0.936, 0.0, 0.0, 0.026),
+        (0.8, 1.02, 0.858, 0.07, 0.0, 0.035),
+        (0.87, 0.91, 0.775, 0.12, 0.0, 0.038),
+        *_shoulder_dome(
+            (0.92, 0.85, 0.707),
+            (0.98, 0.38, 0.46),
+            0.153,
+            (THORAX_SHOULDER_FORWARD, THORAX_COLLAR_FORWARD),
+        ),
+    ),
+}
+TORSO_RINGS = 18
+TORSO_FINE_FROM, TORSO_FINE_RINGS = 0.9, 14  # the shoulder dome is sampled finely
+TORSO_SQUARENESS = 2.6  # superellipse exponent of a trunk cross-section
+# Shoulder link (#15279): a yoke from the neck side to the shoulder joint,
+# flatter than it is deep, not a ball. Depth axis is the link's up axis.
+SHOULDER_ASPECT = 0.72  # up-down over front-back extent of the yoke
+SHOULDER_RADIUS_SCALE = 1.1  # front-back half extent over the part radius
+SHOULDER_END_SCALE = 0.85  # yoke radius at the shoulder joint, over the neck end
+SHOULDER_START_FRACTION = 0.3  # the yoke starts this far along the link
+# The yoke hangs from the NECK point (#15299), in yoke radii, so it slopes like a
+# trapezius by as much as the shoulder joints sit below the neck (a fit setting).
+SHOULDER_NECK_END_BELOW_NECK = 1.35  # yoke axis beside the neck
+SHOULDER_JOINT_END_BELOW_NECK = 1.35  # yoke axis at the joint, never above ...
+SHOULDER_JOINT_END_LIFT = -0.1  # ... this height over the joint itself
+SHOULDER_END_INSET = 0.5  # the yoke stops short of the joint: its tip is in the cap
+SHOULDER_DEFAULT_RISE = 0.73  # neck above the joints when the spec does not say
+SHOULDER_UP_AXIS = (0.0, 0.0, 1.0)  # up, in the shoulder link's body frame
+# Deltoid (#15279): the blend at the shoulder joint is longer down the arm
+# than across it: (across, down the arm), in upper-arm radii.
+DELTOID_HALF_SIZES = (0.9, 1.6)
+UPPER_ARM_SKIN_TIP_INSET = 0.5  # skin tip meets the sleeve start, in radii (#15292)
+UPPER_ARM_START_INSET = 0.5  # the loft's tip sits at the joint, in radii (#15292)
+DELTOID_DROP = 1.25  # ball centre down the arm at the default neck rise, arm radii
+DELTOID_MIN_DROP = 0.9  # the ball climbs as the neck clears it, to this (#15299)
+
+
+def deltoid_drop_m(radius_m: float, rise_m: float | None) -> float:
+    """How far down the arm the deltoid ball sits for a neck ``rise_m`` above."""
+    default = SHOULDER_DEFAULT_RISE * SHOULDER_RADIUS_SCALE * PART_RADIUS_M["shoulder"]
+    climb = 0.0 if rise_m is None else rise_m - default
+    return max(DELTOID_MIN_DROP * radius_m, DELTOID_DROP * radius_m - climb)
+
+
 # Pelvis solid (HRG-C1, #13164): lofted on the hip landmarks, see
 # ``body_meshes._pelvis_segment``.
 # Width is ``pelvis_width`` (HRG-C4); the lower pole hangs below the MEAN HJC.
-PELVIS_CROTCH_DROP_M = PART_RADIUS_M["thigh"]  # pole below the mean HJC height
+PELVIS_CROTCH_DROP_M = 0.078  # pole below the mean HJC height; not the thigh radius
 PELVIS_MIN_BELOW_HJC_M = 0.025  # the lowest HJC keeps at least this much solid below
-PELVIS_WAIST_RATIO = 0.75  # flat cap at the lumbar plane / widest half width
+# The buttock (#15299, owner 2026-11-19: the behind 5-10 % bigger): depth of the
+# pelvis behind the hip joints over its depth ahead of them, and the
+# superellipse exponent of its back outline (two cheeks are squarer than an
+# ellipse). 1.08 and 3.5 give +8 % reach behind the joints and +6 % girth at
+# the hips; both ease out to the belt line (``geometry.SplitEllipsoid``).
+PELVIS_BACK_SCALE = 1.08
+PELVIS_BACK_SQUARE = 3.5
+# Half width of the flat cap at the lumbar plane over the widest half width
+# (#15299, owner 2026-11-19: wider at the pelvis, to match the markers). The CC0
+# athletic male body (1.82 m) is 156 mm wide at the belt line against the
+# 179 mm hip-breadth prior, and the capture's belt markers are 172.5 mm from
+# the midline. Was 0.75; 0.87 keeps the waistband within 5 mm of the shirt hem
+# of the torso's second pass (which used 0.86).
+PELVIS_WAIST_RATIO = 0.87
 
 
 GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")
@@ -414,6 +705,7 @@ def check_references(doc: AppearanceDocument) -> None:
         ("club_finish", doc.club_finish),
         ("ground_material", doc.environment.ground_material),
         ("head headwear_material", headwear_material_name(doc) or "skin_light"),
+        ("head cap_material", doc.head.cap_material),
         *(
             (f"segments[{i}]", r.material)
             for i, r in enumerate(doc.segments)
@@ -426,6 +718,7 @@ def check_references(doc: AppearanceDocument) -> None:
 
 
 def rule_for_body(doc: AppearanceDocument, body_name: str) -> SegmentRule | None:
+    """Find the first case-insensitive appearance rule for a body."""
     lowered = body_name.lower()
     for rule in doc.segments:
         if fnmatchcase(lowered, rule.match.lower()):

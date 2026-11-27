@@ -110,11 +110,17 @@ class SimRenderingMixin:
                 scene_option=self.scene_option,
             )
 
+        iface_frame = self._current_interface_power_frame()
+        net_power_frame, net_power_scale = self._apply_net_power_scene_colors(
+            iface_frame
+        )
+        ke_values = self._apply_stored_ke_scene_colors()
         axial_frame, scale = self._apply_axial_scene_colors()
 
-        # One provider sample per frame feeds both the native and MeshCat views.
-        glyphs = self._build_force_glyphs()
+        glyphs = self._build_overlay_glyphs()
         self._render_force_glyphs(self.renderer.scene, glyphs)
+        self._render_interface_power_glyphs(self.renderer.scene, iface_frame)
+        self._render_segment_ke_globes(self.renderer.scene)
 
         try:
             rgb = self.renderer.render()
@@ -141,31 +147,14 @@ class SimRenderingMixin:
 
         if self.meshcat_adapter:
             try:
-                self.meshcat_adapter.update(self.data)
-                if scale is not None:
-                    self.meshcat_adapter.update_force_colors(axial_frame, scale)
-                self.meshcat_adapter.draw_glyphs(glyphs)
-
-                if self.show_induced_vectors:
-                    self.meshcat_adapter.draw_induced_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.induced_vector_source,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
-
-                if self.show_cf_vectors:
-                    self.meshcat_adapter.draw_cf_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.cf_vector_type,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
-
+                self._update_meshcat_frame_overlays(
+                    glyphs,
+                    axial_frame,
+                    scale,
+                    ke_values,
+                    net_power_frame,
+                    net_power_scale,
+                )
             except (RuntimeError, ValueError, AttributeError) as exc:
                 logger.debug("Counterfactual vector rendering failed: %s", exc)
 
@@ -180,6 +169,63 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _update_meshcat_frame_overlays(
+        self: Any,
+        glyphs: GlyphSet | None,
+        axial_frame: Any,
+        scale: Any,
+        ke_values: dict[str, float | None] | None,
+        net_power_frame: Any,
+        net_power_scale: Any,
+    ) -> None:
+        """Push one frame of glyphs, segment KE globes, and vector overlays to MeshCat."""
+        if self.meshcat_adapter is None or self.data is None:
+            return
+        self.meshcat_adapter.update(self.data)
+        if net_power_scale is not None:
+            self.meshcat_adapter.update_net_power_colors(
+                net_power_frame, net_power_scale
+            )
+        ke_scale = getattr(self, "stored_ke_color_scale", None)
+        if ke_scale is not None:
+            self.meshcat_adapter.update_stored_ke_colors(ke_values, ke_scale)
+        if scale is not None:
+            self.meshcat_adapter.update_force_colors(axial_frame, scale)
+        self.meshcat_adapter.draw_glyphs(glyphs)
+        self._meshcat_draw_segment_ke_globes()
+
+        if self.show_induced_vectors:
+            self.meshcat_adapter.draw_induced_vectors(
+                self.data,
+                self.latest_bio_data,
+                self.induced_vector_source,
+                self.torque_scale,
+            )
+        else:
+            self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
+
+        if self.show_cf_vectors:
+            self.meshcat_adapter.draw_cf_vectors(
+                self.data,
+                self.latest_bio_data,
+                self.cf_vector_type,
+                self.torque_scale,
+            )
+        else:
+            self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
+
+    def _meshcat_draw_segment_ke_globes(self: Any) -> None:
+        if self.meshcat_adapter is None:
+            return
+        if not getattr(self, "show_segment_ke_globes", False):
+            self.meshcat_adapter.draw_ke_globes(None, ())
+            return
+        frame = self._current_segment_ke_frame()
+        if frame is None:
+            self.meshcat_adapter.draw_ke_globes(None, ())
+            return
+        self.meshcat_adapter.draw_ke_globes(frame, self._segment_ke_peaks_tuple())
 
     def _check_first_frame(self: Any, rgb: Any) -> None:
         """Post-condition on the first frame after a model load (UD #12884).
@@ -203,6 +249,66 @@ class SimRenderingMixin:
                 frame_stats(rgb),
             )
 
+    def _current_interface_power_frame(self: Any) -> Any:
+        if self.engine is None:
+            return None
+        try:
+            return self.engine.get_interface_power_frame()
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Interface power sample unavailable: %s", exc)
+            return None
+
+    def _apply_net_power_scene_colors(self: Any, iface: Any) -> tuple[Any, Any]:
+        from src.shared.python.body_part_viz.mujoco_force_colors import (
+            unshaded_geom_ids,
+        )
+        from src.shared.python.body_part_viz.mujoco_scalar_colors import (
+            apply_mujoco_scalar_scene_colors,
+        )
+        from src.shared.python.body_part_viz.segment_net_power import (
+            net_power_frame_from_interface,
+        )
+
+        scale = getattr(self, "net_power_color_scale", None)
+        if scale is None or not scale.enabled:
+            self._refresh_net_power_legend()
+            return None, scale
+        try:
+            if iface is None:
+                self._refresh_net_power_legend()
+                return None, scale
+            presentation = net_power_frame_from_interface(iface, scale)
+            keep = unshaded_geom_ids(self.model, ())
+            apply_mujoco_scalar_scene_colors(
+                self.model,
+                self.renderer.scene,
+                presentation.segment_frame.values,
+                scale,
+                keep_geoms=keep,
+            )
+            self._cached_net_power_presentation = presentation
+            self._refresh_net_power_legend(presentation)
+            return presentation.segment_frame, scale
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Net-power display unavailable: %s", exc)
+            self._refresh_net_power_legend()
+            return None, scale
+
+    def _render_interface_power_glyphs(
+        self: Any, scene: Any, iface: Any | None = None
+    ) -> None:
+        labels: tuple[str, ...] = ()
+        if getattr(self, "show_interface_power_glyphs", False) and iface is not None:
+            from .interface_power_scene import add_interface_power_glyphs_to_scene
+
+            receipt = add_interface_power_glyphs_to_scene(
+                self.model, self.data, scene, iface
+            )
+            labels = receipt.labels
+        presentation = getattr(self, "_cached_net_power_presentation", None)
+        if presentation is not None or labels:
+            self._refresh_net_power_legend(presentation, labels=labels)
+
     def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
         """Sample the optional force capability once for native and web renderers."""
         from src.shared.python.body_part_viz.mujoco_force_colors import (
@@ -219,6 +325,40 @@ class SimRenderingMixin:
                 frame = None
                 logger.debug("Axial force display unavailable: %s", exc)
         return frame, scale
+
+    def _apply_stored_ke_scene_colors(
+        self: Any,
+    ) -> dict[str, float | None] | None:
+        from src.shared.python.body_part_viz.mujoco_scalar_colors import (
+            apply_mujoco_scalar_scene_colors,
+        )
+
+        getter = getattr(self, "_current_stored_ke_values", None)
+        if not callable(getter):
+            return None
+        values = getter()
+        scale = getattr(self, "stored_ke_color_scale", None)
+        if scale is None or not scale.enabled or values is None:
+            setter = getattr(self, "set_stored_ke_clipped_segments", None)
+            if callable(setter):
+                setter(frozenset())
+            return values
+        clipped: set[str] = set()
+        try:
+            apply_mujoco_scalar_scene_colors(
+                self.model,
+                self.renderer.scene,
+                values,
+                scale,
+                clipped_segments=clipped,
+            )
+        except (TypeError, ValueError, RuntimeError) as exc:
+            logger.debug("Stored KE shading unavailable: %s", exc)
+            clipped.clear()
+        setter = getattr(self, "set_stored_ke_clipped_segments", None)
+        if callable(setter):
+            setter(frozenset(clipped))
+        return values
 
     @staticmethod
     def _euler_from_matrix(mat: np.ndarray) -> tuple[float, float, float]:
@@ -392,7 +532,7 @@ class SimRenderingMixin:
         is then not called) or the engine has no frame.
         """
         if not (self.show_force_vectors or self.show_torque_vectors):
-            self._set_force_legend("")
+            self._set_force_legend(self._angmom_legend_line())
             return None
         body_name = None
         if self.isolate_forces_visualization and self.manipulator:
@@ -408,8 +548,50 @@ class SimRenderingMixin:
             body_name=body_name,
             style_options=getattr(self, "force_style_options", None),
         )
-        self._set_force_legend("" if glyphs is None else legend_text(glyphs))
+        line = "" if glyphs is None else legend_text(glyphs)
+        angmom_line = self._angmom_legend_line()
+        if angmom_line:
+            line = f"{line} | {angmom_line}" if line else angmom_line
+        self._set_force_legend(line)
         return glyphs
+
+    def _current_segment_ke_frame(self: Any) -> Any | None:
+        if not getattr(self, "show_segment_ke_globes", False):
+            return None
+        if self.engine is None or self.data is None:
+            return None
+        frame = self.engine.get_segment_kinetic_energy_frame()
+        if frame is None:
+            return None
+        state: dict[str, tuple[float, float]] = getattr(
+            self, "_segment_ke_peak_state", {}
+        )
+        for seg in frame.segments:
+            prev_j, _ = state.get(seg.body, (0.0, 0.0))
+            if seg.total_j >= prev_j:
+                state[seg.body] = (seg.total_j, frame.time_s)
+        self._segment_ke_peak_state = state
+        return frame
+
+    def _segment_ke_peaks_tuple(self: Any) -> tuple[Any, ...]:
+        from src.shared.python.segment_kinetic_energy import SegmentKineticEnergyPeak
+
+        state: dict[str, tuple[float, float]] = getattr(
+            self, "_segment_ke_peak_state", {}
+        )
+        return tuple(
+            SegmentKineticEnergyPeak(body=b, peak_total_j=j, peak_time_s=t)
+            for b, (j, t) in sorted(state.items())
+        )
+
+    def _render_segment_ke_globes(self: Any, scene: Any) -> None:
+        from mujoco_humanoid_golf.ke_globe_scene import add_ke_globes_to_scene
+
+        frame = self._current_segment_ke_frame()
+        if frame is None or scene is None:
+            return
+        peaks = self._segment_ke_peaks_tuple()
+        add_ke_globes_to_scene(scene, frame, peaks)
 
     def _render_force_glyphs(
         self: Any, scene: Any, glyphs: GlyphSet | None = None

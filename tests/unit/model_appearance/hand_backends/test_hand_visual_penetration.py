@@ -19,7 +19,7 @@ from src.shared.python.model_appearance.grip_hand_mesh import HandMeshParams
 from src.shared.python.model_appearance.hand_backends.comparison import (
     build_for_comparison,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
 )
@@ -29,6 +29,7 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize("backend_id", ["capsule", "procedural_skin"])
 def test_no_shaft_or_finger_penetration_beyond_tolerance(backend_id: str) -> None:
+    """Shaft and finger penetration stay inside the configured tolerance."""
     spec = GripSpec.legacy()
     settings = HandVisualSettings()
     for role in ("lead", "trail"):

@@ -45,7 +45,7 @@ from src.shared.python.model_appearance.hand_backends.comparison import (
     build_for_comparison,
     comparison_backend_names,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
@@ -75,6 +75,7 @@ def _metrics_for_backend(
     role: HandSide,
     settings: HandVisualSettings,
 ) -> dict[str, Any]:
+    """Anthropometry and contact metrics for one backend and role."""
     vis = build_for_comparison(
         backend_id,
         grip_spec,
@@ -149,6 +150,7 @@ def render_contact_sheet(
     *,
     settings: HandVisualSettings = DEFAULT_HAND_VISUAL_SETTINGS,
 ) -> None:
+    """Write the backend comparison contact sheet and its metrics JSON."""
     backends = comparison_backend_names()
     spec = GripSpec.legacy()
     n_rows = len(ROW_SPECS)
@@ -241,6 +243,7 @@ def render_contact_sheet(
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Parse arguments and render the comparison contact sheet."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(

@@ -10,7 +10,7 @@
     "skin": [0.93, 0.76, 0.66],
     "top": [0.93, 0.93, 0.92],
     "pants": [0.3, 0.32, 0.35],
-    "shoe": [0.06, 0.06, 0.07],
+    "shoe": [0.72, 0.72, 0.71],
     "hand_left": [0.93, 0.76, 0.66],
     "hand_right": [0.93, 0.76, 0.66]
   },
@@ -80,7 +80,7 @@
       "parent": "LUpperArm",
       "role": "top",
       "rgb": [0.93, 0.93, 0.92],
-      "radii_m": [0.04644, 0.04644, 0.165],
+      "radii_m": [0.055728, 0.055728, 0.165],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
       "sizing_source": "library"
@@ -90,7 +90,7 @@
       "parent": "RUpperArm",
       "role": "top",
       "rgb": [0.93, 0.93, 0.92],
-      "radii_m": [0.04644, 0.04644, 0.165],
+      "radii_m": [0.055728, 0.055728, 0.165],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
       "sizing_source": "library"
@@ -100,7 +100,7 @@
       "parent": "Left Forearm/LUpperForearm",
       "role": "skin",
       "rgb": [0.93, 0.76, 0.66],
-      "radii_m": [0.04212, 0.04212, 0.08],
+      "radii_m": [0.050544, 0.050544, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
       "sizing_source": "library"
@@ -110,7 +110,7 @@
       "parent": "Left Forearm/LLowerForearm",
       "role": "skin",
       "rgb": [0.93, 0.76, 0.66],
-      "radii_m": [0.03096, 0.03096, 0.08],
+      "radii_m": [0.037152, 0.037152, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
       "sizing_source": "library"
@@ -120,7 +120,7 @@
       "parent": "Right Forearm/RUpperForearm",
       "role": "skin",
       "rgb": [0.93, 0.76, 0.66],
-      "radii_m": [0.04212, 0.04212, 0.08],
+      "radii_m": [0.050544, 0.050544, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
       "sizing_source": "library"
@@ -130,7 +130,7 @@
       "parent": "Right Forearm/RLowerForearm",
       "role": "skin",
       "rgb": [0.93, 0.76, 0.66],
-      "radii_m": [0.03096, 0.03096, 0.08],
+      "radii_m": [0.037152, 0.037152, 0.08],
       "offset_m": [0.0, 0.0, 0.0],
       "rotation_z_deg": 0.0,
       "sizing_source": "library"
@@ -178,5 +178,5 @@
     "below_c7_m": 0.05,
     "rgb": [0.93, 0.76, 0.66]
   },
-  "shoe_rgb": [0.06, 0.06, 0.07]
+  "shoe_rgb": [0.72, 0.72, 0.71]
 }

@@ -1,0 +1,33 @@
+{
+  "shaped_club_types": [
+    "Driver",
+    "Wood"
+  ],
+  "smoothing_iterations": 24,
+  "smoothing_lambda": 0.5,
+  "smoothing_mu": -0.53,
+  "face_pin_cos": 0.9,
+  "hosel_radius_m": 0.0072,
+  "hosel_top_radius_m": 0.004225,
+  "hosel_flare_radius_m": 0.0098,
+  "hosel_base_blend_m": 0.012,
+  "hosel_cylinder_length_m": 0.02,
+  "hosel_shoulder_height_m": 0.007,
+  "hosel_profile_steps": 8,
+  "hosel_sides": 32,
+  "sources": {
+    "shaped_club_types": "Club types whose drawn head body is rounded and whose hosel is the blended one (#15150). Types are the club_head_mesh _club_type names. Irons, wedges and hybrids keep the head and tapered hosel as built. Visual only.",
+    "smoothing_iterations": "Taubin passes over the head body. The Tools driver body is a four-station superellipse loft (exponent 4) joined by straight segments, which draws as a boxy faceted wedge; the passes round it toward a pear crown and a rounded sole and tail while the face plate stays fixed. 24 is a display judgement chosen from close renders (fewer leave facets, many more erase the crown shoulder); 0 turns the rounding off.",
+    "smoothing_lambda": "Shrinking step of each Taubin pass, in (0, 1). 0.5 is the classic value.",
+    "smoothing_mu": "Inflating step of each Taubin pass; must be below minus smoothing_lambda so the pair keeps the head volume (-0.53 is the classic partner of 0.5).",
+    "face_pin_cos": "A triangle whose normal is within acos of this value of the face normal, and which lies ahead of the head mid-depth, belongs to the face plate; its vertices are never moved, so the face centre, the face normal, the score lines and the impact geometry stay exactly as built. 0.9 is about 26 degrees.",
+    "hosel_radius_m": "Outer radius of the cylindrical hosel, 7.2 mm. Unchanged from the unblended hosel; a display value, not a measured sleeve size. It is also the reach used to find where the shaft axis last touches the head.",
+    "hosel_top_radius_m": "Radius where the hosel ends and the shaft begins. Equal to the drawn shaft tip radius (club_assembly SHAFT_TIP_RADIUS_FRACTION 0.65 times the 6.5 mm shaft radius) so the shaft enters the hosel with no step; a test pins the two together.",
+    "hosel_flare_radius_m": "Radius of the collar where the hosel meets the heel, easing down to hosel_radius_m up the shaft axis. A display judgement that joins the hosel to the heel without a seam. The driver seat leaves the shaft axis on the heel edge, so the axis is clear of the crown, and the collar sits at the last height where it still touches the head.",
+    "hosel_shoulder_height_m": "Length along the hosel over which its radius eases to hosel_top_radius_m under the shaft, 7 mm. Display judgement; the ease is tangent to the shaft so no ledge is drawn.",
+    "hosel_profile_steps": "Samples per eased section of the hosel profile.",
+    "hosel_sides": "Facets around the hosel tube.",
+    "hosel_base_blend_m": "Length over which the hosel base grows from the shaft tip radius to the collar radius inside the heel, 12 mm, so the hosel start is hidden in the head rather than ending in a flat cap. Display judgement.",
+    "hosel_cylinder_length_m": "Length of the plain cylindrical part of the hosel just below its shoulder, 20 mm. Display judgement for a short driver hosel."
+  }
+}

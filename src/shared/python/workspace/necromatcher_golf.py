@@ -309,6 +309,20 @@ def _read_bundle(archive: Path) -> tuple[dict[str, Any], SwingState, dict[str, s
     return {"result": result, "request": request}, state, hashes
 
 
+def _rigid_gear_head(head: Any) -> Any:
+    """The saved rigid gear head (#15443): ``None`` or finite inertia and CG depth."""
+    from .necromatcher_impact_contracts import finite_array
+
+    if head is None:
+        return None
+    keys = {"inertia_diagonal_kg_m2", "cg_depth_m"}
+    if not isinstance(head, dict) or set(head) != keys:
+        raise ValueError("Saved rigid gear head is malformed")
+    finite_array(head["inertia_diagonal_kg_m2"], (3,), "inertia_diagonal_kg_m2")
+    finite_array(head["cg_depth_m"], (), "cg_depth_m")
+    return {key: head[key] for key in sorted(keys)}
+
+
 def _settings(result: dict[str, Any]) -> dict[str, Any]:
     """Retain finite saved settings, not local-adapter defaults or arbitrary paths."""
     from .necromatcher_impact_contracts import finite_array
@@ -356,6 +370,10 @@ def _settings(result: dict[str, Any]) -> dict[str, Any]:
             if key == "sea_level_pressure_pa" and value[key] is None:
                 continue
             finite_array(value[key], (3,) if key == "wind_velocity" else (), key)
+    if "rigid_gear_head" in result["impact_params"]:
+        settings["impact_params"]["rigid_gear_head"] = _rigid_gear_head(
+            result["impact_params"]["rigid_gear_head"]
+        )
     if result.get("impact_method") != "RIGID_BODY":
         raise ValueError("Unsupported saved impact method")
     return {**settings, "impact_method": result["impact_method"]}

@@ -14,7 +14,7 @@ from src.shared.python.model_appearance.hand_backends.types import HandSide
 from src.shared.python.model_appearance.hand_backends.procedural_skin import (
     _build_canonical_hand,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
@@ -24,6 +24,7 @@ pytestmark = pytest.mark.unit
 
 
 def _unit(v: np.ndarray) -> np.ndarray:
+    """Return ``v`` scaled to unit length."""
     norm = float(np.linalg.norm(v))
     return v / max(norm, 1e-12)
 
@@ -112,6 +113,7 @@ def test_palm_dorsum_shows_knuckle_domes_and_interdigital_valleys(
     w_dir = knuckle_span / float(np.linalg.norm(knuckle_span))
 
     def _local_dorsal_rho(center: np.ndarray) -> float:
+        """Radial distance of palm vertices on the dorsal side of ``center``."""
         delta = palm_v - center
         d_w = np.abs(delta @ w_dir)
         d_3d = np.linalg.norm(delta, axis=1)

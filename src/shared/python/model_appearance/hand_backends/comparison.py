@@ -12,7 +12,7 @@ from src.shared.python.model_appearance.hand_backends.registry import (
     build_hand_visual,
     list_hand_visual_backends,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     HandVisualSettings,
 )

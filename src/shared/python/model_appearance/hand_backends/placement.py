@@ -20,10 +20,12 @@ def axial_offset_vs_lead_m(grip_spec: GripSpec, role: str) -> float:
 
 
 def translate_mesh(mesh: Mesh, delta: np.ndarray) -> Mesh:
+    """Return ``mesh`` translated by ``delta``."""
     return Mesh(mesh.vertices + np.asarray(delta, float), mesh.faces.copy())
 
 
 def mesh_in_shared_visual_frame(mesh: Mesh, grip_spec: GripSpec, role: str) -> Mesh:
+    """Shift ``mesh`` along the grip so a trail hand shares the lead frame."""
     dz = axial_offset_vs_lead_m(grip_spec, role)
     return translate_mesh(mesh, np.array([0.0, 0.0, dz], dtype=float))
 

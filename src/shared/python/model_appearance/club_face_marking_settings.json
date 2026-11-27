@@ -1,0 +1,20 @@
+{
+  "face_marking": false,
+  "score_line_count": 11,
+  "score_line_spacing_m": 0.0035,
+  "score_line_width_m": 0.0009,
+  "score_line_height_m": 0.00015,
+  "centre_clear_width_m": 0.024,
+  "face_rgba": [0.55, 0.57, 0.62, 1.0],
+  "line_rgba": [0.1, 0.1, 0.11, 1.0],
+  "sources": {
+    "face_marking": "Draws horizontal score lines on the drawn driver or iron face and gives the face its own colour (#15150, owner request 2026-11-21). false (default) keeps the drawn head exactly as it was. Visual only: the contact face, the face centre, mass and inertia do not move; the lines are thin ribbons lifted score_line_height_m off the head surface and the face colour recolours existing head triangles.",
+    "score_line_count": "Number of lines. 11 is a display judgement for a driver face about 55 mm high; real faces carry 8 to 16 grooves.",
+    "score_line_spacing_m": "Pitch between line centres, up the face. 3.5 mm is a display judgement (a roughly 38 mm tall set of lines on a driver face), not a measured groove pitch; the Rules of Golf limit the groove spacing to at least three times the groove width.",
+    "score_line_width_m": "Drawn width of one line, 0.9 mm. A display value chosen to stay visible at 1280 px in a close-up while keeping the 3 x width spacing rule; not a measured groove width.",
+    "score_line_height_m": "Lift of each ribbon along the face normal above the head surface, 0.15 mm, so it does not z-fight with the face.",
+    "centre_clear_width_m": "Width along the toe axis of the line-free zone about the face centre. 24 mm is a display judgement for the sweet-spot window; lines run from this zone to the face edge on each side.",
+    "face_rgba": "Face colour (RGBA, 0 to 1). Slightly lighter than the satin steel crown so the face reads in close renders.",
+    "line_rgba": "Score line colour (RGBA, 0 to 1)."
+  }
+}

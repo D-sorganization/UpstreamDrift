@@ -17,6 +17,7 @@ Array = NDArray[np.float64]
 
 
 def _normalize(vec: Array) -> Array:
+    """Return ``vec`` scaled to unit length."""
     norm = float(np.linalg.norm(vec))
     if norm < 1e-12:
         raise ValueError("cannot normalise a near-zero vector")
@@ -129,6 +130,7 @@ def lofted_anatomical_digit(
     cap_rings = 3
 
     def _section_at(idx: int, cap_scale: float) -> Array:
+        """Cross-section ring of the loft at station ``idx``."""
         c = curve[idx]
         t_dir, u_dir, v_dir = tangents[idx], u_axes[idx], v_axes[idx]
         frac = float(arclen[idx] / total)

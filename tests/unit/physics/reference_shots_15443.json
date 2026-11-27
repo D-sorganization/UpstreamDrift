@@ -1,0 +1,141 @@
+{
+  "settings": {
+    "mph_to_mps": 0.44704,
+    "yard_m": 0.9144,
+    "max_time_s": 15.0,
+    "dt_s": 0.01,
+    "carry_band_fraction": 0.05,
+    "apex_band_fraction": 0.15,
+    "descent_band_deg": 4.0,
+    "sources": "Unit factors are exact (international yard and pound, 1959). The integrator time step is the pipeline default (SwingBallFlightPipeline flight_dt); 15 s exceeds every reference flight. Bands describe the reference, not the model: the launch-monitor values are means over many shots at tour venues, not normalised to standard air, so carry is held to +-5 %, apex (a smaller, noisier number) to +-15 % and descent to +-4 deg. Bands were set before any row was marked expected-to-fail and must not be widened to make a row pass (#15443)."
+  },
+  "shots": [
+    {
+      "id": "pga_tour_driver_2019",
+      "ball_speed_mph": 167.0,
+      "launch_deg": 10.9,
+      "spin_rpm": 2686.0,
+      "carry_yd": 275.0,
+      "apex_yd": 32.0,
+      "descent_deg": 38.0,
+      "source": "PGA Tour averages table (yards edition), driver: ball speed 167 mph, launch 10.9 deg, spin 2686 rpm, max height 32 yd, land angle 38 deg, carry 275 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "lpga_tour_driver_2019",
+      "ball_speed_mph": 140.0,
+      "launch_deg": 13.2,
+      "spin_rpm": 2611.0,
+      "carry_yd": 218.0,
+      "apex_yd": 25.0,
+      "descent_deg": 37.0,
+      "source": "LPGA Tour averages table (yards edition), driver: ball speed 140 mph, launch 13.2 deg, spin 2611 rpm, max height 25 yd, land angle 37 deg, carry 218 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "pga_tour_5_iron_2019",
+      "ball_speed_mph": 132.0,
+      "launch_deg": 12.1,
+      "spin_rpm": 5361.0,
+      "carry_yd": 194.0,
+      "apex_yd": 31.0,
+      "descent_deg": 49.0,
+      "source": "PGA Tour averages table (yards edition), 5-iron: ball speed 132 mph, launch 12.1 deg, spin 5361 rpm, max height 31 yd, land angle 49 deg, carry 194 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "pga_tour_6_iron_2019",
+      "ball_speed_mph": 127.0,
+      "launch_deg": 14.1,
+      "spin_rpm": 6231.0,
+      "carry_yd": 183.0,
+      "apex_yd": 30.0,
+      "descent_deg": 50.0,
+      "source": "PGA Tour averages table (yards edition), 6-iron: ball speed 127 mph, launch 14.1 deg, spin 6231 rpm, max height 30 yd, land angle 50 deg, carry 183 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "pga_tour_7_iron_2019",
+      "ball_speed_mph": 120.0,
+      "launch_deg": 16.3,
+      "spin_rpm": 7097.0,
+      "carry_yd": 172.0,
+      "apex_yd": 32.0,
+      "descent_deg": 50.0,
+      "source": "PGA Tour averages table (yards edition), 7-iron: ball speed 120 mph, launch 16.3 deg, spin 7097 rpm, max height 32 yd, land angle 50 deg, carry 172 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "pga_tour_8_iron_2019",
+      "ball_speed_mph": 115.0,
+      "launch_deg": 18.1,
+      "spin_rpm": 7998.0,
+      "carry_yd": 160.0,
+      "apex_yd": 31.0,
+      "descent_deg": 50.0,
+      "source": "PGA Tour averages table (yards edition), 8-iron: ball speed 115 mph, launch 18.1 deg, spin 7998 rpm, max height 31 yd, land angle 50 deg, carry 160 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "pga_tour_9_iron_2019",
+      "ball_speed_mph": 109.0,
+      "launch_deg": 20.4,
+      "spin_rpm": 8647.0,
+      "carry_yd": 148.0,
+      "apex_yd": 30.0,
+      "descent_deg": 51.0,
+      "source": "PGA Tour averages table (yards edition), 9-iron: ball speed 109 mph, launch 20.4 deg, spin 8647 rpm, max height 30 yd, land angle 51 deg, carry 148 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "pga_tour_pitching_wedge_2019",
+      "ball_speed_mph": 102.0,
+      "launch_deg": 24.2,
+      "spin_rpm": 9304.0,
+      "carry_yd": 136.0,
+      "apex_yd": 29.0,
+      "descent_deg": 52.0,
+      "source": "PGA Tour averages table (yards edition), pitching wedge: ball speed 102 mph, launch 24.2 deg, spin 9304 rpm, max height 29 yd, land angle 52 deg, carry 136 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised",
+      "xfail": {
+        "carry": "measured 127.5 yd, -6.3 % (-8.5 yd) against 136 yd after the spin-drag law and the Choi crisis refit: the linear spin term is extrapolated to S ~0.45, beyond the S <= 0.3 wind-tunnel range (#15443)"
+      }
+    },
+    {
+      "id": "lpga_tour_7_iron_2019",
+      "ball_speed_mph": 104.0,
+      "launch_deg": 19.0,
+      "spin_rpm": 6699.0,
+      "carry_yd": 141.0,
+      "apex_yd": 26.0,
+      "descent_deg": 47.0,
+      "source": "LPGA Tour averages table (yards edition), 7-iron: ball speed 104 mph, launch 19.0 deg, spin 6699 rpm, max height 26 yd, land angle 47 deg, carry 141 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised"
+    },
+    {
+      "id": "lpga_tour_pitching_wedge_2019",
+      "ball_speed_mph": 86.0,
+      "launch_deg": 25.7,
+      "spin_rpm": 8403.0,
+      "carry_yd": 107.0,
+      "apex_yd": 23.0,
+      "descent_deg": 48.0,
+      "source": "LPGA Tour averages table (yards edition), pitching wedge: ball speed 86 mph, launch 25.7 deg, spin 8403 rpm, max height 23 yd, land angle 48 deg, carry 107 yd; read from the published table in the 'tour_table_source' block",
+      "confidence": "high: every value is read from the published table; venue air not normalised",
+      "xfail": {
+        "carry": "measured 99.3 yd, -7.2 % (-7.7 yd) against 107 yd after the Choi crisis refit: same wedge spin-drag extrapolation (S ~0.45, beyond the S <= 0.3 wind-tunnel range) as the PGA wedge row (#15443)"
+      }
+    }
+  ],
+  "tour_table_source": {
+    "title": "PGA Tour Averages Yards (PGA_Tour_average.pdf) and LPGA Tour Averages Yards (LPGA_Tour_average.pdf)",
+    "publisher": "Trackman (Trackman support centre, Tour Averages downloads)",
+    "year": "2019 season averages; PDFs dated 2020-07-16 in their metadata (the 2019 driver row matches GOLF.com, 2019-04-23)",
+    "urls": [
+      "https://support.trackmangolf.com/hc/en-us/article_attachments/7349802113051",
+      "https://support.trackmangolf.com/hc/en-us/article_attachments/7349801987483"
+    ],
+    "accessed": "2026-11-22",
+    "notes": "Values were read from the rendered PDF pages, not from memory. The later 2023 averages (trackman.com/blog/golf/introducing-updated-tour-averages, 2024-05-02) are published only as images and are not used."
+  }
+}

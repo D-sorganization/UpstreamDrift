@@ -27,7 +27,7 @@ from src.shared.python.model_appearance.hand_backends.preview import (
 from src.shared.python.model_appearance.hand_backends.comparison import (
     build_for_comparison,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     DEFAULT_VISUAL_GRIP_RADIUS_M,
 )
@@ -44,6 +44,7 @@ SIZE_SKIN_VARIANTS = (
 
 
 def _spec(roll_deg: float) -> GripSpec:
+    """Return a legacy grip spec rolled by ``roll_deg``."""
     return GripSpec.legacy(
         lead=HandGripSpec(shaft_roll_deg=roll_deg),
         trail=HandGripSpec(shaft_roll_deg=-0.5 * roll_deg),
@@ -51,6 +52,7 @@ def _spec(roll_deg: float) -> GripSpec:
 
 
 def _stamp_badge(img: Image.Image, text: str) -> Image.Image:
+    """Draw ``text`` into the corner of ``img``."""
     draw = ImageDraw.Draw(img)
     font = ImageFont.load_default(size=22)
     draw.rectangle([16, 16, 16 + len(text) * 12 + 24, 54], fill=(28, 34, 46))
@@ -61,6 +63,7 @@ def _stamp_badge(img: Image.Image, text: str) -> Image.Image:
 def _hand_fill_fraction(
     focus_verts: np.ndarray, rot: np.ndarray, target_fill: float
 ) -> float:
+    """Camera distance that fills ``target_fill`` of the frame with the hand."""
     cam = focus_verts @ rot.T
     du = float(cam[:, 0].max() - cam[:, 0].min())
     dv = float(cam[:, 1].max() - cam[:, 1].min())
@@ -84,6 +87,7 @@ def _render_view(
     view: str,
     label: str,
 ) -> Image.Image:
+    """Rasterise one named view of a roll-strip job."""
     rgb = render_shaded_scene_rgb(
         drawables,
         focus_vertices=focus,
@@ -102,6 +106,7 @@ def _save_frame(
     focus: np.ndarray,
     fill_view: str,
 ) -> dict[str, Any]:
+    """Write one rendered frame and return its record."""
     out = job.output_dir / name
     img.save(out)
     _LOG.info("Wrote %s", out)
@@ -143,6 +148,7 @@ def _render_strip_and_iso(
 
 
 def render_roll_strip(output_dir: Path, backend_id: str = "procedural_skin") -> None:
+    """Render shaft-roll evidence frames for ``backend_id``."""
     output_dir.mkdir(parents=True, exist_ok=True)
     settings = DEFAULT_HAND_VISUAL_SETTINGS
     job = _RollRenderJob(
@@ -260,6 +266,7 @@ def render_size_skin_variants(
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Parse arguments and render the roll-strip evidence."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(

@@ -53,6 +53,93 @@
     "name": "get_run"
   },
   {
+    "description": "Forces and torques for a saved kinematic bundle (request.bundle, request.out, optional request.shaft_source): writes the bundle with efforts and returns the receipt's verdict, reasons and peaks.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "kinetic_match"
+  },
+  {
+    "description": "Native viewer exporter request schema derived from its command line: groups with maturity and sources, options with defaults. request.min_maturity hides unready groups.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "name": "native_export_describe"
+  },
+  {
+    "description": "Validate a native viewer export request {options: {name: value}} and render it in the background; returns a job id at once.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "native_export_run"
+  },
+  {
+    "description": "State of a native export job (request.job_id): queued, running, succeeded with the clip manifest, or failed with the error.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "native_export_status"
+  },
+  {
+    "description": "Check a native viewer export request {options: {name: value}} against the schema and allowed roots; returns the command line.",
+    "inputSchema": {
+      "properties": {
+        "auth_token": {
+          "type": "string"
+        },
+        "request": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "type": "object"
+    },
+    "name": "native_export_validate"
+  },
+  {
     "description": "Best aim and pace for one putt under the player's stroke noise",
     "inputSchema": {
       "properties": {

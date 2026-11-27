@@ -16,19 +16,23 @@ Array = NDArray[np.float64]
 
 
 def unit(vec: Array) -> Array:
+    """Return ``vec`` scaled to unit length."""
     norm = float(np.linalg.norm(vec))
     return vec / norm if norm > 1e-12 else np.array([1.0, 0.0, 0.0], dtype=float)
 
 
 def radial(theta: float) -> Array:
+    """Unit vector in the grip cross-section at angle ``theta``."""
     return np.array([math.cos(theta), math.sin(theta), 0.0], dtype=float)
 
 
 def tangential(theta: float) -> Array:
+    """Unit vector perpendicular to :func:`radial` at angle ``theta``."""
     return np.array([-math.sin(theta), math.cos(theta), 0.0], dtype=float)
 
 
 def _rodrigues(vec: Array, axis: Array, angle_rad: float) -> Array:
+    """Rotate ``vec`` about ``axis`` by ``angle_rad``."""
     k = unit(axis)
     c, s = math.cos(angle_rad), math.sin(angle_rad)
     return vec * c + np.cross(k, vec) * s + k * (float(np.dot(k, vec)) * (1.0 - c))
@@ -57,6 +61,7 @@ def _segment_skin_clearance(
     t_start: float = 0.15,
     n_samples: int = 9,
 ) -> float:
+    """Clearance from a tapered finger segment to the grip cylinder."""
     ts = np.linspace(t_start, 1.0, n_samples)
     pts = p0[None, :] + ts[:, None] * (p1 - p0)[None, :]
     radii = r0 * (1.0 - ts) + r1 * ts
@@ -147,6 +152,7 @@ def solve_finger_chain(
     tip_r: float,
     solve: FingerSolveSpec,
 ) -> tuple[Array, Array]:
+    """Pose a three-segment finger so its pads meet the grip."""
     total_len = sum(lengths)
     cumulative = (
         0.0,

@@ -300,10 +300,68 @@ def _resolve_tier_for_engine(engine_name: str) -> str:
         return "archived" if engine_name == "double_pendulum" else "experimental"
 
 
-@precondition(lambda: True, "precondition")
+def _ledger_rows_are_records(
+    ledger_rows: list[dict[str, Any]] | None = None,
+) -> bool:
+    """Precondition: ledger rows are absent or a list of record dicts."""
+    if ledger_rows is None:
+        return True
+    return isinstance(ledger_rows, list) and all(
+        isinstance(row, dict) for row in ledger_rows
+    )
+
+
+def _classify_engine_membership(
+    *,
+    is_advertised: bool,
+    tier: str,
+    is_qualified: bool,
+) -> tuple[bool, bool, bool]:
+    """Return advertised, experimental, and unsupported membership.
+
+    Preconditions: ``is_advertised`` and ``is_qualified`` are bool;
+    ``tier`` is a non-empty string.
+
+    Postcondition: advertised and unsupported are not both true.
+    A missing qualification receipt stays on the profile status. It does
+    not place an advertised engine in ``unsupported_engines``. Unsupported
+    membership is only for an engine that is not advertised, not
+    experimental, and not qualified.
+    """
+    if not isinstance(is_advertised, bool):
+        raise TypeError(
+            f"is_advertised must be a bool, got {type(is_advertised).__name__}"
+        )
+    if not isinstance(is_qualified, bool):
+        raise TypeError(
+            f"is_qualified must be a bool, got {type(is_qualified).__name__}"
+        )
+    if not isinstance(tier, str) or not tier.strip():
+        raise ValueError("tier must be a non-empty string")
+
+    in_experimental = tier == "experimental"
+    in_unsupported = not is_advertised and not in_experimental and not is_qualified
+    return is_advertised, in_experimental, in_unsupported
+
+
+def _matrix_lists_are_disjoint(matrix: dict[str, Any]) -> bool:
+    """Postcondition: schema keys exist and the two engine lists do not overlap."""
+    if "schema_version" not in matrix or "profiles" not in matrix:
+        return False
+    advertised = matrix.get("advertised_engines")
+    unsupported = matrix.get("unsupported_engines")
+    if not isinstance(advertised, list) or not isinstance(unsupported, list):
+        return False
+    return set(advertised).isdisjoint(unsupported)
+
+
+@precondition(
+    _ledger_rows_are_records,
+    "ledger_rows must be None or a list of record dicts",
+)
 @postcondition(
-    lambda res: "schema_version" in res and "profiles" in res,
-    "postcondition",
+    _matrix_lists_are_disjoint,
+    "advertised_engines and unsupported_engines must be disjoint",
 )
 def generate_matrix_data(
     ledger_rows: list[dict[str, Any]] | None = None,
@@ -332,11 +390,16 @@ def generate_matrix_data(
             is_advertised=is_adv,
         )
 
-        if is_adv:
+        in_advertised, in_experimental, in_unsupported = _classify_engine_membership(
+            is_advertised=is_adv,
+            tier=tier,
+            is_qualified=res.is_qualified,
+        )
+        if in_advertised:
             advertised.append(eng)
-        if tier == "experimental":
+        if in_experimental:
             experimental.append(eng)
-        elif not res.is_qualified:
+        if in_unsupported:
             unsupported.append(eng)
 
         caps = {

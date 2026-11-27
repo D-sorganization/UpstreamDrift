@@ -19,6 +19,7 @@ from src.shared.python.impact_parameters.flight_report import (
     flight_for_impact,
     _invalid_reason,
     overlay_lines,
+    spin_axis_tilt_deg,
     swing_state_from_series,
 )
 
@@ -73,12 +74,32 @@ def test_flight_for_impact_is_plausible_and_carry_only():
     assert 5.0 < summary.launch_deg < 25.0
     assert summary.ball_speed_mph > 100.0
     assert summary.total_m is None and "bounce" in summary.total_unavailable
+    times = summary.times_s  # one time per trajectory point, launch to landing
+    assert times is not None and times.shape == summary.trajectory_m.shape[:1]
+    assert times[0] == 0.0 and (times[1:] > times[:-1]).all()
+    assert times[-1] == pytest.approx(summary.flight_time_s, abs=0.02)
 
 
 def test_open_face_sends_the_ball_right_of_target():
     right = flight_for_impact(_series(face_open_deg=5.0), 1, FRAME)
     left = flight_for_impact(_series(face_open_deg=-5.0), 1, FRAME)
     assert right.lateral_m > 5.0 > -5.0 > left.lateral_m  # + = golfer's right
+
+
+def test_spin_axis_tilt_is_zero_for_backspin_and_positive_to_the_right():
+    assert spin_axis_tilt_deg(np.array([0.0, -1.0, 0.0])) == pytest.approx(0.0)
+    tilt = math.radians(10.0)  # axis dipped right: Magnus force to the right
+    right = np.array([0.0, -math.cos(tilt), -math.sin(tilt)])
+    assert spin_axis_tilt_deg(right * 3.0) == pytest.approx(10.0)
+    with pytest.raises(ValueError, match="spin axis"):
+        spin_axis_tilt_deg(np.zeros(3))
+
+
+def test_open_face_tilts_the_spin_axis_right():
+    fade = flight_for_impact(_series(face_open_deg=5.0), 1, FRAME)
+    draw = flight_for_impact(_series(face_open_deg=-5.0), 1, FRAME)
+    assert fade.spin_axis_deg is not None and draw.spin_axis_deg is not None
+    assert fade.spin_axis_deg > 0.0 > draw.spin_axis_deg
 
 
 def test_overlay_lines_state_every_condition_and_the_gap():
@@ -146,3 +167,22 @@ def _path(end_azimuth_deg: float, reverse: bool = False) -> np.ndarray:
 def test_invalid_reason_branches(path, expected):
     reason = _invalid_reason(path)
     assert (reason == "") if expected == "" else (expected in reason)
+
+
+def test_driver_heel_strike_gear_uses_the_rigid_contact_law():
+    """The shot card's gear tilt is the rigid-contact law's, about half the legacy one."""
+    from src.shared.python.physics.impact_model.types import ImpactParameters
+    from src.shared.python.physics.swing_ball_flight_pipeline import (
+        SwingBallFlightPipeline,
+    )
+
+    series = _series(speed=49.2, loft_deg=10.5)
+    heel = (-0.0034, 0.0014)
+    centred = flight_for_impact(series, 1, FRAME, "driver").spin_axis_deg
+    rigid = flight_for_impact(series, 1, FRAME, "driver", None, heel).spin_axis_deg
+    legacy_run = SwingBallFlightPipeline(impact_params=ImpactParameters()).run(
+        swing_state_from_series(series, 1, FRAME, None, heel), club="driver"
+    )
+    legacy = spin_axis_tilt_deg(legacy_run.launch_conditions.spin_axis)
+    assert rigid > centred  # heel strike tilts toward a fade
+    assert 0.3 < (rigid - centred) / (legacy - centred) < 0.7

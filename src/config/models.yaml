@@ -562,7 +562,7 @@ models:
   - id: "model_explorer"
     help: "docs/help/model_explorer.md"
     name: "Model Explorer"
-    description: "Explore models and generate URDFs"
+    description: "Play matched golf swings, explore models and edit URDFs"
     type: "special_app"
     path: "src/tools/model_explorer/main_window.py"
     launcher:
@@ -602,6 +602,20 @@ models:
       logo: "assets/urdf_icon.png"
       status: "beta"
       default_launch: "tab"
+
+  - id: "swing_report_package"
+    help: "docs/help/swing_report_package.md"
+    name: "Swing Report Package"
+    description: "Choose a swing bundle, a report package and its items, preview the plan, then render the videos, grids and key-phase sheets in the background"
+    type: "special_app"
+    path: "src/tools/swing_report_package/gui.py"
+    capabilities:
+      - "video_export"
+      - "report_export"
+    launcher:
+      category: "tool"
+      logo: "assets/matched_swing_browser.png"
+      status: "beta"
 
   - id: "necromatcher"
     help: "docs/help/necromatcher.md"

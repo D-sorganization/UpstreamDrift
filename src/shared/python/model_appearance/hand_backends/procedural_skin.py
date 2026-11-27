@@ -49,7 +49,7 @@ from src.shared.python.model_appearance.hand_backends.procedural_loft import (
     lofted_anatomical_digit,
     lofted_palm_slab,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
@@ -88,6 +88,7 @@ class _BuiltProceduralHand:
 
 
 def _mirror_mesh_y(mesh: Mesh) -> Mesh:
+    """Mirror ``mesh`` through the y = 0 plane and flip winding."""
     verts = mesh.vertices.copy()
     verts[:, 1] = -verts[:, 1]
     faces = mesh.faces[:, [0, 2, 1]].copy()
@@ -95,6 +96,7 @@ def _mirror_mesh_y(mesh: Mesh) -> Mesh:
 
 
 def _mirror_point_y(pt: Array) -> Array:
+    """Mirror one point through the y = 0 plane."""
     out = np.asarray(pt, dtype=float).copy()
     out[1] = -out[1]
     return out
@@ -151,6 +153,7 @@ def _hand_build_context(
     grip_radius_m: float,
     settings: HandVisualSettings,
 ) -> _HandBuildContext:
+    """Collect scales, pose and grip radius for one hand build."""
     canon_spec = (
         replace(grip_spec, handedness="right")
         if grip_spec.handedness == "left"
@@ -241,6 +244,7 @@ def _palm_arc(ctx: _HandBuildContext, joint_angles: GripArticulation) -> _PalmAr
 def _palm_slab(
     ctx: _HandBuildContext, arc: _PalmArc
 ) -> tuple[Mesh, Array, float, float]:
+    """Loft the cupped palm and return its mesh, anchors and size."""
     settings, ls = ctx.settings, ctx.length_scale
     cup_depth = (
         settings.palmar_cup_base_m + settings.palmar_cup_curl_gain_m * ctx.depth_factor
@@ -499,6 +503,7 @@ def _build_canonical_hand(
     grip_radius_m: float,
     settings: HandVisualSettings,
 ) -> _BuiltProceduralHand:
+    """Build one unrolled procedural hand in the grip frame."""
     ctx = _hand_build_context(
         grip_spec,
         side,

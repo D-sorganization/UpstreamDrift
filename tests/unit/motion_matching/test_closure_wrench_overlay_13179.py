@@ -154,10 +154,16 @@ def test_frame_source_marks_closure_status_on_real_spec(case) -> None:
     assert any(value is None for value in blank.values_n.values())
 
 
-def test_overlay_feed_blanks_axial_loads_at_ball_impact(spec_bytes: bytes) -> None:
+@pytest.mark.parametrize("blackout", [True, False])
+def test_overlay_feed_blanks_axial_loads_at_ball_impact(
+    spec_bytes: bytes, blackout: bool
+) -> None:
     from src.shared.python.motion_matching.same_input import InputBundle
     from src.tools.native_viewer_export.core import SwingInput
-    from src.tools.native_viewer_export.overlay import build_overlay_feed
+    from src.tools.native_viewer_export.overlay import (
+        OverlayOptions,
+        build_overlay_feed,
+    )
 
     names = tuple(json.loads(spec_bytes)["coordinate_order"])
     q = np.zeros((4, len(names)))
@@ -173,12 +179,19 @@ def test_overlay_feed_blanks_axial_loads_at_ball_impact(spec_bytes: bytes) -> No
         reference_engine="mujoco",
     )
     swing = SwingInput(bundle, q, "t", "Driver", "mujoco")
-    feed, _ = build_overlay_feed(swing, "mujoco", axial=True, impact_time_s=0.002)
+    options = OverlayOptions(axial_impact_blackout=blackout)
+    feed, _ = build_overlay_feed(
+        swing, "mujoco", axial=True, impact_time_s=0.002, options=options
+    )
     before, at = feed.frame_at(0), feed.frame_at(2)
     assert any(v is not None for v in before.axial_loads.values_n.values())
     assert before.metadata["axial_closure"] == "applied"
-    assert all(v is None for v in at.axial_loads.values_n.values())
-    assert at.metadata["axial_impact"] == "unavailable"
+    if blackout:
+        assert all(v is None for v in at.axial_loads.values_n.values())
+        assert at.metadata["axial_impact"] == "unavailable"
+    else:  # the setting off: impact frames are shaded from the motion alone
+        assert any(v is not None for v in at.axial_loads.values_n.values())
+        assert "axial_impact" not in at.metadata
 
 
 def test_drawn_contact_point_wrenches_match_the_forward_line_of_action(case) -> None:

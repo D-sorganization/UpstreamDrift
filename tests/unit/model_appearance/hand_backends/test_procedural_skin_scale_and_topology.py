@@ -25,7 +25,7 @@ from src.shared.python.model_appearance.hand_backends.placement import (
 from src.shared.python.model_appearance.hand_backends.procedural_skin import (
     build_hand_visual,
 )
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_VISUAL_GRIP_RADIUS_M,
     HandVisualSettings,
 )
@@ -38,6 +38,7 @@ pytestmark = pytest.mark.unit
 
 
 def _edge_counts(faces: np.ndarray) -> Counter[tuple[int, int]]:
+    """Count undirected edges in ``faces``."""
     counts: Counter[tuple[int, int]] = Counter()
     for a, b, c in faces:
         for u, v in ((int(a), int(b)), (int(b), int(c)), (int(c), int(a))):
@@ -50,6 +51,7 @@ def _edge_counts(faces: np.ndarray) -> Counter[tuple[int, int]]:
 def test_skeleton_extract_finger_polylines_are_coherent_and_unflipped(
     role: str,
 ) -> None:
+    """Extracted finger polylines stay coherent and point the right way."""
     spec = GripSpec.legacy()
     hand = Hand.LEAD if role == "lead" else Hand.TRAIL
     baked = build_grip_hand_mesh(
@@ -68,6 +70,7 @@ def test_skeleton_extract_finger_polylines_are_coherent_and_unflipped(
 
 
 def test_trail_shared_visual_offset_places_trail_toward_clubhead() -> None:
+    """The trail hand's shared-frame offset moves it toward the clubhead."""
     spec = GripSpec.legacy()
     dz = axial_offset_vs_lead_m(spec, "trail")
     assert dz == pytest.approx(spec.hand_spacing_m, abs=1e-6)
@@ -76,6 +79,7 @@ def test_trail_shared_visual_offset_places_trail_toward_clubhead() -> None:
 
 @pytest.mark.parametrize("role", ("lead", "trail"))
 def test_procedural_skin_mesh_is_watertight_and_not_over_scaled(role: str) -> None:
+    """The procedural skin is watertight and stays inside its length band."""
     spec = GripSpec.legacy()
     settings = HandVisualSettings()
     vis = build_hand_visual(
@@ -100,6 +104,7 @@ def test_procedural_skin_mesh_is_watertight_and_not_over_scaled(role: str) -> No
 def test_procedural_skin_anthropometric_scale_matches_settings_bands(
     role: str,
 ) -> None:
+    """Measured anthropometry stays inside the settings bands."""
     from src.shared.python.model_appearance.hand_backends.procedural_skin import (
         measure_procedural_hand_anthropometry,
     )
@@ -135,6 +140,7 @@ def test_procedural_skin_anthropometric_scale_matches_settings_bands(
 
 
 def test_procedural_skin_scales_monotonically_with_hand_size() -> None:
+    """A larger hand-size scale produces a longer procedural hand."""
     from src.shared.python.model_appearance.hand_backends.procedural_skin import (
         measure_procedural_hand_anthropometry,
     )
@@ -156,6 +162,7 @@ def test_procedural_skin_scales_monotonically_with_hand_size() -> None:
 def test_procedural_skin_knuckle_line_topology_cupped_palm_and_separation(
     role: str,
 ) -> None:
+    """The knuckle line, cupped palm and finger gaps match the settings."""
     from src.shared.python.model_appearance.hand_backends.procedural_skin import (
         measure_procedural_hand_anthropometry,
     )
@@ -180,6 +187,7 @@ def test_procedural_skin_knuckle_line_topology_cupped_palm_and_separation(
 
 
 def test_open_hand_pose_aligns_finger_tangents_within_30_deg() -> None:
+    """An open hand keeps finger tangents within 30 degrees of straight."""
     from src.shared.python.model_appearance.hand_backends.procedural_skin import (
         measure_procedural_hand_anthropometry,
     )
@@ -201,6 +209,7 @@ def test_open_hand_pose_aligns_finger_tangents_within_30_deg() -> None:
 def test_procedural_skin_wraps_grip_radius_within_contact_tolerance(
     grip_radius_m: float, role: str
 ) -> None:
+    """Pads wrap the grip inside the contact tolerance."""
     from src.shared.python.model_appearance.hand_backends.procedural_skin import (
         measure_procedural_hand_anthropometry,
     )
@@ -235,6 +244,7 @@ def test_procedural_skin_wraps_grip_radius_within_contact_tolerance(
 
 
 def test_left_handed_and_roll_mirroring_are_exact() -> None:
+    """Left-handed mirroring and shaft roll are exact reflections."""
     settings = HandVisualSettings()
     right = GripSpec.legacy(lead=HandGripSpec(shaft_roll_deg=20.0))
     left = GripSpec.legacy(handedness="left", lead=HandGripSpec(shaft_roll_deg=20.0))

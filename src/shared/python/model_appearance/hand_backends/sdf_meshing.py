@@ -11,11 +11,13 @@ from src.shared.python.model_appearance.geometry import Mesh
 
 
 def _smooth_min_iq(a: np.ndarray, b: np.ndarray, k: float) -> np.ndarray:
+    """Polynomial smooth minimum of two signed-distance fields."""
     h = np.clip(0.5 + 0.5 * (b - a) / k, 0.0, 1.0)
     return b + (a - b) * h - k * h * (1.0 - h)
 
 
 def sdf_segment(p: np.ndarray, a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Signed distance from points ``p`` to the segment from ``a`` to ``b``."""
     ab = b - a
     denom = float(np.dot(ab, ab))
     if denom < 1e-18:
@@ -50,6 +52,7 @@ def sdf_rounded_box(
     half_extents: np.ndarray,
     corner_radius: float,
 ) -> np.ndarray:
+    """Signed distance from points ``p`` to a rounded box."""
     q = np.abs(p - centre) - half_extents
     outside = np.linalg.norm(np.maximum(q, 0.0), axis=1)
     inside = np.minimum(np.max(q, axis=1), 0.0)
@@ -57,10 +60,12 @@ def sdf_rounded_box(
 
 
 def sdf_thenar_mount(p: np.ndarray, centre: np.ndarray, radius_m: float) -> np.ndarray:
+    """Signed distance from points ``p`` to a thenar sphere."""
     return np.linalg.norm(p - centre, axis=1) - radius_m
 
 
 def combine_sdfs(fields: list[np.ndarray], smooth_k: float) -> np.ndarray:
+    """Smooth-union the signed-distance fields in ``fields``."""
     out = fields[0]
     for f in fields[1:]:
         out = _smooth_min_iq(out, f, smooth_k)
@@ -75,6 +80,7 @@ def mesh_from_sdf(
     resolution: int = 80,
     smooth_k: float = 0.003,
 ) -> Mesh:
+    """Polygonise a signed-distance field over an axis-aligned grid."""
     xs = np.linspace(bounds_min[0], bounds_max[0], resolution)
     ys = np.linspace(bounds_min[1], bounds_max[1], resolution)
     zs = np.linspace(bounds_min[2], bounds_max[2], resolution)
@@ -101,6 +107,7 @@ def mesh_from_sdf(
 
 
 def catmull_rom_spline(points: np.ndarray, samples: int) -> np.ndarray:
+    """Resample ``points`` along a Catmull-Rom spline."""
     if len(points) < 2:
         return points
     if len(points) == 2:
@@ -136,6 +143,7 @@ def tube_mesh_from_polyline(
     sides: int = 20,
     spline_samples: int = 48,
 ) -> Mesh:
+    """Loft a tapered tube along ``points``."""
     from src.shared.python.model_appearance.geometry import _orient
 
     curve = catmull_rom_spline(points, spline_samples)

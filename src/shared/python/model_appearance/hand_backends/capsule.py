@@ -21,7 +21,7 @@ from src.shared.python.model_appearance.grip_hand_mesh import (
     build_grip_hand_mesh,
 )
 from src.shared.python.model_appearance.grip_pose import Hand
-from src.shared.python.model_appearance.hand_backends.settings import (
+from src.shared.python.model_appearance.hand_backends.procedural_settings import (
     DEFAULT_HAND_VISUAL_SETTINGS,
     HandVisualSettings,
 )

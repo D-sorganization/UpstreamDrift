@@ -20,6 +20,7 @@ DEFAULT_FILL_LIGHT = (-0.35, 0.20, 0.62)
 def _camera_basis(
     fwd: Sequence[float], up_hint: Sequence[float] = (0.0, 0.0, 1.0)
 ) -> Array:
+    """Return an orthonormal camera basis with ``fwd`` as the view axis."""
     fwd_arr = np.asarray(fwd, dtype=np.float64)
     fwd_u = fwd_arr / max(float(np.linalg.norm(fwd_arr)), 1e-12)
     up_arr = np.asarray(up_hint, dtype=np.float64)
@@ -32,6 +33,7 @@ def _camera_basis(
 
 
 def skin_tone_rgb(material_name: str) -> tuple[float, float, float]:
+    """RGB triple for a named skin material, or a default skin tone."""
     material = MATERIALS.get(material_name)
     if material is None:
         return (0.85, 0.70, 0.58)
@@ -46,6 +48,7 @@ def _shade_faces(
     fill: np.ndarray,
     ambient: float = 0.22,
 ) -> np.ndarray:
+    """Shade face normals with a key light, a fill light and ambient."""
     key = key / np.linalg.norm(key)
     fill = fill / np.linalg.norm(fill)
     key_term = np.clip(normals @ key, 0.0, 1.0)
@@ -64,6 +67,7 @@ def plot_shaded_mesh(
     frame_fill: float = 0.70,
     auto_frame: bool = True,
 ) -> None:
+    """Draw ``mesh`` on ``ax`` with directional shading."""
     verts = mesh.vertices
     faces = mesh.faces
     normals = np.cross(
@@ -134,6 +138,7 @@ def view_rotation(name: str) -> np.ndarray:
 
 
 def transform_mesh(mesh: Mesh, rotation: np.ndarray) -> Mesh:
+    """Return ``mesh`` with vertices rotated by ``rotation``."""
     return Mesh(mesh.vertices @ rotation.T, mesh.faces.copy())
 
 
@@ -181,6 +186,7 @@ def add_grip_shaft_solid(
     rotation: np.ndarray | None = None,
     color: tuple[float, float, float] = (0.22, 0.24, 0.28),
 ) -> None:
+    """Draw a solid grip cylinder and shaft on ``ax``."""
     grip = grip_shaft_mesh(grip_radius_m, z_range=z_range)
     if rotation is not None:
         grip = transform_mesh(grip, rotation)
@@ -203,6 +209,7 @@ def add_grip_cylinder_wire(
     rotation: np.ndarray | None = None,
     color: tuple[float, float, float] = (0.35, 0.38, 0.42),
 ) -> None:
+    """Draw a wireframe grip cylinder on ``ax``."""
     theta = np.linspace(0.0, 2.0 * math.pi, 64)
     z = np.linspace(z_range[0], z_range[1], 2)
     pts = []
@@ -233,6 +240,7 @@ def _tapered_cylinder_mesh(
     cap_bottom: bool = False,
     cap_top: bool = False,
 ) -> Mesh:
+    """Return a closed tapered cylinder from ``z0`` to ``z1``."""
     theta = np.linspace(0.0, 2.0 * math.pi, sides, endpoint=False)
     cos_t, sin_t = np.cos(theta), np.sin(theta)
     r_bottom = np.column_stack([r0 * cos_t, r0 * sin_t, np.full_like(theta, z0)])
@@ -305,6 +313,7 @@ def club_context_drawables(
 
 
 def _welded_vertex_normals(mesh: Mesh, weld_tol_m: float = 1.5e-4) -> Array:
+    """Area-weighted vertex normals with nearby vertices welded."""
     verts = np.asarray(mesh.vertices, dtype=np.float64)
     faces = np.asarray(mesh.faces, dtype=np.int64)
     quant = np.rint(verts / weld_tol_m).astype(np.int64)
@@ -333,6 +342,7 @@ def _rasterize_ssaa(
     w_ss: int,
     h_ss: int,
 ) -> NDArray[np.uint64]:
+    """Rasterise triangles with supersampling into an RGB image."""
     active = np.flatnonzero(tri_mask)
     best = np.zeros(w_ss * h_ss, dtype=np.uint64)
     if len(active) == 0:

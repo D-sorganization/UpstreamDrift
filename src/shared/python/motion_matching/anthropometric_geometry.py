@@ -199,6 +199,27 @@ def _solid(name: str, mass: float, com: Array, inertia: Array) -> dict[str, Any]
     }
 
 
+#: Where the mass of the clavicle links comes from (#15279). de Leva's upper
+#: trunk already contains the shoulder girdle, so links with mass of their own
+#: on top of the whole upper trunk count the girdle twice.
+GIRDLE_MASS_ADDED = "added"  # the committed specs: links on top of the trunk
+GIRDLE_MASS_FROM_UPPER_TRUNK = "from_upper_trunk"  # the trunk gives it up
+GIRDLE_MASS_RULES = (GIRDLE_MASS_ADDED, GIRDLE_MASS_FROM_UPPER_TRUNK)
+#: Each clavicle link's mass as a share of the de Leva upper arm.
+CLAVICLE_UPPER_ARM_SHARE = 0.2
+
+
+def _upper_trunk_share(rule: str, stature: float, mass: float) -> float:
+    """Share of the de Leva upper trunk its solid keeps under ``rule``."""
+    if rule not in GIRDLE_MASS_RULES:
+        raise ValueError(f"shoulder_girdle_mass must be one of {GIRDLE_MASS_RULES}")
+    if rule == GIRDLE_MASS_ADDED:
+        return 1.0
+    links = 2.0 * CLAVICLE_UPPER_ARM_SHARE
+    links *= segment_parameters(stature, mass, "upper_arm").mass_kg
+    return 1.0 - links / segment_parameters(stature, mass, "upper_trunk").mass_kg
+
+
 def _segment_solid(
     name: str,
     segment: str,
@@ -274,13 +295,26 @@ def build_upper_body(
     scale_hand_mass: bool = False,
     handedness: str = DEFAULT_HANDEDNESS,
     upper_ranges_deg: Mapping[str, tuple[float, float]] | None = None,
+    shoulder_girdle_mass: str = GIRDLE_MASS_ADDED,
+    shoulder_below_cervicale_m: float | None = None,
 ) -> dict[str, Any]:
     """Return the anthropometric upper-body document for a subject.
+
+    ``shoulder_below_cervicale_m`` (finite, >= 0; #15296) is the drop of the
+    shoulder joints below the neck joint; ``None`` is the default
+    ``SHOULDER_BELOW_CERVICALE_M``, any other value is recorded in ``subject``.
 
     ``handedness`` (``"right"`` or ``"left"``, validated) is written to
     ``subject.handedness`` only when it is not the default, so a right-handed
     build stays byte-identical to every spec committed before HRG-GR0 (#13201);
     read it back with ``core.handedness.subject_handedness``.
+
+    ``shoulder_girdle_mass`` says where the clavicle links' mass comes from:
+    ``"added"`` (default, every committed spec) puts it on top of the whole de
+    Leva upper trunk, which counts the girdle twice; ``"from_upper_trunk"``
+    takes it out of the upper-trunk solid (same centre, inertia scaled with
+    its mass), so trunk plus girdle is the de Leva upper trunk and the scapula
+    joints are untouched. Recorded in ``subject`` only when not the default.
 
     ``grip_rotation_deg`` maps ``"L"`` and ``"R"`` to the constant rotation
     of each hand on its wrist (default ``GRIP_ROTATION_DEG``).
@@ -326,10 +360,16 @@ def build_upper_body(
 
     if stature_m is None or mass_kg is None or stature_m <= 0 or mass_kg <= 0:
         raise ValueError("Stature and mass must be positive")
+    trunk_share = _upper_trunk_share(shoulder_girdle_mass, stature_m, mass_kg)
     hand_length_m = resolve_hand_length_m(stature_m)
     hand_breadth_m = resolve_hand_breadth_m(hand_length_m)
     if trunk_scale <= 0 or arm_scale <= 0 or shoulder_scale <= 0:
         raise ValueError("Scale factors must be positive")
+    drop = SHOULDER_BELOW_CERVICALE_M
+    if shoulder_below_cervicale_m is not None:
+        drop = float(shoulder_below_cervicale_m)
+    if not 0.0 <= drop < float("inf"):  # also refuses NaN
+        raise ValueError("shoulder_below_cervicale_m must be finite and >= 0")
     if tuple(native_dict["coordinate_order"]) != COORDINATES:
         raise ValueError("Native document must carry the 27 native coordinates")
     if isinstance(club, str):
@@ -348,7 +388,7 @@ def build_upper_body(
 
     trunk = segment_parameters(stature_m, mass_kg, "trunk").length_m * trunk_scale
     pelvis_h = PELVIS_HEIGHT_FRACTION * trunk
-    hub_h = trunk - SHOULDER_BELOW_CERVICALE_M - pelvis_h  # L5/S1 to shoulder centre
+    hub_h = trunk - drop - pelvis_h  # L5/S1 to shoulder centre
     cervicale_h = trunk - pelvis_h
     head_len = segment_parameters(stature_m, mass_kg, "head").length_m
     clav = BIACROMIAL_FRACTION_OF_STATURE * stature_m * shoulder_scale / 2
@@ -442,6 +482,7 @@ def build_upper_body(
                 mass_kg,
                 (0, 0, hub_h),  # cervicale (shoulder centre), the row origin
                 (0, 0, hub_h * 0.5),  # xiphion
+                share=trunk_share,
             ),
         ],
     )
@@ -484,7 +525,7 @@ def build_upper_body(
                     mass_kg,
                     (0, 0, 0),
                     (0, sign * clav, 0),
-                    share=0.2,
+                    share=CLAVICLE_UPPER_ARM_SHARE,
                 )
             ],
         )
@@ -628,6 +669,16 @@ def build_upper_body(
             "hand_length_m": hand_length_m,
             "hand_breadth_m": hand_breadth_m,
             **({} if handedness == DEFAULT_HANDEDNESS else {"handedness": handedness}),
+            **(
+                {}
+                if shoulder_girdle_mass == GIRDLE_MASS_ADDED
+                else {"shoulder_girdle_mass": shoulder_girdle_mass}
+            ),
+            **(
+                {}
+                if drop == SHOULDER_BELOW_CERVICALE_M
+                else {"shoulder_below_cervicale_m": drop}
+            ),
         },
         "coordinate_ranges_deg": {
             k: list(v)

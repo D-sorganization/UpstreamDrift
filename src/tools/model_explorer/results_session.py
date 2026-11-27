@@ -161,6 +161,11 @@ class ResultsSession:
         self._source = source
         self._current_frame = 0
         self._playback: Any | None = None
+        self._scene_xml: str | None = None
+        #: behind-view anchor from :meth:`prepare_scene` (``None``: preset view)
+        self._behind_anchor: tuple[float, float, float] | None = None
+        #: Shot card summary from :meth:`prepare_scene` (``None``: not built)
+        self._shot_summary: Any | None = None
 
     @classmethod
     def load(cls, path: str | Path, engine: str | None = None) -> ResultsSession:
@@ -195,7 +200,7 @@ class ResultsSession:
 
     @property
     def title(self) -> str:
-        """What is being shown, e.g. ``Playback of Drake result (...)``."""
+        """What is being shown, e.g. ``Swing: matched motion replay (...)``."""
         pose = self.pose_source
         if pose is not None:
             return pose.playback_label
@@ -230,6 +235,58 @@ class ResultsSession:
             )
         self._current_frame = index
 
+    def prepare_scene(self) -> None:
+        """Build (or read cached) golfer scene, behind anchor and shot (GL-free).
+
+        :meth:`playback` then only creates the renderer. ``ValueError`` for a
+        marker archive.
+        """
+        pose = self.pose_source
+        if pose is None:
+            raise ValueError("marker archives have no model pose to play back")
+        if self._scene_xml is None:
+            from src.tools.model_explorer import golfer_playback as golfer
+            from src.tools.model_explorer.playback_view import behind_anchor_for
+            from src.tools.model_explorer.scene_cache import default_scene_cache
+
+            self._scene_xml, _ = default_scene_cache().get_or_build(
+                golfer.golfer_scene_inputs(pose),
+                lambda: golfer.build_golfer_scene_xml(pose),
+            )
+            self._behind_anchor = behind_anchor_for(pose)
+        if self._shot_summary is None:
+            from src.tools.model_explorer import shot_card_rows
+
+            self._shot_summary = shot_card_rows.summary_for_path(self.path)
+
+    @property
+    def shot_summary(self) -> Any | None:
+        """The Shot card summary :meth:`prepare_scene` evaluated, or ``None``."""
+        return self._shot_summary
+
+    def scene_is_cached(self) -> bool:
+        """True when :meth:`prepare_scene` will read the scene cache, not build.
+
+        ``ValueError`` for a marker archive.
+        """
+        pose = self.pose_source
+        if pose is None:
+            raise ValueError("marker archives have no model pose to play back")
+        from src.tools.model_explorer.golfer_playback import golfer_scene_inputs
+        from src.tools.model_explorer.scene_cache import default_scene_cache
+
+        return default_scene_cache().is_cached(golfer_scene_inputs(pose))
+
+    @property
+    def scene_xml(self) -> str | None:
+        """The prepared golfer scene MJCF, or ``None`` before :meth:`prepare_scene`."""
+        return self._scene_xml
+
+    @property
+    def behind_anchor(self) -> tuple[float, float, float] | None:
+        """The behind-view anchor from :meth:`prepare_scene` (``None``: preset)."""
+        return self._behind_anchor
+
     def playback(self) -> Any:
         """The shared :class:`GolferPlayback` of a joint-space run (lazy).
 
@@ -241,7 +298,8 @@ class ResultsSession:
         if self._playback is None:
             from src.tools.model_explorer.golfer_playback import GolferPlayback
 
-            self._playback = GolferPlayback(pose)
+            self._playback = GolferPlayback(pose, scene_xml=self._scene_xml)
+            self._playback.behind_anchor_m = self._behind_anchor
         return self._playback
 
     def export_video(self, out_path: str | Path, *, stride: int = 5) -> Path:

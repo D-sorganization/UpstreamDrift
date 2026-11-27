@@ -42,6 +42,13 @@ DEFAULT_HEAD_LENGTH_M = 0.2429  # de Leva (1996) male head length, cervicale to 
 _RINGS, _SIDES = 26, 40
 _SKULL_CENTRE_Z, _SKULL_HALF = 0.58, (0.40, 0.31, 0.42)  # fractions of head length
 _AXIS = {"x": 0, "y": 1, "z": 2}
+_IRIS_MATERIAL = {
+    "blue_grey": "iris_blue_grey",
+    "hazel": "iris_hazel",
+    "brown": "iris_dark",
+}
+_ROLE_MATERIAL = {"pupil": "pupil_black", "lid": "lid_line"}
+HAIR_PART = "hair_mesh"  # the haircut of the CC0 head, shaded without creases
 FACE_PARTS = ("eye_l", "eye_r", "iris_l", "iris_r", "brow_l", "brow_r", "nose", "mouth")
 
 
@@ -121,6 +128,32 @@ def resolve_head_anchor(spec: Mapping[str, Any]) -> HeadAnchor | None:
                 name, (0.0, 0.0, 0.0), length or DEFAULT_HEAD_LENGTH_M, "head_body"
             )
     return None
+
+
+def drawn_head_length(
+    spec: Mapping[str, Any], anchor: HeadAnchor, settings: HeadSettings | None = None
+) -> float:
+    """Length the head is drawn at, before ``HeadSettings.scale`` (#15299).
+
+    With ``sizing="stature"`` the CC0 head's menton to vertex, measured on its
+    mesh, is ``height_over_stature`` of ``spec.subject.stature_m``, so the head
+    is in proportion at every stature. ``sizing="segment_length"``, the
+    parametric head or a spec that records no stature keep ``anchor.length_m``.
+    Visual only: the anchor, the head segment and its mass properties are not
+    touched. Preconditions: a recorded stature is positive and finite.
+    Postcondition: a positive finite length.
+    """
+    cfg = settings or HeadSettings()
+    stature = (spec.get("subject") or {}).get("stature_m")
+    if cfg.sizing != "stature" or cfg.model != "cc0_mesh" or stature is None:
+        return anchor.length_m
+    stature = float(stature)
+    if not math.isfinite(stature) or stature <= 0:
+        raise ValueError(f"subject stature_m must be positive, got {stature!r}")
+    from src.shared.python.model_appearance import head_mesh
+
+    fraction = head_mesh.head_proportions().menton_to_vertex
+    return cfg.height_over_stature * stature / fraction
 
 
 def _skull_point(direction: NDArray[np.float64], length: float) -> Array:
@@ -327,13 +360,35 @@ def build_head_parts(
 
         return [
             HeadPart(name, mesh, material)
-            for name, mesh, material in head_mesh.build_mesh_parts(length, cfg.headwear)
+            for name, mesh, material in head_mesh.build_mesh_parts(
+                length, cfg.headwear, cfg
+            )
         ]
     parts = [_neck(length), HeadPart("skull", _skull(length), "skin")]
     parts += _face_parts(length) + _ears(length)
     if cfg.headwear != "none":
         parts += _headwear(length, cfg.headwear)
     return parts
+
+
+def build_neck_parts(
+    length_m: float, settings: HeadSettings | None = None
+) -> list[HeadPart]:
+    """The visual neck the CC0 head lacks, canonical frame (#15292).
+
+    The parametric head draws its own neck, so it gets none here. Kept apart
+    from :func:`build_head_parts`, whose triangle budget is the head's own.
+    Preconditions: positive finite head length. Postcondition: at most one
+    closed, positive-volume ``neck`` part scaled with ``length_m``.
+    """
+    from src.shared.python.model_appearance import neck
+
+    if not math.isfinite(length_m) or length_m <= 0:
+        raise ValueError("Head length must be a positive finite number")
+    cfg = settings or HeadSettings()
+    if cfg.model != "cc0_mesh":
+        return []
+    return [HeadPart("neck", neck.build_neck(length_m * cfg.scale), "skin")]
 
 
 def head_frame_in_body(
@@ -373,4 +428,11 @@ def part_material_name(part: HeadPart, doc: AppearanceDocument) -> str:
         if name is None:
             raise ValueError("Headwear part requested for a bare head")
         return name
-    return part.material
+    if part.material == "cap":
+        return doc.head.cap_material
+    if part.material == "iris":
+        return _IRIS_MATERIAL[doc.head.eye_color]
+    if part.material == "brow":  # the hair colour, darker
+        brow = f"brow_{library.headwear_material_name(doc)}"
+        return brow if brow in library.MATERIALS else "brow_dark"
+    return _ROLE_MATERIAL.get(part.material, part.material)

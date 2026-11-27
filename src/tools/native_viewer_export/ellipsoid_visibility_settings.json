@@ -1,0 +1,14 @@
+{
+  "scale_grouping": "per_point",
+  "target_radius_m": 0.09,
+  "outer_alpha": 0.35,
+  "min_semi_axis_m": 0.03,
+  "per_point_note": "Scaled Per Point",
+  "sources": {
+    "scale_grouping": "'per_kind': one display scale per kind (sizes comparable between points; the clubhead sets it); 'per_point': one scale per point and kind, each point's largest radius maps to target_radius_m (sizes NOT comparable between points).",
+    "target_radius_m": "Displayed radius (m) of the 95th-percentile semi-axis (the former literal 0.09).",
+    "outer_alpha": "Alpha of the larger ellipsoid when two kinds share a centre, so the inner one shows (1 = off; the other keeps its colour alpha).",
+    "min_semi_axis_m": "Floor (m) of a displayed semi-axis; 0 = off (the display builder's own 5 mm clamp stays). A floored axis is not to scale.",
+    "per_point_note": "Panel footer shown while scale_grouping is per_point."
+  }
+}

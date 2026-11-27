@@ -54,15 +54,20 @@ def load_json_config(
         raise ValueError("path must be provided")
     path_obj = Path(path)
 
-    if not path_obj.exists():
-        if default is not None:
-            if create_if_missing:
-                save_json_config(path, default)
-            return default.copy()
-        return {}
+    try:
+        if not path_obj.exists():
+            if default is not None:
+                if create_if_missing:
+                    save_json_config(path, default)
+                return default.copy()
+            return {}
 
-    with open(path_obj, encoding="utf-8") as f:
-        config: dict[str, Any] = json.load(f)
+        with open(path_obj, encoding="utf-8") as f:
+            config: dict[str, Any] = json.load(f)
+    except (OSError, ValueError) as exc:
+        # JSON parsing also raises plain ValueError for integer digit limits.
+        logger.error("Failed to load JSON configuration %s: %s", path_obj, exc)
+        return default.copy() if default is not None else {}
 
     logger.debug(f"Loaded configuration from {path}")
     return config
@@ -130,13 +135,18 @@ def load_yaml_config(
 
     path_obj = Path(path)
 
-    if not path_obj.exists():
-        if default is not None:
-            return default.copy()
-        return {}
+    try:
+        if not path_obj.exists():
+            if default is not None:
+                return default.copy()
+            return {}
 
-    with open(path_obj, encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+        with open(path_obj, encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except (OSError, ValueError, yaml.YAMLError) as exc:
+        # YAML integer construction can hit Python's digit limit as well.
+        logger.error("Failed to load YAML configuration %s: %s", path_obj, exc)
+        return default.copy() if default is not None else {}
 
     logger.debug(f"Loaded YAML configuration from {path}")
     return config or {}

@@ -52,7 +52,9 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from .protocol import SimState
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable, Mapping, Sequence
+
+    from numpy.typing import ArrayLike
 
     from .protocol import EquationsOfMotionProvider, SimulationBackend
 
@@ -80,6 +82,86 @@ class ValidationReport:
     atol: float
     passed: bool
     detail: str
+
+
+@dataclass(frozen=True)
+class ReplayTolerance:
+    """Explicit error budget in a quantity's units; no default physics tolerance."""
+
+    atol: float
+    rtol: float
+
+    def __post_init__(self) -> None:
+        """Require finite, nonnegative absolute and relative budgets."""
+        for value in (self.atol, self.rtol):
+            if not np.isfinite(value) or value < 0:
+                raise ValueError("replay tolerances must be finite and nonnegative")
+
+
+def compare_replay_quantities(
+    recorded: Mapping[str, ArrayLike],
+    replayed: Mapping[str, ArrayLike],
+    tolerances: Mapping[str, ReplayTolerance],
+    *,
+    recorded_runtime: str,
+    replay_runtime: str,
+) -> dict[str, ValidationReport]:
+    """Compare recorded quantities with independently re-simulated outputs.
+
+    Preconditions: identical nonempty quantity sets (including all required
+    states, torques, times and metrics), explicit budgets, matching nonblank
+    runtime pins, and nonempty finite real arrays of identical shape. Callers
+    establish model, units, joint order and sample alignment before comparison;
+    this function neither resamples nor wraps angles nor runs a simulation.
+
+    Postcondition: one report per quantity in sorted order, passed iff every
+    element satisfies ``abs(replayed-recorded) <= atol + rtol*abs(recorded)``.
+    All reports must pass for acceptance. Inputs are unchanged. Runtime pins
+    are caller-supplied identifiers, not independently attested environments.
+    """
+    if (
+        not isinstance(recorded_runtime, str)
+        or not recorded_runtime.strip()
+        or not isinstance(replay_runtime, str)
+        or recorded_runtime != replay_runtime
+    ):
+        raise ValueError("replay runtime must match the nonblank recorded runtime pin")
+    names = set(recorded)
+    if (
+        not names
+        or any(not isinstance(name, str) or not name.strip() for name in names)
+        or names != set(replayed)
+        or names != set(tolerances)
+    ):
+        raise ValueError(
+            "recorded, replayed and tolerance quantities must match exactly"
+        )
+    reports = {}
+    for name in sorted(names):
+        budget = tolerances[name]
+        if not isinstance(budget, ReplayTolerance):
+            raise TypeError(f"{name}: tolerance must be a ReplayTolerance")
+        reference = _replay_values(recorded[name], name)
+        actual = _replay_values(replayed[name], name)
+        # Reuse the backend gate's report and allclose implementation. Its second
+        # argument is the relative-error reference, so orientation matters here.
+        reports[name] = _compare(
+            name,
+            actual,
+            reference,
+            budget.rtol,
+            budget.atol,
+            f"replay runtime={recorded_runtime}; samples={reference.size}",
+        )
+    return reports
+
+
+def _replay_values(value: ArrayLike, name: str) -> np.ndarray:
+    """Reject lossy coercions and vacuous/nonfinite comparisons before allclose."""
+    array = np.asarray(value)
+    if array.dtype.kind not in "iuf" or not array.size or not np.isfinite(array).all():
+        raise ValueError(f"{name}: expected nonempty finite real numeric values")
+    return array
 
 
 def _require_positive(value: float, label: str) -> float:

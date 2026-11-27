@@ -52,6 +52,7 @@ from src.shared.python.motion_matching.acceptance import (
     Horizon,
 )
 from src.shared.python.motion_matching.tour_capture_contract import (
+    MARKER_SEGMENTS,
     TOUR_CAPTURE,
     TourCapture,
 )
@@ -69,6 +70,20 @@ SCALED_MODEL_PATH = (
     / "golf_humanoid_scaled.osim"
 )
 C3D_PATH = REPO_ROOT / "data" / "C3D_TA_Driver.c3d"
+
+
+def _waist_and_club_capture(time_s: np.ndarray, n_frames: int) -> TourCapture:
+    """All-valid capture carrying pelvis *and* club markers.
+
+    Since #14756 an absent club label set is "unavailable" (never a perfect
+    0.0), and the acceptance engine fails closed on missing club evidence. A
+    fixture that wants to reach the other gates must therefore supply the club
+    marker rather than lean on the old fabricated 0.0.
+    """
+    labels = ("WaistLeft", "WaistRight", MARKER_SEGMENTS["club"][0])
+    pts = np.zeros((n_frames, len(labels), 3), dtype=np.float64)
+    valid = np.ones((n_frames, len(labels)), dtype=bool)
+    return TourCapture(time_s, labels, pts, valid)
 
 
 def test_red_fixture_mismatched_model_checkpoint_fails() -> None:
@@ -247,10 +262,7 @@ def test_ladder_stages_and_distinct_receipt_statuses() -> None:
         solution=solution,
     )
 
-    labels = ("WaistLeft", "WaistRight")
-    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
-    valid = np.ones((n_frames, 2), dtype=bool)
-    capture = TourCapture(time_s, labels, pts, valid)
+    capture = _waist_and_club_capture(time_s, n_frames)
 
     result = qualify_full_swing_tracking(
         model_path=SCALED_MODEL_PATH,
@@ -323,10 +335,7 @@ def test_trajectory_missing_ground_normal_force_fails_with_missing_gate() -> Non
         support_polygon_fraction=0.95,
     )
 
-    labels = ("WaistLeft", "WaistRight")
-    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
-    valid = np.ones((n_frames, 2), dtype=bool)
-    capture = TourCapture(time_s, labels, pts, valid)
+    capture = _waist_and_club_capture(time_s, n_frames)
 
     result = qualify_full_swing_tracking(
         model_path=SCALED_MODEL_PATH,
@@ -368,10 +377,7 @@ def test_no_solution_object_gives_solver_status_none() -> None:
         support_polygon_fraction=0.95,
     )
 
-    labels = ("WaistLeft", "WaistRight")
-    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
-    valid = np.ones((n_frames, 2), dtype=bool)
-    capture = TourCapture(time_s, labels, pts, valid)
+    capture = _waist_and_club_capture(time_s, n_frames)
 
     result = qualify_full_swing_tracking(
         model_path=SCALED_MODEL_PATH,
@@ -407,10 +413,7 @@ def test_missing_trajectory_fields_default_to_none_not_passing_values() -> None:
         support_polygon_fraction=None,
     )
 
-    labels = ("WaistLeft", "WaistRight")
-    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
-    valid = np.ones((n_frames, 2), dtype=bool)
-    capture = TourCapture(time_s, labels, pts, valid)
+    capture = _waist_and_club_capture(time_s, n_frames)
 
     result = qualify_full_swing_tracking(
         model_path=SCALED_MODEL_PATH,
@@ -478,10 +481,7 @@ def test_fully_populated_synthetic_trajectory_evaluates_real_numbers() -> None:
         solution=solution,
     )
 
-    labels = ("WaistLeft", "WaistRight")
-    pts = np.zeros((n_frames, 2, 3), dtype=np.float64)
-    valid = np.ones((n_frames, 2), dtype=bool)
-    capture = TourCapture(time_s, labels, pts, valid)
+    capture = _waist_and_club_capture(time_s, n_frames)
 
     result = qualify_full_swing_tracking(
         model_path=SCALED_MODEL_PATH,

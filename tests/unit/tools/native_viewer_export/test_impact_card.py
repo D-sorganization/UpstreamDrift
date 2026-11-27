@@ -10,6 +10,7 @@ import pytest
 from src.shared.python.impact_parameters.panel_model import CardRow, ImpactCard
 from src.tools.native_viewer_export import core, impact_card
 from src.tools.native_viewer_export.compositor import (
+    _card_lines,
     draw_impact_card,
     impact_card_bbox,
 )
@@ -117,6 +118,47 @@ def test_unavailable_card_draws_reason_panel() -> None:
     assert (out != _blank()).any()
 
 
+SMASH_REASON = "needs an impact model ball speed and its calibration status"
+
+
+def _smash_card(reason: str = SMASH_REASON) -> ImpactCard:
+    row = CardRow("smash_factor", "Smash Factor", "", None, reason=reason)
+    return ImpactCard(
+        units="mph",
+        impact_time_s=1.0,
+        impact_time_source="provided",
+        frame={},
+        rows=(row,),
+        d_plane={},
+    )
+
+
+def test_long_reason_wraps_whole_words_without_ellipsis() -> None:
+    lines = _card_lines(_smash_card())
+    reason = [text for text, value, _ in lines[1:] if not value]
+    assert len(reason) >= 2
+    assert all("..." not in text and "\u2026" not in text for text in reason)
+    assert " ".join(part.strip() for part in reason) == SMASH_REASON
+    assert all(len(text) <= 46 for text in reason)
+    long_word = _card_lines(_smash_card("x" * 60))
+    assert long_word[1][0].strip() == "x" * 60  # never cut
+
+
+def test_wrapped_reason_fits_the_panel_and_grows_its_height() -> None:
+    shape = (720, 1280, 3)
+    short = impact_card_bbox(shape, _smash_card("no ball"))
+    wrapped = impact_card_bbox(shape, _smash_card())
+    assert wrapped[3] - wrapped[1] > short[3] - short[1]
+    from src.tools.native_viewer_export import compositor as comp
+
+    box, size, lines = comp._card_metrics(shape, _smash_card(), "right")
+    font = comp._font(size)
+    pad = size // 2 + 2
+    assert all(
+        font.getlength(text) <= box[2] - box[0] - 2 * pad for text, _, _ in lines
+    )
+
+
 def test_draw_rejects_bad_input() -> None:
     with pytest.raises(ValueError, match="uint8"):
         draw_impact_card(np.zeros((10, 10, 3)), _card())
@@ -177,7 +219,9 @@ def _swing(steps: int = 100) -> SwingInput:
 
 
 def _export(monkeypatch, tmp_path, card, **overrides):
-    monkeypatch.setattr(core, "impact_card_for", lambda swing, t, ball=None: card)
+    monkeypatch.setattr(
+        core, "impact_card_for", lambda swing, t, ball=None, unit=None: card
+    )
     settings = ExportSettings(
         views=("face_on",),
         multiview=False,
@@ -480,3 +524,29 @@ def test_fixture_series_uses_the_true_face() -> None:
     assert len(series) == swing.n_states
     assert np.isfinite(series.velocity_mps).all()
     assert np.allclose(np.linalg.norm(np.asarray(series.face_normal), axis=1), 1.0)
+
+
+def test_strike_between_samples_through_the_face_centre_reads_zero_zero() -> None:
+    """An open face meets the ball between samples: travel is not a toe miss (#15150)."""
+    from src.shared.python.impact_parameters import ClubheadSeries
+    from src.shared.python.model_appearance.ball_strike import strike_ball_centre
+    from src.tools.native_viewer_export.ball import BallPlacement
+
+    t = np.arange(0.0, 0.2, 0.001)
+    rows = (len(t), 1)
+    normal = [np.cos(np.radians(15.0)), np.sin(np.radians(15.0)), 0.0]
+    series = ClubheadSeries(
+        times_s=t,
+        face_center_m=np.outer(40.0 * t, [1.0, 0.0, 0.0]),  # 40 mm between samples
+        velocity_mps=np.tile([40.0, 0.0, 0.0], rows),
+        face_normal=np.tile(normal, rows),
+        toe_axis=np.tile([0.0, 0.0, -1.0], rows),
+        grip_axis=np.tile([0.0, 0.0, 1.0], rows),
+    )
+    limits = {"max_tee_height_m": 1.0, "max_shift_m": 0.15, "ground_height_m": -1.0}
+    past = [40.0 * 0.15 + 0.030, 0.0, 0.0]  # 30 mm past the sample at 0.15 s
+    path = (t, series.face_center_m, series.face_normal)
+    strike = strike_ball_centre(*path, past, **limits)
+    ball = BallPlacement(strike.centre_m, _RADIUS, "strike_geometry")
+    card = impact_card.card_from_series(series, strike.contact_time_s, ball)
+    assert _toe_high(card) == pytest.approx((0.0, 0.0), abs=0.5)

@@ -29,7 +29,9 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.model_appearance import head_cap, head_features, head_hair
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.schema import HeadSettings
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 ASSET_DIR = REPO_ROOT / "assets" / "head_cc0"
@@ -64,6 +66,7 @@ def _closed(faces: NDArray[np.int64]) -> bool:
 
 
 def _check_mesh(name: str, mesh: Mesh) -> None:
+    """Reject malformed, open, inward-facing, or oversized head parts."""
     v, f = mesh.vertices, mesh.faces
     if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all() or len(f) == 0:
         raise ValueError(f"head mesh {name!r}: bad vertex or face arrays")
@@ -86,6 +89,7 @@ def _check_mesh(name: str, mesh: Mesh) -> None:
 
 
 def _load(asset: Path, provenance: Path) -> HeadAsset:
+    """Load a hash-pinned CC0 asset and validate each mesh part."""
     if not provenance.is_file():
         raise ValueError(f"head provenance record missing: {provenance}")
     record = json.loads(provenance.read_text(encoding="utf-8"))
@@ -116,11 +120,67 @@ def load_head_asset(
 
 @lru_cache(maxsize=1)
 def _default_asset() -> HeadAsset:
+    """Return the validated repository head asset from the cache."""
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
-def build_mesh_parts(length_m: float, headwear: str) -> list[tuple[str, Mesh, str]]:
+@dataclass(frozen=True)
+class HeadLandmarkSettings:
+    """Where the size landmarks are read off the skin, in head lengths."""
+
+    midline_half_band: float = 0.02  # |y| of the mid-sagittal profile
+    chin_min_forward: float = 0.40  # the chin is ahead of this; the throat is not
+    skull_band: tuple[float, float] = (0.60, 0.75)  # heights above the ears
+    glabella_band: tuple[float, float] = (0.58, 0.64)  # heights between the brows
+
+
+@dataclass(frozen=True)
+class HeadProportions:
+    """Sizes of the asset in head lengths (neck joint to vertex is 1)."""
+
+    menton_to_vertex: float  # chin underside to the top of the skull
+    breadth: float  # widest skull above the ears
+    length: float  # glabella to the back of the skull
+
+
+def head_proportions(
+    asset: HeadAsset | None = None, settings: HeadLandmarkSettings | None = None
+) -> HeadProportions:
+    """Measure the head on the skin mesh (#15299); nothing here is a literal.
+
+    The asset's unit is its neck joint to its vertex, which is no standard
+    anthropometric length; menton to vertex is, so the drawn head is sized by
+    it. Postconditions: every size is positive and at most one head length.
+    """
+    cfg = settings or HeadLandmarkSettings()
+    v = (asset or _default_asset()).skin.vertices
+    mid = v[np.abs(v[:, 1]) <= cfg.midline_half_band]
+    chin = mid[mid[:, 0] >= cfg.chin_min_forward]
+    skull = v[(v[:, 2] >= cfg.skull_band[0]) & (v[:, 2] <= cfg.skull_band[1])]
+    brow = mid[
+        (mid[:, 2] >= cfg.glabella_band[0]) & (mid[:, 2] <= cfg.glabella_band[1])
+    ]
+    if min(len(chin), len(skull), len(brow)) == 0:
+        raise ValueError("head mesh has no chin, skull or brow vertices to measure")
+    out = HeadProportions(
+        float(v[:, 2].max() - chin[:, 2].min()),
+        float(np.ptp(skull[:, 1])),
+        float(brow[:, 0].max() - v[:, 0].min()),
+    )
+    if not all(0.0 < x <= 1.0 for x in (out.menton_to_vertex, out.breadth, out.length)):
+        raise ValueError(f"head mesh proportions are out of range: {out}")
+    return out
+
+
+def build_mesh_parts(
+    length_m: float, headwear: str, settings: HeadSettings | None = None
+) -> list[tuple[str, Mesh, str]]:
     """``(name, mesh, material role)`` of the mesh head scaled to ``length_m``.
+
+    With ``settings`` the head also gets eyes, lids, brows and a mouth seam
+    from :mod:`head_features`, and ``hair_style="short_crop"`` swaps the
+    asset's thin scalp shell for the haircut of :mod:`head_hair`; without
+    them (the legacy call) the asset's own parts are returned unchanged.
 
     Preconditions: positive finite length; ``headwear`` is ``"none"`` or
     ``"hair"`` (the asset has short hair only, a cap would not fit). The skin
@@ -137,9 +197,68 @@ def build_mesh_parts(length_m: float, headwear: str) -> list[tuple[str, Mesh, st
     out = [
         ("skin_mesh", Mesh(asset.skin.vertices * length_m, asset.skin.faces), "skin")
     ]
+    if settings is not None:
+        out += [
+            (name, Mesh(m.vertices * length_m, m.faces), role)
+            for name, m, role in head_features.face_parts(asset.skin)
+        ]
+    straw = settings is not None and settings.cap_style == "straw_hat"
+    flat_capped = settings is not None and settings.cap_style == "flat_cap"
+    capped = (
+        straw
+        or flat_capped
+        or (settings is not None and settings.cap_style == "baseball_cap")
+    )
+    cap_crop = (
+        head_cap.straw_hat_crop()
+        if straw
+        else head_cap.flat_cap_crop()
+        if flat_capped
+        else head_cap.CapCrop()
+    )
     if headwear == "hair":
-        hair = Mesh(asset.hair.vertices * length_m, asset.hair.faces)
-        out.append(("hair_mesh", hair, "headwear"))
+        crop = settings is not None and settings.hair_style == "short_crop"
+        unit = asset.hair
+        if settings is not None and (crop or capped):
+            # Under a cap the hair is cut flatter than the crown stands off.
+            under = cap_crop.hair_under if capped else None
+            unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
+        out.append(
+            ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
+        )
+    if settings is not None and straw:
+        out += [
+            (
+                name,
+                Mesh(m.vertices * length_m, m.faces),
+                "hat_band_dark" if name == "straw_band" else "cap",
+            )
+            for name, m in head_cap.build_straw_hat(asset.skin)
+        ]
+    elif settings is not None and capped:
+        out += [
+            (name, Mesh(m.vertices * length_m, m.faces), "cap")
+            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
+        ]
+    if settings is not None:
+        from src.shared.python.model_appearance.head_morph import (
+            HeadMorph,
+            warp_vertices,
+        )
+
+        if settings.morph != HeadMorph():
+            out = [
+                (
+                    name,
+                    Mesh(
+                        warp_vertices(mesh.vertices / length_m, settings.morph)
+                        * length_m,
+                        mesh.faces,
+                    ),
+                    role,
+                )
+                for name, mesh, role in out
+            ]
     return out
 
 

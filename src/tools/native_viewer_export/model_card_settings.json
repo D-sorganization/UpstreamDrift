@@ -1,0 +1,27 @@
+{
+  "schema": "native-export-model-card/v1",
+  "replay_kind_tags": {
+    "kinematic_replay": "measured",
+    "inverse_dynamics": "measured",
+    "feedback_tracked_dynamics": "fitted",
+    "open_loop_dynamics": "fitted",
+    "unknown_replay_mode": "unknown"
+  },
+  "fit_error_keys": [
+    {"key": "max_pose_drift_m", "tag": "fitted"},
+    {"key": "kinetic_match.closure_gap_max_m", "tag": "fitted"}
+  ],
+  "golfer_model_tag": "assumed",
+  "club_tag": "assumed",
+  "shot_setup_tag": "assumed",
+  "impact_model_tag": "assumed",
+  "flight_launch_model": "impact_parameters.flight_report (clubhead state at contact, strike offset on the face)",
+  "sources": {
+    "replay_kind_tags": "Tag of the motion a clip shows, per replay_mode value (replay_mode.py): a kinematic replay and an inverse-dynamics clip show the recorded motion (measured); tracked and open-loop dynamics show a motion the efforts were fitted to reproduce; an undetermined mode is unknown.",
+    "fit_error_keys": "Bundle provenance keys, in order, that record how far the shown motion is from its target: max_pose_drift_m is written by the closed-loop bundle writer (motion_matching/same_input/reference.py); kinetic_match.closure_gap_max_m by the kinetic match (motion_matching/kinetic_match.py). A dotted key reads a nested record. None present gives unknown.",
+    "golfer_model_tag": "The golfer is the bundle spec as built (topology and segment parameters); the card names it by spec hash and revision and makes no claim that its parameters were measured on the golfer.",
+    "club_tag": "Club and shaft come from the spec club record; the chain shaft profile is a generic flex flagged default_not_measured (club_shaft_chain.py), and a rigid club has no flex.",
+    "shot_setup_tag": "Club roll, ball shift and shot shape are export settings chosen by the user (shot_setup.py); the ball is a display placement (ball.py).",
+    "impact_model_tag": "The bundle's latched ball force (GCV-20) uses an assumed COR and ball mass; the exporter's flight is launched by the impact model from the replayed clubhead state."
+  }
+}
