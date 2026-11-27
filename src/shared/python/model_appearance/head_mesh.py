@@ -181,14 +181,11 @@ def _warp_parts(
 
     if morph == HeadMorph():
         return parts
-    return [
-        (
-            name,
-            Mesh(warp_vertices(mesh.vertices / length_m, morph) * length_m, mesh.faces),
-            role,
-        )
-        for name, mesh, role in parts
-    ]
+    warped = []
+    for name, mesh, role in parts:
+        vertices = warp_vertices(mesh.vertices / length_m, morph) * length_m
+        warped.append((name, Mesh(vertices, mesh.faces), role))
+    return warped
 
 
 def _feature_mesh_parts(

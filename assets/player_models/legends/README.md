@@ -18,12 +18,9 @@ in each `receipt.json` and `src/config/player_appearance_presets.json`. Exact SI
 conversion does not make a historical estimate an exact measurement. Height is
 calibrated from neutral head skin to lowest shoe sole: it includes shoes and
 excludes hair and headwear. Segment anatomy is estimated from the shared priors.
-Faces and hair were revised against close-up references on 2026-11-27. Seve now
-has a thin moustache; Jack has a stronger nose and chin with swept blond hair;
-Bobby has a broader rectangular jaw and slick part; Sam has a fuller nose and
-cheeks under his straw hat; Byron shows his uncovered 1945 portrait hairstyle.
-These remain stylized interpretations; fine wrinkles, collars and garment cuts
-are not reconstructed. Era choices and reference limitations are in the receipts.
+Faces and hair were revised against close-up references on 2026-11-27. Era and
+feature choices are recorded in the receipts. These remain stylized; fine skin
+texture, wrinkles, collars and garment cuts are not reconstructed.
 
 ## Use the Models
 
@@ -60,9 +57,8 @@ To refresh an extracted variant while retaining the exact physical specification
 python3 -m scripts.refresh_player_skins --root output/legends/sized
 ```
 
-This also verifies and rebinds an existing review pose without changing its
-coordinates. The separate editable calculation reference is
-`docs/development/legend-portrait-revision.tex`.
+This preserves pose coordinates and cap choices while rebinding the XML hash.
+See the editable reference `docs/development/legend-portrait-revision.tex`.
 
 `--player both` still selects Tiger Woods and Ben Hogan. For hash-bound address
 previews, use `--render-existing --pose-root output/legends` with the archived

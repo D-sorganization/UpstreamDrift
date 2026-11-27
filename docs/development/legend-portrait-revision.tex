@@ -7,48 +7,34 @@
 \begin{document}
 \maketitle
 \section{Scope and Evidence}
-This separate editable research reference accompanies epic 15832 and issue
-15849. Five visual appearances are applied to both the prior sized candidates
-and the common reference model. Every physical JSON byte is retained.
-Seve follows the R\&A compilation close-up at 121.5 s (event date unknown).
-Jack follows the circa-1980 Lucas portrait and 1986 Masters profile.
-Bobby follows the USGA instructional close-up at 578.7 s, with an undated
-Emory portrait as supplementary evidence. Sam follows the May 1984 Lucas
-portrait; its older facial appearance is combined with undated body priors.
-Byron follows the 1945 Los Angeles Daily News portrait, without the old cap.
-The source manifest records reference hashes and rights caveats. Source
-images remain private; their availability does not authorize republication.
+Five stylized appearances retain byte-identical sized/reference physical JSON.
+Sources: Seve, The R\&A close-up at 121.5 s (event undated); Jack, circa-1980 Lucas portrait and 1986 Masters profile;
+Bobby, USGA instructional close-up at 578.7 s and undated Emory portrait; Sam,
+May 1984 Lucas portrait with undated body priors; Byron, 1945 Los Angeles Daily
+News portrait, without the cap. The manifest records hashes/rights; source images
+remain private and their availability does not authorize republication.
 \section{Method and Invariants}
-The shared CC0 head is deformed in its canonical frame: forward $x$, left $y$,
-up $z$, in head-length units. Bounded authored fields described in
-\texttt{portrait-sculpt.tex} move skin and accessories together. No field
-changes the neck anchor or skull vertex. Hair silhouettes and moustache are
-visual meshes with no collision or mass contribution. Optional age detail
-$a\in[0,1]$ adds four closed skin-colored folds: bilateral under-eye and
-nose-to-mouth strips, conformed to the skin before the common morph. Their
-vertical half-width is $0.003a$ head lengths; zero omits every fold. This
-control is artistic detail, not a chronological age estimate. Hair and hats are
-excluded from neutral shoe-to-head stature. No anatomical fit is inferred.
-For old and revised native models, acceptance requires exact equality of
-body/joint/collision arrays, mass and inertia, and at each of three fixed
-states, $M(q)$, bias forces, accelerations, and body transforms. Semantic
-coordinates are mapped by name because native traversal order can differ.
-Compiled visual-height comparison allows $10^{-7}$ m for float32 mesh
-recentering; the initial $10^{-9}$ m check failed by $3.4239\times10^{-9}$ m
-for Seve. This does not relax exact physical or dynamics comparisons.
-The Necromatcher XML and appearance bindings must use the refreshed hashes.
+The shared CC0 head uses forward $x$, left $y$, up $z$ in head-length units.
+Bounded fields in \texttt{portrait-sculpt.tex} deform skin and accessories together, not the
+neck anchor or skull vertex. Hair/moustache meshes add no collision or mass.
+Age detail $a\in[0,1]$ adds four closed skin-colored bilateral under-eye/nose-to-mouth folds
+before morph; vertical half-width is $0.003a$ head lengths and zero omits them.
+This is artistic detail, not an age estimate. Hair/hats are excluded from neutral
+shoe-to-head stature; no anatomical fit is inferred.
+Acceptance requires exact body/joint/collision arrays, mass/inertia, and exact
+$M(q)$, bias, acceleration and body transforms at three fixed states. Coordinates
+map by name when native traversal order differs. Height allows $10^{-7}$ m for
+float32 recentering; the initial $10^{-9}$ m check failed on Seve by
+$3.4239\times10^{-9}$ m. Physical/dynamics stay exact; Necromatcher bindings
+use refreshed XML/appearance hashes.
 \section{Reproduction and Limitations}
-Extract the previous delivery, initialize the pinned Tools submodule, and run:
+Extract the prior delivery, initialize the pinned Tools submodule, then run:
 \begin{verbatim}
 python3 -m scripts.refresh_player_skins --root PATH/sized
+python3 -m scripts.refresh_player_skins --root PATH/reference-skins
 \end{verbatim}
-Repeat for \texttt{reference-skins}. Use the player export renderer with
-\texttt{--render-existing}, the five IDs, and the extracted pose root.
-Review poses retain their coordinates and are rebound to the new XML only.
-Initial trials produced an excessively raised forelock and swollen lower
-cheeks; lowered hair offsets and a localized chin field replace those trials.
-These are stylized likeness studies, without a face scan, fine skin texture,
-measured facial anatomy, expression fitting or fine reconstructed wrinkles.
-Historical motion training, two-foot contact, cuff alignment and forward
-simulation qualification are outside this appearance-only revision.
+Use \texttt{--render-existing} with all five IDs and pose root; keep q fixed and rebind XML hashes.
+Raised forelocks and swollen cheeks in early trials were corrected with lower hair
+offsets and localized chin deformation. Face scans, measured anatomy, expression fits,
+fine wrinkles, motion training, contact, cuff alignment and forward dynamics remain unqualified.
 \end{document}

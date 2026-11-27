@@ -32,10 +32,8 @@ def test_refresh_preserves_physics_and_rejects_bad_inputs(
     """Refresh visual artifacts only; reject invalid inputs before any writes."""
     folder = tmp_path / "seve_ballesteros"
     folder.mkdir()
-    raw, xml = (
-        b'{"coordinate_order":["root_x"],"physics":{"mass":80}}',
-        b"<mujoco>old</mujoco>",
-    )
+    raw = b'{"coordinate_order":["root_x"],"physics":{"mass":80}}'
+    xml = b"<mujoco>old</mujoco>"
     spec = json.loads(raw)
     pose = {
         "target_physics_spec_sha256": physics_spec_sha256(spec),
