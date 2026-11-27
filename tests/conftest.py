@@ -138,6 +138,7 @@ with contextlib.suppress(ImportError):
 
 
 def _ensure_importable_package(module_name: str, package_path: str) -> None:
+    """Register a stub package in ``sys.modules`` when the real module cannot import."""
     try:
         _early_importlib.import_module(module_name)
     except (AttributeError, ImportError):
@@ -187,27 +188,33 @@ if not _has_pyqt6:
 
     class DummySignal:
         def __init__(self, *args, **kwargs):
+            """Initialize an empty callback list."""
             self._callbacks = []
 
         def connect(self, callback):
+            """Register a callback to fire on emit."""
             self._callbacks.append(callback)
 
         def emit(self, *args, **kwargs):
+            """Invoke all registered callbacks."""
             for callback in list(self._callbacks):
                 callback(*args, **kwargs)
 
     class DummyQObject:
         def __init__(self, *args, **kwargs):
+            """Initialize the dummy QObject base."""
             super().__init__()
 
     class DummyQSettings:
         _values: dict[tuple[str, str, str], object] = {}
 
         def __init__(self, organization: str = "", application: str = ""):
+            """Record the organization and application names."""
             self._organization = organization
             self._application = application
 
         def value(self, key: str, defaultValue=None, type=None):
+            """Return the stored value for the key, or the default (optionally coerced)."""
             value = self._values.get(
                 (self._organization, self._application, key), defaultValue
             )
@@ -219,6 +226,7 @@ if not _has_pyqt6:
             return value
 
         def setValue(self, key: str, value):
+            """Store a value for the key under the current names."""
             self._values[(self._organization, self._application, key)] = value
 
     class DummyQStandardPaths:
@@ -227,6 +235,7 @@ if not _has_pyqt6:
 
         @staticmethod
         def writableLocation(_location):
+            """Return the current working directory as a writable location."""
             return str(Path.cwd())
 
     mock_core = MagicMock()
@@ -248,15 +257,18 @@ if not _has_pyqt6:
 
     class DummyWidget:
         def __init__(self, *args, **kwargs):
+            """Initialize an empty mock-attribute store."""
             self.__dict__["_mocks"] = {}
 
         def __getattr__(self, name):
+            """Return (creating if needed) a ``MagicMock`` for the attribute."""
             if name not in self.__dict__["_mocks"]:
                 self.__dict__["_mocks"][name] = MagicMock()
             return self.__dict__["_mocks"][name]
 
         @classmethod
         def instance(cls):
+            """Return a ``MagicMock`` singleton instance."""
             return MagicMock()
 
     DummyWidget.Shape = MagicMock()  # type: ignore[attr-defined]
@@ -339,6 +351,7 @@ def _no_real_network_in_unit_lane(request, monkeypatch):
         return
 
     def _refuse(*_a, **_kw):
+        """Raise on any real outbound network call from a unit test."""
         raise RuntimeError(
             "Unit test made a real network call. Mock with `responses` "
             "or `pytest-httpx`, or mark the test "
@@ -450,10 +463,12 @@ _FAKE_PYQT6_GUI_TESTS = (
 
 
 def _normalized_collection_path(path: object) -> str:
+    """Normalize a collection path to a lowercase POSIX string."""
     return Path(str(path)).as_posix().lower()
 
 
 def _matches_collection_suffix(path_text: str, suffix: str) -> bool:
+    """Return True if the path equals, starts with, ends with, or contains the suffix."""
     normalized_suffix = suffix.lower().strip("/")
     return (
         path_text == normalized_suffix
@@ -464,6 +479,7 @@ def _matches_collection_suffix(path_text: str, suffix: str) -> bool:
 
 
 def _module_available(module_name: str) -> bool:
+    """Return True if the module can be found via ``importlib``."""
     try:
         return importlib.util.find_spec(module_name) is not None
     except (ImportError, AttributeError, ValueError):
@@ -471,6 +487,7 @@ def _module_available(module_name: str) -> bool:
 
 
 def _symbol_available(module_name: str, symbol_name: str) -> bool:
+    """Return True if the module imports and exposes the requested symbol."""
     try:
         module = importlib.import_module(module_name)
     except Exception:  # noqa: BLE001
@@ -479,6 +496,7 @@ def _symbol_available(module_name: str, symbol_name: str) -> bool:
 
 
 def _rule_requirement_missing(rule: OptionalCollectionRule) -> bool:
+    """Return True if the rule's required modules or symbols are unavailable."""
     missing_module = any(not _module_available(module) for module in rule.modules)
     missing_symbol = any(
         not _symbol_available(module, symbol) for module, symbol in rule.symbols
@@ -489,6 +507,7 @@ def _rule_requirement_missing(rule: OptionalCollectionRule) -> bool:
 def _rule_missing_requirements(
     rule: OptionalCollectionRule,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Return the missing modules and symbols for an optional-collection rule."""
     missing_modules = tuple(
         module for module in rule.modules if not _module_available(module)
     )
@@ -501,6 +520,7 @@ def _rule_missing_requirements(
 
 
 def _should_ignore_optional_collection_path(path: object) -> bool:
+    """Return True if the path matches a rule whose optional requirements are missing."""
     path_text = _normalized_collection_path(path)
     for rule in _OPTIONAL_COLLECTION_RULES:
         if any(
@@ -512,6 +532,7 @@ def _should_ignore_optional_collection_path(path: object) -> bool:
 
 
 def _warn_optional_collection_skip(path: object) -> None:
+    """Warn once when a path is skipped for missing optional imports."""
     path_text = _normalized_collection_path(path)
     if path_text in _OPTIONAL_COLLECTION_WARNED_PATHS:
         return
@@ -541,11 +562,13 @@ def _warn_optional_collection_skip(path: object) -> None:
 
 
 def _fake_pyqt6_active() -> bool:
+    """Return True when the fake PyQt6 stub is installed in ``sys.modules``."""
     pyqt6_module = sys.modules.get("PyQt6")
     return not _has_pyqt6 and bool(getattr(pyqt6_module, "__ud_fake__", False))
 
 
 def _is_fake_pyqt6_gui_path(path: object) -> bool:
+    """Return True if the path is a GUI test that needs the fake PyQt6 stub."""
     path_text = _normalized_collection_path(path)
     return any(
         _matches_collection_suffix(path_text, suffix)
@@ -554,6 +577,7 @@ def _is_fake_pyqt6_gui_path(path: object) -> bool:
 
 
 def _skip_fake_pyqt6_gui_items(items: list[pytest.Item]) -> None:
+    """Skip GUI test items when only the fake PyQt6 stub is available."""
     if not _fake_pyqt6_active():
         return
 
@@ -1154,6 +1178,7 @@ def clean_pendulum_dynamics() -> Callable[..., Any]:
     )
 
     def _create(m1_kg: float = 1.0, l1_m: float = 1.0) -> Any:
+        """Build a double-pendulum dynamics model from the given link mass and length."""
         assert m1_kg is not None, "m1_kg must be provided"
         assert l1_m is not None, "l1_m must be provided"
         assert m1_kg > 0.0, "m1_kg must be positive"
@@ -1460,6 +1485,7 @@ _RUST_WHEEL_MODULES: tuple[str, ...] = (
 
 
 def _rust_wheels_expected() -> bool:
+    """Return True when CI expects Rust wheels to be present."""
     return os.environ.get("CI_RUST_WHEELS_EXPECTED") == "1"
 
 
