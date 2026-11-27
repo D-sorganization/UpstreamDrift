@@ -7,7 +7,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15834/#15848/#15854: Shared `straw_hat` and named hair styles ([hat](docs/development/full_body_models/appearance_reference/straw_hat.tex), [hair](docs/development/full_body_models/appearance_reference/hair_styles.tex)); schema-validated `--cap-style` overrides are visual only, with short peaks and profile-aware receipts.
+- #15848/#15853/#15854: Period hair, straw/snap-brim hats and cap export options; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
