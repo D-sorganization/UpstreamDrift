@@ -72,12 +72,14 @@ class AdmittedInterval:
     end_s: float
 
     def __post_init__(self) -> None:
+        """Reject a non-finite or empty interval."""
         if not (math.isfinite(self.start_s) and math.isfinite(self.end_s)):
             raise ContractViolation("interval bounds must be finite")
         if not self.end_s > self.start_s:
             raise ContractViolation("interval must satisfy start_s < end_s")
 
     def contains(self, time_s: float) -> bool:
+        """Whether ``time_s`` lies inside this closed interval."""
         return self.start_s <= time_s <= self.end_s
 
 
@@ -93,6 +95,7 @@ class DiagnosticRenderRequest:
     geometry: str = GEOMETRY
 
     def __post_init__(self) -> None:
+        """Reject a request that would hide evidence or leave the mesh path."""
         if self.renderer != RENDERER:
             raise ContractViolation(
                 f"renderer must be {RENDERER!r}, got {self.renderer!r}"
@@ -124,8 +127,9 @@ def banner_text(request: DiagnosticRenderRequest, time_s: float) -> str:
     """Banner for the frame at ``time_s``: badge, interval, outside warning."""
     interval = request.interval
     assert interval is not None  # guaranteed by the request contract
+    badge = request.badge
     text = (
-        f"{request.badge.value.upper()} | admitted "
+        f"{badge.value.upper()} | admitted "
         f"{interval.start_s:.3f}-{interval.end_s:.3f} s"
     )
     if not interval.contains(time_s):
@@ -150,9 +154,11 @@ def _banner_writer(
 
     class _Banner:
         def __init__(self) -> None:
+            """Start at the first scheduled frame."""
             self.n = 0
 
         def append_data(self, frame: Any) -> None:
+            """Burn the interval banner, then forward the frame."""
             t = float(times_s[self.n])
             self.n += 1
             outside = not request.interval.contains(t)  # type: ignore[union-attr]
@@ -167,6 +173,7 @@ def _banner_writer(
             )
 
         def close(self) -> None:
+            """Close the wrapped writer."""
             inner.close()
 
     return _Banner()
@@ -221,6 +228,7 @@ def export_diagnostic(
     base = writer_factory or (lambda p, fps: imageio_writer(p, fps, settings.crf))
 
     def factory(path: Path, fps: int) -> ClipWriter:
+        """Wrap the clip writer so every frame carries the interval banner."""
         return _banner_writer(base(path, fps), request, schedules[Path(path).name])
 
     result = export_swing(
