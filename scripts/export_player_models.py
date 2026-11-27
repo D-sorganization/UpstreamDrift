@@ -227,22 +227,30 @@ def _render(
         "head": (
             front_azimuth,
             (head_low + head_high) / 2,
-            max((head_high - head_low).max() * 2.5, 0.35),
+            max(
+                (head_high - head_low)[2] * 2.5,
+                (head_high - head_low)[:2].max() * 1.5,
+                0.35,
+            ),
         ),
     }
+    for label, angle in (("head_profile", 90), ("head_threequarter", 35)):
+        views[label] = ((front_azimuth + angle) % 360, *views["head"][1:])
     model.vis.global_.offwidth, model.vis.global_.offheight = SIZE_DESKTOP
     images: dict[str, str] = {}
     for width, height_px in (SIZE_DESKTOP, SIZE_PHONE):
         renderer = mujoco.Renderer(model, height_px, width)
         try:
             for label, (azimuth, lookat, distance) in views.items():
-                if width == SIZE_PHONE[0] and label != "front":
+                if width == SIZE_PHONE[0] and label not in ("front", "head"):
                     continue
                 model.geom_rgba[np.asarray(props, dtype=int), 3] = (
-                    0 if label == "head" else 1
+                    0 if label.startswith("head") else 1
                 )
                 camera = mujoco.MjvCamera()
                 camera.lookat[:] = lookat
+                if width == SIZE_PHONE[0] and label == "head":
+                    distance = max(distance * 1.7, (head_high - head_low).max() * 2.8)
                 camera.distance, camera.azimuth, camera.elevation = (
                     distance,
                     azimuth,

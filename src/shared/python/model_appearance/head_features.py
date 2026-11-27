@@ -29,10 +29,12 @@ _RING = np.array([[0.0, 0.0], [1, 0], [-1, 0], [0, 1], [0, -1]])  # cover stenci
 
 @lru_cache(maxsize=1)
 def _settings() -> dict[str, Any]:
+    """Load the shared immutable facial settings."""
     return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
 
 
 def _frozen(value: Any) -> Any:
+    """Freeze nested lists for dataclass settings."""
     return tuple(_frozen(v) for v in value) if isinstance(value, list) else value
 
 
@@ -82,6 +84,7 @@ class FaceLandmarks:
     mouth_lift: float = 0.003
 
     def __post_init__(self) -> None:
+        """Validate finite feature dimensions and offsets."""
         for item in fields(self):
             value = np.atleast_1d(np.asarray(getattr(self, item.name), dtype=float))
             sized = item.name.endswith(("_half", "_cover", "_radius"))
@@ -184,6 +187,7 @@ class FaceSurface:
         blur: float = 0.006,
         min_x: float = 0.2,
     ) -> None:
+        """Build a smoothed outer face envelope from skin vertices."""
         front = skin.vertices[skin.vertices[:, 0] > min_x]
         outer: dict[tuple[int, int], Array] = {}
         for p in front:
@@ -243,6 +247,31 @@ def moustache_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
     return out
 
 
+def age_detail_parts(skin: Mesh, strength: float) -> list[tuple[str, Mesh, str]]:
+    """Skin-toned shallow under-eye and cheek folds in unit-head coordinates."""
+    out = []
+    for side, sign in (("l", 1.0), ("r", -1.0)):
+        for name, yz, half, shape in (
+            (
+                "eye",
+                (sign * 0.13, 0.486),
+                (0.0015, 0.057, 0.003 * strength),
+                (-0.08, 0.08, 0.3),
+            ),
+            (
+                "cheek",
+                (sign * 0.11, 0.32),
+                (0.0015, 0.020, 0.003 * strength),
+                (-2.3, 0.12, 0.3),
+            ),
+        ):
+            mesh = _strip(yz, half, sign, shape)
+            out.append(
+                (f"age_{name}_{side}", _on_cover(skin, mesh, 0.0001, 0.001), "skin")
+            )
+    return out
+
+
 def face_parts(
     skin: Mesh, marks: FaceLandmarks | None = None
 ) -> list[tuple[str, Mesh, str]]:
@@ -257,6 +286,7 @@ def face_parts(
     front = Mesh(skin.vertices, skin.faces[(skin.vertices[skin.faces, 0] > 0).all(1)])
 
     def decal(centre_yz, half, axis, lift):
+        """Conform a closed facial decal to the skin envelope."""
         c = np.array([surf.depth(centre_yz[0], centre_yz[1]), *centre_yz])
         return surf.conform(_blob(c, half, axis), c, lift)
 

@@ -18,8 +18,12 @@ in each `receipt.json` and `src/config/player_appearance_presets.json`. Exact SI
 conversion does not make a historical estimate an exact measurement. Height is
 calibrated from neutral head skin to lowest shoe sole: it includes shoes and
 excludes hair and headwear. Segment anatomy is estimated from the shared priors.
-Period facial hair, collars and garment cuts are not reconstructed; the profile
-receipts distinguish inspected source features from the simplified interpretation.
+Faces and hair were revised against close-up references on 2026-11-27. Seve now
+has a thin moustache; Jack has a stronger nose and chin with swept blond hair;
+Bobby has a broader rectangular jaw and slick part; Sam has a fuller nose and
+cheeks under his straw hat; Byron shows his uncovered 1945 portrait hairstyle.
+These remain stylized interpretations; fine wrinkles, collars and garment cuts
+are not reconstructed. Era choices and reference limitations are in the receipts.
 
 ## Use the Models
 
@@ -33,6 +37,9 @@ name when filling native `qpos` and `qvel` buffers.
 `sized/` models intentionally change geometry and inertia and need a new motion
 fit. `reference-skins/` preserves the current reference physics. To skin an
 existing fitted model, export with `--base-spec existing_match.json`.
+Every physical `model.json` is byte-identical to the previous delivery. Native
+before/after checks cover joints, collision shapes, mass, inertia, three motion
+states and stature; appearance changes do not refit historical motion.
 Native validation results and hashes are in `delivery-verification.json` and
 `manifest.json`. The archive includes previews and CC0 asset provenance.
 
@@ -46,6 +53,16 @@ python3 scripts/export_player_models.py --player seve_ballesteros jack_nicklaus 
 python3 scripts/export_player_models.py --player sam_snead --output output/skins --base-spec existing_match.json
 python3 scripts/export_player_models.py --player all --output output/all_players
 ```
+
+To refresh an extracted variant while retaining the exact physical specification:
+
+```bash
+python3 -m scripts.refresh_player_skins --root output/legends/sized
+```
+
+This also verifies and rebinds an existing review pose without changing its
+coordinates. The separate editable calculation reference is
+`docs/development/legend-portrait-revision.tex`.
 
 `--player both` still selects Tiger Woods and Ben Hogan. For hash-bound address
 previews, use `--render-existing --pose-root output/legends` with the archived

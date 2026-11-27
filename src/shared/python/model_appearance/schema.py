@@ -214,6 +214,7 @@ class HeadSettings:
     #: Artistic face shape controls, in the canonical CC0 head frame.
     morph: HeadMorph = field(default_factory=HeadMorph)
     facial_hair: str = "none"
+    age_detail: float = 0.0
 
     def __post_init__(self) -> None:
         """Require a CC0 head whenever non-identity face morphs are set."""
@@ -221,6 +222,15 @@ class HeadSettings:
             raise ValueError("head morph must be a HeadMorph")
         if self.morph != HeadMorph() and self.model != "cc0_mesh":
             raise ValueError("head morph needs the cc0_mesh head model")
+        if (
+            isinstance(self.age_detail, bool)
+            or not isinstance(self.age_detail, (int, float))
+            or not math.isfinite(self.age_detail)
+            or not 0 <= self.age_detail <= 1
+        ):
+            raise ValueError("head age_detail must be finite and within 0..1")
+        if self.age_detail and self.model != "cc0_mesh":
+            raise ValueError("age detail needs the cc0_mesh head model")
         if self.facial_hair not in ("none", "moustache"):
             raise ValueError("head facial_hair must be none or moustache")
         if self.facial_hair != "none" and self.model != "cc0_mesh":
@@ -369,6 +379,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         ratio,
         HeadMorph(**raw.get("morph", {})),
         str(raw.get("facial_hair", "none")),
+        float(raw.get("age_detail", 0.0)),
     )
 
 
@@ -393,6 +404,7 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
         "sizing",
         "height_over_stature",
         "facial_hair",
+        "age_detail",
     ):
         if getattr(head, key) != getattr(HeadSettings(), key):
             out[key] = getattr(head, key)

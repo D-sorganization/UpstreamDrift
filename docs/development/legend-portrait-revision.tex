@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,hyperref}
+\title{Historical Golfer Portrait Revision}
+\author{UpstreamDrift}
+\date{November 27, 2026}
+\begin{document}
+\maketitle
+\section{Scope and Evidence}
+This separate editable research reference accompanies epic 15832 and issue
+15849. Five visual appearances are applied to both the prior sized candidates
+and the common reference model. Every physical JSON byte is retained.
+Seve follows the R\&A compilation close-up at 121.5 s (event date unknown).
+Jack follows the circa-1980 Lucas portrait and 1986 Masters profile.
+Bobby follows the USGA instructional close-up at 578.7 s, with an undated
+Emory portrait as supplementary evidence. Sam follows the May 1984 Lucas
+portrait; its older facial appearance is combined with undated body priors.
+Byron follows the 1945 Los Angeles Daily News portrait, without the old cap.
+The source manifest records reference hashes and rights caveats. Source
+images remain private; their availability does not authorize republication.
+\section{Method and Invariants}
+The shared CC0 head is deformed in its canonical frame: forward $x$, left $y$,
+up $z$, in head-length units. Bounded authored fields described in
+\texttt{portrait-sculpt.tex} move skin and accessories together. No field
+changes the neck anchor or skull vertex. Hair silhouettes and moustache are
+visual meshes with no collision or mass contribution. Optional age detail
+$a\in[0,1]$ adds four closed skin-colored folds: bilateral under-eye and
+nose-to-mouth strips, conformed to the skin before the common morph. Their
+vertical half-width is $0.003a$ head lengths; zero omits every fold. This
+control is artistic detail, not a chronological age estimate. Hair and hats are
+excluded from neutral shoe-to-head stature. No anatomical fit is inferred.
+For old and revised native models, acceptance requires exact equality of
+body/joint/collision arrays, mass and inertia, and at each of three fixed
+states, $M(q)$, bias forces, accelerations, and body transforms. Semantic
+coordinates are mapped by name because native traversal order can differ.
+The Necromatcher XML and appearance bindings must use the refreshed hashes.
+\section{Reproduction and Limitations}
+Extract the previous delivery, initialize the pinned Tools submodule, and run:
+\begin{verbatim}
+python3 -m scripts.refresh_player_skins --root PATH/sized
+\end{verbatim}
+Repeat for \texttt{reference-skins}. Use the player export renderer with
+\texttt{--render-existing}, the five IDs, and the extracted pose root.
+Review poses retain their coordinates and are rebound to the new XML only.
+Initial trials produced an excessively raised forelock and swollen lower
+cheeks; lowered hair offsets and a localized chin field replace those trials.
+These are stylized likeness studies, without a face scan, fine skin texture,
+measured facial anatomy, expression fitting or fine reconstructed wrinkles.
+Historical motion training, two-foot contact, cuff alignment and forward
+simulation qualification are outside this appearance-only revision.
+\end{document}

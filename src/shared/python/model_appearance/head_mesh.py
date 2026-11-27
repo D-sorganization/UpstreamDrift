@@ -260,6 +260,13 @@ def build_mesh_parts(
             for name, m in head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
         ]
     if settings is not None:
+        if settings.age_detail:
+            out += [
+                (name, Mesh(m.vertices * length_m, m.faces), role)
+                for name, m, role in head_features.age_detail_parts(
+                    asset.skin, settings.age_detail
+                )
+            ]
         if settings.facial_hair == "moustache":
             out += [
                 (name, Mesh(m.vertices * length_m, m.faces), role)

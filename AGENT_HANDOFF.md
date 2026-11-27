@@ -59,7 +59,7 @@ detail of a finished slice to the archive instead of growing this file.
 - Reproducibility #15191: `fix/seed-validation-atomic` rejects non-integer seeds before modifying Python or NumPy RNG state; `validate=False` continues to bypass only the range check. Review through Barb's pipeline.
 - Player profiles #15816/#15832/#15833: `player_models.export_player` supports source-attributed Tiger/Hogan and five legend candidates; appearance is illustrative and motion remains unqualified.
 - Player delivery #15819: `scripts/export_player_models.py` and `assets/player_models/` provide native sized/reference-skin bundles, hash-bound review poses and desktop/phone previews; motion remains unqualified.
-- Historical player delivery #15836: five sized and five reference-physics skins, catalog-driven batch previews and native verification under epic #15832; historical motion remains unqualified.
+- Legend portraits #15849: five revised faces/hair on byte-preserved physical models; close-ups, native parity receipt and bundle in `assets/player_models/legends`; editable calculation reference in `docs/development/legend-portrait-revision.tex`.
 - Import Utilities #15193: `fix/dotted-module-imports` resolves dotted names to the requested module and reads its own version for dependency checks. Review through Barb's pipeline.
 
 Canonical golfer Drake alignment (#13531, #13450; folded into the grip-lane consolidation): actuator count from `resolve_plant_n_actuators`, grip frames `mid_hands`/`club_head`; verify `tests/engines/drake/test_drake_fit_actuator_alignment_13531.py` and grip-resolution tests.
