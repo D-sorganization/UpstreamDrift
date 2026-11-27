@@ -10,4 +10,5 @@ public methods still require a docstring.
 
 Three `destroyed` lambdas loaded `self` from a method cell. Teardown clears
 that cell and pytest-qt fails whichever test is on the worker. The callbacks
-now bind the widget by value.
+now bind the widget by value. The review runner checks product Python only:
+the test corpus embeds the banned strings it asserts on.

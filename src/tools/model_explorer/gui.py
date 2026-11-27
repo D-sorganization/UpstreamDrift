@@ -370,12 +370,14 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         return self.load_model(file_path)
 
     def save_urdf(self) -> None:
+        """Write the current URDF to the open path, or prompt when none is open."""
         if self.current_file_path:
             self._save_to_file(self.current_file_path)
         else:
             self.save_urdf_as()
 
     def save_urdf_as(self) -> None:
+        """Prompt for a path and write the current URDF there."""
         from PyQt6.QtWidgets import QFileDialog
 
         file_path, _ = QFileDialog.getSaveFileName(
@@ -466,6 +468,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
     # ---- Tools menu actions -------------------------------------------
 
     def open_advanced_editor(self) -> None:
+        """Open the advanced URDF editor for the current file."""
         try:
             from .urdf_editor_window import URDFEditorWindow
 
@@ -479,6 +482,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
             QMessageBox.critical(self, "Error", f"Failed to open editor: {e}")
 
     def open_frankenstein_mode(self) -> None:
+        """Open the dialog that combines URDF sources."""
         try:
             from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
@@ -501,6 +505,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
             )
 
     def open_code_editor(self) -> None:
+        """Open the URDF source editor for the current file."""
         try:
             from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
@@ -631,6 +636,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
         )
 
     def reset_view(self) -> None:
+        """Restore the model view to its default camera."""
         self.visualization_widget.reset_view()
 
     def cleanup(self) -> None:
@@ -842,6 +848,7 @@ class MainWidget(ResultsPlaybackHostMixin, QWidget):
                 win.setWindowTitle("Model Explorer - UpstreamDrift")
 
     def show_about(self) -> None:
+        """Show the Model Explorer about dialog."""
         QMessageBox.about(
             self,
             "About URDF Generator",
