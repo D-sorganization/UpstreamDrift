@@ -128,7 +128,9 @@ def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
         * (np.hypot(h, d) / p["theta_c_ref_speed_mps"])
         * (phi / p["theta_c_ref_angle_deg"])
     )  # eq. (8)
-    tc = np.minimum(tc, np.pi / 4)  # calibrated at 15.4 deg; extrapolation past 45 deg is unphysical
+    tc = np.minimum(
+        tc, np.pi / 4
+    )  # calibrated at 15.4 deg; extrapolation past 45 deg is unphysical
     c, s = np.cos(tc), np.sin(tc)
     vix, viy = h * c - d * s, h * s + d * c  # eq. (6)
     e = np.where(

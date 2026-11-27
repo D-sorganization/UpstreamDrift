@@ -183,7 +183,9 @@ def test_penner_rebound_topspin_slip_classified_and_directed_correctly() -> None
     Without the fix rolling=True (wrong); with fix rolling=False (correct).
     """
     out = gr.penner_rebound(15.0, 25.0, -3000.0)
-    assert float(out.mu_c) < 0.0, f"expected topspin mu_c < 0, got {float(out.mu_c):.3f}"
+    assert float(out.mu_c) < 0.0, (
+        f"expected topspin mu_c < 0, got {float(out.mu_c):.3f}"
+    )
     p = {k[7:]: v.value for k, v in gr.GROUND_PARAMETERS.items() if k[:7] == "bounce."}
     assert abs(float(out.mu_c)) > p["friction_mu"], (
         f"|mu_c|={abs(float(out.mu_c)):.3f} not > friction_mu={p['friction_mu']:.3f}"
