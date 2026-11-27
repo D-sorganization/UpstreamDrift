@@ -779,6 +779,29 @@ def _restore_matplotlib_rcparams() -> Generator[None, None, None]:
 
 
 @pytest.fixture(autouse=True)
+def _reset_pil_and_mpl_font_caches() -> Generator[None, None, None]:
+    """Clear PIL and matplotlib font caches between tests to prevent order pollution.
+
+    On Linux CI, PIL's ``ImageFont.load_default`` and matplotlib's Agg renderer both
+    link the same system libfreetype2.so.  PIL's FreeType initialisation can corrupt
+    global FreeType state, causing subsequent matplotlib font lookups to silently
+    return blank glyphs.  Clearing both caches after each test restores a clean slate
+    without paying the cost when neither library is loaded.  (#15710)
+    """
+    yield
+    compositor_mod = sys.modules.get("src.tools.native_viewer_export.compositor")
+    if compositor_mod is not None:
+        getattr(compositor_mod, "_FONTS", {}).clear()
+    fm_mod = sys.modules.get("matplotlib.font_manager")
+    if fm_mod is not None:
+        for _attr in ("_findfont_cached", "findfont"):
+            _fn = getattr(fm_mod.fontManager, _attr, None)
+            if _fn is not None and hasattr(_fn, "cache_clear"):
+                _fn.cache_clear()
+                break
+
+
+@pytest.fixture(autouse=True)
 def _protect_engine_modules() -> Generator[None, None, None]:
     """Prevent engine module state corruption from leaking between tests.
 
