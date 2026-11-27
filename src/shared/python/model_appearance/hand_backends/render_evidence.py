@@ -41,11 +41,13 @@ class LitRenderSettings:
 
 
 def _unit(v: Array) -> Array:
+    """Return ``v`` scaled to unit length."""
     norm = float(np.linalg.norm(v))
     return v / max(norm, 1e-12)
 
 
 def _camera_basis(view: str) -> tuple[Array, Array, Array]:
+    """Right, up and forward for a named evidence camera."""
     if view == "front":
         fwd = _unit(np.array([0.34, -0.92, 0.26], dtype=np.float64))
         up_hint = np.array([0.0, 1.0, 0.0], dtype=np.float64)
@@ -70,6 +72,7 @@ def _camera_basis(view: str) -> tuple[Array, Array, Array]:
 
 
 def _corner_normals(verts: Array, faces: np.ndarray, crease_cos: float) -> Array:
+    """Per-corner normals that keep a crease when the face turns sharply."""
     e0 = verts[faces[:, 1]] - verts[faces[:, 0]]
     e1 = verts[faces[:, 2]] - verts[faces[:, 0]]
     weighted = np.asarray(np.cross(e0, e1), dtype=np.float64)
@@ -97,6 +100,7 @@ def _shade_corners(
     fwd: Array,
     cfg: LitRenderSettings,
 ) -> Array:
+    """Shade each corner with the key light, fill light and specular term."""
     corners = _corner_normals(verts, faces, cfg.crease_cos)
     k = cfg.key_light
     fl = cfg.fill_light
@@ -114,6 +118,7 @@ def _shade_corners(
 
 
 def _color_for_label(label: str, cfg: LitRenderSettings) -> tuple[float, float, float]:
+    """RGB for a mesh label from the render settings."""
     if label == "grip":
         return cfg.grip_rgb
     if label in ("shaft", "hosel"):

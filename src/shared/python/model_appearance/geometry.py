@@ -72,6 +72,7 @@ _MAX_AXIS_COS = math.cos(math.radians(MIN_WIDTH_AXIS_ANGLE_DEG))
 
 
 def _unit(name: str, value: Array) -> Array:
+    """Return ``value`` as a unit vector after a finite-length check."""
     v = _check_finite(name, value, 3)
     norm = float(np.linalg.norm(v))
     require(norm > 1e-12, f"{name} must be nonzero", value)
@@ -125,6 +126,7 @@ def _width_frame(axis: Array, width: Array) -> tuple[Array, Array, Array]:
 
 
 def _check_finite(name: str, value: Array, size: int) -> Array:
+    """Return ``value`` as a finite vector of length ``size``."""
     v = np.asarray(value, dtype=float)
     if v.shape != (size,) or not np.isfinite(v).all():
         raise ValueError(f"{name} must be a finite {size}-vector")
@@ -132,6 +134,7 @@ def _check_finite(name: str, value: Array, size: int) -> Array:
 
 
 def _orient(vertices: Array, faces: NDArray[np.int64]) -> Mesh:
+    """Return a mesh whose faces wind so the enclosed volume is positive."""
     mesh = Mesh(vertices, faces)
     if mesh.volume() < 0:
         mesh = Mesh(vertices, faces[:, ::-1].copy())
@@ -139,6 +142,7 @@ def _orient(vertices: Array, faces: NDArray[np.int64]) -> Mesh:
 
 
 def _ring_faces(n_rings: int, sides: int) -> list[tuple[int, int, int]]:
+    """Triangle faces that stitch consecutive rings of ``sides`` vertices."""
     faces = []
     for k in range(n_rings - 1):
         for j in range(sides):
