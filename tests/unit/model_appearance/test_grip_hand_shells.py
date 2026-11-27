@@ -29,6 +29,8 @@ SECTION_RADIAL_REACH_M = 0.03
 # Radial thickness of the on-grip patch sampled from each part's closest approach (not
 # the 0–3 mm acceptance cap).
 _CONTACT_PATCH_SAMPLE_BAND_M = 0.001
+# Numerical tolerance only (float round-off), not a taper allowance.
+_GAP_TOLERANCE_M = 1e-6
 
 _BARY = np.array(
     [(a, b, 1.0 - a - b) for a in np.linspace(0, 1, 9) for b in np.linspace(0, 1, 9)]
@@ -138,13 +140,6 @@ def _assert_covered_arc_at_least_deg(covered_deg: float, minimum_deg: float) -> 
     assert covered_deg >= minimum_deg - 1e-6, (covered_deg, minimum_deg)
 
 
-def _taper_slack_m(club: ca.ClubAssembly, distance_below_butt_m: np.ndarray) -> float:
-    """Grip-radius change (m) across the axial span of one contact patch."""
-    clipped = np.clip(distance_below_butt_m, 0.0, club.grip_length_m)
-    radii = np.array([gh.grip_radius_at(club, float(d)) for d in clipped])
-    return float(radii.max() - radii.min())
-
-
 def _contact_patch_samples(gap: np.ndarray) -> np.ndarray:
     """Points on the contact patch from closest approach, without the 0–3 mm cut."""
     min_gap = float(gap.min())
@@ -153,18 +148,14 @@ def _contact_patch_samples(gap: np.ndarray) -> np.ndarray:
 
 
 def _assert_patch_clearance_within_limit(
-    patch_gap: np.ndarray, taper_slack: float, *, part_name: str
+    patch_gap: np.ndarray, *, part_name: str
 ) -> None:
-    """assert patch clearance within limit."""
+    """Assert the 0-3 mm bound; ``gap`` is already local to the tapered surface."""
     assert patch_gap.size, part_name
-    assert patch_gap.min() >= -1e-6, (part_name, patch_gap.min(), patch_gap.max())
-    limit = MAX_PAD_CLEARANCE_M + taper_slack + 1e-6
-    assert patch_gap.max() <= limit, (
+    assert patch_gap.min() >= -_GAP_TOLERANCE_M, (part_name, patch_gap.min())
+    assert patch_gap.max() <= MAX_PAD_CLEARANCE_M + _GAP_TOLERANCE_M, (
         part_name,
-        patch_gap.min(),
         patch_gap.max(),
-        taper_slack,
-        limit,
     )
 
 
@@ -217,12 +208,9 @@ def test_each_contact_patch_gap_within_0_to_3_mm(
         depth = result.distance_below_butt_m + pts[:, 2]
         taper = np.array([gh.grip_radius_at(club, float(d)) for d in depth])
         gap = _rho(pts) - taper
-        taper_slack = _taper_slack_m(club, depth)
         patch_gap = _contact_patch_samples(gap)
         assert patch_gap.size, part.name
-        _assert_patch_clearance_within_limit(
-            patch_gap, taper_slack, part_name=part.name
-        )
+        _assert_patch_clearance_within_limit(patch_gap, part_name=part.name)
 
 
 def test_circular_arc_span_at_0_360_seam_is_short_not_linear_span() -> None:
@@ -239,14 +227,11 @@ def test_circular_arc_span_at_0_360_seam_is_short_not_linear_span() -> None:
 
 def test_contact_patch_clearance_rejects_over_limit_sample() -> None:
     """test contact patch clearance rejects over limit sample."""
-    taper_slack = 0.0001
     ok = np.array([0.0005, 0.0012, 0.0018])
-    _assert_patch_clearance_within_limit(ok, taper_slack, part_name="synthetic_ok")
+    _assert_patch_clearance_within_limit(ok, part_name="synthetic_ok")
     bad = np.array([0.0005, 0.0012, 0.0036])
     with pytest.raises(AssertionError):
-        _assert_patch_clearance_within_limit(
-            bad, taper_slack, part_name="synthetic_bad"
-        )
+        _assert_patch_clearance_within_limit(bad, part_name="synthetic_bad")
 
 
 @pytest.mark.parametrize("hand", list(Hand))
