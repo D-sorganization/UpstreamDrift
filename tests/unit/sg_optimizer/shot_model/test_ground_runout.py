@@ -162,7 +162,7 @@ def test_penner_rebound_reproduces_his_quoted_drive_and_iron_bounces(
     out = gr.penner_rebound(v * np.sin(phi), v * np.cos(phi), spin)
     assert out.mu_c == pytest.approx(mu_c, abs=0.005)
     if height_m is not None:
-        assert out.vz**2 / (2.0 * float(GRAVITY_M_S2)) == pytest.approx(height_m, abs=0.01)
+        assert out.vz**2 / (2.0 * GRAVITY_M_S2) == pytest.approx(height_m, abs=0.01)
 
 
 def test_more_backspin_bounces_shorter_until_the_ball_slides() -> None:
@@ -347,6 +347,7 @@ def test_green_side_skills_keep_carry_and_the_list_is_hashed() -> None:
 
 def test_ground_provenance_cannot_override_table_keys() -> None:
     """Ground provenance cannot override the table's own provenance keys."""
+
     class _Clash:
         provenance = {"seed": 99}
 
