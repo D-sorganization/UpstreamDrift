@@ -1,0 +1,137 @@
+{
+  "schema_version": "2.0.0",
+  "description": "Cross-engine parity capability matrix schema v2 (UpstreamDrift #15794 B1). Comparators start claimed, not verified: a verified cell requires a fixture id and a tolerance id. This file is not the generated MS-71 qualification ledger.",
+  "issue": 15794,
+  "release_cycle": 1,
+  "claim_expiry_cycles": 2,
+  "engines": [
+    "drake",
+    "mujoco",
+    "myosuite",
+    "opensim",
+    "pinocchio",
+    "simscape"
+  ],
+  "capabilities": {
+    "prescribed_kinematics": {
+      "tolerance_id": "prescribed_kinematics",
+      "cells": {
+        "drake": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "mujoco": {
+          "status": "claimed",
+          "claimed_cycle": 1,
+          "reference_issue": 15150
+        },
+        "myosuite": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "opensim": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "pinocchio": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "simscape": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        }
+      }
+    },
+    "instantaneous_dynamics": {
+      "tolerance_id": "instantaneous_dynamics",
+      "cells": {
+        "drake": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "mujoco": {
+          "status": "claimed",
+          "claimed_cycle": 1,
+          "reference_issue": 15150
+        },
+        "myosuite": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "opensim": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "pinocchio": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "simscape": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        }
+      }
+    },
+    "grip_flexible_shaft": {
+      "tolerance_id": "grip_flexible_shaft",
+      "cells": {
+        "drake": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "mujoco": {
+          "status": "claimed",
+          "claimed_cycle": 1,
+          "reference_issue": 15150
+        },
+        "myosuite": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "opensim": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "pinocchio": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "simscape": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        }
+      }
+    },
+    "ground_contact": {
+      "tolerance_id": "ground_contact",
+      "cells": {
+        "drake": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "mujoco": {
+          "status": "claimed",
+          "claimed_cycle": 1,
+          "reference_issue": 15150
+        },
+        "myosuite": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "opensim": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "pinocchio": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        },
+        "simscape": {
+          "status": "claimed",
+          "claimed_cycle": 1
+        }
+      }
+    }
+  }
+}
