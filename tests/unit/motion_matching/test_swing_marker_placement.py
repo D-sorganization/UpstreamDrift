@@ -46,10 +46,12 @@ def _swing(noise_m: float = 0.0):
 
 
 def _start(shift=(0.02, 0.0, -0.01)):
+    """Starting placements, each marker shifted from where it really sits."""
     return {k: (BODY[k], tuple(np.add(TRUE[k], shift))) for k in TRUE}
 
 
 def test_misplaced_markers_return_to_where_they_are() -> None:
+    """A constant shift is removed and the marker returns to its true offset."""
     points, valid, labels, rotations, origins = _swing()
     placed = place_markers_over_swing(
         points, valid, labels, _start(), rotations, origins
@@ -64,6 +66,7 @@ def test_misplaced_markers_return_to_where_they_are() -> None:
 
 
 def test_the_fit_never_gets_worse_with_noise() -> None:
+    """With noise, the new placement is at least as close as the old one."""
     points, valid, labels, rotations, origins = _swing(noise_m=0.004)
     placed = place_markers_over_swing(
         points, valid, labels, _start(), rotations, origins
@@ -74,6 +77,7 @@ def test_the_fit_never_gets_worse_with_noise() -> None:
 
 
 def test_unseen_frames_are_left_out_and_a_rarely_seen_marker_stays() -> None:
+    """Unseen frames are ignored, and a rarely seen marker keeps its offset."""
     points, valid, labels, rotations, origins = _swing()
     points[:20, 0] = 9.0  # rubbish where marker A was not seen
     valid[:20, 0] = False
@@ -88,6 +92,7 @@ def test_unseen_frames_are_left_out_and_a_rarely_seen_marker_stays() -> None:
 
 
 def test_a_move_is_limited_to_the_setting() -> None:
+    """A move longer than the setting is cut to that length."""
     points, valid, labels, rotations, origins = _swing()
     placed = place_markers_over_swing(
         points,
@@ -108,6 +113,7 @@ def test_a_move_is_limited_to_the_setting() -> None:
 
 
 def test_bad_input_is_refused() -> None:
+    """Settings and shapes that break the placement contract are refused."""
     points, valid, labels, rotations, origins = _swing()
     start = _start()
     with pytest.raises(ValueError, match="min_frames"):
