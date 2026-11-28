@@ -116,7 +116,7 @@ def test_duplicate_bundle_members_are_rejected_before_writing(tmp_path):
     args["bundle"] = duplicate.getvalue()
     project_before = (library.root / "project.json").read_bytes()
 
-    with pytest.raises(ValueError, match="one visual JSON and one receipt"):
+    with pytest.raises(ValueError, match="members do not match"):
         _register_bundle(library, args)
 
     assert (library.root / "project.json").read_bytes() == project_before

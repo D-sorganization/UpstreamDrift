@@ -46,4 +46,4 @@ the existing flight scene.
 
 Historical matching and final overall parity acceptance remain tracked in epic
 #11232. Local execution acceptance does not establish a qualified Tiger/Hogan
-model or engineering release approval.
+model or engineering release approval; import catalog exports with `import_catalog_model`.
