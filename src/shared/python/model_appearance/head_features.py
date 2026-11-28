@@ -263,8 +263,7 @@ def dense_short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
         skin,
         upper_extension=-0.005,
         cheek_rise=0.055,
-        lip_half_width=0.065,
-        lip_half_height=0.032,
+        lip_half_size=(0.065, 0.032),
         cheek_slope=0.08,
         sideburn_taper=0.075,
         shell_offset=0.004,
@@ -279,8 +278,7 @@ def _beard_parts(
     shell_offset: float,
     role: str,
     cheek_rise: float = 0.085,
-    lip_half_width: float = 0.09,
-    lip_half_height: float = 0.045,
+    lip_half_size: tuple[float, float] = (0.09, 0.045),
     cheek_slope: float = 0.0,
     sideburn_taper: float = 0.0,
 ) -> list[tuple[str, Mesh, str]]:
@@ -293,6 +291,7 @@ def _beard_parts(
         closed_shell,
     )
 
+    lip_half_width, lip_half_height = lip_half_size
     v, normals, faces = skin.vertices, _vertex_normals(skin), skin.faces
     faces = faces[((v[faces, 2] < 0.48) & (v[faces, 0] > 0.08)).any(axis=1)]
     for _ in range(2):

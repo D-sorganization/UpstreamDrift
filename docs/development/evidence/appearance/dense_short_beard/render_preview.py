@@ -18,6 +18,7 @@ from src.shared.python.model_appearance import document_from_dict
 
 
 def main() -> None:
+    """Render reproducible desktop and phone views of the dense beard."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     out = parser.parse_args().out
