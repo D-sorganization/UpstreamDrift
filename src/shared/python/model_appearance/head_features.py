@@ -247,6 +247,43 @@ def moustache_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
     return out
 
 
+def short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
+    """Create a close-cropped lower-face shell, with a clear lip opening."""
+    from src.shared.python.model_appearance.head_hair import (
+        HairCrop,
+        _clip_above,
+        _split,
+        _vertex_normals,
+        closed_shell,
+    )
+
+    v, normals, faces = skin.vertices, _vertex_normals(skin), skin.faces
+    faces = faces[((v[faces, 2] < 0.48) & (v[faces, 0] > 0.08)).any(axis=1)]
+    for _ in range(2):
+        v, normals, faces = _split(
+            v, normals, faces, HairCrop(refine_edge=0.012, refine_curve=0)
+        )
+
+    def level(points: Array) -> Array:
+        """Signed distance proxy for cheek, chin and elliptical lip boundaries."""
+        x, y, z = np.moveaxis(points, -1, 0)
+        side = np.clip((np.abs(y) - 0.09) / 0.14, 0.0, 1.0)
+        upper = 0.295 + 0.085 * side * side * (3 - 2 * side)
+        outer = np.clip((np.abs(y) - 0.20) / 0.12, 0.0, 1.0)
+        front = 0.13 + 0.10 * outer * outer * (3 - 2 * outer)
+        lip = 0.05 * (np.hypot(y / 0.09, (z - 0.27) / 0.045) - 1)
+        return np.minimum.reduce((x - front, z - 0.075, upper - z, lip))
+
+    v, normals, faces = _clip_above(
+        v, normals, faces, level(v), (lambda p: float(level(p)), 8)
+    )
+    mesh = closed_shell(v, normals, faces, np.full(len(v), 0.003), 0.0004, 0.001)
+    return [
+        ("beard_shell", mesh, "beard"),
+        *[(name, part, "beard") for name, part, _ in moustache_parts(skin)],
+    ]
+
+
 def face_parts(
     skin: Mesh, marks: FaceLandmarks | None = None
 ) -> list[tuple[str, Mesh, str]]:
