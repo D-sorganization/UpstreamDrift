@@ -16,6 +16,7 @@ from src.shared.python.model_appearance import library
 LENGTH = 0.2429
 CAP = {"cap_style": "baseball_cap"}
 FLAT_CAP = {"cap_style": "flat_cap"}
+STRUCTURED_BASEBALL = {"cap_style": "baseball_cap_structured"}
 
 
 def _doc(**head):
@@ -81,6 +82,20 @@ def test_cap_parts_are_closed_and_use_the_cap_colour_setting() -> None:
         assert head_model.part_material_name(parts[name], doc) == "cap_red"
     assert _doc(**CAP).head.cap_material == "cap_navy"
     assert "cap_red" in library.MATERIALS
+
+
+@pytest.mark.unit
+def test_structured_baseball_cap_has_a_visible_drooping_bill() -> None:
+    """Offer a separately selectable cap with a readable front bill."""
+    doc = _doc(**STRUCTURED_BASEBALL)
+    assert doc.head.cap_style == "baseball_cap_structured"
+    parts = {part.name: part.mesh for part in build_head_parts(LENGTH, doc.head)}
+    legacy = dict(head_cap.build_cap(head_mesh._default_asset().skin, 0.3))["cap_brim"]
+    bill = parts["cap_brim"]
+    assert _volume_and_closed(bill)[1]
+    assert _volume_and_closed(bill)[0] > 0.0
+    legacy_drop = np.ptp(legacy.vertices[:, 2]) * LENGTH
+    assert np.ptp(bill.vertices[:, 2]) > legacy_drop * 1.8
 
 
 @pytest.mark.unit

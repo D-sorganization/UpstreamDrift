@@ -88,7 +88,13 @@ def test_period_hats_do_not_change_native_physics():
         document_from_dict(
             {"schema_version": "appearance-v1", "head": {"cap_style": style}}
         )
-        for style in ("none", "flat_cap", "newsboy_cap", "straw_hat")
+        for style in (
+            "none",
+            "baseball_cap_structured",
+            "flat_cap",
+            "newsboy_cap",
+            "straw_hat",
+        )
     ]
     models = [
         mujoco.MjModel.from_xml_string(export_full_body_mjcf(raw, appearance=doc)[0])

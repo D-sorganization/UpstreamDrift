@@ -211,6 +211,63 @@ def _warp_parts(
     return warped
 
 
+def _cap_crop(settings: HeadSettings | None) -> head_cap.CapCrop:
+    """Select cap geometry and hair clearance for the requested style."""
+    if settings is None:
+        return head_cap.CapCrop()
+    straw = settings.cap_style == "straw_hat"
+    structured = settings.cap_style == "baseball_cap_structured"
+    flat = settings.cap_style in ("flat_cap", "newsboy_cap")
+    return (
+        head_cap.straw_hat_crop()
+        if straw
+        else head_cap.newsboy_cap_crop()
+        if settings.cap_style == "newsboy_cap"
+        else head_cap.flat_cap_crop()
+        if flat
+        else head_cap.structured_baseball_cap_crop()
+        if structured
+        else head_cap.CapCrop()
+    )
+
+
+def _cap_mesh_parts(
+    skin: Mesh, length_m: float, settings: HeadSettings | None
+) -> list[tuple[str, Mesh, str]]:
+    """Build scaled cap components selected by the optional head settings."""
+    if settings is None or settings.cap_style == "none":
+        return []
+    straw = settings.cap_style == "straw_hat"
+    flat = settings.cap_style in ("flat_cap", "newsboy_cap")
+    capped = (
+        straw
+        or flat
+        or settings.cap_style
+        in (
+            "baseball_cap",
+            "baseball_cap_structured",
+        )
+    )
+    if not capped:
+        return []
+    crop = _cap_crop(settings)
+    parts = (
+        head_cap.build_straw_hat(skin)
+        if straw
+        else head_cap.build_period_cap(skin, settings.cap_brim, crop)
+        if flat
+        else head_cap.build_cap(skin, settings.cap_brim, crop)
+    )
+    return [
+        (
+            name,
+            Mesh(mesh.vertices * length_m, mesh.faces),
+            "hat_band_dark" if name == "straw_band" else "cap",
+        )
+        for name, mesh in parts
+    ]
+
+
 def build_mesh_parts(
     length_m: float, headwear: str, settings: HeadSettings | None = None
 ) -> list[tuple[str, Mesh, str]]:
@@ -238,26 +295,14 @@ def build_mesh_parts(
     ]
     if settings is not None:
         out += _feature_mesh_parts(asset.skin, length_m, settings)
-    straw = settings is not None and settings.cap_style == "straw_hat"
-    flat_capped = settings is not None and settings.cap_style in (
+    capped = settings is not None and settings.cap_style in (
+        "straw_hat",
         "flat_cap",
         "newsboy_cap",
+        "baseball_cap",
+        "baseball_cap_structured",
     )
-    newsboy = settings is not None and settings.cap_style == "newsboy_cap"
-    capped = (
-        straw
-        or flat_capped
-        or (settings is not None and settings.cap_style == "baseball_cap")
-    )
-    cap_crop = (
-        head_cap.straw_hat_crop()
-        if straw
-        else head_cap.newsboy_cap_crop()
-        if newsboy
-        else head_cap.flat_cap_crop()
-        if flat_capped
-        else head_cap.CapCrop()
-    )
+    cap_crop = _cap_crop(settings)
     if headwear == "hair":
         crop = settings is not None and settings.hair_style == "short_crop"
         unit = asset.hair
@@ -274,24 +319,7 @@ def build_mesh_parts(
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
         )
-    if settings is not None and straw:
-        out += [
-            (
-                name,
-                Mesh(m.vertices * length_m, m.faces),
-                "hat_band_dark" if name == "straw_band" else "cap",
-            )
-            for name, m in head_cap.build_straw_hat(asset.skin)
-        ]
-    elif settings is not None and capped:
-        out += [
-            (name, Mesh(m.vertices * length_m, m.faces), "cap")
-            for name, m in (
-                head_cap.build_period_cap(asset.skin, settings.cap_brim, cap_crop)
-                if flat_capped
-                else head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
-            )
-        ]
+    out += _cap_mesh_parts(asset.skin, length_m, settings)
     if settings is not None:
         if settings.facial_hair == "moustache":
             out += [
