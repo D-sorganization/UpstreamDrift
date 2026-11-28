@@ -2694,6 +2694,7 @@
 {"path": "shadow_tracker/historical_capture.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/ingestion.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/initialization.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/markerless_scorecard.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/mask_records.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/projection.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/segmentation.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
