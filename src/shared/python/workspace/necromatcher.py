@@ -82,7 +82,6 @@ class CatalogModelBundle:
     model_version: str
     candidate_mode: str = "sized_candidate"
     reference_baseline_id: str | None = None
-    reference_baseline_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -107,7 +106,9 @@ def _catalog_digest(payload: bytes) -> str:
     return "sha256:" + hashlib.sha256(payload).hexdigest()
 
 
-def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str, str]:
+def _validate_catalog_model_bundle(
+    bundle: CatalogModelBundle,
+) -> tuple[str, str, str, str | None]:
     """Validate bytes and return XML, visual, and source manifest digests."""
     if not bundle.model_xml or not bundle.bundle:
         raise ValueError("Catalog model files must be nonempty")
@@ -133,11 +134,11 @@ def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str
         if (
             not isinstance(bundle.reference_baseline_id, str)
             or not bundle.reference_baseline_id.strip()
-            or not isinstance(bundle.reference_baseline_sha256, str)
-            or len(bundle.reference_baseline_sha256) != 64
         ):
-            raise ValueError("Appearance-only bundle needs a trusted reference baseline")
-    elif bundle.reference_baseline_id is not None or bundle.reference_baseline_sha256 is not None:
+            raise ValueError(
+                "Appearance-only bundle needs a trusted reference baseline"
+            )
+    elif bundle.reference_baseline_id is not None:
         raise ValueError("Sized candidates must not claim a reference-skin baseline")
     for identifier in (
         bundle.player_id,
@@ -154,12 +155,16 @@ def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str
     visual_hash = "sha256:" + bundle.visual_sha256
     source_hash = "sha256:" + bundle.source_manifest_sha256
     expected_members = {"model.visual.json", "receipt.json"}
+    baseline_hash = None
     if bundle.candidate_mode == "appearance_only":
         expected_members.add("reference-baseline.json")
     try:
         with ZipFile(io.BytesIO(bundle.bundle)) as archive:
             members = archive.namelist()
-            if len(members) != len(expected_members) or set(members) != expected_members:
+            if (
+                len(members) != len(expected_members)
+                or set(members) != expected_members
+            ):
                 raise ValueError(
                     "Catalog bundle members do not match its candidate mode"
                 )
@@ -168,18 +173,17 @@ def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str
             if _catalog_digest(archive.read("receipt.json")) != source_hash:
                 raise ValueError("Catalog source manifest hash mismatch")
             if bundle.candidate_mode == "appearance_only":
-                if _catalog_digest(archive.read("reference-baseline.json")) != (
-                    "sha256:" + bundle.reference_baseline_sha256
-                ):
-                    raise ValueError("Catalog reference baseline hash mismatch")
+                baseline_hash = _catalog_digest(archive.read("reference-baseline.json"))
     except (KeyError, OSError, BadZipFile) as exc:
         raise ValueError("Catalog model bundle is malformed") from exc
-    return _catalog_digest(bundle.model_xml), visual_hash, source_hash
+    return _catalog_digest(bundle.model_xml), visual_hash, source_hash, baseline_hash
 
 
 def _build_catalog_bundle_plan(bundle: CatalogModelBundle) -> _CatalogBundlePlan:
     """Build immutable metadata and payload records after source validation."""
-    xml_hash, visual_hash, source_hash = _validate_catalog_model_bundle(bundle)
+    xml_hash, visual_hash, source_hash, baseline_hash = _validate_catalog_model_bundle(
+        bundle
+    )
     model_metadata = {
         "schema": "necromatcher/native-model/1",
         "hash": xml_hash,
@@ -197,22 +201,14 @@ def _build_catalog_bundle_plan(bundle: CatalogModelBundle) -> _CatalogBundlePlan
     }
     if bundle.reference_baseline_id is not None:
         model_metadata["reference_baseline_id"] = bundle.reference_baseline_id
-        model_metadata["reference_baseline_sha256"] = (
-            "sha256:" + str(bundle.reference_baseline_sha256)
-        )
+        model_metadata["reference_baseline_sha256"] = baseline_hash
     bundle_metadata = {
         "schema": "necromatcher/native-model-bundle/1",
         "model_id": bundle.model_id,
         "hash": _catalog_digest(bundle.bundle),
         "visual_definition_sha256": visual_hash,
         "source_manifest_sha256": source_hash,
-        "candidate_mode": bundle.candidate_mode,
     }
-    if bundle.reference_baseline_id is not None:
-        bundle_metadata["reference_baseline_id"] = bundle.reference_baseline_id
-        bundle_metadata["reference_baseline_sha256"] = (
-            "sha256:" + str(bundle.reference_baseline_sha256)
-        )
     return _CatalogBundlePlan(
         bundle,
         {"catalog_profile_sha256": bundle.source_profile_sha256},
@@ -545,10 +541,11 @@ class NecromatcherLibrary:
         keys = {
             "model.visual.json": "visual_definition_sha256",
             "receipt.json": "source_manifest_sha256",
-            "reference-baseline.json": "reference_baseline_sha256",
         }
         key = keys.get(member)
         expected = bundle.metadata.get(key) if key else None
+        if member == "reference-baseline.json":
+            expected = model.metadata.get("reference_baseline_sha256")
         if member == "reference-baseline.json" and expected is None:
             raise ValueError("Catalog model has no reference-skin baseline")
         if expected != _catalog_digest(content):
