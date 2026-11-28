@@ -34,6 +34,7 @@ _NAME_PATTERN = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
 _BUILTIN_BACKEND_MODULES: tuple[str, ...] = (
     "src.shared.python.model_appearance.hand_backends.myohand",
     "src.shared.python.model_appearance.hand_backends.skinned_human",
+    "src.shared.python.model_appearance.hand_backends.procedural_skin",
     "src.shared.python.model_appearance.hand_backends.shadow",
 )
 
