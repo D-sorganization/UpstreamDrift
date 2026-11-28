@@ -208,6 +208,282 @@
         "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
       }
     },
+    "tom_watson": {
+      "display_name": "Tom Watson",
+      "stature_m": 1.7526,
+      "mass_kg": 72.5747792,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1984_pgatour.pdf",
+          "values": "5 ft 9 in; 160 lb",
+          "era": "1982 Open film; 1984 guide is a nearby-era roster listing; roster listing is not a verified frame-specific measurement."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=dWe9rqS8xJE",
+          "values": "Public golf footage for appearance and motion reference.",
+          "era": "1982 Open film; 1984 guide is a nearby-era roster listing; presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Listed dimensions are historical roster values; segment proportions and inertias are estimated rather than individually measured.",
+        "Facial features, coloring, hair and clothing are stylized interpretations; the video does not qualify a physical motion fit.",
+        "Hair and clothing colors are illustrative, not independently verified for a single captured frame."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "tom_watson_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.18, 0.29, 0.42, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.18, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "side_swept",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.03,
+            "jaw": 0.0,
+            "nose": 0.08,
+            "mouth": -0.02,
+            "eyes": 0.0
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "greg_norman_1986": {
+      "display_name": "Greg Norman (1986)",
+      "stature_m": 1.8542,
+      "mass_kg": 83.91458845,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1986_pgatour.pdf",
+          "values": "6 ft 1 in; 185 lb",
+          "era": "1986 PGA TOUR guide and Open retrospective; roster listing is not a verified frame-specific measurement."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=y4LtIZMC5ns",
+          "values": "Public golf footage for appearance and motion reference.",
+          "era": "1986 PGA TOUR guide and Open retrospective; presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Listed dimensions are historical roster values; segment proportions and inertias are estimated rather than individually measured.",
+        "Facial features, coloring, hair and clothing are stylized interpretations; the video does not qualify a physical motion fit.",
+        "The broad-brimmed light hat is illustrative, not an exact garment reconstruction."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "greg_norman_1986_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.88, 0.87, 0.8, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.18, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_blond",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "straw_hat",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": 0.02,
+            "jaw": 0.07,
+            "nose": 0.05,
+            "mouth": 0.0,
+            "eyes": -0.02
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "george_knudson": {
+      "display_name": "George Knudson",
+      "stature_m": 1.778,
+      "mass_kg": 72.5747792,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1971_pgatour.pdf",
+          "values": "5 ft 10 in; 160 lb",
+          "era": "1971 TOUR guide; video date/identity are uploader-attributed; roster listing is not a verified frame-specific measurement."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=rAMUYnFe-W8",
+          "values": "Public golf footage for appearance and motion reference.",
+          "era": "1971 TOUR guide; video date/identity are uploader-attributed; presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Listed dimensions are historical roster values; segment proportions and inertias are estimated rather than individually measured.",
+        "Facial features, coloring, hair and clothing are stylized interpretations; the video does not qualify a physical motion fit.",
+        "Hair and clothing colors are illustrative, not independently verified for a single captured frame."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "george_knudson_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.72, 0.72, 0.66, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.18, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "slick_part",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.04,
+            "jaw": -0.03,
+            "nose": 0.1,
+            "mouth": -0.03,
+            "eyes": 0.01
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
     "rory_mcilroy": {
       "display_name": "Rory McIlroy",
       "stature_m": 1.778,

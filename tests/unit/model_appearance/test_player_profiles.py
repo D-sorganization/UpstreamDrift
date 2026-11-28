@@ -52,6 +52,8 @@ def test_public_catalog_ids_include_legacy_and_new_profiles():
         "bobby_jones",
         "byron_nelson",
         "dustin_johnson",
+        "george_knudson",
+        "greg_norman_1986",
         "jack_nicklaus",
         "jon_rahm",
         "mac_ogrady",
@@ -60,6 +62,7 @@ def test_public_catalog_ids_include_legacy_and_new_profiles():
         "sergio_garcia",
         "seve_ballesteros",
         "tiger_woods",
+        "tom_watson",
     )
 
 
