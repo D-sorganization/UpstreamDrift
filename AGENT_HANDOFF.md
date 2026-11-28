@@ -140,7 +140,7 @@ Necromatcher and matching:
 
 Motion matching and tour baselines:
 
-- Exception-identity split at shared contracts #11175; reduced-model and club-only claims MMR-11 #11097; best-candidate viewer fixes MMR-16 #11102.
+- Exception-identity split #11175; reduced-model claims #11097; viewer fixes #11102 and viewport timer teardown #15964.
 - `vendor/ud-tools` bump with K0 and K3a #10944; neural-model program NM-09 to NM-12: #10624, #10625, #10626, #10627.
 - Tour baselines (exact-capture matching, fail-closed qualification): #10829, #10830, #10831, #10799, #10800, #10844, #10849; TB-12 #10597 merged.
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
