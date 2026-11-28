@@ -107,6 +107,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
     def __init__(
         self, parent: Any = None, *, color_picker: ColorPicker | None = None
     ) -> None:
+        """Build the form around a new character model."""
         super().__init__(parent)
         self._color_picker = color_picker
         self.model = CharacterBuilderModel()
@@ -115,6 +116,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self._load_preset_into_form(self.preset_combo.currentData())
 
     def _build_ui(self) -> None:
+        """Lay out the preset, parameter, grip, colour, and export controls."""
         layout = QtWidgets.QVBoxLayout(self)
         form = QtWidgets.QFormLayout()
         self.preset_combo = QtWidgets.QComboBox()
@@ -266,6 +268,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
             self._syncing = was
 
     def _set_grip(self, name: str, value: float | str | None) -> bool:
+        """Apply one grip choice and refresh, or show the validation error."""
         try:
             self.model.set_grip(name, value)
         except ValueError as exc:
@@ -275,6 +278,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         return True
 
     def _on_grip_preset(self, _index: int) -> None:
+        """Apply the selected grip preset and clear the named hand picks."""
         if self._syncing:
             return
         for name in _HAND_PICKS:  # a preset resets the hands it names
@@ -283,14 +287,17 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
             self._sync_grip_spins()
 
     def _on_grip_pick(self, name: str, value: float) -> None:
+        """Store a hand grip measurement when the form is not syncing."""
         if not self._syncing:
             self._set_grip(name, value)
 
     def _on_grip_style(self, _index: int) -> None:
+        """Store the selected grip style when the form is not syncing."""
         if not self._syncing:
             self._set_grip("grip_style", self.grip_style_combo.currentData())
 
     def _on_grip_reset(self) -> None:
+        """Clear grip picks and restore the visual grip defaults."""
         for name in self.model.grip_picks():
             self.model.set_grip(name, None)
         self._syncing = True
@@ -344,6 +351,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         return row
 
     def _on_colour_change(self, name: str, value: str) -> None:
+        """Store a colour when it differs from the current document."""
         if value == self._current_colours()[name] and name not in (
             self.model.appearance_choices()
         ):
@@ -351,6 +359,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self._on_appearance_change(name, value)
 
     def _on_colour_reset(self, name: str) -> None:
+        """Clear a custom colour and show the document colour again."""
         try:
             self.model.set_appearance(name, None)
         except ValueError as exc:
@@ -361,6 +370,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self.status.setText("")
 
     def _on_appearance_change(self, name: str, value: str) -> None:
+        """Store an appearance choice, or show the validation error."""
         try:
             self.model.set_appearance(name, value)
         except ValueError as exc:
@@ -369,8 +379,11 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self.status.setText("")
 
     def _load_preset_into_form(self, preset_id: str | None) -> None:
+        """Apply a preset or Custom, then copy the model into the form."""
         if preset_id is not None:
             self.model.apply_preset(preset_id)
+        else:
+            self.model.clear_preset()
         self._syncing = True
         try:
             values = self.model.parameters_dict()
@@ -383,9 +396,11 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self._sync_grip_spins()
 
     def _on_spin(self, name: str, value: float) -> None:
+        """Forward a spin-box edit to the parameter handler."""
         self._on_edit(name, value)
 
     def _on_edit(self, name: str, value: float | str) -> None:
+        """Store a parameter edit and switch the preset combo to Custom."""
         if self._syncing:
             return
         try:
@@ -399,6 +414,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
         self._refresh()
 
     def _refresh(self) -> None:
+        """Show the compiled summary, or the compile error."""
         try:
             self.summary.setPlainText(self.model.summary_text())
             self.status.setText("")

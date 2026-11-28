@@ -62,6 +62,7 @@ class CharacterBuilderModel:
     """Editable character: parameters, optional preset, compile and export."""
 
     def __init__(self, preset_id: str | None = None) -> None:
+        """Start from a preset, or from default parameters when none is given."""
         self._preset: CharacterPreset | None = None
         self._params = SpecCharacterParameters()
         self._appearance_choices: dict[str, Any] = {}
@@ -99,6 +100,10 @@ class CharacterBuilderModel:
             raise ValueError(f"unknown character parameter: {name!r}")
         overrides: dict[str, Any] = {name: value}
         self._params = replace(self._params, **overrides)
+        self._preset = None
+
+    def clear_preset(self) -> None:
+        """Select Custom, preserving parameters, appearance and grip choices."""
         self._preset = None
 
     def compile(self) -> spec_export.CompiledCharacter:
@@ -269,6 +274,7 @@ class CharacterBuilderModel:
 
     @staticmethod
     def _write_export(directory: Path | str, filename: str, text: str) -> Path:
+        """Create the directory and write the export text."""
         out = Path(directory)
         out.mkdir(parents=True, exist_ok=True)
         path = out / filename
