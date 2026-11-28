@@ -104,6 +104,7 @@ def test_seve_profile_keeps_the_reviewed_dark_side_part_visible():
     assert head["headwear_material"] == "hair_dark_brown"
     assert shirt[:3] == [0.10, 0.16, 0.29]
 
+
 def test_mac_ogrady_profile_uses_period_dimensions_and_cautious_visuals():
     """Record the 1986 Tour-guide values and avoid treating the portrait as color evidence."""
     profile = player_profile("mac_ogrady")
