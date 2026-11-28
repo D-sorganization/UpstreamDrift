@@ -212,6 +212,7 @@
       "display_name": "Tom Watson",
       "stature_m": 1.7526,
       "mass_kg": 72.5747792,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1984_pgatour.pdf",
@@ -304,6 +305,7 @@
       "display_name": "Greg Norman (1986)",
       "stature_m": 1.8542,
       "mass_kg": 83.91458845,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1986_pgatour.pdf",
@@ -396,6 +398,7 @@
       "display_name": "George Knudson",
       "stature_m": 1.778,
       "mass_kg": 72.5747792,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1971_pgatour.pdf",
@@ -857,6 +860,7 @@
       "display_name": "Moe Norman",
       "stature_m": 1.7272,
       "mass_kg": 80.0,
+      "frame_prior": null,
       "sources": [
         {
           "url": "https://moenorman.org/2016/12/18/canadian-golfer-moe-different-strokes/",
@@ -949,6 +953,7 @@
       "display_name": "John Schlee",
       "stature_m": 1.905,
       "mass_kg": 77.1107029,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
@@ -1041,6 +1046,7 @@
       "display_name": "Johnny Miller",
       "stature_m": 1.8796,
       "mass_kg": 77.1107029,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
@@ -1132,6 +1138,7 @@
       "display_name": "Lee Trevino",
       "stature_m": 1.7018,
       "mass_kg": 83.91458845,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
@@ -1228,6 +1235,7 @@
       "display_name": "Mac O'Grady",
       "stature_m": 1.8288,
       "mass_kg": 74.84274105,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1986_pgatour.pdf",

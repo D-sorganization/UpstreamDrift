@@ -14,7 +14,7 @@ detail of a finished slice to the archive instead of growing this file.
 - `SPEC.md`: architecture contract; the change log is written by the fragment collate step, one row per PR.
 - `scripts/config/design_manual_governance.json` and `manuals/upstreamdrift/calculation-registry.json`: design-manual authority.
 - `docs/development/AGENT_HANDOFF_ARCHIVE.md`: full detail, branches and verification commands for every slice listed below.
-- #15900/#15947: Visual body build and independent source-attributed frame prior; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
+- #15900/#15947/#15954: Visual build and independent sourced historical frame priors; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
 
 ## Gate Commands
 
