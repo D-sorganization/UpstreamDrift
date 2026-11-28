@@ -145,6 +145,7 @@ HAIR_STYLES = (
     "slick_part",
     "receding_crop",
     "tousled_wave",
+    "short_curls",
 )
 HAIR_PARTS = ("left", "right", "none")
 EYE_COLORS = ("blue_grey", "hazel", "brown")
