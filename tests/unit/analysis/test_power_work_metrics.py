@@ -249,3 +249,46 @@ class TestPowerWorkGuards15343:
         assert (
             metrics.generation_duration + metrics.absorption_duration <= t_total + 1e-9
         )
+
+
+@pytest.mark.unit
+class TestClosedAngleCycleOriginInvariance15864:
+    """Hysteresis area of a closed loop must not depend on the angle origin (#15864).
+
+    A closed ellipse in angle–torque space stores π·A·B = 20π J of hysteresis work.
+    Shifting the whole trace by a constant angle offset (an origin shift) is
+    physically meaningless, so the reported area must be identical. The current
+    ``np.isclose(angles[0], angles[-1], ...)`` check scales its relative tolerance
+    by ``|angles[-1]|``, which breaks this invariance.
+    """
+
+    @staticmethod
+    def _closed_ellipse(
+        theta_0: float, n_samples: int = 200
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Closed ellipse loop: angle = theta_0 + A·sin(φ), torque = B·cos(φ)."""
+        a = 5.0  # rad semi-axis
+        b = 4.0  # N·m semi-axis
+        phi = np.linspace(0.0, 2.0 * np.pi, n_samples)
+        angles = theta_0 + a * np.sin(phi)
+        torques = b * np.cos(phi)
+        # Small numerical closure residual (~0.03 deg) at the seam.
+        angles[-1] += 0.03 * np.pi / 180.0
+        return angles, torques
+
+    def test_hysteresis_area_invariant_under_angle_origin_shift(self) -> None:
+        obj_at_origin = _make_instance(n_samples=200)
+        obj_at_origin.joint_positions[:, 0], obj_at_origin.joint_torques[:, 0] = (
+            self._closed_ellipse(0.0)
+        )
+        obj_shifted = _make_instance(n_samples=200)
+        obj_shifted.joint_positions[:, 0], obj_shifted.joint_torques[:, 0] = (
+            self._closed_ellipse(1.0)
+        )
+
+        area_at_origin = obj_at_origin.compute_joint_stiffness(0).hysteresis_area
+        area_shifted = obj_shifted.compute_joint_stiffness(0).hysteresis_area
+
+        # Physical work of the loop is π·A·B = 20π ≈ 62.83 J regardless of origin.
+        assert area_at_origin == pytest.approx(np.pi * 5.0 * 4.0, rel=1e-2)
+        assert area_shifted == pytest.approx(area_at_origin, rel=1e-9)
