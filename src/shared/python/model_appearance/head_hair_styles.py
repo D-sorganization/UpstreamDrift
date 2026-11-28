@@ -15,8 +15,39 @@ from src.shared.python.model_appearance.head_hair import (
 )
 
 
+def _tousled_wave_preset() -> dict[str, Any]:
+    """Return the extra volume and phase-warp controls for wavy hair."""
+    return {
+        "hairline": (
+            (0.0, 0.76),
+            (0.5, 0.75),
+            (0.85, 0.69),
+            (1.1, 0.56),
+            (1.6, 0.61),
+            (1.85, 0.50),
+            (2.05, 0.39),
+            (2.45, 0.32),
+            (2.85, 0.29),
+            (math.pi, 0.29),
+        ),
+        "hairline_asymmetry": 0.0,
+        "hairline_waviness": 0.006,
+        "side_thickness": 0.018,
+        "top_thickness": 0.065,
+        "fringe_thickness": 0.046,
+        "fringe_band": 0.035,
+        "comb_amplitude": 0.015,
+        "comb_wavelength": 0.10,
+        "comb_sweep": 0.12,
+        "part_depth": 0.0,
+        "heavy_side_gain": 0.0,
+        "wave_bend": 0.42,
+        "wave_wavelength": 0.26,
+    }
+
+
 def build_hair_style(skin: Mesh, part: str, style: str) -> Mesh:
-    """Build one of four bounded named hairstyles on an outward-wound skin."""
+    """Build one of five bounded named hairstyles on an outward-wound skin."""
     base = load_hair_crop()
     # The lower rear hairline adds visible coverage to the nape; a separate
     # crown and forelock field changes the profile and combed part.
@@ -102,6 +133,7 @@ def build_hair_style(skin: Mesh, part: str, style: str) -> Mesh:
             "heavy_side_gain": 0.08,
             "comb_amplitude": 0.003,
         },
+        "tousled_wave": _tousled_wave_preset(),
     }
     if style not in presets:
         raise ValueError(f"Unknown named hairstyle: {style!r}")
