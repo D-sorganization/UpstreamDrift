@@ -126,3 +126,27 @@ def test_sized_receipt_reports_prior_and_reference_skin_does_not(tmp_path, monke
     skin = player_models.export_player("test", tmp_path / "skin", base_spec=source)
     assert json.loads((skin.parent / "model.json").read_text()) == spec
     assert "frame_prior" not in json.loads((skin.parent / "receipt.json").read_text())
+
+
+def test_prior_rejects_extreme_integers_and_non_text_source():
+    """Reject invalid values with a stable ValueError instead of overflowing."""
+    for field in ("stature_m", "mass_kg"):
+        profile = _profile()
+        profile["frame_prior"] = {"method": "height_mass", "source_index": 0}
+        profile[field] = 10**400
+        with pytest.raises(ValueError):
+            player_models.frame_prior(profile)
+    profile = _profile()
+    profile["frame_prior"] = {
+        "method": "override",
+        "value": 10**400,
+        "rationale": "test",
+    }
+    with pytest.raises(ValueError):
+        player_models.frame_prior(profile)
+    profile = _profile()
+    profile["frame_prior"] = {"method": "height_mass", "source_index": 0}
+    for url in ("  ", 8, None):
+        profile["sources"][0]["url"] = url
+        with pytest.raises(ValueError):
+            player_models.frame_prior(profile)

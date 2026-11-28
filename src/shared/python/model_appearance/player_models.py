@@ -10,7 +10,7 @@ import json
 import math
 from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeGuard
 
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
@@ -41,6 +41,16 @@ def player_appearance(player: str) -> AppearanceDocument:
     return document_from_dict(player_profile(player)["appearance"])
 
 
+def _finite_number(value: Any) -> TypeGuard[int | float]:
+    """Reject booleans, nonnumeric inputs and numbers too large to convert."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
 def frame_prior(profile: dict[str, Any]) -> dict[str, Any]:
     """Resolve an explicit frame assumption and its non-physical provenance."""
     setting = profile.get("frame_prior")
@@ -52,9 +62,7 @@ def frame_prior(profile: dict[str, Any]) -> dict[str, Any]:
     if method == "override":
         value, reason = setting.get("value"), setting.get("rationale")
         if (
-            isinstance(value, bool)
-            or not isinstance(value, (int, float))
-            or not math.isfinite(value)
+            not _finite_number(value)
             or abs(value) > 1
             or not isinstance(reason, str)
             or not reason.strip()
@@ -64,13 +72,7 @@ def frame_prior(profile: dict[str, Any]) -> dict[str, Any]:
     if method != "height_mass":
         raise ValueError("unknown frame prior method")
     height, mass = profile.get("stature_m"), profile.get("mass_kg")
-    if any(
-        isinstance(v, bool)
-        or not isinstance(v, (int, float))
-        or not math.isfinite(v)
-        or v <= 0
-        for v in (height, mass)
-    ):
+    if any(not _finite_number(v) or v <= 0 for v in (height, mass)):
         raise ValueError("frame proxy needs finite positive stature and mass")
     index, sources = setting.get("source_index"), profile.get("sources")
     if (
@@ -79,7 +81,8 @@ def frame_prior(profile: dict[str, Any]) -> dict[str, Any]:
         or not isinstance(sources, list)
         or not 0 <= index < len(sources)
         or not isinstance(sources[index], dict)
-        or not sources[index].get("url")
+        or not isinstance(sources[index].get("url"), str)
+        or not sources[index]["url"].strip()
     ):
         raise ValueError("frame proxy needs an explicit source index")
     height = float(profile["stature_m"])
