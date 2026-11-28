@@ -10,23 +10,18 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
 from src.shared.python.config.maturity_scale import validate_level
 from src.shared.python.contracts import ContractChecker, ensure, require
-from src.shared.python.model_appearance.canonical_golfer_gate import (
-    GolferModelLock,
-    NonCanonicalGolferError,
-    Scope,
-    lock_for_spec,
-    require_canonical_golfer,
-    verify_lock,
-)
-from src.shared.python.model_appearance.golfer_model_versions import (
-    current_golfer_model,
-)
+
+if TYPE_CHECKING:
+    from src.shared.python.model_appearance.canonical_golfer_gate import (
+        GolferModelLock,
+        Scope,
+    )
 
 _CAPABILITY_ALIASES = {
     "inverse-kinematics": "ik",
@@ -564,6 +559,26 @@ class _EntryMetadata:
     golfer_model_lock: GolferModelLock | None = None
 
 
+def _parse_golfer_model_lock(lock_raw: Any) -> GolferModelLock | None:
+    """Parse an optional ``golfer_model_lock`` payload lazily."""
+    if lock_raw is None:
+        return None
+    from src.shared.python.model_appearance.canonical_golfer_gate import (
+        GolferModelLock,
+    )
+
+    if isinstance(lock_raw, GolferModelLock):
+        return lock_raw
+    require(
+        isinstance(lock_raw, Mapping),
+        "golfer_model_lock must be a mapping when provided",
+        lock_raw,
+    )
+    return GolferModelLock.from_dict(
+        lock_raw if isinstance(lock_raw, dict) else dict(lock_raw)
+    )
+
+
 def _parse_entry_metadata(data: dict[str, Any]) -> _EntryMetadata:
     """Parse identity, exchange artifacts, provenance and launcher metadata."""
     identity_raw = data.get("identity")
@@ -595,20 +610,7 @@ def _parse_entry_metadata(data: dict[str, Any]) -> _EntryMetadata:
         if launcher_raw is not None
         else None
     )
-    lock_raw = data.get("golfer_model_lock")
-    if lock_raw is None:
-        golfer_model_lock = None
-    elif isinstance(lock_raw, GolferModelLock):
-        golfer_model_lock = lock_raw
-    else:
-        require(
-            isinstance(lock_raw, Mapping),
-            "golfer_model_lock must be a mapping when provided",
-            lock_raw,
-        )
-        golfer_model_lock = GolferModelLock.from_dict(
-            lock_raw if isinstance(lock_raw, dict) else dict(lock_raw)
-        )
+    golfer_model_lock = _parse_golfer_model_lock(data.get("golfer_model_lock"))
     return _EntryMetadata(
         identity, exchange_artifacts, provenance, launcher, golfer_model_lock
     )
@@ -926,6 +928,13 @@ def group_entries_by_canonical_id(
 
 def _verify_lock_identity(lock: GolferModelLock) -> None:
     """Verify a lock's identity fields against the current golfer model."""
+    from src.shared.python.model_appearance.canonical_golfer_gate import (
+        NonCanonicalGolferError,
+    )
+    from src.shared.python.model_appearance.golfer_model_versions import (
+        current_golfer_model,
+    )
+
     current = current_golfer_model()
     checks = (
         ("registry_version", lock.registry_version, current.version),
@@ -972,6 +981,13 @@ def validate_golfer_pack_lock(
         if lock is not None:
             _verify_lock_identity(lock)
         return lock
+
+    from src.shared.python.model_appearance.canonical_golfer_gate import (
+        NonCanonicalGolferError,
+        lock_for_spec,
+        require_canonical_golfer,
+        verify_lock,
+    )
 
     require_canonical_golfer(spec)
     if lock is None:

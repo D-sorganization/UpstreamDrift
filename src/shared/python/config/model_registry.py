@@ -6,7 +6,7 @@ import os
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -27,10 +27,12 @@ from src.shared.python.config.model_source_providers import (
 )
 from src.shared.python.config.provider_catalog import iter_provider_manifest_specs
 from src.shared.python.core.contracts import ContractChecker, require
-from src.shared.python.model_appearance.canonical_golfer_gate import (
-    GolferModelLock,
-    Scope,
-)
+
+if TYPE_CHECKING:
+    from src.shared.python.model_appearance.canonical_golfer_gate import (
+        GolferModelLock,
+        Scope,
+    )
 
 _DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
 _STRICT_TRUE_VALUES = {"1", "true", "yes", "on"}
@@ -340,6 +342,19 @@ class ModelRegistry(ContractChecker):
         """
         return [m for m in self.models.values() if m.type == model_type]
 
+    def _require_model(self, model_id: str) -> ModelConfig:
+        """Validate ``model_id`` and return the matching registered model."""
+        require(
+            isinstance(model_id, str) and bool(model_id.strip()),
+            "invalid model id",
+            model_id,
+        )
+        model = self.get_model(model_id)
+        require(model is not None, "model id not found", model_id)
+        if model is None:
+            raise ValueError(f"model id not found: {model_id!r}")
+        return model
+
     def resolve_model_source(
         self,
         model_id: str,
@@ -349,13 +364,7 @@ class ModelRegistry(ContractChecker):
         fallback_relative: str | Path | None = None,
     ) -> ResolvedModelSource:
         """Resolve canonical source paths for a registered model."""
-        require(
-            isinstance(model_id, str) and bool(model_id.strip()),
-            "invalid model id",
-            model_id,
-        )
-        model = self.get_model(model_id)
-        require(model is not None, "model id not found", model_id)
+        model = self._require_model(model_id)
         return resolve_model_source(
             model,
             default_root,
@@ -386,14 +395,7 @@ class ModelRegistry(ContractChecker):
         scope: Scope = "optimization",
     ) -> GolferModelLock | None:
         """Validate ``golfer_model_lock`` for a registered model against ``spec``."""
-        require(
-            isinstance(model_id, str) and bool(model_id.strip()),
-            "invalid model id",
-            model_id,
-        )
-        model = self.get_model(model_id)
-        if model is None:
-            raise ValueError(f"model id not found: {model_id!r}")
+        model = self._require_model(model_id)
         return validate_golfer_pack_lock(
             model,
             spec,
