@@ -1,0 +1,43 @@
+{
+  "schema_version": "player-reference-acquisition-receipt/1.0",
+  "acquired_date_utc": "2026-11-26",
+  "tools": {"yt-dlp": "2026.11.23", "ffmpeg": "6.1.1-3ubuntu5", "ffprobe": "6.1.1-3ubuntu5"},
+  "storage": "private non-git directory; originals/, yt-dlp metadata sidecars, representative-frames/",
+  "sources": [
+    {
+      "id": "t_J6Vik3Tss", "subject": "tiger-woods",
+      "url": "https://www.youtube.com/watch?v=t_J6Vik3Tss",
+      "metadata_sidecars": ["originals/t_J6Vik3Tss.info.json", "originals/t_J6Vik3Tss.description"],
+      "artifact": {"path": "originals/t_J6Vik3Tss.mp4", "format": "299; H.264 1920x1080 50 fps video-only", "duration_s": 577.72, "size_bytes": 81403056, "sha256": "1a9fb1993b05db8bd9ef083c38716d7f5aa0b1963ba52a914ed8cf32cfd08af8", "catalog_sha256_match": true},
+      "recording_year": "uploader claims 2000; event unverified", "rights": "unknown", "physical_time": "unknown"
+    },
+    {
+      "id": "bado2QdgD3c", "subject": "tiger-woods",
+      "url": "https://www.youtube.com/watch?v=bado2QdgD3c",
+      "metadata_sidecars": ["originals/bado2QdgD3c-3250-3295.info.json", "originals/bado2QdgD3c-3250-3295.description", "originals/bado2QdgD3c-requested-3250-3295-forced-cut.info.json", "originals/bado2QdgD3c-requested-3250-3295-forced-cut.description"],
+      "requested_source_presentation_interval_s": [3250, 3295],
+      "section_file": {"path": "originals/bado2QdgD3c-3250-3295.mkv", "size_bytes": 3612286, "sha256": "21ecf4af880cefc15835d97157dfd390e8793426841fd94ea04ff4c4da23c839", "container_start_time_s": -0.007, "duration_s": 54.997, "first_video_packet_pts_s": 5.881, "streams": "AV1 1280x720 30000/1001 + Opus"},
+      "source_alignment_verified": false,
+      "alignment_caveat": "5.881 s is relative to the section-file timeline; no independent mapping to full-video PTS was established. Do not infer or guess source start from this offset.",
+      "stream_copy_variant": {"path": "originals/bado2QdgD3c-3250-3295-bounded.mp4", "duration_s": 45.045, "size_bytes": 3190241, "sha256": "0e70f7b910295595dd669522ce6feb89289b6ab1a5796e680061e8bf791ba8af", "method": "seek 5.888 s within section file; stream copy for 45.025 s", "source_alignment_verified": false},
+      "forced_cut_variant": {"path": "originals/bado2QdgD3c-requested-3250-3295-forced-cut.mkv", "duration_s": 45.014, "size_bytes": 6478313, "sha256": "416c61d4c811731dcef0cdca92d9f43b22e38ee1737c7f7cc3be3b6c7abd3be0", "first_video_pts_s": 0.003, "last_video_pts_s": 44.981, "streams": "re-encoded H.264 1280x720 30000/1001 + Vorbis", "method": "yt-dlp --force-keyframes-at-cuts; lossy re-encode; original section retained", "source_pts_mapping_verified": false},
+      "catalog_expected_sha256": "99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+      "catalog_sha256_match": false, "event_year": "official USGA 2000 broadcast per catalog", "rights": "unknown", "physical_time": "unknown"
+    },
+    {
+      "id": "DJDYMjmvFwg", "subject": "ben-hogan",
+      "url": "https://www.youtube.com/watch?v=DJDYMjmvFwg",
+      "metadata_sidecars": ["originals/DJDYMjmvFwg.info.json", "originals/DJDYMjmvFwg.description"],
+      "artifact": {"path": "originals/DJDYMjmvFwg.mp4", "remux_input": "originals/DJDYMjmvFwg.mkv", "format": "399+140-1; AV1/AAC 1920x1080", "duration_s": 623.223356, "size_bytes": 100565142, "sha256": "6f7ea26de4682508d27fcc191eb2ddc6055366df41eb0498fb8da9ca28416b0a", "catalog_expected_sha256": "b91d2a45d189dfc1d92204b71349a06ed88bbb2789b5f14751d7a095364eba81", "catalog_sha256_match": false},
+      "identity_lineage": "uploader compilation attribution; per-event identity/year and film lineage review pending", "rights": "unknown", "physical_time": "unknown"
+    }
+  ],
+  "representative_frames": [
+    {"path": "representative-frames/tiger-t_J6Vik3Tss-5s.png", "relative_presentation_s": 5},
+    {"path": "representative-frames/tiger-usga-bounded-20s.png", "relative_presentation_s": 20},
+    {"path": "representative-frames/hogan-DJDYMjmvFwg-50s.png", "relative_presentation_s": 50}
+  ],
+  "owner_provided_media": "not located locally; not replaced or newly attributed",
+  "training_performed": false,
+  "publication_permitted": false
+}

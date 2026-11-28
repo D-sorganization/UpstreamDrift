@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from pathlib import Path
 
@@ -31,6 +31,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.model_appearance import head_cap, head_features, head_hair
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.head_morph import HeadMorph
 from src.shared.python.model_appearance.schema import HeadSettings
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -66,6 +67,7 @@ def _closed(faces: NDArray[np.int64]) -> bool:
 
 
 def _check_mesh(name: str, mesh: Mesh) -> None:
+    """Reject malformed, open, inward-facing, or oversized head parts."""
     v, f = mesh.vertices, mesh.faces
     if v.ndim != 2 or v.shape[1] != 3 or not np.isfinite(v).all() or len(f) == 0:
         raise ValueError(f"head mesh {name!r}: bad vertex or face arrays")
@@ -88,6 +90,7 @@ def _check_mesh(name: str, mesh: Mesh) -> None:
 
 
 def _load(asset: Path, provenance: Path) -> HeadAsset:
+    """Load a hash-pinned CC0 asset and validate each mesh part."""
     if not provenance.is_file():
         raise ValueError(f"head provenance record missing: {provenance}")
     record = json.loads(provenance.read_text(encoding="utf-8"))
@@ -118,6 +121,7 @@ def load_head_asset(
 
 @lru_cache(maxsize=1)
 def _default_asset() -> HeadAsset:
+    """Return the validated repository head asset from the cache."""
     return _load(ASSET_PATH, PROVENANCE_PATH)
 
 
@@ -169,6 +173,44 @@ def head_proportions(
     return out
 
 
+def _feature_mesh_parts(
+    skin: Mesh, length_m: float, settings: HeadSettings
+) -> list[tuple[str, Mesh, str]]:
+    """Build face-feature meshes from the scaled skin and authored settings."""
+    marks = head_features.load_face_landmarks()
+    if settings.morph.brow:
+        amount = settings.morph.brow
+        marks = replace(
+            marks,
+            brow_tilt=marks.brow_tilt - 0.6 * amount,
+            brow_arch=marks.brow_arch - 0.3 * amount,
+            brow_half=(
+                marks.brow_half[0],
+                marks.brow_half[1] * (1 - 0.3 * amount),
+                marks.brow_half[2] * (1 + 0.5 * amount),
+            ),
+        )
+    return [
+        (name, Mesh(mesh.vertices * length_m, mesh.faces), role)
+        for name, mesh, role in head_features.face_parts(skin, marks)
+    ]
+
+
+def _warp_parts(
+    parts: list[tuple[str, Mesh, str]], length_m: float, morph: HeadMorph
+) -> list[tuple[str, Mesh, str]]:
+    """Apply one shared unit-head deformation while preserving part order."""
+    from src.shared.python.model_appearance.head_morph import warp_vertices
+
+    if morph == HeadMorph():
+        return parts
+    warped = []
+    for name, mesh, role in parts:
+        vertices = warp_vertices(mesh.vertices / length_m, morph) * length_m
+        warped.append((name, Mesh(vertices, mesh.faces), role))
+    return warped
+
+
 def build_mesh_parts(
     length_m: float, headwear: str, settings: HeadSettings | None = None
 ) -> list[tuple[str, Mesh, str]]:
@@ -195,26 +237,68 @@ def build_mesh_parts(
         ("skin_mesh", Mesh(asset.skin.vertices * length_m, asset.skin.faces), "skin")
     ]
     if settings is not None:
-        out += [
-            (name, Mesh(m.vertices * length_m, m.faces), role)
-            for name, m, role in head_features.face_parts(asset.skin)
-        ]
-    capped = settings is not None and settings.cap_style == "baseball_cap"
+        out += _feature_mesh_parts(asset.skin, length_m, settings)
+    straw = settings is not None and settings.cap_style == "straw_hat"
+    flat_capped = settings is not None and settings.cap_style in (
+        "flat_cap",
+        "newsboy_cap",
+    )
+    newsboy = settings is not None and settings.cap_style == "newsboy_cap"
+    capped = (
+        straw
+        or flat_capped
+        or (settings is not None and settings.cap_style == "baseball_cap")
+    )
+    cap_crop = (
+        head_cap.straw_hat_crop()
+        if straw
+        else head_cap.newsboy_cap_crop()
+        if newsboy
+        else head_cap.flat_cap_crop()
+        if flat_capped
+        else head_cap.CapCrop()
+    )
     if headwear == "hair":
         crop = settings is not None and settings.hair_style == "short_crop"
         unit = asset.hair
         if settings is not None and (crop or capped):
             # Under a cap the hair is cut flatter than the crown stands off.
-            under = head_cap.CapCrop().hair_under if capped else None
+            under = cap_crop.hair_under if capped else None
             unit = head_hair.build_short_crop(asset.skin, settings.hair_part, under)
+        elif settings is not None and settings.hair_style != "dome":
+            from src.shared.python.model_appearance.head_hair_styles import (
+                build_hair_style,
+            )
+
+            unit = build_hair_style(asset.skin, settings.hair_part, settings.hair_style)
         out.append(
             ("hair_mesh", Mesh(unit.vertices * length_m, unit.faces), "headwear")
         )
-    if settings is not None and capped:
+    if settings is not None and straw:
+        out += [
+            (
+                name,
+                Mesh(m.vertices * length_m, m.faces),
+                "hat_band_dark" if name == "straw_band" else "cap",
+            )
+            for name, m in head_cap.build_straw_hat(asset.skin)
+        ]
+    elif settings is not None and capped:
         out += [
             (name, Mesh(m.vertices * length_m, m.faces), "cap")
-            for name, m in head_cap.build_cap(asset.skin, settings.cap_brim)
+            for name, m in (
+                head_cap.build_period_cap(asset.skin, settings.cap_brim, cap_crop)
+                if flat_capped
+                else head_cap.build_cap(asset.skin, settings.cap_brim, cap_crop)
+            )
         ]
+    if settings is not None:
+        if settings.facial_hair == "moustache":
+            out += [
+                (name, Mesh(m.vertices * length_m, m.faces), role)
+                for name, m, role in head_features.moustache_parts(asset.skin)
+            ]
+        out = _warp_parts(out, length_m, settings.morph)
     return out
 
 

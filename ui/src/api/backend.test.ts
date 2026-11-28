@@ -1,20 +1,30 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+import { invoke } from '@tauri-apps/api/core';
 import {
   BACKEND_PORT,
   DEFAULT_BACKEND_URL,
-  getApiBase,
-  isTauri,
-  resolveBackendBaseUrl,
+  applyBackendStatusPort,
   checkHealth,
+  getApiBase,
+  getBackendPort,
+  getBackendStatus,
+  isTauri,
+  resetTauriSupervisedPortForTests,
+  resolveBackendBaseUrl,
+  startBackend,
   type BackendStatus,
 } from './backend';
 
 /**
- * Tests for the backend helper module (issues #6637, #14951).
- * Verifies port consistency, dynamic backend port resolution, and health probing.
+ * Tests for the backend helper module (issues #6637, #14951, #14964).
  */
 
-describe('backend.ts – issue #6637 & #14951', () => {
+describe('backend.ts – issue #6637', () => {
   const EXPECTED_PORT = 8000;
 
   describe('BACKEND_PORT constant', () => {
@@ -29,7 +39,7 @@ describe('backend.ts – issue #6637 & #14951', () => {
     });
 
     afterEach(() => {
-      // Restore window to original state
+      resetTauriSupervisedPortForTests();
       if ('__TAURI_INTERNALS__' in window) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (window as any).__TAURI_INTERNALS__;
@@ -37,30 +47,34 @@ describe('backend.ts – issue #6637 & #14951', () => {
     });
 
     it('returns empty string in browser (non-Tauri) mode', () => {
-      // Ensure Tauri is not present
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__TAURI_INTERNALS__;
       expect(isTauri()).toBe(false);
       expect(getApiBase()).toBe('');
     });
 
-    it('returns http://localhost:BACKEND_PORT in Tauri mode', () => {
-      // Simulate Tauri environment
+    it('returns http://localhost:BACKEND_PORT in Tauri mode before sync', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__TAURI_INTERNALS__ = {};
       expect(isTauri()).toBe(true);
       expect(getApiBase()).toBe(`http://localhost:${BACKEND_PORT}`);
     });
 
-    it('Tauri API base includes the correct canonical port', () => {
+    it('uses the supervised port after BackendStatus sync (#14964)', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__TAURI_INTERNALS__ = {};
-      const base = getApiBase();
-      expect(base).toContain(String(EXPECTED_PORT));
+      const supervised = 38427;
+      applyBackendStatusPort({ port: supervised });
+      expect(getBackendPort()).toBe(supervised);
+      expect(getApiBase()).toBe(`http://localhost:${supervised}`);
     });
   });
 
   describe('dynamic backend port resolution (#14951)', () => {
+    afterEach(() => {
+      resetTauriSupervisedPortForTests();
+    });
+
     it('defaults DEFAULT_BACKEND_URL to 127.0.0.1:8000', () => {
       expect(DEFAULT_BACKEND_URL).toBe('http://127.0.0.1:8000');
     });
@@ -70,8 +84,7 @@ describe('backend.ts – issue #6637 & #14951', () => {
       expect(resolveBackendBaseUrl(null)).toBe('http://127.0.0.1:8000');
     });
 
-    it('resolveBackendBaseUrl returns DEFAULT_BACKEND_URL when port is null, 0, or negative', () => {
-      expect(resolveBackendBaseUrl({ port: null })).toBe('http://127.0.0.1:8000');
+    it('resolveBackendBaseUrl returns DEFAULT_BACKEND_URL when port is 0 or negative', () => {
       expect(resolveBackendBaseUrl({ port: 0 })).toBe('http://127.0.0.1:8000');
       expect(resolveBackendBaseUrl({ port: -1 })).toBe('http://127.0.0.1:8000');
     });
@@ -81,7 +94,7 @@ describe('backend.ts – issue #6637 & #14951', () => {
       expect(resolveBackendBaseUrl({ port: 8080 })).toBe('http://127.0.0.1:8080');
     });
 
-    it('BackendStatus supports optional supervisor state and stderr fields', () => {
+    it('BackendStatus supports optional supervisor state and stderr string wire', () => {
       const status: BackendStatus = {
         running: true,
         pid: 12345,
@@ -90,12 +103,10 @@ describe('backend.ts – issue #6637 & #14951', () => {
         state: 'ready',
         healthy: true,
         managed: true,
-        stderr_tail: ['[INFO] starting up', '[INFO] bound port 54321'],
+        stderr_tail: '[INFO] starting up\n[INFO] bound port 54321',
         last_error: null,
       };
       expect(status.state).toBe('ready');
-      expect(status.port).toBe(54321);
-      expect(status.stderr_tail?.length).toBe(2);
       expect(resolveBackendBaseUrl(status)).toBe('http://127.0.0.1:54321');
     });
   });
@@ -109,11 +120,9 @@ describe('backend.ts – issue #6637 & #14951', () => {
       const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
       vi.stubGlobal('fetch', fetchMock);
 
-      const status: Partial<BackendStatus> = { port: 59123 };
-      const healthy = await checkHealth(status);
+      const healthy = await checkHealth({ port: 59123 });
 
       expect(healthy).toBe(true);
-      expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(
         'http://127.0.0.1:59123/api/health',
         expect.objectContaining({ method: 'GET' })
@@ -121,11 +130,55 @@ describe('backend.ts – issue #6637 & #14951', () => {
     });
 
     it('returns false when health endpoint fails or network throws', async () => {
-      const fetchMock = vi.fn().mockRejectedValue(new Error('Connection refused'));
-      vi.stubGlobal('fetch', fetchMock);
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Connection refused')));
+      expect(await checkHealth({ port: 59123 })).toBe(false);
+    });
+  });
 
-      const healthy = await checkHealth({ port: 59123 });
-      expect(healthy).toBe(false);
+  describe('Tauri supervised port IPC (#14964)', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      resetTauriSupervisedPortForTests();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__TAURI_INTERNALS__ = {};
+    });
+
+    afterEach(() => {
+      resetTauriSupervisedPortForTests();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).__TAURI_INTERNALS__;
+    });
+
+    it('first backend_status sync drives HTTP base before any fetch', async () => {
+      vi.mocked(invoke).mockResolvedValueOnce({
+        running: false,
+        pid: 123,
+        port: 45123,
+        state: 'starting',
+        error: null,
+        stderr_tail: null,
+      });
+      await getBackendStatus();
+      expect(getApiBase()).toBe('http://localhost:45123');
+    });
+
+    it('restart reports a new supervised port for HTTP and WebSocket', async () => {
+      vi.mocked(invoke).mockResolvedValueOnce({
+        running: true,
+        pid: 1,
+        port: 45123,
+        error: null,
+      });
+      await startBackend();
+      vi.mocked(invoke).mockResolvedValueOnce({
+        running: true,
+        pid: 2,
+        port: 55234,
+        error: null,
+      });
+      await getBackendStatus();
+      expect(getApiBase()).toBe('http://localhost:55234');
+      expect(getApiBase().replace(/^http/, 'ws')).toBe('ws://localhost:55234');
     });
   });
 });

@@ -24,7 +24,7 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plot_style.color_utils import rgba_to_hex
 
-from .meshcat_geom_loader import build_meshcat_color_bindings
+from .meshcat_geom_loader import build_meshcat_color_bindings, normalize_geom_rgba
 
 try:
     import meshcat
@@ -471,5 +471,5 @@ class MuJoCoMeshcatAdapter:
     def _rgba_to_int(self, rgba: Any) -> int:
         if rgba is None:
             return 0
-        hex_str = rgba_to_hex(rgba, include_alpha=False)
+        hex_str = rgba_to_hex(normalize_geom_rgba(rgba), include_alpha=False)
         return int(hex_str[1:], 16)

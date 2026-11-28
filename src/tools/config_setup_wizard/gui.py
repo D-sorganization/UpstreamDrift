@@ -20,7 +20,7 @@ from src.shared.python.config.setup_wizard import SetupWizardViewModel
 __all__ = ["ConfigSetupWizardWidget"]
 
 
-class ConfigSetupWizardWidget(QWidget):  # pragma: no cover - GUI smoke follows later
+class ConfigSetupWizardWidget(QWidget):
     """Small embeddable widget backed by :class:`SetupWizardViewModel`."""
 
     def __init__(self, parent: Any = None) -> None:

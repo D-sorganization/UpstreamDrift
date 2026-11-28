@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "description": "Settings of the internal shaft-load split along the flexible-shaft chain, by part (ZTCF, ZVCF, total; #15150 Track Z, Z9).",
+  "axis_min_norm": 1e-9,
+  "static_check_rtol": 1e-9,
+  "sources": {
+    "axis_min_norm": "Smallest shaft-axis vector length accepted before normalising; a shorter axis is a degenerate frame and is refused.",
+    "static_check_rtol": "Relative tolerance of the static cantilever check (tip load F at length L gives root moment F L and constant shear). The decomposition is exact algebra, so the tolerance only covers floating-point rounding."
+  }
+}

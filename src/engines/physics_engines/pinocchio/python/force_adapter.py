@@ -53,6 +53,7 @@ from src.shared.python.model_appearance.grip_pose import (
     GripPose,
     Hand,
 )
+from src.shared.python.motion_matching.club_shaft_chain import passive_coordinates
 from src.shared.python.motion_matching.multi_engine_torque_allocator import EngineType
 from src.shared.python.motion_matching.polynomial_actuation import (
     actuated_coordinate_indices,
@@ -146,7 +147,11 @@ class PinocchioForceAdapter:
             ),
             dtype=float,
         ).copy()
-        return mass, bias
+        return mass, bias - self._plant.shaft_spring_torque(configuration, velocity)
+
+    def shaft_springs(self) -> dict[str, tuple[float, float, float]]:
+        """``{chain coordinate: (k, rest, c)}``; empty for a rigid club."""
+        return self._plant.shaft_springs()
 
     def _checked(self, values: Array, name: str) -> Array:
         result = np.asarray(values, dtype=float)
@@ -158,12 +163,13 @@ class PinocchioForceAdapter:
         configuration = self._checked(q, "configuration")
         velocity = self._checked(v, "velocity")
         acceleration = self._checked(a, "acceleration")
-        return np.asarray(
+        rnea = np.asarray(
             self._pin.rnea(
                 self._model, self._data, configuration, velocity, acceleration
             ),
             dtype=float,
         ).copy()
+        return rnea - self._plant.shaft_spring_torque(configuration, velocity)
 
     # -- inertial parameters (NSX-62, #12587) --------------------------------
 
@@ -250,6 +256,57 @@ class PinocchioForceAdapter:
             result[3 * i : 3 * i + 3] = jac[:3]
         return result
 
+    def planted_bodies(self) -> tuple[str, ...]:
+        """Bodies that carry contact spheres (the feet), in spec order."""
+        spheres = self._spec["contact"]["spheres"]
+        return tuple(dict.fromkeys(str(s["body"]) for s in spheres))
+
+    def gravity_m_s2(self) -> Array:
+        """World gravity vector of the model (m/s^2)."""
+        field = self._model.gravity
+        return np.asarray(field.linear, dtype=float).copy()
+
+    def ground_weld_rows(self, q: Array, v: Array) -> tuple[Array, Array]:
+        """``(J, Jdot v)`` welding each planted body to the ground (#15150 Z5).
+
+        Six rows per body of :meth:`planted_bodies`, linear then angular, in
+        world-aligned axes at the body's first contact sphere (a frame rigid on
+        that body); the drift is that point's classical acceleration and the
+        angular acceleration at ``a = 0``. The multipliers on these rows are
+        the ground's wrench on each foot, about that sphere centre.
+        """
+        zero = np.zeros(self.nv)
+        self._second_order_kinematics(q, v, zero)
+        pin = self._pin
+        aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+        pin.computeJointJacobians(self._model, self._data, np.asarray(q, float))
+        pin.updateFramePlacements(self._model, self._data)
+        rows, drift = [], []
+        spheres = self._spec["contact"]["spheres"]
+        for body in self.planted_bodies():
+            first = next(x["name"] for x in spheres if x["body"] == body)
+            frame = self._model.getFrameId(first)
+            rows.append(pin.getFrameJacobian(self._model, self._data, frame, aligned))
+            linear = pin.getFrameClassicalAcceleration(
+                self._model, self._data, frame, aligned
+            )
+            angular = pin.getFrameAcceleration(self._model, self._data, frame, aligned)
+            drift.append(np.concatenate([linear.linear, angular.angular]))
+        return np.vstack(rows), np.concatenate(drift)
+
+    def ground_wrench_points(self, q: Array) -> tuple[tuple[str, Array], ...]:
+        """``(body, world point)`` per planted body, where the multipliers of
+        :meth:`ground_weld_rows` act: the body's first contact sphere centre."""
+        pin = self._pin
+        pin.framesForwardKinematics(self._model, self._data, np.asarray(q, float))
+        spheres = self._spec["contact"]["spheres"]
+        out = []
+        for body in self.planted_bodies():
+            first = next(x["name"] for x in spheres if x["body"] == body)
+            placement = self._data.oMf[self._model.getFrameId(first)]
+            out.append((body, np.asarray(placement.translation, dtype=float).copy()))
+        return tuple(out)
+
     def foot_contact_candidates(self, q: Array) -> tuple[ContactCandidate, ...]:
         """Contact spheres as candidates, in ``contact_names`` order (NSX-60).
 
@@ -318,6 +375,16 @@ class PinocchioForceAdapter:
             self._bare_club = bare.expressed_in(pose.homogeneous)
         return joint, self._bare_club
 
+    def _second_order_kinematics(self, q: Array, v: Array, a: Array) -> None:
+        """Checked forward kinematics with velocity and acceleration."""
+        self._pin.forwardKinematics(
+            self._model,
+            self._data,
+            self._checked(q, "configuration"),
+            self._checked(v, "velocity"),
+            self._checked(a, "acceleration"),
+        )
+
     def club_newton_euler(self, q: Array, v: Array, a: Array) -> dict:
         """Bare-club Newton-Euler keywords at ``(q, v, a)`` (NSX-01, #12550).
 
@@ -325,13 +392,8 @@ class PinocchioForceAdapter:
         and grip only; the hand solids welded into the club body are excluded.
         ``a`` is the constrained generalised acceleration in native order.
         """
-        configuration = self._checked(q, "configuration")
-        velocity = self._checked(v, "velocity")
-        acceleration = self._checked(a, "acceleration")
+        self._second_order_kinematics(q, v, a)
         pin = self._pin
-        pin.forwardKinematics(
-            self._model, self._data, configuration, velocity, acceleration
-        )
         joint, inertia = self._bare_club_in_joint_frame()
         gravity = self._model.gravity
         world_aligned = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
@@ -349,6 +411,130 @@ class PinocchioForceAdapter:
             alpha=spatial_acc.angular,
             accel_origin=classical.linear,
             gravity=gravity.linear,
+        )
+
+    def club_joint_index(self) -> int:
+        """Pinocchio joint carrying the club body (the lead wrist weld)."""
+        joint, _ = self._plant.body_placement(self._spec["closure"]["body_b"])
+        return int(joint)
+
+    def _club_subtree(self) -> tuple[int, ...]:
+        """Club joint plus its flexible-shaft link joints (no other bodies)."""
+        joint = self.club_joint_index()
+        shaft = set(passive_coordinates(self._spec))
+        names = self._model.names
+        return (joint,) + tuple(
+            j for j in self._model.subtrees[joint] if j != joint and names[j] in shaft
+        )
+
+    def _club_subtree_inertias(self) -> tuple[tuple[int, Any], ...]:
+        """``(joint, inertia)`` of the bare club and its shaft links.
+
+        The club joint carries the bare club only (head, shaft, grip); the
+        hand solids welded into the club body belong to the hands (NSX-01).
+        """
+        joint, bare = self._bare_club_in_joint_frame()
+        club = self._pin.Inertia(
+            bare.mass_kg, np.asarray(bare.com_m), np.asarray(bare.inertia_com_kg_m2)
+        )
+        return tuple(
+            (j, club if j == joint else self._model.inertias[j])
+            for j in self._club_subtree()
+        )
+
+    def club_subtree_mass_kg(self) -> float:
+        """Mass of the bare club and its shaft links (no welded hand solids)."""
+        return float(sum(i.mass for _, i in self._club_subtree_inertias()))
+
+    def lead_wrist_point(self, q: Array) -> Array:
+        """World origin of the club joint: the lead wrist weld, at ``q``."""
+        configuration = self._checked(q, "configuration")
+        self._pin.forwardKinematics(self._model, self._data, configuration)
+        return self._data.oMi[self.club_joint_index()].translation.copy()
+
+    def _club_demands(
+        self, q: Array, v: Array, a: Array, gravity: bool
+    ) -> dict[int, Any]:
+        """World spatial force (about the origin) each club-subtree joint's body
+        needs: momentum rate ``Y a + v x* Y v``, less the weight when ``gravity``."""
+        self._second_order_kinematics(q, v, a)
+        field = self._model.gravity
+        weight = self._pin.Motion(np.asarray(field.linear), np.zeros(3))
+        demands = {}
+        for j, inertia in self._club_subtree_inertias():
+            placement = self._data.oMi[j]
+            accel = self._data.a[j]
+            if gravity:
+                accel = accel - placement.actInv(weight)
+            body_v = self._data.v[j]
+            demands[j] = placement.act(inertia * accel + body_v.cross(inertia * body_v))
+        return demands
+
+    def club_subtree_load(
+        self, q: Array, v: Array, a: Array, gravity: bool = True
+    ) -> tuple[Array, Array]:
+        """World ``(force, moment about the origin)`` the hands supply together.
+
+        Sum over the bare club and its flexible-shaft links of the momentum
+        rate ``Y a + v x* Y v``, less the weight when ``gravity`` (#15150 Z2).
+        The hand solids welded into the club body are excluded: they are the
+        hands' own mass. Postcondition: equals the spatial force Pinocchio's
+        RNEA passes through the club joint of a model whose club body holds
+        the bare club only.
+        """
+        pin = self._pin
+        demands = self._club_demands(q, v, a, gravity).values()
+        total = sum(demands, pin.Force.Zero())
+        return total.linear.copy(), total.angular.copy()
+
+    def _shaft_station_joints(self) -> tuple[tuple[int, ...], ...]:
+        """Pinocchio joints of each shaft joint (one per primitive), grip first.
+
+        ``ValueError`` for a rigid club (no shaft joints).
+        """
+        groups: dict[int, list[int]] = {}
+        for name in passive_coordinates(self._spec):
+            station = int(name.rsplit("_", 1)[1])
+            groups.setdefault(station, []).append(int(self._model.getJointId(name)))
+        if not groups:
+            raise ValueError("the club has no flexible-shaft chain")
+        return tuple(tuple(groups[i]) for i in sorted(groups))
+
+    def shaft_stations(self, q: Array) -> tuple[Array, Array]:
+        """World ``(points, tip-ward unit axes)`` of the shaft joints, ``(n, 3)``.
+
+        The axis is the distal link's ``+y`` (club frame: grip toward head),
+        the convention of ``shaft_load_split`` (#15150 Z9).
+        """
+        configuration = self._checked(q, "configuration")
+        self._pin.forwardKinematics(self._model, self._data, configuration)
+        placements = self._data.oMi
+        points, axes = [], []
+        for joints in self._shaft_station_joints():
+            first, last = placements[joints[0]], placements[joints[-1]]
+            rotation = last.rotation
+            points.append(first.translation.copy())
+            axes.append(rotation[:, 1].copy())
+        return np.array(points), np.array(axes)
+
+    def shaft_link_loads(
+        self, q: Array, v: Array, a: Array, gravity: bool = True
+    ) -> tuple[Array, Array]:
+        """World ``(forces, moments about the origin)`` each shaft link needs.
+
+        Row ``i`` is link ``i`` (distal of shaft joint ``i``): its momentum
+        rate less its weight when ``gravity``. Feeds ``shaft_load_split``.
+        """
+        pin = self._pin
+        demands = self._club_demands(q, v, a, gravity)
+        zero = pin.Force.Zero()
+        links = [
+            sum((demands[j] for j in joints), zero)
+            for joints in self._shaft_station_joints()
+        ]
+        return (
+            np.array([f.linear for f in links]),
+            np.array([f.angular for f in links]),
         )
 
     def bare_club_net_wrench(self, q: Array, v: Array, a: Array) -> tuple[Array, Array]:

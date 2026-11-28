@@ -1,0 +1,85 @@
+\documentclass{article}
+\usepackage{hyperref}
+\title{Tiger Woods and Ben Hogan: Compatible Player Model Candidates}
+\author{UpstreamDrift}
+\date{26 November 2026}
+\begin{document}
+\maketitle
+\section{Authority and Interpretation}
+This editable research record belongs to issues 15814 and 15816, separate from
+the engineering design manual. The canonical pipeline is
+\texttt{compose\_anthropometric\_document}, followed by the current grip,
+skinned-wrist/body and flexible-shaft revisions. The registry selects the model;
+the player module does not introduce a second skeleton or dynamics engine.
+\section{Published Dimensions and Uncertainty}
+Tiger's selected prior is 73 inches and 185 pounds, exactly 1.8542 metres and
+83.91458845 kilograms, from his official biography. The 2005 PGA Tour guide
+instead lists 74 inches and 180 pounds; neither establishes his exact 2000
+capture dimensions. Hogan's PGA Tour profile lists 68 inches and 150 pounds,
+exactly 1.7272 metres and 68.0388555 kilograms; the PGA retrospective lists
+145 pounds (65.77089365 kilograms). These are conflicting published values,
+not confidence intervals. Full URLs and era notes are retained in
+\texttt{src/config/player\_appearance\_presets.json}.
+\section{Construction and Compatibility}
+Segment lengths and inertias use the existing de Leva/OpenSim priors, with
+explicit stature-scaled thigh and shank targets on both legs (the template
+otherwise retains unequal fixed leg lengths), and
+\texttt{match\_subject\_mass=True}. Human solid masses sum to the selected
+mass after subtracting the recorded club mass. Segment proportions are not
+measured on either golfer. The resulting driver has the current reference's
+52-coordinate contract; dimension changes intentionally change its physics.
+An existing C3D trajectory or torque history must be refitted to a newly sized
+model. By contrast, supplying \texttt{base\_spec} to the exporter keeps the
+entire input physics document and applies only the visual appearance.
+\section{Appearance and Visual Review}
+Both skins use the current CC0 body/head and skinned hands. Tiger's red polo,
+dark trousers/cap and broader jaw, and Hogan's pale polo, grey-brown trousers,
+side-parted hair, a pale flat cap and narrower face are authored interpretations. They are
+not photogrammetric reconstructions. The shared head deformation and limits
+are defined in \texttt{player-skin-morphology.tex}. Defaults and physical
+parameters remain separate. Preview pose and vertical placement are authored
+for inspection, not inferred motion. Posed head-to-shoe height is not the
+same as erect anatomical stature. A bounded trunk calibration now matches
+the declared neutral shoe-to-head convention; see \texttt{player-stature.tex}
+for the equations, actual native checks and anatomical interpretation limits.
+\section{Cap Style Override}
+The batch exporter accepts \texttt{--cap-style} from the live \texttt{CAP\_STYLES} schema choices. This changes only the appearance
+sidecar; the profile remains unchanged and the receipt records an explicit
+\texttt{head.cap\_style} override. The override is rejected before any
+output is written when it is unknown, and cannot be combined with
+\texttt{--render-existing} because that mode does not regenerate XML.
+Flat and newsboy caps use a short 0.12-head-length peak; a profile's straw
+material is replaced with the neutral white cloth material for cloth caps.
+Choosing \texttt{straw\_hat} selects the straw material. Other explicit
+materials are retained. The default path makes no head-setting changes.
+After the corresponding profiles and styles are available, use:
+\begin{verbatim}
+python scripts/export_player_models.py --player ben_hogan sam_snead --cap-style flat_cap --output output/flat_caps
+python scripts/export_player_models.py --player byron_nelson --cap-style newsboy_cap --output output/byron
+\end{verbatim}
+The second command becomes accepted when the independent hat-style change adds
+\texttt{newsboy\_cap} to the schema choices and the Nelson profile is present.
+The exporter reads those choices from \texttt{CAP\_STYLES} rather than
+maintaining a second command-line list.
+\section{Reproduction and Acceptance}
+From the repository root, initialize the pinned Tools submodule and set
+\texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.
+\begin{verbatim}
+from pathlib import Path
+from src.shared.python.model_appearance.player_models import export_player
+export_player("tiger_woods", Path("output/tiger"))
+export_player("ben_hogan", Path("output/hogan"))
+export_player("tiger_woods", Path("output/capture_skin"),
+              base_spec=Path("existing_match.json"))
+\end{verbatim}
+Outputs are native MJCF, physical JSON, an appearance sidecar and a receipt.
+A separate \texttt{model.visual.json} embeds appearance explicitly for exact
+Necromatcher native-resource verification; the input physics stays unchanged.
+Tests check published priors, actual total human mass, current model selection,
+distinct face settings, independent profile reads, unchanged supplied specs
+and compiled native dynamics under skin changes. The first tests failed on
+the absent player module and absent \texttt{base\_spec} API, respectively.
+An additional red test found fixed template leg lengths; the corrected build
+checks actual hip--knee and knee--ankle distances against the declared priors.
+These software gates do not qualify historical motion or precise likeness.
+\end{document}

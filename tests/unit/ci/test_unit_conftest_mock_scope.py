@@ -14,6 +14,7 @@ import pytest
 
 from tests.integration.cross_engine.loop_nullspace_conformance_support import (
     require_real_module,
+    require_real_pinocchio,
 )
 from tests.unit.conftest import _MOCKED_MODULES
 
@@ -149,6 +150,20 @@ def test_require_real_module_returns_file_backed_and_skips_stubs(
     real_file_mod.__file__ = str(tmp_path / "real_file_mod.py")
     monkeypatch.setitem(sys.modules, "real_file_mod", real_file_mod)
     assert require_real_module("real_file_mod") is real_file_mod
+
+
+def test_require_real_pinocchio_skips_file_backed_module_without_model(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A file-backed ``pinocchio`` lacking ``Model`` is not real bindings (#15525)."""
+    shadow = types.ModuleType("pinocchio")
+    shadow.__file__ = str(tmp_path / "pinocchio.py")
+    monkeypatch.setitem(sys.modules, "pinocchio", shadow)
+    with pytest.raises(pytest.skip.Exception):
+        require_real_pinocchio()
+
+    shadow.Model = object  # type: ignore[attr-defined]
+    require_real_pinocchio()
 
 
 def test_opensim_dynamics_parity_markers_and_guards() -> None:

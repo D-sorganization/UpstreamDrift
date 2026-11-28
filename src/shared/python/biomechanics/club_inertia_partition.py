@@ -155,7 +155,9 @@ def club_solids_partition(spec: Mapping[str, Any]) -> ClubSolidsPartition:
     Raises:
         ValueError: if the spec has no closure, the closure body is missing or
             has no bare-club solids, or ``spec["club"]["total_mass_kg"]`` is
-            present and differs from the bare mass by more than 1e-9 kg.  A
+            present and differs from the bare mass plus the mass of the
+            flexible-shaft link bodies jointed below the club body by more
+            than 1e-9 kg.  A
             spec without a ``club`` record (full-body v1/v2) skips only that
             mass check.
     """
@@ -222,13 +224,35 @@ def club_solids_partition(spec: Mapping[str, Any]) -> ClubSolidsPartition:
                     )
     bare = _compose(bare_solids)
     total = (spec.get("club") or {}).get("total_mass_kg")
-    if total is not None and abs(bare.mass_kg - float(total)) > MASS_CHECK_TOLERANCE_KG:
+    links = _link_mass_kg(spec, name)
+    if (
+        total is not None
+        and abs(bare.mass_kg + links - float(total)) > MASS_CHECK_TOLERANCE_KG
+    ):
         raise ValueError(
-            f"bare club mass {bare.mass_kg!r} kg differs from club.total_mass_kg "
-            f"{float(total)!r} kg by more than {MASS_CHECK_TOLERANCE_KG:g} kg; "
-            "the solid partition is wrong or the spec is inconsistent"
+            f"bare club mass {bare.mass_kg!r} kg plus flexible-shaft link mass "
+            f"{links!r} kg differs from club.total_mass_kg {float(total)!r} kg by "
+            f"more than {MASS_CHECK_TOLERANCE_KG:g} kg; the solid partition is "
+            "wrong or the spec is inconsistent"
         )
     return ClubSolidsPartition(bare, hands)
+
+
+def _link_mass_kg(spec: Mapping[str, Any], club_body: str) -> float:
+    """Mass of the bodies jointed below ``club_body`` (flexible-shaft links)."""
+    children: dict[str, list[str]] = {}
+    for joint in spec.get("joints", []):
+        children.setdefault(joint.get("parent"), []).append(joint.get("child"))
+    masses = {
+        b["name"]: sum(float(s["mass_kg"]) for s in b["solids"])
+        for b in spec.get("bodies", [])
+    }
+    total, stack = 0.0, list(children.get(club_body, []))
+    while stack:
+        body = stack.pop()
+        total += masses.get(body, 0.0)
+        stack.extend(children.get(body, []))
+    return total
 
 
 def newton_euler_keywords(

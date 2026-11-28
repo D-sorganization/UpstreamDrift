@@ -171,7 +171,8 @@ def audit_impact_interval(
     Postconditions:
         The verdict reports the provider residual unchanged alongside the
         residual recomputed from the ledger terms, and is ``qualified`` only
-        when ``failures`` is empty.
+        when ``failures`` is empty. Qualification requires both completed
+        contact and a ``SEPARATED`` termination; neither alone releases a state.
     """
     tolerances = ImpactAuditTolerances() if tolerances is None else tolerances
     if not isinstance(tolerances, ImpactAuditTolerances):
@@ -189,6 +190,11 @@ def audit_impact_interval(
             f"contact did not separate (termination={termination_name}); "
             f"{audit.stored_contact_energy_final_j:.6g} J remain stored in the "
             "contact spring"
+        )
+    if termination_name != "SEPARATED":
+        failures.append(
+            f"termination={termination_name} is not SEPARATED; "
+            "refusing qualified post-impact output"
         )
     if abs(audit.energy_residual_j - recomputed) > tolerances.ledger_closure_j:
         failures.append(

@@ -109,6 +109,10 @@ from src.shared.python.motion_matching.pipeline.lane import (
     fitted_grip,
     wrist_bounds,
 )
+from src.shared.python.motion_matching.pipeline.swing_placement import (
+    add_placement_arguments,
+    replace_run_markers,
+)
 from src.shared.python.motion_matching.pipeline.turn_split import (
     DEFAULT_SHOULDER_GIRDLE_WEIGHT,
     DEFAULT_THORAX_WEIGHT,
@@ -154,6 +158,7 @@ FOOT_SERIES_STRIDE = 6
 
 
 def _positive_int(value: str) -> int:
+    """Parse a positive integer for ``--mjx-iterations``."""
     try:
         val = int(value)
     except ValueError as e:
@@ -164,6 +169,7 @@ def _positive_int(value: str) -> int:
 
 
 def _nonnegative_float(value: str) -> float:
+    """Parse a non-negative finite weight."""
     try:
         val = float(value)
     except ValueError as e:
@@ -451,6 +457,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     add_turn_split_arguments(parser)
     add_trajectory_convergence_arguments(parser)
+    add_placement_arguments(parser)
     add_hip_zero_twist_argument(parser)
     add_knee_flexion_argument(parser)
     add_marker_selection_argument(parser)
@@ -574,6 +581,7 @@ def _validate_scaled_spec(
     scaled_spec: dict[str, Any],
     upper_base: dict[str, Any],
 ) -> None:
+    """Validate a scaled spec unless the run is anthropometric or already unqualified."""
     if not args.anthropometric and "unqualified" not in str(
         base_spec.get("upper_body_qualification", "")
     ):
@@ -691,6 +699,7 @@ def _calibrate_and_scale(
 
 class _PinkFrameFit:
     def __init__(self, closure_error_m: float, marker_rms_m: float) -> None:
+        """Record one Pink frame's closure error and marker RMS."""
         self.closure_error_m = float(closure_error_m)
         self.marker_rms_m = float(marker_rms_m)
 
@@ -854,6 +863,25 @@ def _solve_trajectory_ik(
     return q_ik, q_ref, fits, ref_fits, errors, ref_errors, None
 
 
+def _targets_and_solve(
+    ctx: PipelineContext,
+    lane: Lane,
+    cal_res: _CalibrateAndScaleResult,
+    labels: tuple[str, ...],
+) -> tuple[Any, ...]:
+    """Set the club and turn targets from the attachments, then solve the swing."""
+    args = ctx.args
+    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_turn_split(
+        cal_res.attachments,
+        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
+        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
+    )
+    return _solve_trajectory_ik(
+        ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
+    )
+
+
 def _save_dynamics_record(
     out_dir: Path,
     record: Any,
@@ -943,6 +971,7 @@ def _render_playbacks(
 
 
 def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
+    """Write the pipeline receipt as JSON."""
     (out_dir / "receipt.json").write_text(
         json.dumps(receipt, indent=2, default=float) + "\n", encoding="utf-8"
     )
@@ -1494,7 +1523,6 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         run.labels,
         run.cal_res,
     )
-    lane.set_club_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
     lane.set_restart_policy(
         getattr(args, "ik_restart_policy", DEFAULT_IK_RESTART_POLICY)
     )
@@ -1504,23 +1532,15 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         getattr(args, "ik_spin_prior_weight", None),
     )
     apply_stance_arguments(lane, args)
-    lane.set_turn_split(
-        cal_res.attachments,
-        getattr(args, "thorax_weight", DEFAULT_THORAX_WEIGHT),
-        getattr(args, "shoulder_girdle_weight", DEFAULT_SHOULDER_GIRDLE_WEIGHT),
-    )
-
-    (
-        q_ik,
-        q_ref,
-        fits,
-        ref_fits,
-        errors,
-        ref_errors,
-        constrained_ik_dict,
-    ) = _solve_trajectory_ik(
-        ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
-    )
+    solved = _targets_and_solve(ctx, lane, cal_res, labels)
+    placement_reports: list[dict[str, Any]] = []
+    for _ in range(getattr(args, "placement_passes", 0)):
+        # Markers re-placed from the swing just solved, then solved again.
+        cal_res, placed = replace_run_markers(lane, cal_res, solved[0], args)
+        placed["swing_marker_rms_before_m"] = float(np.sqrt(np.nanmean(solved[4] ** 2)))
+        placement_reports.append(placed)
+        solved = _targets_and_solve(ctx, lane, cal_res, labels)
+    q_ik, q_ref, fits, ref_fits, errors, ref_errors, constrained_ik_dict = solved
 
     if lane.feet is not None:
         cal_res.address_report["foot_progression"]["trajectory"] = {
@@ -1560,6 +1580,8 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     ik_report["restart_policy"] = lane.restart_report()
     if lane.convergence_report():
         ik_report["trajectory_convergence"] = lane.convergence_report()
+    if placement_reports:
+        ik_report["swing_placement"] = placement_reports
     if turn_split_active(lane):
         ik_report["turn_split"] = turn_split_report(lane)
     _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)

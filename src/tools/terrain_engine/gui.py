@@ -199,7 +199,7 @@ class TerrainExplorerWidget(QWidget):
 
     def _show_error(self, title: str, exc: Exception) -> None:
         """Log exception and display a user-friendly message/dialog instead of aborting."""
-        logger.exception("Terrain Engine error: %s", exc)
+        logger.error("Terrain Engine error: %s", exc, exc_info=exc)
         msg = f"{title}: {exc}"
         if hasattr(self, "query_result"):
             self.query_result.setText(msg)
@@ -252,6 +252,8 @@ class TerrainExplorerWidget(QWidget):
                     f"Preset '{preset}' produced an invalid terrain instance"
                 )
             self._terrain = terrain
+            self.query_x_spin.setMaximum(terrain.elevation.width)
+            self.query_y_spin.setMaximum(terrain.elevation.length)
             self._set_query_controls_enabled(True)
             self._refresh_summary()
             self._populate_samples()

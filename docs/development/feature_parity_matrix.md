@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 51 parity · 12 gap · 19 exempt (12 pending decision in #7460).
+**Summary:** 51 parity · 17 gap · 19 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -44,6 +44,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `loop_nullspace_variability`<br>Closed-loop null-space variability and consistency (NSX-100): kernel heatmap, variance budget, strategy Pareto and face dispersion from the plot model 2.0.0 sensitivity panels, with disturbance, mechanism, strategy, outcome-priority and engine controls | ✅ parity | `src/tools/grip_wrench_plots/variability_tab.py` | `src/api/routes/analysis_loop_nullspace.py` | `ui/src/components/analysis/loopNullSpace/VariabilityView.tsx` | — |
 | `matching.tour_matching_viewer`<br>Tour matching viewer | 🔴 gap | `src/tools/tour_matching_viewer/__main__.py` | — | — | #15150 |
 | `mocap.breadth`<br>Motion-capture breadth (C3D upload/playback, OpenPose source) | ✅ parity | `src/tools/freemocap_sidecar/run_freemocap.py` | `src/api/routes/motion_capture.py` | `ui/src/pages/MotionCapture.tsx` | — |
+| `motion_matching.kinetic_match`<br>Kinetic match: forces and torques for a kinematic best match (CLI, REST, MCP) | 🔴 gap | `src/shared/python/motion_matching/kinetic_match.py` | `src/api/routes/agent_sim_run.py` | — | #15150 |
 | `mujoco.force_overlays`<br>MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | ✅ parity | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py` | `src/api/routes/force_overlays.py` | `ui/src/components/visualization/ForceOverlay.tsx` | — |
 | `onboarding.about_version`<br>About/version info + onboarding | ✅ parity | `src/launchers/about_dialog.py` | `src/api/routes/about.py` | `ui/src/components/ui/AboutModal.tsx` | — |
 | `opencap.session_import`<br>OpenCap session import action and OpenSim engine handoff | ✅ parity | `src/engines/physics_engines/opensim/python/opencap_import_action.py` | `src/api/routes/opencap.py` | `ui/src/components/opencap/OpenCapImportModal.tsx` | — |
@@ -77,7 +78,10 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | ✅ parity | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | — |
 | `tools.model_explorer.frankenstein_assembly`<br>Frankenstein drag-and-drop assembly with typed attachment ports | 🔴 gap | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | `src/api/routes/model_explorer_assembly.py` | — | #11651 |
+| `tools.model_explorer.playback_shot_card`<br>Model Explorer Shot card: impact factors and ball flight beside the playback | 🔴 gap | `src/tools/model_explorer/playback_flight_panel.py` | — | — | #12878 |
 | `tools.model_explorer.results_playback`<br>Model Explorer results playback on the shared-appearance golfer | 🔴 gap | `src/tools/model_explorer/results_playback_panel.py` | — | — | #12878 |
+| `tools.model_explorer.results_playback_ball`<br>Ball, ball flight, shot shape and aim line in live results playback | 🔴 gap | `src/tools/model_explorer/playback_ball_overlay.py` | — | — | #15150 |
+| `tools.model_explorer.run_simulation_dock`<br>Model Explorer Run Simulation dock | 🔴 gap | `src/tools/model_explorer/run_dock.py` | — | — | #15150 |
 | `tools.motion_matching`<br>Motion Matching tour-average and club-only Excel matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
 | `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | 🔴 gap | `src/tools/native_viewer_export/cli.py` | `src/api/routes/agent_sim_run.py` | — | #15150 |
 | `tools.necromatcher`<br>Historical Player Library And Source Review | ✅ parity | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | — |
@@ -89,6 +93,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.shot_pattern_analysis`<br>Shot Pattern Analysis Workbench | ⚪ exempt | `src/tools/shot_pattern_analysis/gui.py` | — | — | The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed. |
 | `tools.spine_study`<br>Segmental spine study execution and model asset selection | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
 | `tools.spine_viewer`<br>Segmental spine viewer (per-level load heatmaps from study receipts) | ✅ parity | `src/tools/spine_viewer/gui.py` | `src/api/routes/spine_viewer.py` | `ui/src/pages/SpineViewer.tsx` | — |
+| `tools.swing_report_package`<br>Swing report package: choose, preview and render a swing's videos, grids and phase sheets | 🔴 gap | `src/tools/swing_report_package/gui.py` | — | — | #15725 |
 | `tools.terrain_engine`<br>Terrain and topography configuration | ✅ parity | — | `src/api/routes/terrain.py` | `ui/src/pages/Terrain.tsx` | — |
 | `tools.training_controller`<br>Training controller tool | 🔴 gap | `src/tools/training_controller/__main__.py` | — | — | #15150 |
 | `tools.video_analyzer`<br>Video Analyzer (pose tracking and force/torque overlay) | ✅ parity | `src/tools/video_analyzer/gui.py` | `src/api/routes/video_overlays.py` | `ui/src/pages/VideoAnalyzer.tsx` | — |
@@ -178,6 +183,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `swing_flight_pipeline` | `simulation.swing_flight_pipeline` |
 | `swing_objective_lab` | `simulation.swing_objective_lab` |
 | `swing_optimizer` | `optimization.swing_optimizer` |
+| `swing_report_package` | `tools.swing_report_package` |
 | `terrain_engine` | `tools.terrain_engine` |
 | `tools_calculator_hub` | `launcher.tile_web_reachability` |
 | `tour_matching_viewer` | `matching.tour_matching_viewer` |

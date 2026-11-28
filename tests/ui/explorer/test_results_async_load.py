@@ -56,7 +56,7 @@ def qapp() -> QApplication:
 def fake_work(qapp: QApplication) -> Generator[list[Any], None, None]:
     made: list[Any] = []
 
-    def _prepare(path: Path, engine: str | None) -> _FakeSession:
+    def _prepare(path: Path, engine: str | None, report: Any = None) -> _FakeSession:
         made.append(threading.get_ident())
         time.sleep(SLOW_LOAD_S)  # releases the GIL, like the real C/numpy work
         if not Path(path).name.startswith("ok"):
@@ -191,3 +191,39 @@ def test_waiting_on_a_load_that_already_finished_returns_at_once(
     start = time.monotonic()
     assert explorer.wait_for_results_load(timeout_s=5.0) is True
     assert time.monotonic() - start < 2.0, "waited for the timeout"
+
+
+def test_deleting_an_explorer_leaves_other_deferred_deletes_alone(
+    qapp: QApplication,
+) -> None:
+    """Teardown inside a deletion must not re-post later deletions (CI shard 2).
+
+    ``destroyed`` runs ``cleanup``; a blanket ``sendPostedEvents()`` there
+    re-posted every deferred delete queued behind the explorer, so the outer
+    flush skipped them and their widgets (and timers) survived.
+    """
+    from PyQt6.QtCore import QEvent
+
+    from src.tools.model_explorer.gui import MainWidget
+
+    explorer, other = MainWidget(), QWidget()
+    timer = QTimer(other)
+    explorer.deleteLater()
+    other.deleteLater()
+    QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    assert sip.isdeleted(explorer)
+    assert sip.isdeleted(timer)
+
+
+def test_wait_idles_while_processing_events(qapp: QApplication) -> None:
+    from src.tools.model_explorer.results_playback_host import ResultsPlaybackHostMixin
+
+    host = ResultsPlaybackHostMixin()
+    host._results_loader = object()
+    host._results = object()
+    QTimer.singleShot(200, lambda: setattr(host, "_results_loader", None))
+    wall_start, cpu_start = time.monotonic(), time.process_time()
+    assert host.wait_for_results_load(timeout_s=1.0)
+    wall, cpu = time.monotonic() - wall_start, time.process_time() - cpu_start
+    assert wall >= 0.15
+    assert cpu < wall * 0.5, f"idle wait consumed {cpu:.3f}s CPU over {wall:.3f}s"

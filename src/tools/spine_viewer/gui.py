@@ -233,11 +233,7 @@ class SpineViewerWidget(QtWidgets.QWidget):
             self._view = core.open_study(receipt_path)
         except (OSError, ValueError) as exc:
             logger.warning("spine study could not be opened: %s", exc)
-            self._view = None
-            self._clear_plot()
-            self._status.setText(f"ERROR: study not loaded ({exc})")
-            self._status.setStyleSheet(_WARN_STYLE)
-            self._source.setText("distribution_source: -")
+            self._show_study_error(f"study not loaded ({exc})")
             return
         self._status.setText(core.status_banner(self._view))
         qualified = self._view.scientific_status == "qualified"
@@ -270,7 +266,7 @@ class SpineViewerWidget(QtWidgets.QWidget):
                     coupling_law_id=coupling_law,
                 )
             except (ValueError, TypeError) as exc:
-                self._run_status.setText(f"Error: {exc}")
+                self._on_study_failed(str(exc))
                 return
         else:
             study_payload = dict(payload)
@@ -278,7 +274,7 @@ class SpineViewerWidget(QtWidgets.QWidget):
         try:
             request = core.build_study_request(study_payload, root=root)
         except (ValueError, TypeError, OSError) as exc:
-            self._run_status.setText(f"Error: {exc}")
+            self._on_study_failed(str(exc))
             return
 
         self._run_button.setEnabled(False)
@@ -353,12 +349,22 @@ class SpineViewerWidget(QtWidgets.QWidget):
     def _on_study_failed(self, error_msg: str) -> None:
         self._run_button.setEnabled(True)
         self._run_status.setText(f"Error: {error_msg}")
+        self._show_study_error(f"study not run ({error_msg})")
+
+    def _show_study_error(self, message: str) -> None:
+        """Clear stale results and provenance after a refused load or study."""
+        self._view = None
+        self._clear_plot()
+        self._status.setText(f"ERROR: {message}")
+        self._status.setStyleSheet(_WARN_STYLE)
+        self._source.setText("distribution_source: -")
 
     def _clear_plot(self) -> None:
         canvas, self._canvas = self._canvas, None
         self._figure = None
         if canvas is not None:
             self._layout.removeWidget(canvas)
+            canvas.hide()
             canvas.deleteLater()
 
     def _redraw(self, *_args: object) -> None:

@@ -11,6 +11,8 @@ report *no* force, depth or carry whenever the envelope declines the query.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -543,3 +545,17 @@ class TestModelSettings:
 
     def test_default_settings_are_used_when_none_are_given(self) -> None:
         assert WorkbenchModel().settings == SolverSetup()
+
+
+def test_shot_outcome_carries_trace_and_refusal_does_not(
+    nominal_shot, model, nominal_design, firm_sand, quasi_static_swing
+) -> None:
+    assert nominal_shot.flight is not None, nominal_shot.unavailable
+    assert nominal_shot.flight.carry_m == pytest.approx(nominal_shot.carry_m)
+    refused = model.run_shot(
+        nominal_design.geometry(), firm_sand.sand_state(), quasi_static_swing
+    )
+    assert refused.refused
+    assert refused.flight is None
+    with pytest.raises(ValueError, match="refused shot"):
+        replace(refused, flight=nominal_shot.flight)

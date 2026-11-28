@@ -52,6 +52,7 @@
     "deploy",
     "docker",
     "docker-compose.gpu.yml",
+    "docker-compose.override.yml",
     "docker-compose.profiles.yml",
     "docker-compose.yml",
     "docs",

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "description": "Arrow colours of the ZTCF/ZVCF hand-on-club split per hand (#15150 Track Z). Both hands in one palette read as one hand in the first review render.",
+  "lead": {
+    "drift_hex": "#0072B2",
+    "control_hex": "#D55E00",
+    "total_hex": "#F2F2F2"
+  },
+  "trail": {
+    "drift_hex": "#56B4E9",
+    "control_hex": "#F4A582",
+    "total_hex": "#A8A8A8"
+  },
+  "sources": {
+    "lead": "Okabe-Ito blue and vermillion with a near-white total, the tip-to-tail defaults.",
+    "trail": "Okabe-Ito sky blue and a light vermillion (#F4A582): the same hue families as the lead (drift blue, control vermillion) one step lighter, so drift and control still read across hands while each hand stays distinct; a mid-grey total. Not Okabe-Ito orange #E69F00, which is the joint-actuator torque colour (#15150 Z8 review)."
+  }
+}

@@ -299,12 +299,15 @@ def club_fixed_bodies(fix_club_markers: bool) -> tuple[str, ...]:
     With the flag the club cluster (``club_markers.CLUB_MARKER_BODY``) stays at
     the document's per-club offsets, so the static trial cannot absorb a grip
     rotation into the club markers and move the capture's measured face (#12221).
+    A chain shaft's shaft markers sit on ``SHAFT_MARKER_FRAME`` (#15150 C23)
+    and are held with them.
     """
     from src.shared.python.motion_matching.execution.club_markers import (
         CLUB_MARKER_BODY,
+        SHAFT_MARKER_FRAME,
     )
 
-    return (CLUB_MARKER_BODY,) if fix_club_markers else ()
+    return (CLUB_MARKER_BODY, SHAFT_MARKER_FRAME) if fix_club_markers else ()
 
 
 def static_offsets(

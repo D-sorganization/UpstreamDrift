@@ -34,6 +34,7 @@ _NAME_PATTERN = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)*$")
 _BUILTIN_BACKEND_MODULES: tuple[str, ...] = (
     "src.shared.python.model_appearance.hand_backends.myohand",
     "src.shared.python.model_appearance.hand_backends.skinned_human",
+    "src.shared.python.model_appearance.hand_backends.procedural_skin",
 )
 
 _REGISTRY: dict[str, HandVisualBackend] = {}
@@ -51,6 +52,7 @@ class HandVisualBackend:
     default_enabled: bool = True
 
     def __post_init__(self) -> None:
+        """Reject a non-callable builder or capabilities that are not a frozenset."""
         if not callable(self.builder):
             raise TypeError(f"builder for {self.name!r} must be callable")
         if not isinstance(self.capabilities, frozenset):
@@ -119,6 +121,7 @@ def build_hand_visual(
 
 
 def _ensure_builtin_backends() -> None:
+    """Import each built-in backend module once and call its register()."""
     global _builtins_loaded
     if _builtins_loaded:
         return

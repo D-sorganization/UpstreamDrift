@@ -1306,7 +1306,7 @@ dependencies = [
 
 [[package]]
 name = "golf-modeling-suite"
-version = "2.1.0"
+version = "2.1.3"
 dependencies = [
  "log",
  "serde",

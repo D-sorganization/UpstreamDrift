@@ -1,0 +1,46 @@
+schema_version: "2.0.0"
+version: 1
+issue: 15794
+regimes:
+  prescribed_kinematics:
+    description: >
+      Model-to-model landmark and angular error after convention alignment.
+      capture-A marker-fit RMS is reported separately and is not this gate.
+    bounds:
+      landmark_error_mm:
+        max: 0.1
+      angular_error_mrad:
+        max: 1.0
+  instantaneous_dynamics:
+    description: >
+      Relative L2 error of instantaneous dynamics, with a torque floor.
+      A higher floor hides smaller torques, so the floor is an upper bound.
+    bounds:
+      relative_l2:
+        max: 1.0e-3
+      torque_floor_nm:
+        max: 0.01
+  grip_flexible_shaft:
+    description: >
+      Two-hand loop closure, tip deflection, and the first two modal
+      frequencies (#12691, #15684).
+    issues: [12691, 15684]
+    bounds:
+      loop_closure_mm:
+        max: 1.0
+      tip_deflection_mm:
+        max: 2.0
+      modal_frequency_relative_error:
+        max: 0.01
+  ground_contact:
+    description: >
+      Per-foot net impulse and loaded center of pressure (#15776). A higher
+      vertical-load threshold judges fewer samples, so it is an upper bound.
+    issues: [15776]
+    bounds:
+      net_impulse_relative_error:
+        max: 0.03
+      cop_rms_mm:
+        max: 10.0
+      vertical_load_threshold_n:
+        max: 50.0

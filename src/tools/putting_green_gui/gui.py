@@ -669,16 +669,18 @@ class PuttingGreenWidget(QWidget):
 
     def _advance_animation(self) -> None:
         scene = self._scene
-        if scene is None or self._ball_item is None:
-            self._anim_timer.stop()
+        if scene is None:
+            self._set_playing(False)
             return
         traj = scene.trajectory_xyz
         n = traj.shape[0]
         if self._anim_index >= n:
-            self._ball_item.setData(pos=traj[-1:])
+            self._show_sample(n - 1)
+            self._playback.follow(n - 1)
             self._set_playing(False)
             return
-        self._ball_item.setData(pos=traj[self._anim_index : self._anim_index + 1])
+        # Transport remains usable when the optional GL renderer is unavailable.
+        self._show_sample(self._anim_index)
         self._playback.follow(self._anim_index)
         # Advance proportionally so every putt animates in similar wall-clock time.
         self._anim_index += max(1, n // 90)

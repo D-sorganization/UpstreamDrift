@@ -10,13 +10,14 @@
     "putting_green",
     "simscape"
   ],
-  "experimental_engines": ["jaxsim", "myosuite", "opensim", "simscape"],
+  "experimental_engines": [
+    "jaxsim",
+    "myosuite",
+    "opensim",
+    "simscape"
+  ],
   "unsupported_engines": [
-    "double_pendulum",
-    "drake",
-    "mujoco",
-    "pinocchio",
-    "putting_green"
+    "double_pendulum"
   ],
   "profiles": {
     "mujoco": {
@@ -26,8 +27,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -55,8 +60,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -84,8 +93,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -113,8 +126,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -142,8 +159,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "partial",
         "jacobian": "partial",
@@ -171,8 +192,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -200,8 +225,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["missing_engine_receipt"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "missing_engine_receipt"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -229,8 +258,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["unadvertised_engine"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "unadvertised_engine"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",
@@ -258,8 +291,12 @@
       "is_qualified": false,
       "release_ready": false,
       "horizon_coverage": [],
-      "failure_reasons": ["unadvertised_engine"],
-      "conformance_checks": ["engine_name_known"],
+      "failure_reasons": [
+        "unadvertised_engine"
+      ],
+      "conformance_checks": [
+        "engine_name_known"
+      ],
       "capabilities": {
         "mass_matrix": "full",
         "jacobian": "full",

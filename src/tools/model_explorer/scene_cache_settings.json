@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "directory": "",
+  "directory_env": "UD_SCENE_CACHE_DIR",
+  "max_bytes": 536870912,
+  "compress_level": 1,
+  "key_packages": ["mujoco", "numpy", "scipy", "trimesh"],
+  "sibling_data_suffixes": [".json", ".npz"],
+  "extra_dependency_globs": [
+    "assets/*/*.json",
+    "assets/*/*.npz",
+    "assets/club_heads/*.stl",
+    "scripts/config/golf_grip.json",
+    "scripts/config/hand_visual_quality.json",
+    "scripts/config/skinned_human_hand.json",
+    "src/config/appearance_defaults.json",
+    "src/shared/python/body_segment_parameters/data/*.json",
+    "vendor/ud-tools/src/shared/theme-definitions/*.json"
+  ]
+}

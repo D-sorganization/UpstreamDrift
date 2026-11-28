@@ -10,6 +10,7 @@ from typing import Any, Literal
 
 from .counterfactual_run import execute_golden_ztcf
 from .golf_simulator_run import execute_golden_golf_shot
+from .kinetic_match_capability import run_kinetic_match_capability
 from .native_export_jobs import export_status, submit_export
 from .payload_bounds import bound_payload, canonical_json
 from .store import SimulationRunStore
@@ -22,6 +23,7 @@ CapabilityId = Literal[
     "native_export_validate",
     "native_export_run",
     "native_export_status",
+    "kinetic_match",
 ]
 
 CapabilityExecutor = Callable[[dict[str, Any] | None], dict[str, Any]]
@@ -48,6 +50,7 @@ _EXECUTORS: dict[CapabilityId, CapabilityExecutor] = {
     "native_export_validate": _native_export_validate,
     "native_export_run": submit_export,
     "native_export_status": export_status,
+    "kinetic_match": run_kinetic_match_capability,
 }
 
 
