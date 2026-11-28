@@ -54,6 +54,7 @@ def test_public_catalog_ids_include_legacy_and_new_profiles():
         "john_schlee",
         "johnny_miller",
         "lee_trevino",
+        "mac_ogrady",
         "moe_norman",
         "sam_snead",
         "seve_ballesteros",
