@@ -268,6 +268,7 @@ class NecromatcherLibrary:
 
     @property
     def root(self) -> Path:
+        """Return the configured library root directory."""
         return self._store.root
 
     def authenticated_read(self) -> AuthenticatedRead:
@@ -305,6 +306,7 @@ class NecromatcherLibrary:
             return self._store.add_subject(player_id, name)
 
     def players(self) -> list[SubjectMetadata]:
+        """Return registered player identities in stable identifier order."""
         return sorted(
             self._store.load_project().subjects.values(), key=lambda x: x.subject_id
         )
@@ -315,9 +317,11 @@ class NecromatcherLibrary:
             return self._store.create_session(swing_id, player_id, name)
 
     def swings(self, player_id: str | None = None) -> list[SessionMetadata]:
+        """List swing sessions, optionally limited to one player."""
         return self._store.list_sessions(player_id)
 
     def assets(self, swing_id: str) -> list[DatasetMetadata]:
+        """List the registered assets for a swing session."""
         self._store.load_session(swing_id)
         return self._store.list_datasets(swing_id)
 
