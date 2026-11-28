@@ -2611,6 +2611,7 @@
 {"path": "reporting/swing_report/policy.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/selection.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/series_csv.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
+{"path": "reporting/swing_report/simulation_output.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/summary_md.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/validator.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/view_model.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
