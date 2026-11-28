@@ -767,12 +767,17 @@
         {
           "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
           "values": "5 ft 7 in; 185 lb",
-          "era": "1973 guide near the 1971 USGA video; later biography lists 180 lb."
+          "era": "1973 guide; selected roster prior near the 1971 USGA video."
+        },
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1971_pgatour.pdf",
+          "values": "5 ft 7 in; 180 lb",
+          "era": "1971 PGA TOUR guide; alternate earlier roster value, not selected."
         },
         {
           "url": "https://www.youtube.com/watch?v=efk2GL7goRg",
           "values": "Public footage for appearance and motion reference.",
-          "era": "1973 guide near the 1971 USGA video; later biography lists 180 lb; recording lineage and speed may be uncertain."
+          "era": "1971 USGA footage; recording lineage and speed may be uncertain."
         }
       ],
       "limitations": [

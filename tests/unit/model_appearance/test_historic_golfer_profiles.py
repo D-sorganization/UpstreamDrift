@@ -36,3 +36,12 @@ def test_moe_mass_is_explicitly_provisional():
     assert any(
         "80 kg" in note and "estimate" in note for note in profile["limitations"]
     )
+
+
+def test_trevino_alternate_weight_has_a_dated_source():
+    """Trace the 180 lb alternative to the 1971 guide, without changing the selected 1973 prior."""
+    sources = player_profile("lee_trevino")["sources"]
+    assert any(
+        "1971_pgatour.pdf" in source["url"] and "180 lb" in source["values"]
+        for source in sources
+    )
