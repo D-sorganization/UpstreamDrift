@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 import defusedxml.ElementTree as ET
 import numpy as np
+from PyQt6 import sip
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QMouseEvent, QPixmap, QWheelEvent
 from PyQt6.QtWidgets import (
@@ -97,10 +98,11 @@ class MuJoCoViewerWidget(QWidget):
         self._setup_ui()
         self._setup_renderer()
 
-        # Render timer, parented so it dies with the widget: an orphan timer
-        # would keep firing _update_render on an already-deleted viewport.
+        # The viewport can die before the parented timer during Qt teardown.
+        # Stop promptly; _update_render also rejects callbacks already queued.
         self._render_timer = QTimer(self)
         self._render_timer.timeout.connect(self._update_render)
+        self._viewport.destroyed.connect(self._render_timer.stop)
         self._render_timer.start(50)  # 20 FPS
 
     def _setup_ui(self) -> None:
@@ -349,7 +351,7 @@ class MuJoCoViewerWidget(QWidget):
 
     def _update_render(self) -> None:
         """Update the rendered image."""
-        if not self._renderer:
+        if not self._renderer or sip.isdeleted(self._viewport):
             return
 
         image = self._renderer.render()
