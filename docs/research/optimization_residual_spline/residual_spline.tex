@@ -1,0 +1,49 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Bounded Feedforward Residual Spline}
+\author{UpstreamDrift Research}
+\date{2026-11-23}
+\begin{document}
+\maketitle
+\section{Scope and Assumptions}
+This editable standalone research reference covers the parameterization in
+issue 15493, Slice 3; it is separate from the engineering design manual.
+No plant or controller is introduced. All examples are synthetic, with no
+capture provenance or admitted swing. Joint ordering is supplied by the caller;
+coefficients and radii use N m, and physical times use seconds.
+\section{Basis and Bounds}
+For distinct breakpoints $b_0<\cdots<b_{B-1}$ require
+$b_{i+1}-b_i\geq h_{\min}>0$, where the experiment declares $h_{\min}$.
+Construct a cubic knot vector with four copies of each endpoint and simple
+interior knots. There are $B+2$ coefficients per joint:
+\[
+ \delta\tau_j(t)=\sum_{i=0}^{B+1}c_{ij}N_{i,3}(t),\qquad
+ |c_{ij}|\leq r_j,\quad r_j\geq0.
+\]
+On the closed support the nonnegative basis functions sum to one, giving
+$|\delta\tau_j(t)|\leq r_j$ continuously, including between query times.
+This coefficient box is conservative and is not a Euclidean trust ball.
+Interior simple knots give $C^2$ continuity. Endpoint values are the first
+and last coefficients; endpoint derivatives are taken from inside support.
+SciPy's BSpline evaluates both the value and its analytic first derivative
+from the same knots and coefficients. Slew is in N m/s and is reported,
+not limited. Inputs outside support are rejected; no continuation is assumed.
+\section{Contracts and Evidence}
+Reject nonfinite input, malformed shapes, insufficient spacing, out-of-box
+coefficients, queries outside support, and nonfinite numerical output.
+Do not clip proposals. For a single span with normalized time
+$s=(t-b_0)/(b_1-b_0)$ and coefficients $(0,0,0,a)$, the independent oracle is
+$\delta\tau=a s^3$, with derivative $3a s^2/(b_1-b_0)$.
+Unit tests pin this oracle, endpoint behavior, physical time scaling,
+multispan bounds, a frozen joint, analytic versus finite-difference slew,
+and negative controls. Exact commands are in the adjacent README.
+The LaTeX source has not been compiled as part of this code validation.
+\section{Limitations and Remaining Gates}
+The box bounds only the residual. Total applied torque includes baseline
+feedforward and PD feedback and needs independent torque, slew, work, ROM,
+tracking and contact checks. Minimum spacing is an experiment assumption,
+not a physiological guarantee. Sensitivity audits, controller wiring,
+admitted-baseline replay and contact/flight convergence remain outstanding.
+No feasible swing, optimization improvement or safety claim follows from
+this parameterization alone.
+\end{document}
