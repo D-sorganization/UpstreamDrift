@@ -64,6 +64,7 @@ class HairCrop:
     comb_wavelength: float = 0.085
     wave_bend: float = 0.0  # cycles of sinusoidal phase warp; zero keeps combs straight
     wave_wavelength: float = 0.24  # head lengths along the crown
+    curl_amplitude: float = 0.0  # bounded 2D relief for irregular short curls
     comb_sweep: float = 0.30  # strands lean toward the parted side by this slope
     fringe_band: float = 0.02  # the forelock ramps up faster than the crop
     crown_from_z: float = 0.78  # combing and parting start above this height
@@ -264,7 +265,10 @@ def hairline_height(crop: HairCrop, azimuth: NDArray[np.float64]) -> Array:
             "hairline waviness must be finite and within -0.015..0.015 head lengths"
         )
     if crop.hairline_waviness:
-        result = result + crop.hairline_waviness * front * np.sin(3 * angle + 0.4)
+        front_wave = np.sin(3 * angle + 0.4)
+        if crop.curl_amplitude:
+            front_wave += 0.24 * np.sin(7 * angle - 0.7)
+        result = result + crop.hairline_waviness * front * front_wave
     return result
 
 
@@ -349,6 +353,11 @@ def _thickness(crop: HairCrop, v: Array, part: str) -> tuple[Array, Array]:
         raise ValueError(
             "hair wave wavelength must be finite and within 0.08..1.0 head lengths"
         )
+    if (
+        not math.isfinite(crop.curl_amplitude)
+        or not 0.0 <= crop.curl_amplitude <= 0.024
+    ):
+        raise ValueError("hair curl amplitude must be finite and within 0..0.024")
     phase = (y - sign * crop.comb_sweep * (x - crop.centre_x)) / crop.comb_wavelength
     if crop.wave_bend:
         angle_x = 2 * np.pi * (x - crop.centre_x) / crop.wave_wavelength
@@ -357,6 +366,27 @@ def _thickness(crop: HairCrop, v: Array, part: str) -> tuple[Array, Array]:
         wave = np.sin(angle_x + bend) + 0.20 * np.sin(2 * angle_x + 0.7 - bend)
         phase += crop.wave_bend * wave
     t = t + crop.comb_amplitude * top_mask * np.cos(2 * np.pi * phase)
+    if crop.curl_amplitude:
+        # Crossing, gently warped wave trains make low, irregular curl relief;
+        # no single direction or centre creates a parallel furrow or swirl.
+        turn = 2 * np.pi
+        warp_x = (
+            x + 0.018 * np.sin(turn * y / 0.17) + 0.009 * np.sin(turn * (x + y) / 0.21)
+        )
+        warp_y = (
+            y + 0.016 * np.sin(turn * x / 0.19) - 0.008 * np.sin(turn * (x - y) / 0.23)
+        )
+        curls = (
+            0.70
+            * np.cos(turn * warp_x / 0.115 + 0.4)
+            * np.cos(turn * warp_y / 0.13 - 0.6)
+        )
+        curls += (
+            0.30
+            * np.cos(turn * (x + 0.4 * y) / 0.12 + 0.9)
+            * np.cos(turn * (y - 0.35 * x) / 0.11 - 1.2)
+        )
+        t = t + crop.curl_amplitude * top_mask * curls
     r2 = ((x - crop.fringe_x) ** 2 + (z - crop.fringe_z) ** 2) / crop.fringe_width**2
     forelock = (
         crop.fringe_thickness * np.exp(-r2) * _smooth((z - line) / crop.fringe_band)

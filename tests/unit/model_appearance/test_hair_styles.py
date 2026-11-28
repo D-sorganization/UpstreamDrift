@@ -11,7 +11,14 @@ from src.shared.python.model_appearance import (
 from src.shared.python.model_appearance import head_hair, head_mesh
 
 pytestmark = pytest.mark.unit
-STYLES = ("side_swept", "swept_back", "slick_part", "receding_crop", "tousled_wave")
+STYLES = (
+    "side_swept",
+    "swept_back",
+    "slick_part",
+    "receding_crop",
+    "tousled_wave",
+    "short_curls",
+)
 
 
 def _parts(style, cap="none"):
@@ -152,19 +159,20 @@ def test_full_styles_keep_crown_below_pompadour_height():
     from src.shared.python.model_appearance import head_hair_styles
 
     skin = head_mesh._default_asset().skin
-    for style in ("side_swept", "swept_back", "tousled_wave"):
+    for style in ("side_swept", "swept_back", "tousled_wave", "short_curls"):
         vertices = head_hair_styles.build_hair_style(skin, "left", style).vertices
         assert vertices[:, 2].max() < 1.09
         assert vertices[:, 2].min() < 0.30
 
 
-def test_tousled_wave_is_schema_validated_and_roundtrips():
-    """Expose the wavy style through the public appearance schema."""
+@pytest.mark.parametrize("style", ("tousled_wave", "short_curls"))
+def test_textured_styles_are_schema_validated_and_roundtrip(style):
+    """Expose the optional textured styles through the appearance schema."""
     doc = document_from_dict(
-        {"schema_version": "appearance-v1", "head": {"hair_style": "tousled_wave"}}
+        {"schema_version": "appearance-v1", "head": {"hair_style": style}}
     )
     restored = document_from_dict(document_to_dict(doc))
-    assert restored.head.hair_style == "tousled_wave"
+    assert restored.head.hair_style == style
 
 
 def test_tousled_wave_bends_ridges_on_a_closed_scalp():
@@ -187,6 +195,33 @@ def test_tousled_wave_bends_ridges_on_a_closed_scalp():
     )
     assert sorted(map(tuple, edges)) == sorted(map(tuple, edges[:, ::-1]))
     assert np.isfinite(wave.vertices).all() and wave.volume() > 0
+
+
+def test_short_curls_adds_a_bounded_two_dimensional_curl_field():
+    """Give the optional curl style visible, nonparallel crown relief."""
+    from dataclasses import replace
+
+    skin = head_mesh._default_asset().skin
+    config = head_hair.load_hair_crop()
+    x, y = np.meshgrid(np.linspace(0.08, 0.34, 13), np.linspace(-0.16, 0.16, 13))
+    points = np.column_stack((x.ravel(), y.ravel(), np.full(x.size, 0.94)))
+    smooth, _ = head_hair._thickness(config, points, "none")
+    curled, _ = head_hair._thickness(
+        replace(config, curl_amplitude=0.016), points, "none"
+    )
+    relief = (curled - smooth).reshape(x.shape)
+    assert np.ptp(relief) > 0.02
+    interaction = relief - relief.mean(axis=0) - relief.mean(axis=1)[:, None]
+    assert np.ptp(interaction) > 0.02
+    for invalid in (-0.001, 0.031, float("nan"), float("inf")):
+        with pytest.raises(ValueError, match="curl amplitude"):
+            head_hair._thickness(
+                replace(config, curl_amplitude=invalid), points, "none"
+            )
+
+    mesh = _parts("short_curls")["hair_mesh"]
+    assert np.isfinite(mesh.vertices).all() and mesh.volume() > 0
+    assert np.max(mesh.vertices[:, 2]) < 1.09
 
 
 def test_tousled_wave_softens_the_front_hairline():

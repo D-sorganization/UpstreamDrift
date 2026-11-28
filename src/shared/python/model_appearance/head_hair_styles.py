@@ -46,8 +46,39 @@ def _tousled_wave_preset() -> dict[str, Any]:
     }
 
 
+def _short_curls_preset() -> dict[str, Any]:
+    """Return a short, irregular curl silhouette for era portrait matches."""
+    return {
+        **_tousled_wave_preset(),
+        "hairline": (
+            (0.0, 0.760),
+            (0.20, 0.767),
+            (0.38, 0.752),
+            (0.56, 0.758),
+            (0.72, 0.735),
+            (0.85, 0.690),
+            (1.10, 0.560),
+            (1.60, 0.610),
+            (1.85, 0.500),
+            (2.05, 0.390),
+            (2.45, 0.320),
+            (2.85, 0.290),
+            (math.pi, 0.290),
+        ),
+        "hairline_waviness": 0.012,
+        "side_thickness": 0.016,
+        "top_thickness": 0.048,
+        "fringe_thickness": 0.038,
+        "comb_amplitude": 0.006,
+        "wave_bend": 0.12,
+        "wave_wavelength": 0.18,
+        "curl_amplitude": 0.024,
+        "refine_splits": 2,
+    }
+
+
 def build_hair_style(skin: Mesh, part: str, style: str) -> Mesh:
-    """Build one of five bounded named hairstyles on an outward-wound skin."""
+    """Build one of six bounded named hairstyles on an outward-wound skin."""
     base = load_hair_crop()
     # The lower rear hairline adds visible coverage to the nape; a separate
     # crown and forelock field changes the profile and combed part.
@@ -134,6 +165,7 @@ def build_hair_style(skin: Mesh, part: str, style: str) -> Mesh:
             "comb_amplitude": 0.003,
         },
         "tousled_wave": _tousled_wave_preset(),
+        "short_curls": _short_curls_preset(),
     }
     if style not in presets:
         raise ValueError(f"Unknown named hairstyle: {style!r}")
