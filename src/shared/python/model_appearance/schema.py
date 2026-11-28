@@ -254,6 +254,17 @@ class AppearanceDocument:
     #: Visual grip picks (``style``, ``lead_thumb_offset_deg``); never a physical
     #: value (HRG-GR4, #13205).  ``None`` leaves the spec's own visual hints.
     grip: dict[str, Any] | None = None
+    body_build: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Keep the visual build control finite and within its supported range."""
+        if (
+            isinstance(self.body_build, bool)
+            or not isinstance(self.body_build, (int, float))
+            or not math.isfinite(self.body_build)
+            or abs(self.body_build) > 1
+        ):
+            raise ValueError("body_build must be a finite number in [-1, 1]")
 
 
 @lru_cache(maxsize=1)
@@ -470,6 +481,7 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         spec_sha256=data.get("spec_sha256"),
         head=_head_settings(data.get("head", {})),
         body_model=data.get("body_model", "ellipsoid"),
+        body_build=data.get("body_build", 0.0),
         ball=_ball_settings(data.get("ball", {})),
         glove=data.get("glove", DEFAULT_GLOVE),
         handedness=data.get("handedness", DEFAULT_HANDEDNESS),
@@ -547,6 +559,8 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
         out["handedness"] = doc.handedness
     if doc.grip is not None:
         out["grip"] = dict(doc.grip)
+    if doc.body_build:
+        out["body_build"] = doc.body_build
     validate_document(out)
     return out
 

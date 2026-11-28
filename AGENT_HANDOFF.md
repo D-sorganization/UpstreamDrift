@@ -14,6 +14,7 @@ detail of a finished slice to the archive instead of growing this file.
 - `SPEC.md`: architecture contract; the change log is written by the fragment collate step, one row per PR.
 - `scripts/config/design_manual_governance.json` and `manuals/upstreamdrift/calculation-registry.json`: design-manual authority.
 - `docs/development/AGENT_HANDOFF_ARCHIVE.md`: full detail, branches and verification commands for every slice listed below.
+- #15900: Visual-only golfer body build; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
 
 ## Gate Commands
 
@@ -52,7 +53,6 @@ detail of a finished slice to the archive instead of growing this file.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
-
 
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
 - Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
