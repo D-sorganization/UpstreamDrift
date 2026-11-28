@@ -439,4 +439,8 @@ def part_material_name(part: HeadPart, doc: AppearanceDocument) -> str:
         hair = doc.head.headwear_material or library.HEADWEAR_DEFAULT_MATERIAL["hair"]
         beard = f"beard_{doc.skin_tone}_{hair}"
         return beard if beard in library.MATERIALS else "brow_dark"
+    if part.material == "dense_beard":
+        hair = doc.head.headwear_material or library.HEADWEAR_DEFAULT_MATERIAL["hair"]
+        beard = f"dense_beard_{doc.skin_tone}_{hair}"
+        return beard if beard in library.MATERIALS else "brow_dark"
     return _ROLE_MATERIAL.get(part.material, part.material)

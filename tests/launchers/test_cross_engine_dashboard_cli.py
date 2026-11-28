@@ -23,6 +23,7 @@ from typing import Any
 pytestmark = pytest.mark.unit
 
 from src.launchers import cross_engine_dashboard as ced
+from src.launchers import cross_engine_dashboard_theme as dashboard_theme
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
     CrossEngineRunResult,
     EngineTrialMetrics,
@@ -220,6 +221,79 @@ def test_create_dashboard_window_class_returns_window_object(qapp) -> None:
     obj = ced._build_qt_window()
     assert obj is not None
     obj.deleteLater()
+
+
+def test_destroyed_dashboard_releases_theme_manager_after_qt_deferred_delete(
+    qapp, monkeypatch
+) -> None:
+    """Closing and reopening a themed window does not retain deleted wrappers."""
+    from PyQt6 import sip
+    from PyQt6.QtCore import QEvent
+
+    theme_manager = pytest.importorskip(
+        "src.shared.python.theme.theme_manager"
+    ).ThemeManager
+    monkeypatch.setattr(ced, "persist_window_geometry", lambda *_args: None)
+    theme_manager.reset_instance()
+
+    slot_factory = ced.dashboard_destroyed_slot
+    invoked_slots = []
+
+    def track_slot(window):
+        slot = slot_factory(window)
+
+        def tracked(*signal_args):
+            invoked_slots.append(signal_args)
+            slot(*signal_args)
+
+        return tracked
+
+    monkeypatch.setattr(ced, "dashboard_destroyed_slot", track_slot)
+    windows = []
+    try:
+        window = ced.CrossEngineDashboardWindow()
+        windows.append(window)
+        assert len(invoked_slots) == 0
+        manager = theme_manager.instance()
+        assert manager.main_window is window
+        window.deleteLater()
+        qapp.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        qapp.processEvents()
+        assert len(invoked_slots) == 1
+        assert manager.main_window is None
+
+        reopened = ced.CrossEngineDashboardWindow()
+        windows.append(reopened)
+        reopened.deleteLater()
+        qapp.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        qapp.processEvents()
+        assert len(invoked_slots) == 2
+    finally:
+        for window in windows:
+            if not sip.isdeleted(window):
+                window.deleteLater()
+        qapp.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        qapp.processEvents()
+        theme_manager.reset_instance()
+
+
+def test_dashboard_destroyed_slot_has_no_keyword_only_capture(monkeypatch) -> None:
+    """The Qt slot accepts signal args without a required keyword-only value."""
+    import inspect
+
+    from PyQt6.QtCore import QObject
+
+    released = []
+    window = object()
+    monkeypatch.setattr(dashboard_theme, "release_theme_manager", released.append)
+    slot = ced.dashboard_destroyed_slot(window)
+    assert all(
+        parameter.kind is not inspect.Parameter.KEYWORD_ONLY
+        for parameter in inspect.signature(slot).parameters.values()
+    )
+
+    slot(QObject())
+    assert released == [window]
 
 
 def test_cross_engine_dashboard_window_factory_returns_window(qapp) -> None:

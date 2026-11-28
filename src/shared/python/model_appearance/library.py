@@ -191,6 +191,18 @@ for _skin_name in (*SKIN_TONES, *defaults.skin_aliases()):
             ),
             0.9,
         )
+        # Dense facial hair covers the skin more fully than stubble, so bias
+        # the short-beard shell toward the selected hair swatch.
+        MATERIALS[f"dense_beard_{_skin_name}_{_hair['id']}"] = Material(
+            (
+                *(
+                    0.45 * s + 0.55 * h
+                    for s, h in zip(_skin_rgb, _hair_rgb, strict=True)
+                ),
+                1.0,
+            ),
+            0.94,
+        )
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
 # The lower-body garment is keyed on the thigh; the pelvis always wears it.

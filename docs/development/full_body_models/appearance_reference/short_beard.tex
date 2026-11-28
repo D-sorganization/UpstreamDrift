@@ -2,28 +2,50 @@
 \usepackage{amsmath}
 \begin{document}
 \section*{Short Beard Visual Geometry}
-The optional \texttt{short\_beard} style draws on the actual CC0 head skin,
-not on the mass or collision model. An official LIV Golf team portrait of Jon
-Rahm (\texttt{https://www.livgolf.com/legion-xiii}, accessed 2026-11-27)
-shows a close-cropped beard and moustache; the procedural result is a stylized
-interpretation, not a measured face or exact texture.
+The optional \texttt{short\_beard} and \texttt{dense\_short\_beard} styles
+draw on the actual CC0 head skin, not on the mass or collision model. The
+PGA TOUR Jon Rahm profile portrait
+(\texttt{https://www.pgatour.com/player/46970/jon-rahm}, accessed
+2026-11-28) shows dense dark cheek, jaw, chin and moustache coverage. It is a
+current profile image, so it is only a modern-era visual reference. Both
+procedural results are stylized surface approximations, not measured facial
+geometry, individual hair strands or exact texture.
 
 The head mesh uses dimensionless head-length coordinates, $x$ forward, $y$
 lateral, $z$ upward. With $a=|y|$ and $t=\operatorname{clip}((a-0.09)/0.14,0,1)$,
-the cheek boundary is $z<0.295+0.085t^2(3-2t)$. The skin is locally subdivided and clipped at the boundary, requiring
-$x>0.13+0.10u^2(3-2u)$, $u=\operatorname{clip}((a-0.20)/0.12,0,1)$,
-$z>0.075$ and an elliptical lip opening
-$(y/0.09)^2+((z-0.27)/0.045)^2>1$. The shell's inward surface is offset
-$0.0004$ head lengths along vertex normals; the outward surface adds $0.003$,
-except the $0.001$ rim. Boundary walls and a reversed inner layer close the
-mesh. Two existing tapered moustache strips sit above the lip. The shell uses an opaque swatch mixed from 75\% skin and 25\% hair color
-to suggest closely cropped hair; the moustache uses the same shade. Skin, moustache, beard and cap are subject to
-the same optional head morph, so the ornament follows the base head.
+the short stubble cheek boundary is $z<0.295+0.085t^2(3-2t)$. The dense short
+beard uses a lower, more gradual cheek boundary, with an outer-cheek top at
+0.345 head lengths at the rear cheek, tapering forward with the face profile.
+Its upper rear edge also shifts forward as it rises to soften the sideburn
+transition. The stubble boundary peaks at 0.380. The dense style's elliptical lip opening is
+narrower and shorter (0.130 by 0.064 head lengths versus 0.180 by 0.090 for
+stubble), leaving more of the lip area covered. The skin is locally subdivided
+and clipped at the boundary, requiring
+$x>0.13+0.10u^2(3-2u)$ plus an upward sideburn taper,
+$u=\operatorname{clip}((a-0.20)/0.12,0,1)$,
+$z>0.075$ and an elliptical lip opening; the dense style uses
+$(y/0.065)^2+((z-0.27)/0.032)^2>1$. The shell's inward surface is offset
+$0.0004$ head lengths along vertex normals; the outward surface adds $0.003$
+for stubble or $0.004$ for the denser beard, except the $0.001$ rim. Boundary
+walls and a reversed inner layer close the mesh. Two tapered moustache strips
+sit above the lip; the dense style widens them and extends their lower edge to
+meet the beard shell, while leaving a narrow lip opening. Stubble keeps the original opaque 75\%
+skin / 25\% hair swatch. Dense beard uses a 45\% skin / 55\% hair swatch to
+soften the color boundary while keeping it distinct from stubble.
+Skin, moustache, beard and cap are subject to
+the same optional head morph, so the ornament follows the base head. Front and
+profile renders at desktop (1280x720) and phone (390x844) aspect ratios are
+stored under
+\texttt{docs/development/evidence/appearance/dense\_short\_beard/}.
 
-The coarse skin triangles limit boundary fidelity and the uniform material is
-not individual stubble; facial hair is visual only. Rendering must be checked
-for each selected face, hair color and pose. Reproduce the closedness,
-orientation, lip-clearance, schema and native physics checks with:
+The coarse skin triangles limit boundary fidelity and each uniform material
+represents a coverage level rather than individual hair; facial hair is visual
+only. Rendering must be checked
+for each selected face, hair color and pose. Reproduce the renders with:
+\begin{verbatim}
+MUJOCO_GL=egl PYTHONPATH=.:vendor/ud-tools/src python3 docs/development/evidence/appearance/dense_short_beard/render_preview.py --out docs/development/evidence/appearance/dense_short_beard
+\end{verbatim}
+Reproduce the closedness, orientation, lip-clearance, schema and native physics checks with:
 \begin{verbatim}
 PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_short_beard.py
 \end{verbatim}
