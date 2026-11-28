@@ -207,6 +207,8 @@ class GolferPlayback:
         self._camera = mujoco.MjvCamera()
         #: ball-to-feet point behind views look along; ``None`` keeps the preset
         self._behind_anchor_m: tuple[float, float, float] | None = None
+        #: the look-at :attr:`view` last gave the camera; 2D overlays project with it
+        self._lookat_m: tuple[float, float, float] = DEFAULT_LOOKAT_M
         self.view = load_view_settings().default_view
         #: called as ``scene_hook(scene, index)`` after the scene is posed, to
         #: add render-only geoms (the decorative ball); never touches the model
@@ -238,15 +240,22 @@ class GolferPlayback:
             mujoco_camera_params,
         )
 
-        params = mujoco_camera_params(
-            name,
-            playback_lookat(name, self._behind_anchor_m),
-            self._distances.get(name),
-        )
+        self._lookat_m = playback_lookat(name, self._behind_anchor_m)
+        params = mujoco_camera_params(name, self._lookat_m, self._distances.get(name))
         cam = self._camera
         cam.type = _free_camera_type(self._mj)
         params.apply_to(cam)
         self._view = name
+
+    @property
+    def lookat_m(self) -> tuple[float, float, float]:
+        """The look-at the current view aimed the camera at.
+
+        A 2D overlay drawn on top of the render must project with this, not
+        with the preset look-at: for behind views the two differ by the run's
+        ball-to-feet anchor (#15538).
+        """
+        return self._lookat_m
 
     @property
     def behind_anchor_m(self) -> tuple[float, float, float] | None:

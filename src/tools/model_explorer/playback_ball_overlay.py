@@ -249,7 +249,12 @@ class BallOverlay:
         depth_m: NDArray[np.float64] | None = None,
         lookat_m: tuple[float, float, float] = DEFAULT_LOOKAT_M,
     ) -> NDArray[np.uint8]:
-        """``rgb`` with the aim line (whole run) and the flight (after impact)."""
+        """``rgb`` with the aim line (whole run) and the flight (after impact).
+
+        ``lookat_m`` is the look-at the golfer was rendered with; leaving it at
+        the preset draws the overlay beside the golfer of a behind view, whose
+        camera looks at the run's ball-to-feet anchor instead (#15538).
+        """
         play = None if layout is None else layout.flight
         if play is None or play.path_m is None:
             return rgb

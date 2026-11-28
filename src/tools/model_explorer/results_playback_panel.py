@@ -308,7 +308,16 @@ class ResultsPlaybackPanel(QWidget):
         time_s = float(self._pose.time_s[index])
         view = self._playback.view
         paint = self.ball_overlay.paint
-        return paint(rgb, view, time_s, layout, flight=flight, aim=aim, depth_m=depth)
+        return paint(
+            rgb,
+            view,
+            time_s,
+            layout,
+            flight=flight,
+            aim=aim,
+            depth_m=depth,
+            lookat_m=self._playback.lookat_m,
+        )
 
     def _sync_aim(self) -> None:
         """The aim line ends where the ball finishes: it needs the flight."""
