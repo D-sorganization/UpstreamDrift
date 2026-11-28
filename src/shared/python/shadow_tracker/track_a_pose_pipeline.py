@@ -17,7 +17,6 @@ import numpy as np
 
 from src.shared.python.core.contracts import StateError
 from src.shared.python.core.error_utils import ModelError
-from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ._validation import check_bool, check_int, check_nonneg_float, check_str
 from .historical_capture import observation_record
@@ -25,7 +24,6 @@ from .historical_capture import observation_record
 if TYPE_CHECKING:
     from src.shared.python.pose_estimation.interface import PoseEstimationResult
 
-logger = get_logger(__name__)
 HISTORICAL_CAPTURE_SCHEMA_VERSION = "historical-capture/1.0.0"
 OPENPOSE_SETUP_CAP_S = 7200.0
 BackendState = Literal["ok", "blocked"]
@@ -36,13 +34,15 @@ _SETUP_ERRS = (ImportError, OSError, RuntimeError, StateError, ValueError, Model
 class TrackAPoseEstimator(Protocol):
     """Narrow pose-estimator seam for Track A frame observation."""
 
-    def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult: ...
+    def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult:
+        """Estimate 2D pose landmarks from an image array."""
 
 
 ProbeFn = Callable[[], TrackAPoseEstimator | None]
 
 
 def _nn_int(v: object, name: str) -> int:
+    """Validate and return a non-negative integer."""
     i = check_int(v, name)
     if i < 0:
         raise ValueError(f"{name} must be non-negative")
@@ -50,6 +50,7 @@ def _nn_int(v: object, name: str) -> int:
 
 
 def _num(v: object, name: str, *, unit: bool = False) -> float:
+    """Validate finite numeric value, optionally bounded to [0, 1]."""
     if isinstance(v, bool) or not isinstance(v, (int, float)):
         raise ValueError(f"{name} must be numeric")
     f = float(v)
@@ -59,6 +60,7 @@ def _num(v: object, name: str, *, unit: bool = False) -> float:
 
 
 def _impl_sha256() -> str:
+    """Return SHA-256 hex digest of this pipeline implementation."""
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
@@ -79,6 +81,7 @@ class BackendStatus(_JsonRecord):
     mean_coverage: float = 0.0
 
     def __post_init__(self) -> None:
+        """Validate status, timing, and blocked-backend invariants."""
         if self.status not in ("ok", "blocked"):
             raise ValueError(f"Invalid status: {self.status!r}")
         check_nonneg_float(self.elapsed_setup_s, "elapsed_setup_s")
@@ -108,6 +111,7 @@ class TrackAFrameObservation(_JsonRecord):
     qualification: Literal["image_observations_only"] = "image_observations_only"
 
     def __post_init__(self) -> None:
+        """Validate frame indices, unit metrics, and unverified timebase."""
         _nn_int(self.frame_index, "frame_index")
         _num(self.timestamp_s, "timestamp_s")
         if self.status not in ("detected", "partial", "missing"):
@@ -141,19 +145,38 @@ class TrackAPipelineReceipt(_JsonRecord):
     implementation_sha256: str = field(default_factory=_impl_sha256)
 
     def __post_init__(self) -> None:
+        """Enforce schema version, cap, and unverified-timebase invariants."""
         if self.schema_version != HISTORICAL_CAPTURE_SCHEMA_VERSION:
             raise ValueError(f"Unexpected schema_version: {self.schema_version!r}")
         check_str(self.subject_id, "subject_id")
         _nn_int(self.frame_count, "frame_count")
         if check_nonneg_float(self.setup_cap_s, "setup_cap_s") <= 0.0:
             raise ValueError("setup_cap_s must be positive")
-        if (
-            self.qualification != "image_observations_only"
-            or self.timebase != "unverified"
-        ):
+        q_bad = self.qualification != "image_observations_only"
+        if q_bad or self.timebase != "unverified":
             raise ValueError("Track A receipt must remain unverified")
         if check_bool(self.physical_time_verified, "physical_time_verified"):
             raise ValueError("physical_time_verified must remain False")
+
+
+@dataclass(frozen=True, slots=True)
+class TrackAPipelineConfig:
+    """Optional configuration and runtime hooks for Track A execution."""
+
+    setup_cap_s: float = OPENPOSE_SETUP_CAP_S
+    min_visibility: float = 0.05
+    expected_keypoints: Sequence[str] | None = None
+    openpose_native_probe: ProbeFn | None = None
+    openpose_body25_onnx_factory: ProbeFn | None = None
+    rtmpose_factory: ProbeFn | None = None
+    frame_decoder: Callable[[Path], Sequence[np.ndarray]] | None = None
+    monotonic_fn: Callable[[], float] = time.monotonic
+
+    def __post_init__(self) -> None:
+        """Validate setup cap and visibility thresholds."""
+        if check_nonneg_float(self.setup_cap_s, "setup_cap_s") <= 0.0:
+            raise ValueError("setup_cap_s must be positive")
+        _num(self.min_visibility, "min_visibility", unit=True)
 
 
 def sanitize_track_a_frame(
@@ -167,9 +190,7 @@ def sanitize_track_a_frame(
     idx = _nn_int(frame_index, "frame_index")
     vis_min = _num(min_visibility, "min_vis", unit=True)
     raw_c = result.raw_confidences or {}
-    confs = {
-        check_str(k, "k"): _num(v, f"vis[{k}]", unit=True) for k, v in raw_c.items()
-    }
+    confs = {check_str(k, "k"): _num(v, "vis", unit=True) for k, v in raw_c.items()}
     base = observation_record(result)
     base_lm: dict[str, dict[str, Any]] = base["landmarks"]
     src = expected_keypoints if expected_keypoints is not None else [*base_lm, *confs]
@@ -190,32 +211,27 @@ def sanitize_track_a_frame(
                 vis_cnt += int(name in exp_set)
             landmarks[name] = entry
         else:
-            entry = {"x": None, "y": None, "visibility": confs.get(name)}
-            entry["status"] = "missing"
-            landmarks[name] = entry
+            lm = {
+                "x": None,
+                "y": None,
+                "visibility": confs.get(name),
+                "status": "missing",
+            }
+            landmarks[name] = lm
             missing.append(name)
     cov = (vis_cnt / len(exp)) if exp else 0.0
     st: FrameStatus = "missing"
     if vis_cnt > 0:
-        st = (
-            "detected"
-            if vis_cnt == len(exp) and not missing and not low_vis
-            else "partial"
-        )
-    return TrackAFrameObservation(
-        idx,
-        float(result.timestamp),
-        st,
-        str(base["coordinate_system"]),
-        float(base["confidence"]),
-        cov,
-        landmarks,
-        tuple(missing),
-        tuple(low_vis),
-    )
+        full = vis_cnt == len(exp) and not missing and not low_vis
+        st = "detected" if full else "partial"
+    ts = float(result.timestamp)
+    cs, conf = str(base["coordinate_system"]), float(base["confidence"])
+    m_kp, l_kp = tuple(missing), tuple(low_vis)
+    return TrackAFrameObservation(idx, ts, st, cs, conf, cov, landmarks, m_kp, l_kp)
 
 
 def _builtin_setup(backend: str) -> TrackAPoseEstimator:
+    """Instantiate and load a built-in Track A pose estimator backend."""
     b25 = (None, "openpose_dnn_estimator", "OpenPoseDnnEstimator")
     specs = {
         "openpose_native": ("pyopenpose", "openpose_estimator", "OpenPoseEstimator"),
@@ -231,6 +247,7 @@ def _builtin_setup(backend: str) -> TrackAPoseEstimator:
 
 
 def _decode_with_av(source_path: Path) -> list[np.ndarray]:
+    """Decode video frames as BGR24 arrays using PyAV."""
     if not source_path.is_file():
         raise FileNotFoundError(source_path)
     try:
@@ -241,29 +258,56 @@ def _decode_with_av(source_path: Path) -> list[np.ndarray]:
         return [f.to_ndarray(format="bgr24") for f in c.decode(c.streams.video[0])]
 
 
+def _exec_backend(
+    name: str,
+    setup_fn: ProbeFn,
+    resolved: Sequence[np.ndarray],
+    cfg: TrackAPipelineConfig,
+    obs_map: dict[str, tuple[TrackAFrameObservation, ...]],
+    cap_s: float | None = None,
+) -> BackendStatus:
+    """Probe one backend, enforce optional setup cap, and sanitize frames."""
+    start = float(cfg.monotonic_fn())
+    try:
+        est = setup_fn()
+    except _SETUP_ERRS as exc:
+        el = check_nonneg_float(float(cfg.monotonic_fn()) - start, "el")
+        return BackendStatus("blocked", el, str(exc).strip() or type(exc).__name__)
+    el = check_nonneg_float(float(cfg.monotonic_fn()) - start, "el")
+    if est is None:
+        return BackendStatus("blocked", el, f"{name} returned no estimator")
+    if cap_s is not None and el > cap_s:
+        rsn = f"{name} setup exceeded {cap_s:.1f}s cap ({el:.1f}s)"
+        return BackendStatus("blocked", el, rsn)
+    fn = est.estimate_from_image
+    two_arg = len(inspect.signature(fn).parameters) >= 2
+    ek, mv = cfg.expected_keypoints, cfg.min_visibility
+    raw = [fn(fr, i * 33) if two_arg else fn(fr) for i, fr in enumerate(resolved)]  # type: ignore[call-arg]
+    obs = tuple(
+        sanitize_track_a_frame(
+            r, frame_index=i, expected_keypoints=ek, min_visibility=mv
+        )
+        for i, r in enumerate(raw)
+    )
+    obs_map[name] = obs
+    det = sum(1 for item in obs if item.status in ("detected", "partial"))
+    cov = sum(item.keypoint_coverage for item in obs) / len(obs)
+    return BackendStatus("ok", el, f"{name} ready", det, cov)
+
+
 def run_track_a_pipeline(
     *,
     subject_id: str,
     frames: Sequence[np.ndarray] | None = None,
     source_path: Path | None = None,
-    setup_cap_s: float = OPENPOSE_SETUP_CAP_S,
-    min_visibility: float = 0.05,
-    expected_keypoints: Sequence[str] | None = None,
-    openpose_native_probe: ProbeFn | None = None,
-    openpose_body25_onnx_factory: ProbeFn | None = None,
-    rtmpose_factory: ProbeFn | None = None,
-    frame_decoder: Callable[[Path], Sequence[np.ndarray]] | None = None,
-    monotonic_fn: Callable[[], float] = time.monotonic,
+    config: TrackAPipelineConfig | None = None,
 ) -> TrackAPipelineReceipt:
     """Run Track A pipeline with 2h native OpenPose cap and separate fallback."""
     clean_subject = check_str(subject_id, "subject_id")
-    cap = check_nonneg_float(setup_cap_s, "setup_cap_s")
-    if cap <= 0.0:
-        raise ValueError("setup_cap_s must be positive")
-    _num(min_visibility, "min_visibility", unit=True)
+    cfg = config or TrackAPipelineConfig()
     if frames is None and source_path is None:
         raise ValueError("Either frames or source_path must be provided")
-    dec = frame_decoder or _decode_with_av
+    dec = cfg.frame_decoder or _decode_with_av
     resolved = list(frames) if frames is not None else list(dec(source_path))  # type: ignore[arg-type]
     if not resolved:
         raise ValueError("At least one frame is required")
@@ -271,67 +315,34 @@ def run_track_a_pipeline(
     obs_map: dict[str, tuple[TrackAFrameObservation, ...]] = {}
     sts: dict[str, BackendStatus] = {}
     fb = False
-
-    def _exec(
-        name: str, setup_fn: ProbeFn, cap_s: float | None = None
-    ) -> BackendStatus:
-        start = float(monotonic_fn())
-        try:
-            est = setup_fn()
-        except _SETUP_ERRS as exc:
-            el = check_nonneg_float(float(monotonic_fn()) - start, "el")
-            rsn = str(exc).strip() or type(exc).__name__
-            return BackendStatus("blocked", el, rsn)
-        el = check_nonneg_float(float(monotonic_fn()) - start, "el")
-        if est is None:
-            return BackendStatus("blocked", el, f"{name} returned no estimator")
-        if cap_s is not None and el > cap_s:
-            rsn = f"{name} setup exceeded {cap_s:.1f}s cap ({el:.1f}s)"
-            return BackendStatus("blocked", el, rsn)
-        fn = est.estimate_from_image
-        two_arg = len(inspect.signature(fn).parameters) >= 2
-        obs = tuple(
-            sanitize_track_a_frame(
-                fn(fr, i * 33) if two_arg else fn(fr),  # type: ignore[call-arg]
-                frame_index=i,
-                expected_keypoints=expected_keypoints,
-                min_visibility=min_visibility,
-            )
-            for i, fr in enumerate(resolved)
-        )
-        obs_map[name] = obs
-        det = sum(1 for item in obs if item.status in ("detected", "partial"))
-        cov = sum(item.keypoint_coverage for item in obs) / len(obs)
-        return BackendStatus("ok", el, f"{name} ready", det, cov)
-
-    for name, custom, c_s in (
-        ("openpose_native", openpose_native_probe, cap),
-        ("openpose_body25_onnx", openpose_body25_onnx_factory, None),
-        ("rtmpose", rtmpose_factory, None),
-    ):
+    specs = (
+        ("openpose_native", cfg.openpose_native_probe, cfg.setup_cap_s),
+        ("openpose_body25_onnx", cfg.openpose_body25_onnx_factory, None),
+        ("rtmpose", cfg.rtmpose_factory, None),
+    )
+    for name, custom, c_s in specs:
         if name != "openpose_native" and not fb:
             sts[name] = BackendStatus("blocked", 0.0, "Skipped: openpose_native ok")
             continue
         fac: ProbeFn = custom or (lambda n=name: _builtin_setup(n))  # type: ignore[misc]
-        sts[name] = _exec(name, fac, c_s)
+        sts[name] = _exec_backend(name, fac, resolved, cfg, obs_map, c_s)
         if name == "openpose_native":
             fb = sts[name].status == "blocked"
 
     active = tuple(n for n, st in sts.items() if st.status == "ok")
     src_s = str(source_path) if source_path else None
-    n_st = sts["openpose_native"]
-    b_st = sts["openpose_body25_onnx"]
-    r_st = sts["rtmpose"]
+    n_s, b_s, r_s = sts["openpose_native"], sts["openpose_body25_onnx"], sts["rtmpose"]
+    ver = HISTORICAL_CAPTURE_SCHEMA_VERSION
     return TrackAPipelineReceipt(
-        HISTORICAL_CAPTURE_SCHEMA_VERSION,
+        ver,
         clean_subject,
         src_s,
         len(resolved),
-        n_st,
-        b_st,
-        r_st,
+        n_s,
+        b_s,
+        r_s,
         fb,
         active,
         obs_map,
-        setup_cap_s=cap,
+        setup_cap_s=cfg.setup_cap_s,
     )
