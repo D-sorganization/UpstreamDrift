@@ -82,7 +82,9 @@ class TestCliImportBoundary:
         Baseline (issue #15830): 489-line importtime trace, zero forbidden entries.
         """
         loaded, raw = _importtime_modules()
-        leaked = {m for m in loaded if any(m.startswith(p) for p in _FORBIDDEN_PREFIXES)}
+        leaked = {
+            m for m in loaded if any(m.startswith(p) for p in _FORBIDDEN_PREFIXES)
+        }
         assert not leaked, (
             f"`ud-sim --help` importtime trace contains {sorted(leaked)}; "
             "the CLI import path must stay GUI/physics-free -- see #15830\n"
