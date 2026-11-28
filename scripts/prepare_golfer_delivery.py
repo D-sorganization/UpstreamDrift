@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
-"""Export and validate private golfer delivery candidates.
-
-Use ``--scratch`` for preliminary output in a fresh temp directory. The
-``--skip-library-import`` option is scratch-only while #15957 is pending.
-``--final`` requires all twelve profiles, current main, accepted appearance
-features, a fresh sibling output, and verified temporary-library bindings.
-
-Examples::
-
-    python scripts/prepare_golfer_delivery.py --scratch --players rory_mcilroy
-    python scripts/prepare_golfer_delivery.py --scratch --skip-library-import
-    python scripts/prepare_golfer_delivery.py --final --output ../golfer-delivery-final
-"""
+"""Export private scratch candidates; this runner does not accept likeness."""
 
 from __future__ import annotations
 
@@ -60,27 +48,13 @@ def _object(path: Path) -> dict[str, Any]:
     return result
 
 
-def _branch(repo: Path) -> str:
-    return subprocess.run(
-        ["git", "branch", "--show-current"],
-        cwd=repo,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-
-
-def _output(path: Path | None, repo: Path, final: bool) -> Path:
+def _output(path: Path | None) -> Path:
     tmp = Path(tempfile.gettempdir()).resolve()
     if path is None:
-        if final:
-            raise ValueError("--final requires a fresh sibling --output")
         return Path(tempfile.mkdtemp(prefix="golfer-delivery-scratch-", dir=tmp))
     target = path.expanduser().absolute()
     parent = target.parent.resolve()
-    if final and parent != repo.parent.resolve():
-        raise ValueError("Final output must be a sibling of the repository")
-    if not final and not parent.is_relative_to(tmp):
+    if not parent.is_relative_to(tmp):
         raise ValueError("Scratch output must be under the system temp directory")
     if target.exists():
         raise FileExistsError(f"Refusing to reuse output: {target}")
@@ -197,41 +171,10 @@ def _import_api(required: bool) -> Callable[..., Any] | None:
     return api
 
 
-def _final_gate(repo: Path, players: tuple[str, ...]) -> None:
-    if _branch(repo) != "main" or players != PLAYERS:
-        raise ValueError("Final packaging requires main and all twelve profiles")
-    from src.shared.python.model_appearance.head_detail import HeadDetail
-    from src.shared.python.model_appearance.schema import CAP_STYLES
-
-    if "baseball_cap_structured" not in CAP_STYLES or not HeadDetail():
-        raise ValueError("Merged face detail and structured cap are required")
-
-
-def run(
-    repo: Path,
-    output: Path,
-    players: tuple[str, ...],
-    importer: Callable[..., Any] | None,
-) -> dict[str, Any]:
-    """Export both variants, validate them, render previews, and optionally import."""
-    from src.shared.python.model_appearance.player_models import (
-        player_ids,
-        player_profile,
-    )
-    from src.shared.python.model_appearance.schema import physics_spec_sha256
-
-    missing = sorted(set(players) - set(player_ids()))
-    if missing:
-        raise ValueError(f"Catalog is missing profiles: {missing}")
-    archive_path = repo / BASELINE_ARCHIVE
-    with ZipFile(archive_path) as archive:
-        baseline_bytes = archive.read(BASELINE_MEMBER)
-    baseline_spec = json.loads(baseline_bytes)
-    if not isinstance(baseline_spec, dict):
-        raise ValueError("Reference baseline must be a JSON object")
+def _export(repo: Path, output: Path, players: tuple[str, ...], base: bytes) -> None:
     with tempfile.TemporaryDirectory(prefix="golfer-delivery-reference-") as tmp:
-        baseline_path = Path(tmp) / "reference-model.json"
-        baseline_path.write_bytes(baseline_bytes)
+        baseline = Path(tmp) / "reference-model.json"
+        baseline.write_bytes(base)
         env = os.environ.copy()
         env["PYTHONPATH"] = os.pathsep.join(
             (
@@ -242,10 +185,7 @@ def run(
             )
         )
         env.setdefault("MUJOCO_GL", "egl")
-        for mode, base in (
-            ("sized_candidate", None),
-            ("appearance_only", baseline_path),
-        ):
+        for mode, spec in (("sized_candidate", None), ("appearance_only", baseline)):
             command = [
                 sys.executable,
                 str(repo / "scripts/export_player_models.py"),
@@ -254,191 +194,231 @@ def run(
                 "--output",
                 str(output / "models" / mode),
             ]
-            if base:
-                command.extend(("--base-spec", str(base)))
+            if spec:
+                command.extend(("--base-spec", str(spec)))
             subprocess.run(command, cwd=repo, env=env, check=True)
-        from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
-            export_full_body_mjcf,
+
+
+def _import_binding(
+    importer: Callable[..., Any],
+    library: Any,
+    player: str,
+    folder: Path,
+    mode: str,
+    base: bytes,
+) -> dict[str, Any]:
+    model_record, bundle_record = importer(
+        library,
+        player,
+        folder,
+        reference_baseline=base if mode == "appearance_only" else None,
+        reference_baseline_id=BASELINE_ID if mode == "appearance_only" else None,
+    )
+    model = library.load_asset(model_record.dataset_id)
+    definition = library.load_model_definition(model_record.dataset_id)
+    if (
+        definition != (folder / "model.visual.json").read_bytes()
+        or library.load_model_source_manifest(model_record.dataset_id)
+        != (folder / "receipt.json").read_bytes()
+    ):
+        raise ValueError("Imported visual definition or source receipt changed")
+    if (
+        mode == "appearance_only"
+        and library.load_reference_baseline(model_record.dataset_id) != base
+    ):
+        raise ValueError("Imported baseline bytes changed")
+    from src.shared.python.workspace.necromatcher_native import (
+        load_native_model_binding,
+    )
+
+    binding = load_native_model_binding(
+        library,
+        model_record.dataset_id,
+        definition,
+        tuple(model.metadata["coordinate_units"]),
+    )
+    if binding.model_hash != model.metadata["hash"]:
+        raise ValueError("Native binding hash mismatch")
+    return {
+        "dataset_id": model_record.dataset_id,
+        "bundle_id": bundle_record.dataset_id,
+        "model_hash": model.metadata["hash"],
+        "native_binding_verified": True,
+    }
+
+
+def _variant(
+    output: Path,
+    player: str,
+    mode: str,
+    profile: dict[str, Any],
+    context: dict[str, Any],
+) -> dict[str, Any]:
+    folder = output / "models" / mode / player
+    spec, appearance = (
+        _object(folder / "model.json"),
+        _object(folder / "model.appearance.json"),
+    )
+    visual, receipt = (
+        _object(folder / "model.visual.json"),
+        _object(folder / "receipt.json"),
+    )
+    if visual.pop("appearance", None) != appearance or visual != spec:
+        raise ValueError(f"Visual sidecar mismatch: {player}/{mode}")
+    if (
+        receipt.get("mode") != mode
+        or receipt.get("visual_definition") != "model.visual.json"
+    ):
+        raise ValueError(f"Bad source receipt: {player}/{mode}")
+    xml = folder / "model.xml"
+    checks = _native_checks(xml, spec, profile, mode)
+    if mode == "appearance_only":
+        if spec != context["spec"]:
+            raise ValueError("Skin changed the supplied physics baseline")
+        _same_reference_physics(xml, context["native"])
+    preview = _object(folder / "previews/neutral/preview_receipt.json")
+    height = float(preview["rendered_geometry_height_m"])
+    delta = height - float(checks["anatomy_height_m"])
+    if not math.isfinite(height) or height <= 0 or abs(delta) > HEIGHT_TOL_M:
+        raise ValueError(f"Rendered height differs from anatomy: {player}/{mode}")
+    checks.update(
+        rendered_height_m=height,
+        rendered_delta_m=delta,
+        rendered_tolerance_m=HEIGHT_TOL_M,
+    )
+    imported = (
+        _import_binding(
+            context["importer"],
+            context["library"],
+            player,
+            folder,
+            mode,
+            context["bytes"],
         )
-        import mujoco
+        if context["importer"] and context["library"]
+        else None
+    )
+    return {
+        "mode": mode,
+        "height_basis": "catalog anatomy" if mode == "sized_candidate" else BASELINE_ID,
+        "physics_sha256": receipt["physics_spec_sha256"],
+        "checks": checks,
+        "body_build": appearance.get("body_build", 0.0),
+        "frame_prior": receipt.get("frame_prior"),
+        "import": imported,
+    }
 
-        baseline_xml, _ = export_full_body_mjcf(baseline_bytes)
-        baseline_native = mujoco.MjModel.from_xml_string(baseline_xml)
-        library_tmp = (
-            tempfile.TemporaryDirectory(prefix="golfer-delivery-library-")
-            if importer
-            else None
-        )
-        library = None
-        if importer and library_tmp:
-            from src.shared.python.workspace.necromatcher import NecromatcherLibrary
 
-            library = NecromatcherLibrary.create(
-                Path(library_tmp.name) / "chosen-library"
-            )
-        manifest: dict[str, Any] = {
-            "status": "scratch_preliminary_not_final",
-            "branch": _branch(repo),
-            "players": list(players),
-            "baseline": {
-                "id": BASELINE_ID,
-                "archive_sha256": _sha(archive_path.read_bytes()),
-                "member_sha256": _sha(baseline_bytes),
-                "physics_sha256": physics_spec_sha256(baseline_spec),
-            },
-            "library_import": "verified"
-            if importer
-            else "omitted_by_explicit_scratch_mode",
-            "models": [],
-            "warnings": [
-                "No historical motion is fitted.",
-                "Reference skins retain Tiger fitted physics, not golfer dimensions.",
-                "Media is not copied; verify reuse rights before redistribution.",
-            ],
-        }
-        try:
-            for player in players:
-                profile = player_profile(player)
-                variants = []
-                for mode in ("sized_candidate", "appearance_only"):
-                    folder = output / "models" / mode / player
-                    spec, appearance = (
-                        _object(folder / "model.json"),
-                        _object(folder / "model.appearance.json"),
-                    )
-                    visual, receipt = (
-                        _object(folder / "model.visual.json"),
-                        _object(folder / "receipt.json"),
-                    )
-                    if visual.pop("appearance", None) != appearance or visual != spec:
-                        raise ValueError(f"Visual sidecar mismatch: {player}/{mode}")
-                    if (
-                        receipt.get("mode") != mode
-                        or receipt.get("visual_definition") != "model.visual.json"
-                    ):
-                        raise ValueError(f"Bad source receipt: {player}/{mode}")
-                    xml_path = folder / "model.xml"
-                    checks = _native_checks(xml_path, spec, profile, mode)
-                    if mode == "appearance_only":
-                        if spec != baseline_spec:
-                            raise ValueError(
-                                "Skin changed the supplied physics baseline"
-                            )
-                        _same_reference_physics(xml_path, baseline_native)
-                    preview_dir = folder / "previews" / "neutral"
-                    preview = _object(preview_dir / "preview_receipt.json")
-                    height = float(preview["rendered_geometry_height_m"])
-                    delta = height - float(checks["anatomy_height_m"])
-                    if (
-                        not math.isfinite(height)
-                        or height <= 0
-                        or abs(delta) > HEIGHT_TOL_M
-                    ):
-                        raise ValueError(
-                            f"Rendered height differs from anatomy: {player}/{mode}"
-                        )
-                    checks.update(
-                        rendered_height_m=height,
-                        rendered_delta_m=delta,
-                        rendered_tolerance_m=HEIGHT_TOL_M,
-                    )
-                    imported = None
-                    if importer and library:
-                        model_record, bundle_record = importer(
-                            library,
-                            player,
-                            folder,
-                            reference_baseline=baseline_bytes
-                            if mode == "appearance_only"
-                            else None,
-                            reference_baseline_id=BASELINE_ID
-                            if mode == "appearance_only"
-                            else None,
-                        )
-                        model = library.load_asset(model_record.dataset_id)
-                        definition = library.load_model_definition(
-                            model_record.dataset_id
-                        )
-                        if definition != (folder / "model.visual.json").read_bytes():
-                            raise ValueError("Imported visual definition changed")
-                        if (
-                            library.load_model_source_manifest(model_record.dataset_id)
-                            != (folder / "receipt.json").read_bytes()
-                        ):
-                            raise ValueError("Imported source receipt changed")
-                        if (
-                            mode == "appearance_only"
-                            and library.load_reference_baseline(model_record.dataset_id)
-                            != baseline_bytes
-                        ):
-                            raise ValueError("Imported baseline bytes changed")
-                        from src.shared.python.workspace.necromatcher_native import (
-                            load_native_model_binding,
-                        )
-
-                        binding = load_native_model_binding(
-                            library,
-                            model_record.dataset_id,
-                            definition,
-                            tuple(model.metadata["coordinate_units"]),
-                        )
-                        if binding.model_hash != model.metadata["hash"]:
-                            raise ValueError("Native binding hash mismatch")
-                        imported = {
-                            "dataset_id": model_record.dataset_id,
-                            "bundle_id": bundle_record.dataset_id,
-                            "model_hash": model.metadata["hash"],
-                            "native_binding_verified": True,
-                            "coordinate_units": list(binding.coordinate_units),
-                            "coordinate_order": list(binding.plant.coordinate_order),
-                        }
-                    variants.append(
-                        {
-                            "mode": mode,
-                            "height_basis": "catalog anatomy"
-                            if mode == "sized_candidate"
-                            else BASELINE_ID,
-                            "physics_sha256": receipt["physics_spec_sha256"],
-                            "checks": checks,
-                            "body_build": appearance.get("body_build", 0.0),
-                            "frame_prior": receipt.get("frame_prior"),
-                            "import": imported,
-                        }
-                    )
-                manifest["models"].append(
-                    {
-                        "player_id": player,
-                        "display_name": profile["display_name"],
-                        "stature_m": profile["stature_m"],
-                        "mass_kg": profile["mass_kg"],
-                        "sources": profile.get("sources", []),
-                        "uncertainties": profile.get("limitations", []),
-                        "variants": variants,
-                    }
-                )
-        finally:
-            if library_tmp:
-                library_tmp.cleanup()
+def _write_receipts(output: Path, manifest: dict[str, Any]) -> None:
     files = sorted(p for p in output.rglob("*") if p.is_file())
     (output / "SHA256SUMS").write_text(
         "".join(f"{_sha(p.read_bytes())}  {p.relative_to(output)}\n" for p in files),
         encoding="utf-8",
     )
-    manifest_path = output / "delivery-manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    path = output / "delivery-manifest.json"
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     (output / "delivery-manifest.sha256").write_text(
-        f"{_sha(manifest_path.read_bytes())}  delivery-manifest.json\n",
-        encoding="utf-8",
+        f"{_sha(path.read_bytes())}  delivery-manifest.json\n", encoding="utf-8"
     )
+
+
+def run(
+    repo: Path,
+    output: Path,
+    players: tuple[str, ...],
+    importer: Callable[..., Any] | None,
+) -> dict[str, Any]:
+    """Export both candidates and verify native physics, source receipt and imports."""
+    from src.shared.python.model_appearance.player_models import (
+        player_ids,
+        player_profile,
+    )
+    from src.shared.python.model_appearance.schema import physics_spec_sha256
+
+    if missing := sorted(set(players) - set(player_ids())):
+        raise ValueError(f"Catalog is missing profiles: {missing}")
+    archive_path = repo / BASELINE_ARCHIVE
+    with ZipFile(archive_path) as archive:
+        base = archive.read(BASELINE_MEMBER)
+    base_spec = json.loads(base)
+    if not isinstance(base_spec, dict):
+        raise ValueError("Reference baseline must be a JSON object")
+    _export(repo, output, players, base)
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+    import mujoco
+
+    xml, _ = export_full_body_mjcf(base)
+    baseline = mujoco.MjModel.from_xml_string(xml)
+    tmp = (
+        tempfile.TemporaryDirectory(prefix="golfer-delivery-library-")
+        if importer
+        else None
+    )
+    library = None
+    if importer and tmp:
+        from src.shared.python.workspace.necromatcher import NecromatcherLibrary
+
+        library = NecromatcherLibrary.create(Path(tmp.name) / "chosen-library")
+    manifest: dict[str, Any] = {
+        "status": "scratch_preliminary_not_final",
+        "source_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=repo, text=True
+        ).strip(),
+        "players": list(players),
+        "baseline": {
+            "id": BASELINE_ID,
+            "archive_sha256": _sha(archive_path.read_bytes()),
+            "member_sha256": _sha(base),
+            "physics_sha256": physics_spec_sha256(base_spec),
+        },
+        "library_import": "verified"
+        if importer
+        else "omitted_by_explicit_scratch_mode",
+        "models": [],
+        "warnings": [
+            "No historical motion is fitted.",
+            "Reference skins retain Tiger fitted physics, not golfer dimensions.",
+            "Media is not copied; verify reuse rights before redistribution.",
+        ],
+    }
+    context = {
+        "spec": base_spec,
+        "native": baseline,
+        "bytes": base,
+        "importer": importer,
+        "library": library,
+    }
+    try:
+        for player in players:
+            profile = player_profile(player)
+            variants = [
+                _variant(output, player, mode, profile, context)
+                for mode in ("sized_candidate", "appearance_only")
+            ]
+            manifest["models"].append(
+                {
+                    "player_id": player,
+                    "display_name": profile["display_name"],
+                    "stature_m": profile["stature_m"],
+                    "mass_kg": profile["mass_kg"],
+                    "sources": profile.get("sources", []),
+                    "uncertainties": profile.get("limitations", []),
+                    "variants": variants,
+                }
+            )
+    finally:
+        if tmp:
+            tmp.cleanup()
+    _write_receipts(output, manifest)
     return manifest
 
 
 def main() -> int:
-    """Run only after the caller explicitly selects scratch or final mode."""
+    """Run the private scratch-only exporter."""
     parser = argparse.ArgumentParser(description=__doc__)
-    modes = parser.add_mutually_exclusive_group(required=True)
-    modes.add_argument("--scratch", action="store_true")
-    modes.add_argument("--final", action="store_true")
+    parser.add_argument("--scratch", action="store_true", required=True)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--output", type=Path)
     parser.add_argument("--players", nargs="+", choices=PLAYERS, default=PLAYERS)
@@ -446,26 +426,13 @@ def main() -> int:
     args = parser.parse_args()
     repo = args.repo.resolve(strict=True)
     sys.path[:0] = [str(repo), str(repo / "src"), str(repo / "vendor/ud-tools/src")]
-    if args.skip_library_import and not args.scratch:
-        parser.error("--skip-library-import is scratch-only")
-    if args.final and tuple(args.players) != PLAYERS:
-        parser.error("--final requires all twelve profiles")
-    selected = PLAYERS if args.final else tuple(dict.fromkeys(args.players))
-    if args.final:
-        _final_gate(repo, selected)
-    importer = _import_api(required=args.final or not args.skip_library_import)
+    selected = tuple(dict.fromkeys(args.players))
+    importer = _import_api(required=not args.skip_library_import)
     if args.skip_library_import:
         importer = None
     os.environ.setdefault("MUJOCO_GL", "egl")
-    output = _output(args.output, repo, args.final)
+    output = _output(args.output)
     manifest = run(repo, output, selected, importer)
-    if args.final:
-        manifest["status"] = "final_candidate"
-        path = output / "delivery-manifest.json"
-        path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-        (output / "delivery-manifest.sha256").write_text(
-            f"{_sha(path.read_bytes())}  delivery-manifest.json\n", encoding="utf-8"
-        )
     return 0
 
 
