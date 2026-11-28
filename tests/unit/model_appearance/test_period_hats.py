@@ -143,3 +143,18 @@ def test_crown_pull_preserves_triangle_winding():
             na = np.cross(a[:, 1] - a[:, 0], a[:, 2] - a[:, 0])
             nb = np.cross(b[:, 1] - b[:, 0], b[:, 2] - b[:, 0])
             assert (np.einsum("ij,ij->i", na, nb) > 0).all()
+
+
+def test_owner_requested_brim_and_cap_fit():
+    """Use a narrower straw brim and a fuller, forward-leaning period cap."""
+    skin = head_mesh._default_asset().skin
+    brim = dict(head_cap.build_straw_hat(skin))["straw_brim"].vertices
+    assert np.ptp(brim[:, 1]) < 1.20
+    for crop in (head_cap.flat_cap_crop(), head_cap.newsboy_cap_crop()):
+        assert crop.offset >= 0.044
+        parts = dict(head_cap.build_period_cap(skin, 0.12, crop))
+        old = dict(head_cap.build_cap(skin, 0.12, crop))
+        assert (
+            parts["cap_brim"].vertices[:, 2].mean()
+            < old["cap_brim"].vertices[:, 2].mean() - 0.005
+        )

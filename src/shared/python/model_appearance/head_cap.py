@@ -75,7 +75,7 @@ def flat_cap_crop() -> CapCrop:
             (2.60, 0.65),
             (math.pi, 0.64),
         ),
-        offset=0.034,
+        offset=0.044,
         brim_half_angle=0.93,
         brim_forward=0.68,
         brim_end_taper=0.34,
@@ -91,7 +91,7 @@ def flat_cap_crop() -> CapCrop:
 
 def newsboy_cap_crop() -> CapCrop:
     """Return a fuller period crown over the same closely cropped hair."""
-    return replace(flat_cap_crop(), offset=0.085, front_overhang=0.16)
+    return replace(flat_cap_crop(), offset=0.095, front_overhang=0.16)
 
 
 def build_period_cap(
@@ -119,7 +119,27 @@ def build_period_cap(
         np.array([0.0, 0.0, 1.0]),
         width_hint=np.array([1.0, 0.0, 0.0]),
     )
-    return [*parts, ("cap_snap", snap)]
+    # Scale and tip the complete assembly forward around its seated band.
+    angle = math.radians(3.0)
+    rotation = np.array(
+        [
+            [math.cos(angle), 0, math.sin(angle)],
+            [0, 1, 0],
+            [-math.sin(angle), 0, math.cos(angle)],
+        ]
+    )
+    pivot = np.array([crop.centre_x, 0.0, 0.73])
+    return [
+        (
+            name,
+            Mesh(
+                (mesh.vertices - pivot) @ rotation.T * np.array([1.02, 1.03, 0.96])
+                + pivot,
+                mesh.faces,
+            ),
+        )
+        for name, mesh in [*parts, ("cap_snap", snap)]
+    ]
 
 
 def cap_line_height(crop: CapCrop, azimuth: Array) -> Array:
@@ -260,7 +280,7 @@ def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
     """Build closed rounded crown, circumferential brim and narrow dark band.
 
     Dimensions are artistic head-length fractions; all are visual only.
-    The brim extends 0.32 radially from the crown and is 0.012 thick.
+    The brim extends 0.22 radially from the crown and is 0.012 thick.
     """
     cfg = straw_hat_crop()
     rounded = build_cap(skin, 0.3, cfg)[0][1]
@@ -274,7 +294,7 @@ def build_straw_hat(skin: Mesh) -> list[tuple[str, Mesh]]:
     pts, angle = pts[np.argsort(angle)], np.sort(angle)
     radial = np.column_stack((np.cos(angle), np.sin(angle), np.zeros(len(angle))))
     inner = pts.copy()
-    outer = pts + 0.32 * radial
+    outer = pts + 0.22 * radial
     outer[:, 2] -= 0.025
     upper = np.array([0.0, 0.0, 0.006])
     rings = np.stack((inner + upper, outer + upper, outer - upper, inner - upper))
