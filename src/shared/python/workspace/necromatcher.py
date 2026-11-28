@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from functools import lru_cache
 import hashlib
@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Iterator
-from zipfile import ZIP_STORED, ZipFile
+from zipfile import ZIP_STORED, BadZipFile, ZipFile
 
 from src.shared.python.core.contracts.exceptions import StateError
 from src.shared.python.data_io.user_config_root import user_config_path
@@ -62,6 +62,180 @@ _FIT_RECALL_CHAIN: ContextVar[tuple[tuple[str, str], ...]] = ContextVar(
 )
 
 
+@dataclass(frozen=True)
+class CatalogModelBundle:
+    """Validated inputs for atomic registration of a catalog candidate."""
+
+    player_id: str
+    display_name: str
+    session_id: str
+    model_id: str
+    bundle_asset_id: str
+    model_xml: bytes
+    bundle: bytes
+    visual_sha256: str
+    source_manifest_sha256: str
+    dofs: tuple[str, ...]
+    coordinate_units: tuple[str, ...]
+    source_profile_sha256: str
+    physics_spec_sha256: str
+    model_version: str
+
+
+@dataclass(frozen=True)
+class _CatalogBundleFile:
+    asset_id: str
+    payload: bytes
+    kind: str
+    suffix: str
+    metadata: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class _CatalogBundlePlan:
+    request: CatalogModelBundle
+    subject_metadata: dict[str, Any]
+    session_metadata: dict[str, Any]
+    model_file: _CatalogBundleFile
+    bundle_file: _CatalogBundleFile
+
+
+def _catalog_digest(payload: bytes) -> str:
+    return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+
+def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str, str]:
+    """Validate bytes and return XML, visual, and source manifest digests."""
+    if not bundle.model_xml or not bundle.bundle:
+        raise ValueError("Catalog model files must be nonempty")
+    if (
+        not bundle.dofs
+        or len(bundle.dofs) != len(set(bundle.dofs))
+        or len(bundle.coordinate_units) != len(bundle.dofs)
+        or any(not name.strip() for name in bundle.dofs)
+        or any(unit not in {"m", "rad"} for unit in bundle.coordinate_units)
+    ):
+        raise ValueError("Catalog model requires ordered scalar DOFs and units")
+    hashes = (
+        bundle.source_profile_sha256,
+        bundle.physics_spec_sha256,
+        bundle.visual_sha256,
+        bundle.source_manifest_sha256,
+    )
+    if any(not isinstance(value, str) or len(value) != 64 for value in hashes):
+        raise ValueError("Catalog model requires exact source and physics hashes")
+    for identifier in (
+        bundle.player_id,
+        bundle.session_id,
+        bundle.model_id,
+        bundle.bundle_asset_id,
+    ):
+        ArtifactReference(
+            identifier, "pending", "pending", "pending", ArtifactKind.MODEL
+        )
+    if len({bundle.session_id, bundle.model_id, bundle.bundle_asset_id}) != 3:
+        raise ValueError("Catalog model bundle identifiers must be distinct")
+
+    visual_hash = "sha256:" + bundle.visual_sha256
+    source_hash = "sha256:" + bundle.source_manifest_sha256
+    try:
+        with ZipFile(io.BytesIO(bundle.bundle)) as archive:
+            members = archive.namelist()
+            if len(members) != 2 or set(members) != {
+                "model.visual.json",
+                "receipt.json",
+            }:
+                raise ValueError(
+                    "Catalog bundle must contain one visual JSON and one receipt"
+                )
+            if _catalog_digest(archive.read("model.visual.json")) != visual_hash:
+                raise ValueError("Catalog visual definition hash mismatch")
+            if _catalog_digest(archive.read("receipt.json")) != source_hash:
+                raise ValueError("Catalog source manifest hash mismatch")
+    except (KeyError, OSError, BadZipFile) as exc:
+        raise ValueError("Catalog model bundle is malformed") from exc
+    return _catalog_digest(bundle.model_xml), visual_hash, source_hash
+
+
+def _build_catalog_bundle_plan(bundle: CatalogModelBundle) -> _CatalogBundlePlan:
+    """Build immutable metadata and payload records after source validation."""
+    xml_hash, visual_hash, source_hash = _validate_catalog_model_bundle(bundle)
+    model_metadata = {
+        "schema": "necromatcher/native-model/1",
+        "hash": xml_hash,
+        "engine": "mujoco",
+        "dofs": list(bundle.dofs),
+        "coordinate_units": list(bundle.coordinate_units),
+        "qualification": "unqualified_candidate",
+        "model_version": bundle.model_version,
+        "bundle_asset_id": bundle.bundle_asset_id,
+        "visual_definition_sha256": visual_hash,
+        "source_manifest_sha256": source_hash,
+        "source_profile_sha256": bundle.source_profile_sha256,
+        "physics_spec_sha256": bundle.physics_spec_sha256,
+    }
+    bundle_metadata = {
+        "schema": "necromatcher/native-model-bundle/1",
+        "model_id": bundle.model_id,
+        "hash": _catalog_digest(bundle.bundle),
+        "visual_definition_sha256": visual_hash,
+        "source_manifest_sha256": source_hash,
+    }
+    return _CatalogBundlePlan(
+        bundle,
+        {"catalog_profile_sha256": bundle.source_profile_sha256},
+        {
+            "kind": "sized_catalog_candidate",
+            "model_version": bundle.model_version,
+            "source_manifest_sha256": source_hash,
+            "source_profile_sha256": bundle.source_profile_sha256,
+        },
+        _CatalogBundleFile(
+            bundle.model_id, bundle.model_xml, "native_model", "xml", model_metadata
+        ),
+        _CatalogBundleFile(
+            bundle.bundle_asset_id,
+            bundle.bundle,
+            "native_model_bundle",
+            "bundle.zip",
+            bundle_metadata,
+        ),
+    )
+
+
+def _existing_catalog_bundle(
+    library: NecromatcherLibrary,
+    project: Any,
+    plan: _CatalogBundlePlan,
+) -> tuple[DatasetMetadata, DatasetMetadata] | None:
+    """Return an exact prior import, or reject any partial/identity collision."""
+    request = plan.request
+    subject = project.subjects.get(request.player_id)
+    if subject is not None and (
+        subject.display_name != request.display_name
+        or subject.metadata != plan.subject_metadata
+    ):
+        raise StateError(f"Catalog player identity collision: {request.player_id}")
+    model_present = request.model_id in project.datasets
+    bundle_present = request.bundle_asset_id in project.datasets
+    session = project.sessions.get(request.session_id)
+    if not model_present and not bundle_present and session is None:
+        return None
+    if not (model_present and bundle_present and session is not None and subject):
+        raise StateError("Partial or conflicting catalog model import exists")
+    if (
+        session.subject_id != request.player_id
+        or session.metadata != plan.session_metadata
+    ):
+        raise StateError("Catalog model session identity collision")
+    for spec in (plan.model_file, plan.bundle_file):
+        asset = project.datasets[spec.asset_id]
+        if asset.kind != spec.kind or asset.metadata != spec.metadata:
+            raise StateError(f"Catalog model asset collision: {spec.asset_id}")
+        library.load_asset(spec.asset_id)
+    return project.datasets[request.model_id], project.datasets[request.bundle_asset_id]
+
+
 def _scope_review_metadata(scope: SourceFitScope) -> dict[str, Any]:
     """Use the verified scope declaration as the receipt asset's immutable index."""
     review = scope.review
@@ -94,6 +268,7 @@ class NecromatcherLibrary:
 
     @property
     def root(self) -> Path:
+        """Return the configured library root directory."""
         return self._store.root
 
     def authenticated_read(self) -> AuthenticatedRead:
@@ -131,6 +306,7 @@ class NecromatcherLibrary:
             return self._store.add_subject(player_id, name)
 
     def players(self) -> list[SubjectMetadata]:
+        """Return registered player identities in stable identifier order."""
         return sorted(
             self._store.load_project().subjects.values(), key=lambda x: x.subject_id
         )
@@ -141,9 +317,11 @@ class NecromatcherLibrary:
             return self._store.create_session(swing_id, player_id, name)
 
     def swings(self, player_id: str | None = None) -> list[SessionMetadata]:
+        """List swing sessions, optionally limited to one player."""
         return self._store.list_sessions(player_id)
 
     def assets(self, swing_id: str) -> list[DatasetMetadata]:
+        """List the registered assets for a swing session."""
         self._store.load_session(swing_id)
         return self._store.list_datasets(swing_id)
 
@@ -234,192 +412,68 @@ class NecromatcherLibrary:
             )
 
     def add_catalog_model_bundle(
-        self,
-        *,
-        player_id: str,
-        display_name: str,
-        session_id: str,
-        model_id: str,
-        bundle_asset_id: str,
-        model_xml: bytes,
-        bundle: bytes,
-        visual_sha256: str,
-        source_manifest_sha256: str,
-        dofs: tuple[str, ...],
-        coordinate_units: tuple[str, ...],
-        source_profile_sha256: str,
-        physics_spec_sha256: str,
-        model_version: str,
+        self, bundle: CatalogModelBundle
     ) -> tuple[DatasetMetadata, DatasetMetadata]:
         """Atomically add an immutable candidate with its bindable source files."""
-        if not model_xml or not bundle:
-            raise ValueError("Catalog model files must be nonempty")
-        if (
-            not dofs
-            or len(dofs) != len(set(dofs))
-            or len(coordinate_units) != len(dofs)
-            or any(not name.strip() for name in dofs)
-            or any(unit not in {"m", "rad"} for unit in coordinate_units)
-        ):
-            raise ValueError("Catalog model requires ordered scalar DOFs and units")
-        hashes = (
-            source_profile_sha256,
-            physics_spec_sha256,
-            visual_sha256,
-            source_manifest_sha256,
-        )
-        if any(not isinstance(value, str) or len(value) != 64 for value in hashes):
-            raise ValueError("Catalog model requires exact source and physics hashes")
-        for identifier in (player_id, session_id, model_id, bundle_asset_id):
-            ArtifactReference(
-                identifier, "pending", "pending", "pending", ArtifactKind.MODEL
-            )
-        if len({session_id, model_id, bundle_asset_id}) != 3:
-            raise ValueError("Catalog model bundle identifiers must be distinct")
-
-        def digest(data: bytes) -> str:
-            return "sha256:" + hashlib.sha256(data).hexdigest()
-
-        xml_hash = digest(model_xml)
-        visual_hash = "sha256:" + visual_sha256
-        source_hash = "sha256:" + source_manifest_sha256
-        try:
-            with ZipFile(io.BytesIO(bundle)) as archive:
-                if set(archive.namelist()) != {"model.visual.json", "receipt.json"}:
-                    raise ValueError(
-                        "Catalog bundle must contain visual JSON and receipt"
-                    )
-                if digest(archive.read("model.visual.json")) != visual_hash:
-                    raise ValueError("Catalog visual definition hash mismatch")
-                if digest(archive.read("receipt.json")) != source_hash:
-                    raise ValueError("Catalog source manifest hash mismatch")
-        except (KeyError, OSError) as exc:
-            raise ValueError("Catalog model bundle is malformed") from exc
-        subject_metadata = {"catalog_profile_sha256": source_profile_sha256}
-        session_metadata = {
-            "kind": "sized_catalog_candidate",
-            "model_version": model_version,
-            "source_manifest_sha256": source_hash,
-            "source_profile_sha256": source_profile_sha256,
-        }
-        model_metadata = {
-            "schema": "necromatcher/native-model/1",
-            "hash": xml_hash,
-            "engine": "mujoco",
-            "dofs": list(dofs),
-            "coordinate_units": list(coordinate_units),
-            "qualification": "unqualified_candidate",
-            "model_version": model_version,
-            "bundle_asset_id": bundle_asset_id,
-            "visual_definition_sha256": visual_hash,
-            "source_manifest_sha256": source_hash,
-            "source_profile_sha256": source_profile_sha256,
-            "physics_spec_sha256": physics_spec_sha256,
-        }
-        bundle_hash = digest(bundle)
-        bundle_metadata = {
-            "schema": "necromatcher/native-model-bundle/1",
-            "model_id": model_id,
-            "hash": bundle_hash,
-            "visual_definition_sha256": visual_hash,
-            "source_manifest_sha256": source_hash,
-        }
-        names = {
-            model_id: ("native_model", "xml", model_metadata, xml_hash),
-            bundle_asset_id: (
-                "native_model_bundle",
-                "bundle.zip",
-                bundle_metadata,
-                bundle_hash,
-            ),
-        }
-
+        plan = _build_catalog_bundle_plan(bundle)
         with self._write_lock():
             project = self._store.load_project()
-            subject = project.subjects.get(player_id)
-            if subject is not None and (
-                subject.display_name != display_name
-                or subject.metadata != subject_metadata
-            ):
-                raise StateError(f"Catalog player identity collision: {player_id}")
+            existing = _existing_catalog_bundle(self, project, plan)
+            if existing is not None:
+                return existing
+            return self._write_catalog_bundle(project, plan)
 
-            ids = set(names)
-            prior_ids = ids & project.datasets.keys()
-            prior_session = project.sessions.get(session_id)
-            if prior_ids or prior_session:
-                if prior_ids != ids or prior_session is None or subject is None:
-                    raise StateError(
-                        "Partial or conflicting catalog model import exists"
-                    )
-                if (
-                    prior_session.subject_id != player_id
-                    or prior_session.metadata != session_metadata
-                ):
-                    raise StateError("Catalog model session identity collision")
-                for asset_id, (kind, _, metadata, _) in names.items():
-                    asset = project.datasets[asset_id]
-                    if asset.kind != kind or asset.metadata != metadata:
-                        raise StateError(f"Catalog model asset collision: {asset_id}")
-                    self.load_asset(asset_id)
-                return tuple(project.datasets[item] for item in names)  # type: ignore[return-value]
-
-            if session_id in project.sessions:
-                raise StateError(f"Catalog model session collision: {session_id}")
-            assets_root = self.root / "assets"
-            assets_root.mkdir(exist_ok=True)
-            payloads = {
-                model_id: (model_xml, "native_model", "xml", model_metadata),
-                bundle_asset_id: (
-                    bundle,
-                    "native_model_bundle",
-                    "bundle.zip",
-                    bundle_metadata,
-                ),
-            }
-            now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-            created: list[Path] = []
-            try:
-                datasets = dict(project.datasets)
-                for asset_id, (payload, kind, suffix, metadata) in payloads.items():
-                    target = assets_root / f"{asset_id}.{suffix}"
-                    with target.open("xb") as handle:
-                        created.append(target)
-                        handle.write(payload)
-                        handle.flush()
-                        os.fsync(handle.fileno())
-                    datasets[asset_id] = DatasetMetadata(
-                        dataset_id=asset_id,
-                        session_id=session_id,
-                        path=str(target),
-                        kind=kind,
-                        metadata=dict(metadata),
-                    )
-                subjects = dict(project.subjects)
-                if subject is None:
-                    subjects[player_id] = SubjectMetadata(
-                        player_id, display_name, subject_metadata
-                    )
-                sessions = dict(project.sessions)
-                sessions[session_id] = SessionMetadata(
-                    session_id,
-                    player_id,
-                    f"{display_name} Catalog Candidate",
-                    now,
-                    session_metadata,
+    def _write_catalog_bundle(
+        self, project: Any, plan: _CatalogBundlePlan
+    ) -> tuple[DatasetMetadata, DatasetMetadata]:
+        """Publish files first, then register all metadata in one project save."""
+        request = plan.request
+        assets_root = self.root / "assets"
+        assets_root.mkdir(exist_ok=True)
+        now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        created: list[Path] = []
+        try:
+            datasets = dict(project.datasets)
+            for spec in (plan.model_file, plan.bundle_file):
+                target = assets_root / f"{spec.asset_id}.{spec.suffix}"
+                with target.open("xb") as handle:
+                    created.append(target)
+                    handle.write(spec.payload)
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                datasets[spec.asset_id] = DatasetMetadata(
+                    dataset_id=spec.asset_id,
+                    session_id=request.session_id,
+                    path=str(target),
+                    kind=spec.kind,
+                    metadata=dict(spec.metadata),
                 )
-                self._store._save(
-                    replace(
-                        project,
-                        subjects=subjects,
-                        sessions=sessions,
-                        datasets=datasets,
-                    )
+            subjects = dict(project.subjects)
+            if request.player_id not in subjects:
+                subjects[request.player_id] = SubjectMetadata(
+                    request.player_id, request.display_name, plan.subject_metadata
                 )
-            except BaseException:
-                for path in created:
-                    path.unlink(missing_ok=True)
-                raise
-            return datasets[model_id], datasets[bundle_asset_id]
+            sessions = dict(project.sessions)
+            sessions[request.session_id] = SessionMetadata(
+                request.session_id,
+                request.player_id,
+                f"{request.display_name} Catalog Candidate",
+                now,
+                plan.session_metadata,
+            )
+            self._store._save(
+                replace(
+                    project,
+                    subjects=subjects,
+                    sessions=sessions,
+                    datasets=datasets,
+                )
+            )
+        except BaseException:
+            for path in created:
+                path.unlink(missing_ok=True)
+            raise
+        return datasets[request.model_id], datasets[request.bundle_asset_id]
 
     def load_model_definition(self, model_id: str) -> bytes:
         """Return the exact hash-verified visual JSON bound to a catalog model."""
@@ -443,7 +497,7 @@ class NecromatcherLibrary:
         try:
             with ZipFile(bundle.path) as archive:
                 content = archive.read(member)
-        except (KeyError, OSError) as exc:
+        except (KeyError, OSError, BadZipFile) as exc:
             raise ValueError("Catalog bundle member is missing") from exc
         key = (
             "visual_definition_sha256"
@@ -451,7 +505,7 @@ class NecromatcherLibrary:
             else "source_manifest_sha256"
         )
         if bundle.metadata.get(key) != "sha256:" + hashlib.sha256(content).hexdigest():
-            raise ValueError("Catalog bundle member hash is missing")
+            raise ValueError("Catalog bundle member hash verification failed")
         return content
 
     def add_capture(
