@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -109,6 +110,18 @@ def test_frame_digest_and_window_are_verified_against_pinned_map() -> None:
         annotation_set((frame(digest="f" * 64),)).verify_frame_map(frame_map)
     with pytest.raises(ValueError, match="candidate window"):
         annotation_set((frame(index=2000),)).verify_frame_map(frame_map)
+    with pytest.raises(ValueError, match="absent from pinned frame map"):
+        annotation_set((frame(index=1102),)).verify_frame_map(frame_map)
+
+
+def test_envelope_invariants_fail_closed() -> None:
+    """Duplicate rows, an unknown phase and a wrong schema are all refused."""
+    with pytest.raises(ValueError, match="Duplicate held-out"):
+        annotation_set((frame(), frame()))
+    with pytest.raises(ValueError, match="outside required_phases"):
+        annotation_set((frame(phase="backswing"),))
+    with pytest.raises(ValueError, match="schema_version"):
+        replace(annotation_set(full_pass()), schema_version="heldout-phase-9/0.0.0")
 
 
 def test_out_of_frame_keypoints_are_rejected() -> None:
