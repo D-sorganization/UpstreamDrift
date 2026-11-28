@@ -2106,6 +2106,7 @@
 {"path": "neural_motion/roster.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/surrogates/__init__.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/surrogates/comparison.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
+{"path": "neural_motion/surrogates/forward_surrogate_runner.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/surrogates/physics_structured.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/surrogates/sparse_residual.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
 {"path": "neural_motion/surrogates/types.py", "classification": "ud-only", "package": "neural_motion", "spelling_only": false}
