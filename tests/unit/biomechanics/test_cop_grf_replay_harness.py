@@ -234,4 +234,38 @@ def test_dwell_time_suppresses_rapid_threshold_oscillations():
         f"dwell_time_s not wired: {len(chatter_window['transitions'])} transitions from "
         f"sub-dwell oscillations; expected 0 with dwell_time_s=0.05 s"
     )
+
+
+def test_split_foot_load_keeps_foot_in_support_hull():
+    """FC-016a review: a foot loaded across sub-threshold contacts must stay in the hull.
+
+    The left foot carries 6 N + 6 N against a 10 N release threshold.  Per-contact gating
+    drops that foot, collapsing the hull to the right foot only, so the wrench CoP — which
+    sits in the gap between the two foot polygons — is reported as a false excursion.
+    """
+    left_hull = [(0.0, -0.1), (0.2, -0.1), (0.2, 0.0), (0.0, 0.0)]
+    right_hull = [(0.0, 0.1), (0.2, 0.1), (0.2, 0.2), (0.0, 0.2)]
+
+    harness = ReplayHarness(
+        foot_hulls={"left": left_hull, "right": right_hull},
+        engage_threshold_n=20.0,
+        release_threshold_n=10.0,
+        dwell_time_s=0.015,
+    )
+
+    contacts = [
+        ContactPointRecord("l1", "calcn_l", "left", (0.1, -0.05, 0.0), (0.0, 0.0, 6.0)),
+        ContactPointRecord("l2", "calcn_l", "left", (0.1, -0.05, 0.0), (0.0, 0.0, 6.0)),
+        ContactPointRecord("r1", "calcn_r", "right", (0.1, 0.15, 0.0), (0.0, 0.0, 12.0)),
+    ]
+    rec = harness.record_frame("frame_0001", time_s=0.0, source_ref="test:15858", contacts=contacts)
+
+    assert rec.wrench_cop is not None
+    assert rec.wrench_cop[1] == pytest.approx(0.05)
+
+    assert rec.bos_valid is True, (
+        f"a foot whose 12 N load is split across two 6 N contacts must stay in the hull; "
+        f"got bos_valid={rec.bos_valid}, bos_margin_m={rec.bos_margin_m:.4f}"
+    )
+    assert rec.is_excursion is False
 # fmt: on

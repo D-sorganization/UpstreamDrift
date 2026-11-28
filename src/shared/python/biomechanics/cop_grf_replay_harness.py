@@ -257,9 +257,15 @@ class ReplayHarness:
         bos_margin = 0.0
         is_excursion = False
         if cop_w is not None and self.foot_hulls:
+            # Gate on aggregated per-foot normal load: a foot whose load is split across
+            # contacts is loaded even when no single contact clears the threshold.
+            fz_by_foot: dict[str, float] = {}
+            for c in contacts:
+                if c.foot in self.foot_hulls:
+                    fz_by_foot[c.foot] = fz_by_foot.get(c.foot, 0.0) + float(c.force_n[2])
             active_feet = {
-                c.foot for c in contacts
-                if c.foot in self.foot_hulls and float(c.force_n[2]) >= self.release_threshold_n
+                foot for foot, foot_fz in fz_by_foot.items()
+                if foot_fz >= self.release_threshold_n
             }
             if not active_feet:
                 active_feet = set(self.foot_hulls.keys())
