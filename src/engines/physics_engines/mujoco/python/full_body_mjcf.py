@@ -213,6 +213,19 @@ def export_full_body_mjcf(
     )
 
     spec = json.loads(model_bytes)
+    embedded_appearance = spec.pop("appearance", None)
+    if embedded_appearance is not None:
+        if appearance is not None:
+            raise ValueError(
+                "appearance must not be supplied both in the visual definition and as an argument"
+            )
+        from src.shared.python.model_appearance.schema import document_from_dict
+
+        appearance = document_from_dict(embedded_appearance)
+        # The visual definition is a physics spec plus its appearance sidecar.
+        # Normalize the physics bytes before hashing/export so bindings can use
+        # the retained combined definition directly.
+        model_bytes = json.dumps(spec, separators=(",", ":")).encode("utf-8")
     model_sha = hashlib.sha256(model_bytes).hexdigest()
     if require_grip_binding:
         build_spec_grip_binding_manifest(

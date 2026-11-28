@@ -47,3 +47,18 @@ the existing flight scene.
 Historical matching and final overall parity acceptance remain tracked in epic
 #11232. Local execution acceptance does not establish a qualified Tiger/Hogan
 model or engineering release approval.
+
+## Importing Catalog Candidates
+
+Import a `player_models.export_player` sized export into an existing library:
+
+```python
+from pathlib import Path
+from src.shared.python.workspace import NecromatcherLibrary, import_catalog_model
+library = NecromatcherLibrary(Path("/path/to/chosen/necromatcher-library"))
+result = import_catalog_model(library, "rory_mcilroy", "/path/to/rory_mcilroy-export")
+```
+
+The root must already contain `project.json`. Import retains the hash-checked
+XML, visual JSON and receipt. Exact reimports are idempotent; collisions are
+rejected. The tile uses this root when `NECROMATCHER_LIBRARY_ROOT` is set.

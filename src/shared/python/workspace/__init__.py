@@ -49,6 +49,10 @@ from .historical_research import (
     historical_research_schema_bytes,
 )
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
+from .necromatcher_catalog_import import (
+    CatalogModelImport,
+    import_catalog_model,
+)
 from .necromatcher_authenticated_read import AuthenticatedRead, authenticated_read
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
 from .necromatcher_native import (
@@ -274,6 +278,8 @@ __all__ = [
     "authenticated_read",
     "CaptureReview",
     "default_necromatcher_library",
+    "CatalogModelImport",
+    "import_catalog_model",
     "ActionAvailability",
     "ArtifactKind",
     "ArtifactReference",
