@@ -1,0 +1,37 @@
+{
+  "schema_version": "club-only-canonical-v2-thresholds/1.0.0",
+  "provenance": {
+    "governing_issue": 15787,
+    "parent_epic": 10602,
+    "panel_id": "th_18425773591c",
+    "model_version_ref": "src/config/golfer_model_versions.json",
+    "full_body_gate_ref": "src/shared/python/motion_matching/acceptance.py::AcceptanceGates",
+    "admission_ref": "src/shared/python/optimization/admission.py::PREREGISTERED_TOLERANCES",
+    "skin_model_ref": "#15814"
+  },
+  "kinematic_tolerances": {
+    "grip_position_rmse_m": 0.04,
+    "grip_position_max_m": 0.08,
+    "grip_orientation_rmse_rad": 0.1,
+    "grip_orientation_max_rad": 0.2,
+    "clubhead_position_rmse_m": 0.1,
+    "clubhead_position_max_m": 0.18,
+    "clubhead_orientation_rmse_rad": 0.1,
+    "clubhead_orientation_max_rad": 0.2
+  },
+  "closure_tolerances": {
+    "grip_closure_rmse_m": 0.002,
+    "grip_closure_max_m": 0.005
+  },
+  "dynamic_and_replay_budgets": {
+    "min_native_coverage_fraction": 0.8,
+    "max_root_force_bw_fraction": 0.02,
+    "max_root_moment_bw_height_fraction": 0.02,
+    "max_grf_residual_bw_fraction": 0.05,
+    "max_penetration_m": 0.01,
+    "max_replay_drift_m": 0.025,
+    "max_replay_joint_rms_rad": 0.03490658503988659,
+    "max_speed_error_m_s": 2.0,
+    "max_phase_error_s": 0.02
+  }
+}
