@@ -121,3 +121,54 @@ def test_scorecard_serialization_and_deterministic_sha256_hash(tmp_path: Path) -
     assert loaded["timebase"] == "unverified"
     assert loaded["physical_time_verified"] is False
     assert loaded["qualification"] == "image_observations_only"
+
+
+def test_null_margin_is_scored_on_the_covered_population() -> None:
+    """A candidate that re-emits the null pose earns no baseline margin (#15837)."""
+    gates = ms.load_scorecard_gates()
+    tpl = ms.build_phase_aligned_null_template(gates)
+    anns: list[ms.FramePoseRecord] = []
+    preds: list[ms.FramePoseRecord] = []
+    for pi, phase in enumerate(gates.required_phases):
+        pose = tpl.phase_poses[phase]
+        for j in range(4):
+            idx = 1080 + 10 * pi + j
+            anns.append(
+                ms.FramePoseRecord(
+                    idx,
+                    phase,
+                    {k: (v[0] + 6.0, v[1] + 6.0) for k, v in pose.keypoints_px.items()},
+                    pose.shaft_angle_deg + 1.0,
+                )
+            )
+            preds.append(
+                ms.FramePoseRecord(
+                    idx, phase, dict(pose.keypoints_px), pose.shaft_angle_deg
+                )
+            )
+        anns.append(
+            ms.FramePoseRecord(
+                1500,
+                phase,
+                {k: (v[0] + 400.0, v[1] + 150.0) for k, v in pose.keypoints_px.items()},
+                pose.shaft_angle_deg + 45.0,
+            )
+        )
+    sc = ms.evaluate_markerless_scorecard(
+        "c-pop", anns, preds, gates=gates, null_template=tpl
+    )
+    assert sc.metrics["null_kp_px"] == pytest.approx(sc.metrics["kp_px"])
+    assert sc.metrics["null_ang_deg"] == pytest.approx(sc.metrics["ang_deg"])
+    assert sc.status == "below_gate"
+    assert "null_baseline_keypoint_margin_not_met" in sc.failure_reasons
+    assert "null_baseline_shaft_angle_margin_not_met" in sc.failure_reasons
+
+
+def test_annotation_phase_outside_frozen_vocabulary_is_rejected() -> None:
+    """Unknown swing phases fail closed instead of skewing the scored population."""
+    anns, preds = _sample()
+    anns.append(
+        ms.FramePoseRecord(1200, "backswing", {"left_wrist": (600.0, 300.0)}, 0.0)
+    )
+    with pytest.raises(ValueError, match="required_phases"):
+        ms.evaluate_markerless_scorecard("c-vocab", anns, preds)
