@@ -306,6 +306,7 @@
 {"path": "biomechanics/swing_comparison.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_analysis.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_visualization.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/swing_planes_quiver.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_posture_metrics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/transactional_muscle_replay.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/x_factor_literature.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
