@@ -51,11 +51,14 @@ def test_public_catalog_ids_include_legacy_and_new_profiles():
         "ben_hogan",
         "bobby_jones",
         "byron_nelson",
+        "george_knudson",
+        "greg_norman_1986",
         "jack_nicklaus",
         "mac_ogrady",
         "sam_snead",
         "seve_ballesteros",
         "tiger_woods",
+        "tom_watson",
     )
 
 
