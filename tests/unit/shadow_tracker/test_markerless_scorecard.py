@@ -8,9 +8,56 @@ from pathlib import Path
 
 import pytest
 
+from src.shared.python.shadow_tracker import heldout_phase_annotations as ho
 from src.shared.python.shadow_tracker import markerless_scorecard as ms
 
 pytestmark = pytest.mark.unit
+
+
+def _heldout(
+    anns: list[ms.FramePoseRecord],
+    *,
+    status: str = "reviewed",
+    floor: str = "measured",
+    pinned: dict[str, object] | None = None,
+) -> ho.HeldoutPhaseAnnotations:
+    """Wrap synthetic annotations in a pinned held-out envelope."""
+    gates = ms.load_scorecard_gates()
+    return ho.HeldoutPhaseAnnotations(
+        schema_version=ho.HELDOUT_SCHEMA_VERSION,
+        annotation_set_id="tiger-2000-heldout-fixture",
+        status=status,  # type: ignore[arg-type]
+        annotator="fixture-annotator",
+        pinned_reference=dict(pinned or gates.pinned_reference),
+        required_phases=gates.required_phases,
+        frames=tuple(
+            ho.HeldoutFrameAnnotation(
+                frame_index=a.frame_index,
+                phase=a.phase,
+                frame_sha256=f"{a.frame_index:064x}",
+                keypoints_px=a.keypoints_px,
+                shaft_angle_deg=a.shaft_angle_deg,
+            )
+            for a in anns
+        ),
+        independence=ho.IndependenceDeclaration(
+            annotator_kind="human_reviewed",
+            derived_from_null_template=False,
+            derived_from_candidate_tracker=False,
+        ),
+        noise_floor=ho.NoiseFloor(
+            status=floor,  # type: ignore[arg-type]
+            keypoint_rmse_px=3.0 if floor == "measured" else None,
+            shaft_angle_deg=1.0 if floor == "measured" else None,
+            repeat_pair_count=6 if floor == "measured" else 0,
+        ),
+        review=ho.AnnotationReview(
+            method="independent_human_annotation_on_pinned_decoded_frames",
+            second_pass_required=True,
+            reviewer="fixture-reviewer",
+            completed_at="2026-11-28",
+        ),
+    )
 
 
 def _sample(
@@ -60,7 +107,9 @@ def test_known_offsets_fail_1_5x_noise_floor_ceiling() -> None:
     """Offsets exceeding 1.5x annotator noise floor fail closed."""
     for kp_e, ang_e, frag in ((13.0, 1.0, "keypoint"), (1.0, 7.0, "shaft_angle")):
         anns, preds = _sample(kp_e=kp_e, ang_e=ang_e)
-        sc = ms.evaluate_markerless_scorecard("c-n", anns, preds)
+        sc = ms.evaluate_markerless_scorecard(
+            "c-n", anns, preds, heldout=_heldout(anns)
+        )
         assert sc.status == "below_gate" and sc.match_classification == "below_gate"
         assert any(frag in r for r in sc.failure_reasons)
         assert sc.failing_phases == ("address", "top", "downswing", "impact", "finish")
@@ -69,7 +118,9 @@ def test_known_offsets_fail_1_5x_noise_floor_ceiling() -> None:
 def test_missing_and_low_coverage_phases_fail_closed() -> None:
     """Missing impact and sub-threshold finish coverage fail closed and name both."""
     anns, preds = _sample(("address", "top", "downswing", "finish"), per_phase=4)
-    sc = ms.evaluate_markerless_scorecard("c-cov", anns, preds[:-2])
+    sc = ms.evaluate_markerless_scorecard(
+        "c-cov", anns, preds[:-2], heldout=_heldout(anns)
+    )
     assert sc.status == "below_gate"
     assert {"impact", "finish"}.issubset(sc.failing_phases)
     assert all(any(p in r for r in sc.failure_reasons) for p in ("impact", "finish"))
@@ -81,7 +132,7 @@ def test_candidate_must_beat_phase_aligned_null_template_by_margin() -> None:
     g = ms.load_scorecard_gates()
     tpl = ms.build_phase_aligned_null_template(g)
     sc = ms.evaluate_markerless_scorecard(
-        "c-m", anns, preds, gates=g, null_template=tpl
+        "c-m", anns, preds, gates=g, null_template=tpl, heldout=_heldout(anns)
     )
     assert sc.status == "below_gate"
     assert any("null_baseline" in r for r in sc.failure_reasons)
@@ -90,15 +141,20 @@ def test_candidate_must_beat_phase_aligned_null_template_by_margin() -> None:
 def test_passing_candidate_emits_2d_or_3d_plausible_and_unverified_timebase() -> None:
     """Passing candidate emits 2D match or 3D plausible with unverified timebase."""
     anns, preds = _sample(kp_e=1.5, ang_e=0.5)
-    sc2 = ms.evaluate_markerless_scorecard("c-2d", anns, preds)
+    held = _heldout(anns)
+    sc2 = ms.evaluate_markerless_scorecard("c-2d", anns, preds, heldout=held)
     assert sc2.schema_version == ms.SCORECARD_SCHEMA_VERSION and sc2.status == "passed"
     assert sc2.match_classification == "kinematic_2d_match"
     _assert_unverified(sc2)
     part = ms.ModelSpaceChecks(True, True, True, True, False)
-    sc_p = ms.evaluate_markerless_scorecard("c-p", anns, preds, model_space_checks=part)
+    sc_p = ms.evaluate_markerless_scorecard(
+        "c-p", anns, preds, model_space_checks=part, heldout=held
+    )
     assert sc_p.match_classification == "kinematic_2d_match"
     full = ms.ModelSpaceChecks(True, True, True, True, True)
-    sc3 = ms.evaluate_markerless_scorecard("c-3d", anns, preds, model_space_checks=full)
+    sc3 = ms.evaluate_markerless_scorecard(
+        "c-3d", anns, preds, model_space_checks=full, heldout=held
+    )
     assert sc3.status == "passed"
     assert sc3.match_classification == "kinematic_3d_plausible"
     _assert_unverified(sc3)
@@ -107,8 +163,9 @@ def test_passing_candidate_emits_2d_or_3d_plausible_and_unverified_timebase() ->
 def test_scorecard_serialization_and_deterministic_sha256_hash(tmp_path: Path) -> None:
     """Scorecard JSON serialization and SHA-256 content hash are deterministic."""
     anns, preds = _sample(kp_e=1.0, ang_e=0.5)
-    sc_a = ms.evaluate_markerless_scorecard("c-h", anns, preds)
-    sc_b = ms.evaluate_markerless_scorecard("c-h", anns, preds)
+    held = _heldout(anns)
+    sc_a = ms.evaluate_markerless_scorecard("c-h", anns, preds, heldout=held)
+    sc_b = ms.evaluate_markerless_scorecard("c-h", anns, preds, heldout=held)
     assert len(sc_a.content_sha256) == 64 and sc_a.content_sha256 == sc_b.content_sha256
     assert sc_a.to_json() == sc_b.to_json()
     pl = sc_a.to_payload_dict()
@@ -121,3 +178,42 @@ def test_scorecard_serialization_and_deterministic_sha256_hash(tmp_path: Path) -
     assert loaded["timebase"] == "unverified"
     assert loaded["physical_time_verified"] is False
     assert loaded["qualification"] == "image_observations_only"
+
+
+def test_unpinned_evaluation_cannot_report_passed() -> None:
+    """Without a frozen held-out set the gate refuses any pass verdict."""
+    anns, preds = _sample(kp_e=1.0, ang_e=0.5)
+    sc = ms.evaluate_markerless_scorecard("c-unpinned", anns, preds)
+    assert sc.status == "below_gate"
+    assert sc.heldout_set_sha256 == ""
+    assert "heldout_annotations_missing" in sc.failure_reasons
+
+
+def test_pending_or_assumed_heldout_set_blocks_pass_verdict() -> None:
+    """An unreviewed pass or an assumed noise floor cannot yield a pass."""
+    anns, preds = _sample(kp_e=1.0, ang_e=0.5)
+    sc = ms.evaluate_markerless_scorecard(
+        "c-pending",
+        anns,
+        preds,
+        heldout=_heldout(anns, status="pending", floor="assumed"),
+    )
+    assert sc.status == "below_gate"
+    assert {
+        "heldout_annotation_pass_pending",
+        "annotator_noise_floor_unmeasured",
+    }.issubset(sc.failure_reasons)
+
+
+def test_heldout_pin_must_match_gate_config() -> None:
+    """A held-out set pinned to another rendition is rejected before scoring."""
+    anns, preds = _sample()
+    drifted = _heldout(
+        anns,
+        pinned={
+            **ms.load_scorecard_gates().pinned_reference,
+            "source_sha256": "9" * 64,
+        },
+    )
+    with pytest.raises(ValueError, match="pinned"):
+        ms.evaluate_markerless_scorecard("c-drift", anns, preds, heldout=drifted)

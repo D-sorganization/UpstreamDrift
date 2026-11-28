@@ -1,26 +1,32 @@
 """Frozen independent held-out phase annotations for the Tiger 2000 scorecard (#15837).
 
-WP-2 needs ground truth that was not produced by the tracker under test or by the null
-template itself. This module freezes that ground truth as a versioned, hash-pinned
-artifact whose records are bound to decoded image digests from the ``#15844`` frame map,
-so an annotation set cannot be silently regenerated against a different rendition or
-copied from the baseline it is meant to referee. It depends on nothing else in the
-package: the scorecard seam is added when the gate is wired.
+The scorecard in :mod:`.markerless_scorecard` needs ground truth that was not
+produced by the tracker under test or by the null template itself. This module
+freezes that ground truth as a versioned, hash-pinned artifact whose records are
+bound to decoded image digests from the ``#15844`` frame map, so an annotation set
+cannot be silently regenerated against a different rendition or copied from the
+baseline it is meant to referee.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, Final, Literal
 
 from . import _validation as _v
+from .markerless_scorecard import FramePoseRecord, PhaseAlignedNullTemplate
 
 HELDOUT_SCHEMA_VERSION: Final[str] = "heldout-phase-annotations/1.0.0"
-_CFG: Final[Path] = Path(__file__).resolve().parents[3] / "config"
-DEFAULT_HELDOUT_PATH: Final[Path] = _CFG / "tiger_2000_heldout_phase_annotations.json"
+DEFAULT_HELDOUT_PATH: Final[Path] = (
+    Path(__file__).resolve().parents[3]
+    / "config"
+    / "tiger_2000_heldout_phase_annotations.json"
+)
 #: Gate pins that the held-out set must agree with before any scoring is allowed.
 SHARED_PIN_KEYS: Final[tuple[str, ...]] = (
     "epic_issue",
@@ -147,6 +153,13 @@ class HeldoutFrameAnnotation:
         object.__setattr__(self, "keypoints_px", cleaned)
         object.__setattr__(self, "shaft_angle_deg", float(self.shaft_angle_deg))
 
+    @property
+    def pose(self) -> FramePoseRecord:
+        """Scorecard pose view, so keypoint validation lives in one place."""
+        return FramePoseRecord(
+            self.frame_index, self.phase, self.keypoints_px, self.shaft_angle_deg
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class HeldoutPhaseAnnotations:
@@ -216,6 +229,10 @@ class HeldoutPhaseAnnotations:
             )
         return int(window[0]), int(window[1])
 
+    def to_records(self) -> tuple[FramePoseRecord, ...]:
+        """Expose the annotation set as scorecard pose records."""
+        return tuple(record.pose for record in self.frames)
+
     def scoreability_blockers(self) -> tuple[str, ...]:
         """Return fail-closed reasons why this set may not referee a pass verdict."""
         blockers: list[str] = []
@@ -251,6 +268,16 @@ class HeldoutPhaseAnnotations:
                     f"frame_sha256 for {record.frame_index} does not match the pinned map"
                 )
 
+    def assert_carries_signal(self, null_template: PhaseAlignedNullTemplate) -> None:
+        """Reject an annotation set that merely copies the null template poses."""
+        empty = [
+            record
+            for record in self.frames
+            if _template_gap(record, null_template) == 0.0
+        ]
+        if len(empty) == len(self.frames):
+            raise ValueError("held-out annotations identical to the null template")
+
     def assert_pins_match(self, gate_pins: dict[str, Any]) -> None:
         """Require agreement with the gate config on every shared provenance pin."""
         assert_pins_match(gate_pins, self.pinned_reference)
@@ -262,6 +289,22 @@ class HeldoutPhaseAnnotations:
     def to_json(self) -> str:
         """Serialize the held-out set as deterministic indented JSON."""
         return json.dumps(asdict(self), sort_keys=True, allow_nan=False, indent=2)
+
+
+def _template_gap(
+    record: HeldoutFrameAnnotation, null_template: PhaseAlignedNullTemplate
+) -> float:
+    """Return the largest keypoint/angle difference between a record and its phase pose."""
+    pose = null_template.phase_poses.get(record.phase)
+    if pose is None:
+        raise ValueError(f"Null template missing phase {record.phase!r}")
+    gap = abs(pose.shaft_angle_deg - record.shaft_angle_deg)
+    for name, (x, y) in record.keypoints_px.items():
+        if name not in pose.keypoints_px:
+            return math.inf
+        px, py = pose.keypoints_px[name]
+        gap = max(gap, abs(px - x), abs(py - y))
+    return gap
 
 
 def _content_hash(payload: dict[str, Any]) -> str:
@@ -280,6 +323,38 @@ def assert_pins_match(gate_pins: dict[str, Any], heldout_pins: dict[str, Any]) -
             raise ValueError(
                 f"held-out pinned_reference.{key} disagrees with the gate config"
             )
+
+
+def measure_repeat_noise_floor(
+    first_pass: Sequence[HeldoutFrameAnnotation],
+    second_pass: Sequence[HeldoutFrameAnnotation],
+) -> NoiseFloor:
+    """Derive the annotator noise floor from two independent passes over one clip."""
+    first = {(r.frame_index, r.phase): r for r in first_pass}
+    second = {(r.frame_index, r.phase): r for r in second_pass}
+    shared = sorted(set(first) & set(second))
+    if not shared:
+        raise ValueError("repeat passes have no overlapping frames to measure")
+    kp_sq: list[float] = []
+    ang_sq: list[float] = []
+    for key in shared:
+        a, b = first[key], second[key]
+        names_a, names_b = set(a.keypoints_px), set(b.keypoints_px)
+        if names_a != names_b:
+            raise ValueError(
+                f"repeat passes disagree on keypoint names for frame {key[0]}"
+            )
+        for name in sorted(names_a):
+            (ax, ay), (bx, by) = a.keypoints_px[name], b.keypoints_px[name]
+            kp_sq.append((bx - ax) ** 2 + (by - ay) ** 2)
+        delta = (b.shaft_angle_deg - a.shaft_angle_deg + 180.0) % 360.0 - 180.0
+        ang_sq.append(delta * delta)
+    return NoiseFloor(
+        status="measured",
+        keypoint_rmse_px=math.sqrt(sum(kp_sq) / len(kp_sq)),
+        shaft_angle_deg=math.sqrt(sum(ang_sq) / len(ang_sq)),
+        repeat_pair_count=len(shared),
+    )
 
 
 def load_heldout_annotations(path: Path | None = None) -> HeldoutPhaseAnnotations:
