@@ -1050,7 +1050,7 @@ def _create_dashboard_window_class() -> type:
                 return
             if callable(apply_theme_to_window):
                 apply_theme_to_window(self)
-                self.destroyed.connect(lambda *_, b=self: release_theme_manager(b))
+                self.destroyed.connect(lambda *_: release_theme_manager(self))
 
         def _build_window_layout(self) -> None:
             """Create the central dashboard layout."""

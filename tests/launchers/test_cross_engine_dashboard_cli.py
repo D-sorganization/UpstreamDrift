@@ -222,6 +222,38 @@ def test_create_dashboard_window_class_returns_window_object(qapp) -> None:
     obj.deleteLater()
 
 
+def test_destroyed_dashboard_releases_theme_manager_after_qt_deferred_delete(
+    qapp, monkeypatch, tmp_path
+) -> None:
+    """Closing and reopening a themed window does not retain deleted wrappers."""
+    from PyQt6.QtCore import QEvent
+    from PyQt6.QtCore import QSettings
+
+    theme_manager = pytest.importorskip(
+        "src.shared.python.theme.theme_manager"
+    ).ThemeManager
+    QSettings.setPath(
+        QSettings.Format.NativeFormat, QSettings.Scope.UserScope, str(tmp_path)
+    )
+    monkeypatch.setattr(ced, "persist_window_geometry", lambda *_args: None)
+    theme_manager.reset_instance()
+
+    window = ced.CrossEngineDashboardWindow()
+    manager = theme_manager.instance()
+    assert manager.main_window is window
+    window.deleteLater()
+    qapp.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    qapp.processEvents()
+    assert manager.main_window is None
+
+    reopened = ced.CrossEngineDashboardWindow()
+    assert reopened is not None
+    reopened.deleteLater()
+    qapp.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    qapp.processEvents()
+    theme_manager.reset_instance()
+
+
 def test_cross_engine_dashboard_window_factory_returns_window(qapp) -> None:
     win = ced.CrossEngineDashboardWindow()
     assert win is not None
