@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 
 import defusedxml.ElementTree as ET
 import numpy as np
+from PyQt6 import sip
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QMouseEvent, QPixmap, QWheelEvent
 from PyQt6.QtWidgets import (
@@ -101,6 +102,11 @@ class MuJoCoViewerWidget(QWidget):
         # would keep firing _update_render on an already-deleted viewport.
         self._render_timer = QTimer(self)
         self._render_timer.timeout.connect(self._update_render)
+        # Parenting does not cover the viewport being destroyed on its own
+        # (issue #15935): the timer outlives it and every tick then raises
+        # inside the Qt event loop, which the test runner attributes to
+        # whichever test happens to be draining events.
+        self._viewport.destroyed.connect(self._stop_render_timer)
         self._render_timer.start(50)  # 20 FPS
 
     def _setup_ui(self) -> None:
@@ -347,9 +353,27 @@ class MuJoCoViewerWidget(QWidget):
 
         return errors
 
+    def _viewport_is_alive(self) -> bool:
+        """Return whether the viewport still owns its C++ QLabel.
+
+        Qt can delete the viewport before the rest of the widget tree goes, so
+        a later tick that reaches it raises ``RuntimeError`` inside the event
+        loop instead of at the caller (issue #15935).
+        """
+        return not sip.isdeleted(self._viewport)
+
+    def _stop_render_timer(self) -> None:
+        """Stop the render timer once the viewport it paints into is destroyed.
+
+        The timer is usually destroyed with its own widget, in which case there
+        is nothing left to stop.
+        """
+        if not sip.isdeleted(self._render_timer):
+            self._render_timer.stop()
+
     def _update_render(self) -> None:
-        """Update the rendered image."""
-        if not self._renderer:
+        """Update the rendered image, unless the viewport is already gone."""
+        if not self._renderer or not self._viewport_is_alive():
             return
 
         image = self._renderer.render()
