@@ -236,15 +236,100 @@ def _blob(centre: Array, half_xyz: tuple[float, float, float], axis: Array) -> M
     )
 
 
-def moustache_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
+def moustache_parts(skin: Mesh, *, fuller: bool = False) -> list[tuple[str, Mesh, str]]:
     """Two closed tapered hair strips conformed above the existing upper lip."""
     out = []
+    width, centre_z, height = (0.052, 0.305, 0.020) if fuller else (0.043, 0.315, 0.008)
+    centre_y = 0.04
     for side, sign in (("l", 1.0), ("r", -1.0)):
         mesh = _strip(
-            (sign * 0.04, 0.315), (0.002, 0.043, 0.008), sign, (-0.06, 0.12, 0.3)
+            (sign * centre_y, centre_z),
+            (0.002, width, height),
+            sign,
+            (-0.06, 0.12, 0.3),
         )
         out.append((f"moustache_{side}", _on_cover(skin, mesh, 0.001, 0.002), "brow"))
     return out
+
+
+def short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
+    """Create a close-cropped stubble shell, with a clear lip opening."""
+    return _beard_parts(skin, upper_extension=0.0, shell_offset=0.003, role="beard")
+
+
+def dense_short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
+    """Create a fuller short-beard shell that still leaves the lips open."""
+    return _beard_parts(
+        skin,
+        upper_extension=-0.005,
+        cheek_rise=0.055,
+        lip_half_size=(0.065, 0.032),
+        cheek_slope=0.08,
+        sideburn_taper=0.075,
+        shell_offset=0.004,
+        role="dense_beard",
+    )
+
+
+def _beard_parts(
+    skin: Mesh,
+    *,
+    upper_extension: float,
+    shell_offset: float,
+    role: str,
+    cheek_rise: float = 0.085,
+    lip_half_size: tuple[float, float] = (0.09, 0.045),
+    cheek_slope: float = 0.0,
+    sideburn_taper: float = 0.0,
+) -> list[tuple[str, Mesh, str]]:
+    """Build the facial-hair cover with a clear lip opening and fixed topology."""
+    from src.shared.python.model_appearance.head_hair import (
+        HairCrop,
+        _clip_above,
+        _split,
+        _vertex_normals,
+        closed_shell,
+    )
+
+    lip_half_width, lip_half_height = lip_half_size
+    v, normals, faces = skin.vertices, _vertex_normals(skin), skin.faces
+    faces = faces[((v[faces, 2] < 0.48) & (v[faces, 0] > 0.08)).any(axis=1)]
+    for _ in range(2):
+        v, normals, faces = _split(
+            v, normals, faces, HairCrop(refine_edge=0.012, refine_curve=0)
+        )
+
+    def level(points: Array) -> Array:
+        """Signed distance proxy for cheek, chin and elliptical lip boundaries."""
+        x, y, z = np.moveaxis(points, -1, 0)
+        side = np.clip((np.abs(y) - 0.09) / 0.14, 0.0, 1.0)
+        x_slope = np.clip((x - 0.08) / 0.20, 0.0, 1.0)
+        x_slope = x_slope * x_slope * (3 - 2 * x_slope)
+        upper = (
+            0.295
+            + upper_extension
+            + cheek_rise * side * side * (3 - 2 * side)
+            - cheek_slope * x_slope * side
+        )
+        outer = np.clip((np.abs(y) - 0.20) / 0.12, 0.0, 1.0)
+        front = 0.13 + 0.10 * outer * outer * (3 - 2 * outer)
+        z_taper = np.clip((z - 0.25) / 0.12, 0.0, 1.0)
+        z_taper = z_taper * z_taper * (3 - 2 * z_taper)
+        front += sideburn_taper * z_taper
+        lip = 0.05 * (np.hypot(y / lip_half_width, (z - 0.27) / lip_half_height) - 1)
+        return np.minimum.reduce((x - front, z - 0.075, upper - z, lip))
+
+    v, normals, faces = _clip_above(
+        v, normals, faces, level(v), (lambda p: float(level(p)), 8)
+    )
+    mesh = closed_shell(v, normals, faces, np.full(len(v), shell_offset), 0.0004, 0.001)
+    return [
+        ("beard_shell", mesh, role),
+        *[
+            (name, part, role)
+            for name, part, _ in moustache_parts(skin, fuller=role == "dense_beard")
+        ],
+    ]
 
 
 def face_parts(

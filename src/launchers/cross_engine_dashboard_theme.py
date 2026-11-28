@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any
+from functools import partial
+from typing import Any, Callable
 
 
 def release_theme_manager(window: Any) -> None:
@@ -24,3 +25,13 @@ def release_theme_manager(window: Any) -> None:
         return
     if manager.main_window is window:
         manager.main_window = None
+
+
+def dashboard_destroyed_slot(window: Any) -> Callable[..., None]:
+    """Bind a dashboard window to a Qt-safe destroyed-signal callback."""
+    return partial(_release_dashboard_theme_manager, window)
+
+
+def _release_dashboard_theme_manager(window: Any, *_args: Any) -> None:
+    """Ignore Qt's signal payload while releasing the captured window."""
+    release_theme_manager(window)
