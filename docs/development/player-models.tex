@@ -131,9 +131,9 @@ The exporter reads those choices from \texttt{CAP\_STYLES} rather than
 maintaining a second command-line list.
 \section{Sized-Candidate Frame Inertia Estimate}
 The sized-candidate builder accepts a dimensionless \texttt{frame\_build}
-$b\in[-1,1]$, taken from the catalog appearance's \texttt{body\_build}; it
-is zero when absent; catalog use requires appearance schema support for that
-field. Direct sized-builder use is independent. Existing fitted specs supplied for appearance-only export
+$b\in[-1,1]$, set by the catalog's explicit physical \texttt{frame\_prior}; it
+is zero when unknown. The separate visual \texttt{body\_build} does not set
+the physical prior. Direct sized-builder use remains independent. Existing fitted specs supplied for appearance-only export
 are not rebuilt or changed. For nonzero $b$, three de Leva trunk solids
 (pelvis, middle and upper trunk) receive an estimated change in transverse
 mass distribution, while segment mass and COM remain fixed. In each supported
@@ -158,6 +158,20 @@ matrix tests with:
 \begin{verbatim}
 PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_player_frame_inertia.py
 \end{verbatim}
+\subsection{Source-Attributed Frame Prior}
+An opt-in \texttt{height\_mass} prior selects a profile source and assumes
+equal average density and geometrically similar proportions relative to
+$H_0=1.71$ m and $M_0=78$ kg. For listed height $H$ and mass $M$, the
+transverse scale and bounded input are
+\[s=\sqrt{(M/M_0)(H_0/H)^3},\quad b=\operatorname{clip}((s-1)/0.18,-1,1).\]
+The source and era, raw scale, bound saturation and model assumption are
+recorded in the export receipt. A numeric \texttt{override} requires a
+written rationale; an absent prior means unknown, not a measured zero.
+Listed dimensions may not match the depicted era; composition, segment girths
+and subject-specific inertias are unmeasured. Bounds and alternatives such as
+$b\pm0.25$ are illustrative sensitivity cases, not confidence intervals.
+The tapered visual shape and uniform transverse inertia transforms have
+different geometry even when their parameters happen to be equal.
 \section{Reproduction and Acceptance}
 From the repository root, initialize the pinned Tools submodule and set
 \texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.
