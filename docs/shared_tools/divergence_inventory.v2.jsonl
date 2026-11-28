@@ -1780,6 +1780,7 @@
 {"path": "motion_matching/inverse/collapse.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/cvae.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/masked_proposal.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/inverse/ood_rejection.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/predict.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/proposal_shared.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse/proposal_training.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
