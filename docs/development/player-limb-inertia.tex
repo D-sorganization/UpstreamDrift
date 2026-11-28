@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section*{Sized Golfer Limb Inertia Estimates}
+This supplement to \texttt{player-models.tex} extends the frame-dependent
+inertia prior to both upper arms, both split forearms, both femurs and both
+tibias. It applies only when building a newly sized candidate. An existing
+fitted model used for an appearance-only export retains its physics. The
+control $b\in[-1,1]$ is an artistic build prior and $b=0$ returns the exact
+existing model. It is not a measured limb girth or a qualified motion.
+
+Each supported body has one expected incoming and outgoing joint. Their
+child-follower and parent-base translations give the proximal and distal
+points in the body frame, including nonzero proximal offsets. A proper solid
+placement rotation $R$ maps its local frame to the body frame. The unit
+longitudinal axis in the solid frame is $a=R^T(p_d-p_p)/\|p_d-p_p\|$.
+Invalid rigid transforms, unexpected or ambiguous endpoints, and spans outside
+$(0.05,1.0)$ metres are rejected. For $k=1+0.18b$, put
+\[ A=k\mathbf{1}+(1-k)aa^T,\quad
+C=\tfrac12\operatorname{tr}(I)\mathbf{1}-I,\quad
+C'=ACA^T,\quad I'=\operatorname{tr}(C')\mathbf{1}-C'. \]
+The input COM second moment $C$ must be positive definite. Since $k>0$,
+$C'$ is positive definite, and the resulting inertia obeys strict triangle
+inequalities. Mass, COM, joint frames, length and geometry do not change.
+The forearms are represented by proximal and distal solids; clavicles, hands,
+feet, head and club are excluded. Arm prior tensors use de Leva proportions;
+the leg tensors originate from the scaled OpenSim/Rajagopal bodies, not
+subject-specific scans. The common scale is a bounded heuristic, not the
+integral of the visible skin warp. New inertia estimates require refitting.
+
+Reproduce native mass, SPD, coordinate-frame and $qM$ checks with:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest \
+  tests/unit/model_appearance/test_player_limb_inertia.py
+\end{verbatim}
+\end{document}

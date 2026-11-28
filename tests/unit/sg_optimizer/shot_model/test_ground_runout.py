@@ -205,6 +205,60 @@ def test_penner_rebound_topspin_slip_classified_and_directed_correctly() -> None
     )
 
 
+def _eq8_tilt_deg(horizontal: float, down: float) -> float:
+    """Penner eq. (8) tilt (deg), recomputed straight from the cited coefficients."""
+    p = {k[7:]: v.value for k, v in gr.GROUND_PARAMETERS.items() if k[:7] == "bounce."}
+    phi = np.degrees(np.arctan2(horizontal, down))
+    return (
+        p["theta_c_ref_deg"]
+        * (np.hypot(horizontal, down) / p["theta_c_ref_speed_mps"])
+        * (phi / p["theta_c_ref_angle_deg"])
+    )
+
+
+def _tilt_domain_edge_mps() -> float:
+    """Landing speed at Penner's reference angle where eq. (8) reaches the 45 deg edge."""
+    p = {k[7:]: v.value for k, v in gr.GROUND_PARAMETERS.items() if k[:7] == "bounce."}
+    return p["theta_c_ref_speed_mps"] * 45.0 / p["theta_c_ref_deg"]
+
+
+def test_penner_rebound_flags_extrapolated_tilt() -> None:
+    """#15861: the 45 deg theta_c clamp is an explicit flag, not a silent bound.
+
+    Penner fitted eq. (8) to a single green impact (15.4 deg at 18.6 m/s and
+    44.4 deg from vertical), so every tilt past 45 deg is extrapolation. Clamping
+    keeps the rebound physical, but a caller reading only ``vx``/``vz`` cannot tell
+    a fitted bounce from an invented one, so the out-of-domain case must be marked.
+    """
+    assert _eq8_tilt_deg(55.0, 2.0) > 45.0, "input must really leave the domain"
+    out = gr.penner_rebound(55.0, 2.0, 500.0)
+    assert bool(out.tilt_clamped), (
+        "eq. (8) past 45 deg must report an extrapolated tilt"
+    )
+
+
+def test_penner_rebound_does_not_flag_tilt_inside_the_calibrated_domain() -> None:
+    """Penner's own reference impact stays unflagged: the flag is not always true."""
+    v, phi = 18.6, np.radians(44.4)
+    assert _eq8_tilt_deg(v * np.sin(phi), v * np.cos(phi)) < 45.0
+    out = gr.penner_rebound(v * np.sin(phi), v * np.cos(phi), 484.0)
+    assert not bool(out.tilt_clamped), "in-domain bounce must not be flagged"
+
+
+def test_tilt_clamp_flag_is_per_element_and_flips_at_the_domain_edge() -> None:
+    """Mixed landings flag elementwise, and the flag turns on exactly at 45 deg."""
+    edge = _tilt_domain_edge_mps()
+    inside = 0.999 * edge
+    outside = 1.001 * edge
+    phi = np.radians(44.4)
+    speeds = np.array([inside, outside])
+    out = gr.penner_rebound(speeds * np.sin(phi), speeds * np.cos(phi), np.zeros(2))
+    assert _eq8_tilt_deg(inside * np.sin(phi), inside * np.cos(phi)) < 45.0
+    assert _eq8_tilt_deg(outside * np.sin(phi), outside * np.cos(phi)) > 45.0
+    assert list(np.asarray(out.tilt_clamped, bool)) == [False, True]
+    assert np.shape(out.tilt_clamped) == np.shape(out.rolling)
+
+
 def test_landing_backspin_decays_with_the_flight_kernel_rate() -> None:
     """Landing backspin decays by ``exp(-k t)`` at the flight kernel rate."""
     w0 = 6000.0 * 2.0 * np.pi / 60.0

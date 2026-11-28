@@ -47,6 +47,7 @@ class HairCrop:
         (math.pi, 0.31),
     )
     hairline_asymmetry: float = 0.0  # signed front sweep in head lengths
+    hairline_waviness: float = 0.0  # subtle front-edge height variation in head lengths
     centre_x: float = 0.10  # azimuth origin on the head's x axis
     off_skin: float = 0.0020  # inner surface clearance from the skin
     side_thickness: float = 0.008  # tapered fade at the sides and back
@@ -61,6 +62,8 @@ class HairCrop:
     fringe_width: float = 0.15  # fringe gaussian radius
     comb_amplitude: float = 0.009  # combed ridges running front to back
     comb_wavelength: float = 0.085
+    wave_bend: float = 0.0  # cycles of sinusoidal phase warp; zero keeps combs straight
+    wave_wavelength: float = 0.24  # head lengths along the crown
     comb_sweep: float = 0.30  # strands lean toward the parted side by this slope
     fringe_band: float = 0.02  # the forelock ramps up faster than the crop
     crown_from_z: float = 0.78  # combing and parting start above this height
@@ -253,9 +256,16 @@ def hairline_height(crop: HairCrop, azimuth: NDArray[np.float64]) -> Array:
     line, (first, last) = _hairline(tuple(map(tuple, crop.hairline)))
     angle = np.asarray(azimuth)
     front = np.clip(1.0 - np.abs(angle) / 1.4, 0.0, 1.0)
-    return line(np.clip(np.abs(angle), first, last)) + (
+    result = line(np.clip(np.abs(angle), first, last)) + (
         crop.hairline_asymmetry * np.sin(angle) * front
     )
+    if not math.isfinite(crop.hairline_waviness) or abs(crop.hairline_waviness) > 0.015:
+        raise ValueError(
+            "hairline waviness must be finite and within -0.015..0.015 head lengths"
+        )
+    if crop.hairline_waviness:
+        result = result + crop.hairline_waviness * front * np.sin(3 * angle + 0.4)
+    return result
 
 
 def hairline_turns_deg(
@@ -330,7 +340,22 @@ def _thickness(crop: HairCrop, v: Array, part: str) -> tuple[Array, Array]:
     t = crop.side_thickness + (crop.top_thickness - crop.side_thickness) * top
     sign = _PART_SIGN[part]
     top_mask = _smooth((z - crop.crown_from_z) / crop.crown_band)
+    if not math.isfinite(crop.wave_bend) or not 0.0 <= crop.wave_bend <= 0.75:
+        raise ValueError("hair wave bend must be finite and within 0..0.75 cycles")
+    if (
+        not math.isfinite(crop.wave_wavelength)
+        or not 0.08 <= crop.wave_wavelength <= 1.0
+    ):
+        raise ValueError(
+            "hair wave wavelength must be finite and within 0.08..1.0 head lengths"
+        )
     phase = (y - sign * crop.comb_sweep * (x - crop.centre_x)) / crop.comb_wavelength
+    if crop.wave_bend:
+        angle_x = 2 * np.pi * (x - crop.centre_x) / crop.wave_wavelength
+        angle_y = 2 * np.pi * y / crop.comb_wavelength
+        bend = 0.18 * np.sin(angle_y)
+        wave = np.sin(angle_x + bend) + 0.20 * np.sin(2 * angle_x + 0.7 - bend)
+        phase += crop.wave_bend * wave
     t = t + crop.comb_amplitude * top_mask * np.cos(2 * np.pi * phase)
     r2 = ((x - crop.fringe_x) ** 2 + (z - crop.fringe_z) ** 2) / crop.fringe_width**2
     forelock = (
