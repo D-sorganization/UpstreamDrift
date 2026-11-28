@@ -68,6 +68,7 @@ class BundleSettings:
     damping_floor: float = 1e-9
 
     def __post_init__(self) -> None:
+        """Reject non-positive BundleSettings fields."""
         for item in fields(self):
             if not getattr(self, item.name) > 0:
                 raise ValueError(f"BundleSettings.{item.name} must be positive")
@@ -127,6 +128,15 @@ class BundleProblem:
         for name, (value, shape) in shapes.items():
             if np.shape(value) != shape:
                 raise ValueError(f"{name} must have shape {shape}")
+        bodies = np.asarray(self.marker_bodies)
+        if not np.issubdtype(bodies.dtype, np.integer):
+            raise ValueError("marker_bodies must be an integer array of body indices")
+        if bodies.size:
+            n_bodies = len(np.asarray(self.fk(np.asarray(self.pose_start, float)[0])))
+            if int(bodies.min()) < 0 or int(bodies.max()) >= n_bodies:
+                raise ValueError(
+                    f"marker_bodies must index the {n_bodies} fk bodies 0..{n_bodies - 1}"
+                )
         if frames < settings.min_frames:
             raise ValueError(
                 f"bundle adjustment needs at least {settings.min_frames} frames, "
@@ -159,6 +169,8 @@ class BundleProblem:
             mean, sigma = self.pose_prior
             if np.shape(mean) != (frames, n_q) or np.shape(sigma) != (frames, n_q):
                 raise ValueError(f"pose_prior arrays must have shape {(frames, n_q)}")
+            if not np.all(np.isfinite(np.asarray(mean, float))):
+                raise ValueError("pose_prior mean must be finite")
             sigmas = np.asarray(sigma)
             if not np.all(sigmas > 0):
                 raise ValueError("pose_prior sigmas must be positive (inf: none)")
@@ -411,6 +423,7 @@ def _settle(
 def _settled(
     prob: BundleProblem, settings: BundleSettings, poses: Array, offsets: Array
 ) -> Array:
+    """Settle one frame's pose against fixed offsets with inner damped steps."""
     return np.array(
         [_settle(prob, settings, (pose, offsets), k) for k, pose in enumerate(poses)]
     )
@@ -508,6 +521,7 @@ def _weak_directions(
 
 
 def _rms(errors: Array, valid: Array, axis: int | None) -> Any:
+    """Root-mean-square error of the squared residual blocks along ``axis``."""
     counted = valid.sum(axis=axis)
     total = (np.sum(errors**2, axis=-1) * valid).sum(axis=axis)
     with np.errstate(invalid="ignore", divide="ignore"):
@@ -541,7 +555,9 @@ def solve_bundle(prob: BundleProblem, settings: BundleSettings) -> BundleResult:
         settings,
     )
     rms_m = float(_rms(errors, valid, None))
-    converged = converged and np.isfinite(rms_m)
+    converged = (
+        converged and np.isfinite(rms_m) and all(np.isfinite(c) for c in chi2)
+    )  # a converged result cannot carry a NaN chi2 term (#15862)
     return BundleResult(
         offsets=offsets,
         poses=poses,

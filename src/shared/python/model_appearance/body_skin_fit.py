@@ -438,6 +438,26 @@ def fit_body_skin(
     return FittedSkin(vertices=vertices, joints=joints, maps=maps)
 
 
+def shape_body_build(fitted: FittedSkin, build: float) -> FittedSkin:
+    """Vary torso breadth and depth smoothly without moving skeleton landmarks."""
+    if isinstance(build, bool) or not math.isfinite(build) or abs(build) > 1:
+        raise ValueError("build must be finite and in [-1, 1]")
+    if build == 0:
+        return fitted
+    vertices = fitted.vertices.copy()
+    x, y, z = vertices.T.copy()
+    neck = fitted.joints["neck"][2]
+    shoulder = fitted.joints["shoulder_l"][1]
+    height = _smoothstep((z + 0.14 * neck) / (0.24 * neck)) * (
+        1 - _smoothstep((z - 0.72 * neck) / (0.28 * neck))
+    )
+    lateral = 1 - _smoothstep((np.abs(y) - 0.8 * shoulder) / (0.9 * shoulder))
+    scale = 1 + 0.18 * build * height * lateral
+    vertices[:, 0] = x * scale
+    vertices[:, 1] = y * scale
+    return FittedSkin(vertices, fitted.joints, fitted.maps)
+
+
 def match_wrists(
     skin: BodySkin,
     fitted: FittedSkin,
