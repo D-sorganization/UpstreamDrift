@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field, replace
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -402,6 +403,7 @@ def build_grip_hand_mesh(
     pose: GripPose = DEFAULT_GRIP_POSE,
     style: GripStyle | None = None,
     params: HandMeshParams = DEFAULT_HAND_MESH_PARAMS,
+    frozen_template: Any | None = None,
 ) -> GripHandMesh:
     """Bake one hand, fingers curled on a grip of radius ``grip_radius_m``.
 
@@ -412,6 +414,13 @@ def build_grip_hand_mesh(
     Postconditions: every shell is closed with outward winding; every on-grip
     shell clears the grip cylinder by ``[0, MAX_PAD_CLEARANCE_M]`` at its
     nearest vertex; the trail little finger is off the grip for linked styles.
+
+    ``frozen_template`` (HRG-GB5) is opt-in and ``None`` by default: when omitted the
+    analytic mesh below is the only code path, so existing output is byte-for-byte
+    unchanged. When a :class:`FrozenGripTemplate` is supplied the shells come from its
+    frozen capsule data instead; the analytic pad-clearance postcondition is a property
+    of the analytic construction, so the template path reports the measured gap instead
+    of asserting it.
     """
     _check_inputs(hand, grip_radius_m, pose, style)
     if not isinstance(params, HandMeshParams):
@@ -445,6 +454,29 @@ def build_grip_hand_mesh(
     parts += _thumb(radius, thumb_azimuth, params)
     parts += _thumb_web(radius, thumb_azimuth, (v, mcp), (z_lo, z_hi), params)
 
+    if frozen_template is not None:
+        role = "lead" if hand is Hand.LEAD else "trail"
+        template_parts = components_from_frozen_template(
+            frozen_template, role, params=params
+        )
+        template_vertices = np.vstack([p.mesh.vertices for p in template_parts])
+        template_gap = (
+            float(np.min(np.hypot(template_vertices[:, 0], template_vertices[:, 1])))
+            - radius
+        )
+        return GripHandMesh(
+            hand=hand,
+            style=grip_style,
+            grip_radius_m=radius,
+            distance_below_butt_m=placement.distance_below_butt_m,
+            v_azimuth_deg=placement.v_azimuth_deg,
+            thumb_azimuth_deg=thumb_azimuth_deg,
+            curl_sign=curl,
+            components=tuple(template_parts),
+            mesh=concat_meshes(*(p.mesh for p in template_parts)),
+            min_pad_clearance_m=template_gap,
+        )
+
     on_grip_vertices = np.vstack([p.mesh.vertices for p in parts if p.on_grip])
     gap = float(np.min(np.hypot(on_grip_vertices[:, 0], on_grip_vertices[:, 1])))
     gap -= radius
@@ -462,6 +494,70 @@ def build_grip_hand_mesh(
         mesh=concat_meshes(*(p.mesh for p in parts)),
         min_pad_clearance_m=gap,
     )
+
+
+def _inward_perpendicular(point: Array, axis: Array) -> Array:
+    """Radial-inward direction for a capsule ring, forced perpendicular to ``axis``."""
+    radial = np.array([float(point[0]), float(point[1]), 0.0], dtype=np.float64)
+    if float(np.linalg.norm(radial)) < 1e-9:
+        radial = np.array([1.0, 0.0, 0.0], dtype=np.float64)
+    for seed in (radial, np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0])):
+        perp = seed - float(np.dot(seed, axis)) * axis
+        norm = float(np.linalg.norm(perp))
+        if norm > 1e-9:
+            return perp / norm
+    raise ValueError("could not derive a perpendicular inward direction")
+
+
+def components_from_frozen_template(
+    template: Any,
+    role: str,
+    *,
+    params: HandMeshParams = DEFAULT_HAND_MESH_PARAMS,
+) -> list[HandComponent]:
+    """Draw one hand's shells from a :class:`FrozenGripTemplate` (HRG-GB5).
+
+    Visual only: the shells come straight from the frozen capsule data, never from a
+    physics engine. Fails closed on a template from a different frozen-template builder,
+    so a stale capture is never drawn as current. Precondition: ``template`` exposes
+    ``hand(role)`` with a non-empty ``capsules`` sequence carrying
+    ``owner``/``segment``/``p0``/``p1``/``radius_m``.
+    """
+    from src.shared.python.grip_build.frozen_template import (
+        TEMPLATE_BUILDER_VERSION,
+        verify_template_stamp,
+    )
+
+    verify_template_stamp(template, expected_builder_version=TEMPLATE_BUILDER_VERSION)
+    hand = template.hand(role)
+    components: list[HandComponent] = []
+    for capsule in hand.capsules:
+        p0 = np.asarray(capsule.p0, dtype=np.float64)
+        p1 = np.asarray(capsule.p1, dtype=np.float64)
+        axis = p1 - p0
+        length = float(np.linalg.norm(axis))
+        if length <= 1e-9:
+            raise ValueError(
+                f"{role} capsule {capsule.owner}[{capsule.segment}] is degenerate"
+            )
+        axis = axis / length
+        mid = 0.5 * (p0 + p1)
+        components.append(
+            HandComponent(
+                name=f"{role}_{capsule.owner}_{capsule.segment}",
+                finger=capsule.owner,
+                mesh=capsule_mesh(
+                    p0,
+                    p1,
+                    float(capsule.radius_m) * params.scale,
+                    inward=_inward_perpendicular(mid, axis),
+                ),
+                on_grip=True,
+            )
+        )
+    if not components:
+        raise ValueError(f"{role} frozen template carries no capsules")
+    return components
 
 
 def _finger_components(

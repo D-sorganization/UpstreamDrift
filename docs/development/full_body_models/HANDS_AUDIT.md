@@ -40,6 +40,23 @@ The legacy MuJoCo model has one hinge for each finger proxy and a club weld to `
 
 The contact columns distinguish pad-to-grip contact from physical hand-to-hand contact. The shared grip topology can describe hand-hand pairs, but the inventory reports no physical hand-hand contact implementation for any listed asset. `allocated_hand_hand` is a separate inventory capability and is also unavailable for every engine entry. Shared `GripPose` geometry does not imply that an engine's native exporter supports visual grip-style switching.
 
+## Procedural Frozen Template (data)
+
+HRG-GB5 (#15127) adds `src/shared/python/grip_build/frozen_template.py`: a built grip can be exported as a **procedural frozen template (data)** — per-hand capsule poses in the hand-grip frame, the joint table, the contact table, and a provenance stamp carrying `spec_sha256` plus `builder_version`. The loader fails closed: a template whose stamp does not match the caller's spec or builder is rejected before any capsule data is returned, so a capture taken against an older `GripSpec` or builder can never be drawn as current.
+
+Every engine row in the matrix above is **not consumed yet** for this capability. The template is data only: no engine reads it as collision, mass or inertia, and it does not change the weld attachment path or any engine output. The visual adapter `build_grip_hand_mesh(..., frozen_template=...)` is opt-in and `None` by default, which leaves the analytic mesh as the only code path and existing renders byte-for-byte unchanged. The per-engine state lives in `src/config/grip_capability_inventory.json` under `frozen_template_engines`, where an absent engine reads as `False`.
+
+| Engine | Consumes frozen template | Basis |
+| --- | --- | --- |
+| mujoco | No | Visual only; club attachment stays the weld path (#13191 remains blocked) |
+| drake | No | No reader wired |
+| pinocchio | No | No reader wired |
+| opensim | No | No reader wired |
+| myosuite | No | No reader wired |
+| simscape | No | No reader wired |
+| jaxsim | No | No reader wired |
+| humanoid_character_builder | No | Character Builder still bakes the analytic mesh |
+
 ## Wrist Frame Contract
 
 In the full-body specification, `child_to_follower` is a homogeneous transform. Let `N` be its native rotation block and `G(e)` the extrinsic x-y-z rotation matrix from `subject.grip_rotation_deg`. The builder composes the wrist rotation as:

@@ -676,6 +676,16 @@
     "pinocchio": { "pad_contact": false, "weld_bushing": true },
     "simscape": { "pad_contact": false, "weld_bushing": false }
   },
+  "frozen_template_engines": {
+    "mujoco": false,
+    "drake": false,
+    "humanoid_character_builder": false,
+    "jaxsim": false,
+    "myosuite": false,
+    "opensim": false,
+    "pinocchio": false,
+    "simscape": false
+  },
   "excluded": [
     {
       "id": "putting_green",
