@@ -248,7 +248,21 @@ def moustache_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
 
 
 def short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
-    """Create a close-cropped lower-face shell, with a clear lip opening."""
+    """Create a close-cropped stubble shell, with a clear lip opening."""
+    return _beard_parts(skin, upper_extension=0.0, shell_offset=0.003, role="beard")
+
+
+def dense_short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
+    """Create a fuller short-beard shell that still leaves the lips open."""
+    return _beard_parts(
+        skin, upper_extension=0.035, shell_offset=0.004, role="dense_beard"
+    )
+
+
+def _beard_parts(
+    skin: Mesh, *, upper_extension: float, shell_offset: float, role: str
+) -> list[tuple[str, Mesh, str]]:
+    """Build the facial-hair cover with a clear lip opening and fixed topology."""
     from src.shared.python.model_appearance.head_hair import (
         HairCrop,
         _clip_above,
@@ -268,7 +282,7 @@ def short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
         """Signed distance proxy for cheek, chin and elliptical lip boundaries."""
         x, y, z = np.moveaxis(points, -1, 0)
         side = np.clip((np.abs(y) - 0.09) / 0.14, 0.0, 1.0)
-        upper = 0.295 + 0.085 * side * side * (3 - 2 * side)
+        upper = 0.295 + upper_extension + 0.085 * side * side * (3 - 2 * side)
         outer = np.clip((np.abs(y) - 0.20) / 0.12, 0.0, 1.0)
         front = 0.13 + 0.10 * outer * outer * (3 - 2 * outer)
         lip = 0.05 * (np.hypot(y / 0.09, (z - 0.27) / 0.045) - 1)
@@ -277,10 +291,10 @@ def short_beard_parts(skin: Mesh) -> list[tuple[str, Mesh, str]]:
     v, normals, faces = _clip_above(
         v, normals, faces, level(v), (lambda p: float(level(p)), 8)
     )
-    mesh = closed_shell(v, normals, faces, np.full(len(v), 0.003), 0.0004, 0.001)
+    mesh = closed_shell(v, normals, faces, np.full(len(v), shell_offset), 0.0004, 0.001)
     return [
-        ("beard_shell", mesh, "beard"),
-        *[(name, part, "beard") for name, part, _ in moustache_parts(skin)],
+        ("beard_shell", mesh, role),
+        *[(name, part, role) for name, part, _ in moustache_parts(skin)],
     ]
 
 
