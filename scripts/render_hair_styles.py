@@ -21,22 +21,30 @@ from src.shared.python.motion_matching.execution.golfer_reference_specs import (
     reference_spec,
 )
 
+STYLES = (
+    "short_crop",
+    "side_swept",
+    "swept_back",
+    "slick_part",
+    "receding_crop",
+    "tousled_wave",
+    "short_curls",
+)
+VIEWS = (("front", 0), ("three_quarter", 35), ("side", 90))
+
 
 def main() -> None:
-    """Render the default and four named styles using one shared neutral head."""
+    """Render front, three-quarter and side views at desktop and phone sizes."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
-    out = parser.parse_args().out
+    parser.add_argument("--style", choices=STYLES)
+    args = parser.parse_args()
+    out = args.out
     out.mkdir(parents=True, exist_ok=True)
     spec = reference_spec("driver")
     raw = json.dumps(spec).encode()
-    for style in (
-        "short_crop",
-        "side_swept",
-        "swept_back",
-        "slick_part",
-        "receding_crop",
-    ):
+    styles = (args.style,) if args.style else STYLES
+    for style in styles:
         doc = document_from_dict(
             {"schema_version": "appearance-v1", "head": {"hair_style": style}}
         )
@@ -63,15 +71,18 @@ def main() -> None:
         for width, height in ((1280, 960), (390, 844)):
             renderer = mujoco.Renderer(model, height, width)
             try:
-                camera = mujoco.MjvCamera()
-                camera.lookat[:] = np.mean(data.geom_xpos[heads], axis=0)
-                camera.distance, camera.azimuth, camera.elevation = (
-                    (0.7 if width == 1280 else 1.05),
-                    azimuth,
-                    -5,
-                )
-                renderer.update_scene(data, camera=camera)
-                imageio.imwrite(out / f"{style}_{width}.png", renderer.render())
+                for view, angle_offset in VIEWS:
+                    camera = mujoco.MjvCamera()
+                    camera.lookat[:] = np.mean(data.geom_xpos[heads], axis=0)
+                    camera.distance, camera.azimuth, camera.elevation = (
+                        (0.7 if width == 1280 else 1.05),
+                        azimuth + angle_offset,
+                        -5,
+                    )
+                    renderer.update_scene(data, camera=camera)
+                    imageio.imwrite(
+                        out / f"{style}_{view}_{width}.png", renderer.render()
+                    )
             finally:
                 renderer.close()
 
