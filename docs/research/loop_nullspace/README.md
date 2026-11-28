@@ -23,9 +23,11 @@ rank audit of the pendulum constraints and the citation verification table.
 
 ## Contents of This Directory
 
-- `allocation_comparison.tex` documents the sampled common-reference wrench
-  comparison gate for epic #15494, including its analytic negative control
-  and the feasibility/replay evidence that it does not establish.
+- `../sampled_net_club_wrench_equivalence/sampled_net_club_wrench_equivalence.tex`
+  documents the sampled common-reference wrench comparison gate for epic #15494,
+  including its analytic negative control and the feasibility/replay evidence
+  that it does not establish. It is a separate research reference, so it owns its
+  own `docs/research/<name>/<name>.tex` slot rather than this directory's.
 - `loop_nullspace.tex` is the reference.
 - `publication_gate.md` is the checklist that must pass before any NSX result is published externally.
 - `hit_and_run_sampling.md` is the NSX-70 research spike (hit-and-run on a
