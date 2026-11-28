@@ -2,7 +2,9 @@
 # ruff: noqa: E301, E302, E305, E306
 """Versioned immutable serializable SimulationOutput and DynamicsQuery interface (#15794 B2 / #15731).
 
-Unavailable channels carry no payload. CoP threshold is 5 N.
+Unavailable channels carry no payload. CoP threshold is 5 N. An available channel may carry
+NaN only where the quantity is computed as undefined (the ground CoP in flight, #15859);
+infinite values and placeholder zero-fills are refused.
 """
 from __future__ import annotations
 from abc import abstractmethod
@@ -43,6 +45,7 @@ class Channel:
     reason: str = ""
 
     def __post_init__(self) -> None:
+        """Keep UNAVAILABLE value-free with a reason and available channels value-bearing."""
         if self.availability == "UNAVAILABLE":
             if self.values is not None:
                 raise ValueError("UNAVAILABLE channel must not carry values (no zero-fill)")
@@ -50,12 +53,17 @@ class Channel:
                 raise ValueError("UNAVAILABLE channel requires a reason")
             return
         _pre(self.availability == "available", "availability must be available or UNAVAILABLE")
-        if self.values is None or not all(math.isfinite(item) for item in self.values):
-            raise ValueError("available channel requires finite values")
+        if self.values is None:
+            raise ValueError("available channel requires values (no zero-fill)")
+        # NaN marks a quantity computed as undefined (flight CoP, #15859); infinity is a
+        # numerical blow-up and is never a measurement, so only the latter is refused here.
+        if any(math.isinf(item) for item in self.values):
+            raise ValueError("available channel must not carry infinite values")
         if self.reason:
             raise ValueError("available channel must not carry a reason")
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize the channel, omitting an absent payload and an empty reason."""
         d: dict[str, Any] = {
             "availability": self.availability,
             "units": self.units,
@@ -68,6 +76,7 @@ class Channel:
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Channel:
+        """Rebuild a channel from its serialized mapping."""
         values_raw = data.get("values")
         values = tuple(float(v) for v in values_raw) if values_raw is not None else None
         return cls(
@@ -79,10 +88,12 @@ class Channel:
 
 
 def _channel(values, units: str) -> Channel:
+    """Wrap a computed numeric payload as an available channel."""
     return Channel("available", units, tuple(float(v) for v in np.asarray(values)))
 
 
 def _missing(reason: str, units: str) -> Channel:
+    """Report a quantity that could not be computed, naming why and carrying nothing."""
     return Channel("UNAVAILABLE", units, None, reason)
 
 
@@ -120,6 +131,7 @@ class SimulationOutput:
     momentum_residual_n: Channel | None = None
 
     def __post_init__(self) -> None:
+        """Validate the schema, the enums, lineage strings, scalar finiteness and flight state."""
         _pre(self.schema_version == SCHEMA_VERSION, "schema_version is not supported")
         _pre(bool(self.frame.strip()) and math.isfinite(self.time_s), "frame and time_s are required")
         _pre(self.load_kind in {"total", "ztcf", "zvcf"}, "load_kind is not recognised")
@@ -129,12 +141,21 @@ class SimulationOutput:
             _pre(isinstance(value, str), f"{name} must be a string")
             if value and value.strip() != value:
                 raise ValueError(f"{name} must not have surrounding whitespace")
+        _pre(math.isfinite(self.bos_margin_m), "bos_margin_m must be finite")
+        _pre(math.isfinite(self.gate_alpha), "gate_alpha must be finite")
         _post(
             self.replay_badge != "forward-replayed" or self.f_l_n.availability == "available",
             "forward-replayed requires available hand forces",
         )
+        # Nothing supports the body in flight, so a valid base of support there is a
+        # contradiction rather than a reportable state (#15859).
+        _post(
+            self.contact_state != "flight" or not self.bos_valid,
+            "flight requires bos_valid false (undefined)",
+        )
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize every field, omitting channels that were never populated."""
         d: dict[str, Any] = {
             "schema_version": self.schema_version,
             "frame": self.frame,
@@ -176,15 +197,20 @@ class SimulationOutput:
         return d
 
     def to_json(self, **kwargs) -> str:
+        """Render the dictionary form as a JSON string."""
         return json.dumps(self.to_dict(), **kwargs)
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> SimulationOutput:
+        """Rebuild an output, deriving an absent bos_valid from the contact state."""
         _pre(data.get("schema_version") == SCHEMA_VERSION, "schema_version is not supported")
+        contact_state = str(data.get("contact_state", "flight"))
         def _get_ch(name: str) -> Channel:
+            """Read a required channel from the payload."""
             return Channel.from_dict(data[name])
 
         def _maybe_ch(name: str) -> Channel | None:
+            """Read an optional channel, returning None when the payload omits it."""
             raw = data.get(name)
             return Channel.from_dict(raw) if raw is not None else None
 
@@ -209,9 +235,11 @@ class SimulationOutput:
             match_artifact_hash=str(data.get("match_artifact_hash", "")),
             cop_wrench_m=_maybe_ch("cop_wrench_m"),
             cop_pressure_centroid_m=_maybe_ch("cop_pressure_centroid_m"),
-            bos_valid=bool(data.get("bos_valid", True)),
+            # A payload without bos_valid must not claim a valid base of support while
+            # claiming flight; an explicit true alongside flight fails closed (#15859).
+            bos_valid=bool(data.get("bos_valid", contact_state != "flight")),
             bos_margin_m=float(data.get("bos_margin_m", 0.0)),
-            contact_state=str(data.get("contact_state", "flight")),
+            contact_state=contact_state,
             cop_segment_id=int(data.get("cop_segment_id", 0)),
             gate_alpha=float(data.get("gate_alpha", 1.0)),
             filter_provenance=str(data.get("filter_provenance", "raw")),
@@ -223,6 +251,7 @@ class SimulationOutput:
 
     @classmethod
     def from_json(cls, json_str: str) -> SimulationOutput:
+        """Rebuild an output from its JSON string."""
         return cls.from_dict(json.loads(json_str))
 
 
@@ -243,17 +272,14 @@ class DynamicsQuery(Protocol):
     @abstractmethod
     def mass_matrix(self, q: np.ndarray) -> np.ndarray:
         """Compute the generalized inertia matrix M(q)."""
-        ...
 
     @abstractmethod
     def bias_forces(self, q: np.ndarray, qdot: np.ndarray) -> np.ndarray:
         """Compute bias forces C(q, qdot) + g(q)."""
-        ...
 
     @abstractmethod
     def jacobian_midhands(self, q: np.ndarray) -> np.ndarray:
         """Compute spatial Jacobian J_midhands(q) mapping joint velocities to midhands twist."""
-        ...
 
 
 class DefaultDynamicsQuery:
@@ -266,11 +292,13 @@ class DefaultDynamicsQuery:
         bias_forces_fn: Callable[[np.ndarray, np.ndarray], np.ndarray],
         jacobian_midhands_fn: Callable[[np.ndarray], np.ndarray],
     ) -> None:
+        """Bind the three provider callables used for live dynamics queries."""
         self._mass_matrix_fn = mass_matrix_fn
         self._bias_forces_fn = bias_forces_fn
         self._jacobian_midhands_fn = jacobian_midhands_fn
 
     def mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        """Return M(q) from the provider, refusing non-finite state or result."""
         q_arr = np.asarray(q, dtype=float)
         _pre(bool(np.all(np.isfinite(q_arr))), "q must contain finite values")
         M = self._mass_matrix_fn(q_arr)
@@ -278,6 +306,7 @@ class DefaultDynamicsQuery:
         return M
 
     def bias_forces(self, q: np.ndarray, qdot: np.ndarray) -> np.ndarray:
+        """Return C(q,qdot)+g(q) from the provider, refusing non-finite state or result."""
         q_arr = np.asarray(q, dtype=float)
         qdot_arr = np.asarray(qdot, dtype=float)
         _pre(bool(np.all(np.isfinite(q_arr))), "q must contain finite values")
@@ -287,6 +316,7 @@ class DefaultDynamicsQuery:
         return cg
 
     def jacobian_midhands(self, q: np.ndarray) -> np.ndarray:
+        """Return J_midhands(q) from the provider, refusing non-finite state or result."""
         q_arr = np.asarray(q, dtype=float)
         _pre(bool(np.all(np.isfinite(q_arr))), "q must contain finite values")
         J = self._jacobian_midhands_fn(q_arr)
@@ -295,6 +325,7 @@ class DefaultDynamicsQuery:
 
 
 def cop_channel(force_n, moment_nm, point_m, *, min_fz_n: float = DEFAULT_COP_MIN_FZ_N) -> Channel:
+    """Ground CoP channel, UNAVAILABLE with a reason once Fz falls below the threshold."""
     force, moment, point = _vec(force_n, "force"), _vec(moment_nm, "moment"), _vec(point_m, "point")
     _pre(math.isfinite(min_fz_n) and min_fz_n >= 0, "min_fz_n must be non-negative")
     about_origin = moment + np.cross(point, force)
@@ -305,12 +336,14 @@ def cop_channel(force_n, moment_nm, point_m, *, min_fz_n: float = DEFAULT_COP_MI
 
 
 def _hand(values, units: str, reason: str) -> Channel:
+    """Wrap an optional hand-load vector, reporting the solution reason when absent."""
     if values is None:
         return _missing(reason or "hand load unavailable", units)
     return _channel(values, units)
 
 
 def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_fz_n=DEFAULT_COP_MIN_FZ_N, lineage=("", "", "", ""), **biomech):
+    """Assemble a SimulationOutput frame from a solved hand-load problem and biomechanics."""
     cop_wrench_m = biomech.get("cop_wrench_m")
     cop_pressure_centroid_m = biomech.get("cop_pressure_centroid_m")
     bos_valid = biomech.get("bos_valid", True)
@@ -334,6 +367,12 @@ def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_
         ground_force_n, ground_moment_nm, ground_point_m = ground
         ground_f, ground_m = _channel(ground_force_n, "N"), _channel(ground_moment_nm, "N*m")
         cop = cop_channel(ground_force_n, ground_moment_nm, ground_point_m, min_fz_n=cop_min_fz_n)
+    if contact_state == "flight":
+        # No ground contact means no base of support, and a ground CoP derived from a wrench the
+        # flight state denies is not a position: publish NaN instead of it (#15859).
+        bos_valid = False
+        if cop.availability == "available":
+            cop = _channel([math.nan, math.nan, math.nan], "m")
     match_id, model_def_hash, subj_hash, artifact_hash = lineage
     return SimulationOutput(
         SCHEMA_VERSION, frame, float(time_s), solution.load_kind, solution.replay_badge,
@@ -361,8 +400,10 @@ def simulation_output(problem, solution, *, frame, time_s, ground=None, cop_min_
 
 
 def superposition_holds(total_f, ztcf_f, zvcf_f, total_m, ztcf_m, zvcf_m, *, rtol=DEFAULT_SUPERPOSITION_RTOL) -> bool:
+    """True when the ztcf and zvcf wrenches add back to the total within rtol."""
     _pre(math.isfinite(rtol) and rtol > 0, "rtol must be positive")
     def ok(total, left, right) -> bool:
+        """Compare one recovered vector pair against the total at the shared scale."""
         whole, a, b = _vec(total, "total"), _vec(left, "ztcf"), _vec(right, "zvcf")
         scale = max(float(np.linalg.norm(whole)), 1.0)
         return float(np.linalg.norm(a + b - whole)) <= rtol * scale
@@ -370,6 +411,7 @@ def superposition_holds(total_f, ztcf_f, zvcf_f, total_m, ztcf_m, zvcf_m, *, rto
 
 
 def zvcf_from_pinned(total_f, total_m, ztcf_f, ztcf_m):
+    """Derive the free contribution by subtracting the pinned ZTCF wrench from the total."""
     force = _vec(total_f, "total_f") - _vec(ztcf_f, "ztcf_f")
     moment = _vec(total_m, "total_m") - _vec(ztcf_m, "ztcf_m")
     _post(superposition_holds(total_f, ztcf_f, force, total_m, ztcf_m, moment), "pinned ZVCF must superpose")

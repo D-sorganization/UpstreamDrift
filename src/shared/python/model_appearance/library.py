@@ -175,6 +175,34 @@ for _hair in defaults.hair_palette():
     MATERIALS[f"brow_{_hair['id']}"] = Material(
         (*(c * BROW_DARKEN for c in _hair["srgb"]), 1.0), 0.9
     )
+# Close-cropped beard exposes some skin between hairs. Use the chosen skin and
+# hair swatches rather than painting every face with an opaque black patch.
+for _skin_name in (*SKIN_TONES, *defaults.skin_aliases()):
+    for _hair in defaults.hair_palette():
+        _skin_rgb = MATERIALS[_skin_name].rgba[:3]
+        _hair_rgb = _hair["srgb"]
+        MATERIALS[f"beard_{_skin_name}_{_hair['id']}"] = Material(
+            (
+                *(
+                    0.75 * s + 0.25 * h
+                    for s, h in zip(_skin_rgb, _hair_rgb, strict=True)
+                ),
+                1.0,
+            ),
+            0.9,
+        )
+        # Dense facial hair covers the skin more fully than stubble, so bias
+        # the short-beard shell toward the selected hair swatch.
+        MATERIALS[f"dense_beard_{_skin_name}_{_hair['id']}"] = Material(
+            (
+                *(
+                    0.45 * s + 0.55 * h
+                    for s, h in zip(_skin_rgb, _hair_rgb, strict=True)
+                ),
+                1.0,
+            ),
+            0.94,
+        )
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
 # The lower-body garment is keyed on the thigh; the pelvis always wears it.
