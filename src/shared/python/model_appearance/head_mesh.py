@@ -298,6 +298,11 @@ def build_mesh_parts(
                 (name, Mesh(m.vertices * length_m, m.faces), role)
                 for name, m, role in head_features.moustache_parts(asset.skin)
             ]
+        elif settings.facial_hair == "short_beard":
+            out += [
+                (name, Mesh(m.vertices * length_m, m.faces), role)
+                for name, m, role in head_features.short_beard_parts(asset.skin)
+            ]
         out = _warp_parts(out, length_m, settings.morph)
     return out
 

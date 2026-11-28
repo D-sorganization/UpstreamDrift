@@ -7,7 +7,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15848/#15853/#15854: Period hair, straw/snap-brim hats and cap export options; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
+- #15848/#15853/#15854/#15909: Period hair, hats, cap export and sized-frame inertia; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
@@ -110,7 +110,7 @@ Golf Chain Visualisation, Epic #11706 (GCV):
 - Native export backends, quarter-speed variants, impact time, high-FPS schedule GCV-14: #11720; MyoSuite v3 export worker #11997.
 - ClubheadSeries adapters GCV-16 #11722; impact parameters panel GCV-17 #11723; ground reaction manual slice GCV-18 #11724.
 - Clubhead speed timing GCV-20: #11767; MyoSuite hip retarget #12052; right knee flexes negative like the left #12057.
-- Visual flat-cap appearance #15822 adds a low-profile CC0 headwear style; the crown geometry stays in the appearance layer.
+- Visual flat-cap #15822 and short beard #15903 are appearance-only; see [short beard geometry](docs/development/full_body_models/appearance_reference/short_beard.tex).
 
 Open Swing Visualisation grip and gaze (OSV, Epic #11726):
 

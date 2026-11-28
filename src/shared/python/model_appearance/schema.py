@@ -221,8 +221,8 @@ class HeadSettings:
             raise ValueError("head morph must be a HeadMorph")
         if self.morph != HeadMorph() and self.model != "cc0_mesh":
             raise ValueError("head morph needs the cc0_mesh head model")
-        if self.facial_hair not in ("none", "moustache"):
-            raise ValueError("head facial_hair must be none or moustache")
+        if self.facial_hair not in ("none", "moustache", "short_beard"):
+            raise ValueError("head facial_hair must be none, moustache or short_beard")
         if self.facial_hair != "none" and self.model != "cc0_mesh":
             raise ValueError("facial hair needs the cc0_mesh head model")
 
