@@ -123,7 +123,7 @@ def compute_wrench_cop(
     ground_z: float = 0.0,
     min_fz: float = 5.0,
 ) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float] | None]:
-    """Wrench CoP transporting moments about fixed origin O on the ground plane."""
+    """Wrench CoP with the moment about origin O transported to the ground plane first."""
     ox, oy, oz = origin
     total_f = np.zeros(3)
     total_m_o = np.zeros(3)
@@ -139,11 +139,18 @@ def compute_wrench_cop(
     if fz < min_fz:
         cop = None
     else:
-        # c = O + (n x M_O) / Fz where n = (0, 0, 1)
-        # n x M_O = (-M_y, M_x, 0)
+        # Moment transport O -> G, G = (ox, oy, ground_z). M_B = M_A + (A - B) x F, so with
+        # O - G = (0, 0, k) and k = oz - ground_z: (0, 0, k) x (Fx, Fy, Fz) = (-k*Fy, k*Fx, 0),
+        # giving M_G = (M_x - k*F_y, M_y + k*F_x, M_z). k = 0 (origin on the ground plane) is
+        # the identity, and a vertical-only resultant (Fx = Fy = 0) needs no transport.
+        k = oz - float(ground_z)
+        mg_x = total_m_o[0] - k * total_f[1]
+        mg_y = total_m_o[1] + k * total_f[0]
+        # c = G + (n x M_G) / Fz where n = (0, 0, 1)
+        # n x M_G = (-M_G_y, M_G_x, 0)
         cop = (
-            float(ox - total_m_o[1] / fz),
-            float(oy + total_m_o[0] / fz),
+            float(ox - mg_y / fz),
+            float(oy + mg_x / fz),
             float(ground_z),
         )
     return (

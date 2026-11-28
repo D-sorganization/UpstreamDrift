@@ -306,6 +306,7 @@
 {"path": "biomechanics/swing_comparison.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_analysis.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_visualization.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/swing_planes_quiver.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_posture_metrics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/transactional_muscle_replay.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/x_factor_literature.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
@@ -1492,6 +1493,7 @@
 {"path": "model_appearance/mesh_io.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/neck.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/pelvis_width.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/player_frame_inertia.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/player_models.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/player_stature.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1638,6 +1640,8 @@
 {"path": "motion_matching/club_only/adapters.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/ambiguity.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/body_candidates.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_only/calibration_and_phase.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_only/canonical_v2_matrix.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/canonical_v2_trial.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/constrained_ik.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/control_replay.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1791,6 +1795,7 @@
 {"path": "motion_matching/inverse_timestep/model.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse_timestep/predict.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse_timestep/training.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/isolated_joint_kinematics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/jax_contact.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/jobs/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/jobs/benchmarks.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1832,6 +1837,7 @@
 {"path": "motion_matching/matching_strategy.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/metrics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/mirrored_spec.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/model_library_contracts.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/multi_engine_torque_allocator.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/multi_shooting_fit.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/multi_source_target.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2315,6 +2321,7 @@
 {"path": "physics/contact_reaction_decomposition.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/dimple_geometry.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/divot_model.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/energy_ledger_contract.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/energy_monitor.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/equipment.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/flexible_shaft.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
@@ -2370,6 +2377,7 @@
 {"path": "playback/__init__.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "playback/bidirectional_overlay.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "playback/camera_perspective.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
+{"path": "playback/quiver_profiling_fixture.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "plot_engine/__init__.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
 {"path": "plot_engine/contour.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
 {"path": "plot_engine/matplotlib_renderer.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
@@ -2611,6 +2619,7 @@
 {"path": "reporting/swing_report/policy.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/selection.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/series_csv.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
+{"path": "reporting/swing_report/simulation_output.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/summary_md.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/validator.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
 {"path": "reporting/swing_report/view_model.py", "classification": "ud-only", "package": "reporting", "spelling_only": false}
@@ -2701,6 +2710,7 @@
 {"path": "shadow_tracker/segmentation.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/service.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/source_records.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/tiger_trajectory_fitter.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/track_b_observation_export.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "sidekick/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/__main__.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}

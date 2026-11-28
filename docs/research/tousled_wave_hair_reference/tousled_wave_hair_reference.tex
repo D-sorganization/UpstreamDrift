@@ -1,0 +1,109 @@
+% Editable visual-geometry calculation note for issue #15901.
+% This is a stylized, source-informed appearance model, not an anatomical fit.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\title{Tousled-Wave Hair on the Closed CC0 Scalp}
+\author{UpstreamDrift appearance research}
+\date{2026-11-28}
+\begin{document}
+\maketitle
+
+\section{Purpose and Evidence}
+This note defines the visual-only \texttt{tousled\_wave} style for the CC0
+head's existing scalp shell. The source-inspired target is the full-volume,
+short wavy hair visible in the contemporary PGA TOUR portraits of Mac O'Grady
+and John Schlee. The 1984 PGA TOUR Guide describes O'Grady's profile and
+reproduces a grayscale headshot (printed page 124); the 1973 PGA TOUR Guide
+shows Schlee's grayscale portrait and calls him curly-haired (printed page
+58). These are qualitative references. They do not provide calibrated head
+geometry, color, or strand-level measurements.
+
+\begin{itemize}
+  \item O'Grady: \href{https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1984_pgatour.pdf}{1984 PGA TOUR Guide}
+  \item Schlee: \href{https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf}{1973 PGA TOUR Guide}
+\end{itemize}
+The source images are retained as local research material only; neither image
+is copied into this repository. Grayscale tone does not establish natural hair
+color, and the headshots do not support a body-build inference.
+
+\section{Coordinates and Inputs}
+All length inputs are in head-length units, with the existing CC0 head's neck
+plane at $z=0$ and vertex at $z=1$. In the canonical frame, $x$ points toward
+the face, $y$ points to the subject's left, and $z$ points upward. The existing
+closed scalp mesh supplies the vertices $\mathbf{p}_i$ and outward normals
+$\mathbf{n}_i$. A style adds only a bounded shell around this surface.
+
+Let $s\in\{-1,0,+1\}$ encode the hair part. The phase of the existing comb
+ridges is
+\begin{align}
+ u(x,y) &= \frac{y-s\,q(x-x_c)}{\lambda_c},\\
+ \theta(x) &= \frac{2\pi(x-x_c)}{\lambda_w},\\
+ b(y) &= 0.18\sin\left(\frac{2\pi y}{\lambda_c}\right),\\
+ \phi(x,y) &= 2\pi\left[u(x,y)+a_w\left(\sin(\theta+b)+0.20\sin(2\theta+0.7-b)\right)\right].
+\end{align}
+where $q$ controls ridge sweep and $b(y)$ varies ridge bending across the scalp. The style sets $a_w=0.42$ cycles and
+$\lambda_w=0.26$ head lengths. The wave term bends the existing ridges across
+the crown; it does not add disconnected locks, vertices, or a second shell.
+For every other hairstyle, $a_w=0$ and the phase-warp branch is skipped, which
+preserves its previous vertex coordinates exactly.
+
+The added thickness field is
+\begin{equation}
+ t_w(x,y,z)=A_c\,M_{\mathrm{crown}}(z)\cos(\phi(x,y)),
+\end{equation}
+with crown mask $M_{\mathrm{crown}}$ already used by the existing haircut
+builder. The full thickness is the current base fade, fringe, and parting
+field plus $t_w$. It is multiplied by the existing smooth hairline edge mask,
+so added volume returns to zero at the cut boundary. The style-specific inputs
+are:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Input & Value & Meaning \\
+\midrule
+$A_c$ & 0.015 & comb-ridge amplitude (head lengths) \\
+$\lambda_c$ & 0.10 & ridge wavelength across the crown (head lengths) \\
+$a_w$ & 0.42 & sinusoidal phase warp (cycles) \\
+$\lambda_w$ & 0.26 & bend wavelength along the crown (head lengths) \\
+$t_{\mathrm{top}}$ & 0.065 & top shell thickness (head lengths) \\
+$t_{\mathrm{side}}$ & 0.018 & side shell thickness (head lengths) \\
+$t_{\mathrm{fringe}}$ & 0.046 & soft front-hairline lift (head lengths) \\
+front-edge wave & 0.006 & hairline-height amplitude (head lengths) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The base hairline control points retain a modest forehead and longer nape;
+parting depth and heavy-side gain are zero. The hairline receives a bounded
+0.006 head-length sinusoidal variation over the front arc; it is subtle and
+does not change the closed rim. \texttt{tousled\_wave} remains nearly symmetric. Its top remains below $z=1.09$ in the unit-head geometry.
+
+\section{Closed-Shell Construction and Invariants}
+For each scalp point, the existing mesh builder evaluates the nonnegative
+total thickness and offsets the outer surface along $\mathbf{n}_i$. It keeps
+the hidden inner surface at the configured skin clearance and zips the shared
+hairline rim to close the shell. The wave changes only the scalar thickness;
+it does not change the scalp cut, inner surface, face winding, or rim index
+welding. The result must remain a finite, outward-wound, closed manifold with
+positive signed volume.
+
+When a cap is requested, the existing cap-specific path still builds the
+legacy short crop and uses its cap-clearance geometry. The new style does not
+alter that fallback. Appearance has no effect on the native body, joint,
+contact, or dynamics arrays; the native MuJoCo regression compares those
+arrays and forward-dynamics quantities across all named styles.
+
+\section{Limits and Reproduction}
+The portrait references motivate the broad silhouette (fuller crown and
+wavy/tousled ridges) only. This is not a reconstruction of any named player's
+individual hair or a measured historical hairstyle. Colors remain an artistic
+choice. To reproduce the geometry checks from the repository root, run:
+\begin{verbatim}
+python -m pytest tests/unit/model_appearance/test_hair_styles.py -q
+\end{verbatim}
+The native-model equality test is visual-only qualification: it verifies that
+hair changes do not alter modeled dynamics. It is not a motion-fit or physical
+validation of either golfer.
+\end{document}
