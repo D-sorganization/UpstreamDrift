@@ -1,0 +1,59 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Sampled Net-Club-Wrench Equivalence}
+\author{UpstreamDrift Research}
+\date{2026-11-22}
+\begin{document}
+\maketitle
+\section{Scope and Preconditions}
+This separate research reference documents the comparison prerequisite of
+epic 15494, slice B. It is not the governed engineering design manual.
+Two allocations must already share one motion, model, timebase, contact regime
+and ground-load policy. The caller supplies aligned samples; this diagnostic
+does not verify those upstream conditions or interpolate missing samples.
+No admitted golfer baseline or Solution Bundle from epic 15493 is supplied here.
+
+\section{Frames, Units, and Equations}
+At each sample the shared frame is world-from-grip rotation $R$ and world
+origin $o$, the midpoint of distinct lead and trail grip points $p_L,p_R$.
+Each hand-on-club wrench is force $f$ in N and free couple $c$ in N\,m,
+expressed in grip axes at its hand point. Positions are in metres.
+Using the existing canonical grasp map from \texttt{grip\_split},
+\[
+ w=Gy,\quad y=(f_L,c_L,f_R,c_R),\qquad
+ F=f_L+f_R,\quad
+ M=R^T(p_L-o)\times f_L+c_L+R^T(p_R-o)\times f_R+c_R.
+\]
+For candidate minus baseline, $\delta w=G(y_c-y_b)$.
+The comparison passes exactly when every supplied sample satisfies
+$\|\delta F\|_2\leq\epsilon_F$ and
+$\|\delta M\|_2\leq\epsilon_M$.
+The caller declares finite non-negative absolute tolerances separately in
+N and N\,m. There is no mixed-unit norm or default tolerance.
+
+\section{Evidence and Negative Controls}
+\texttt{compare\_hand\_wrench\_histories} returns a JSON-compatible diagnostic
+with sample times, conventions, tolerances, both residual series, their maxima,
+and failed sample indices. Missing or non-finite channels, inconsistent shapes,
+unordered times and invalid geometry are errors, never implicit zero loads.
+The tests construct two distinct splits through the existing canonical
+\texttt{hand\_wrenches} map on moving and rotating geometry.
+An independent negative control applies opposite transverse forces of 3 N
+at points separated by 0.2 m: net force is unchanged but the moment changes
+by 0.6 N\,m. Pure axial-force and free-couple perturbations check dimensional
+tolerances separately. These are analytic structural fixtures, not recordings.
+
+\section{Limitations and Reproduction}
+Agreement of sampled net wrenches is a necessary comparison gate only.
+It does not establish joint-torque balance, closure, contact admissibility,
+capacity, uncertainty, between-knot feasibility, or forward replay.
+A passing sample comparison is neither an across-family invariant nor proof
+that these allocations produce the same motion. Both feasibility and replay
+verification flags remain false; later qualification must supply that evidence.
+No inference of co-contraction, stiffness, clinical safety or golfer optimality
+is made. Run from the repository root with its pinned Tools tree initialized:
+\begin{verbatim}
+python3 -m pytest tests/unit/loop_nullspace/test_allocation_comparison.py
+python3 -m pytest tests/unit/loop_nullspace/test_grip_split.py
+\end{verbatim}
+\end{document}
