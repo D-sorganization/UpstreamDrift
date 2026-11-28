@@ -15,13 +15,10 @@ from scipy.ndimage import label as _nd_label
 from . import _validation as _v
 from .source_records import FrameIdentity, SourceAsset, validate_frame_sequence
 
-cv2: Any
 try:
-    import cv2 as _cv2
-
-    cv2 = _cv2
+    import cv2
 except ImportError:  # pragma: no cover
-    cv2 = None
+    cv2 = None  # type: ignore[assignment]
 
 TRACK_B_SCHEMA_VERSION: Final[str] = _v.SOURCE_SCHEMA_VERSION
 TRACK_B_QUALIFICATION: Final[str] = "image_observations_only"
@@ -29,12 +26,14 @@ MAX_ANGULAR_UNCERTAINTY_RAD: Final[float] = math.pi / 2.0
 
 
 def _xy(pt: object, name: str) -> tuple[float, float]:
+    """Validate and convert a 2-tuple into finite (x, y) floats."""
     if not isinstance(pt, tuple) or len(pt) != 2:
         raise TypeError(f"{name} must be a 2-tuple")
     return (_v.check_float(pt[0], f"{name}[0]"), _v.check_float(pt[1], f"{name}[1]"))
 
 
 def _rng(val: object, name: str, lo: float, hi: float, open_lo: bool = False) -> float:
+    """Validate a finite float within [lo, hi] (or (lo, hi] when open_lo)."""
     x = _v.check_float(val, name)
     if not ((x > lo if open_lo else x >= lo) and x <= hi):
         raise ValueError(f"{name} out of range [{lo}, {hi}]: {x}")
@@ -42,6 +41,7 @@ def _rng(val: object, name: str, lo: float, hi: float, open_lo: bool = False) ->
 
 
 def _check_prov(rec: Any) -> None:
+    """Validate Track B non-physical provenance and schema fields."""
     _v.check_schema_version(rec.schema_version, TRACK_B_SCHEMA_VERSION)
     if _v.check_bool(rec.physical_time_verified, "physical_time_verified") is not False:
         raise ValueError("physical_time_verified must be False")
@@ -50,6 +50,7 @@ def _check_prov(rec: Any) -> None:
 
 
 def _check_mask(mask: object, name: str) -> np.ndarray:
+    """Validate a non-empty 2D boolean mask array and return a contiguous copy."""
     if not isinstance(mask, np.ndarray):
         raise TypeError(f"{name} must be numpy.ndarray")
     if mask.ndim != 2 or min(mask.shape) <= 0:
@@ -70,6 +71,7 @@ class ContourBoundary:
     bbox_xywh: tuple[int, int, int, int] | None
 
     def __post_init__(self) -> None:
+        """Validate contour geometry, bounds, and empty-mask consistency."""
         if not isinstance(self.points_xy, tuple):
             raise TypeError("points_xy must be tuple")
         for p in self.points_xy:
@@ -102,6 +104,7 @@ class ShaftSegmentObservation:
     angular_uncertainty_rad: float
 
     def __post_init__(self) -> None:
+        """Validate shaft endpoints, orientation angle, length, and uncertainty."""
         for k in ("start_xy", "end_xy", "center_xy"):
             _xy(getattr(self, k), k)
         _rng(self.angle_rad, "angle_rad", 0.0, math.nextafter(math.pi, 0.0))
@@ -132,6 +135,7 @@ class TrackBFrameExport:
     qualification: str = TRACK_B_QUALIFICATION
 
     def __post_init__(self) -> None:
+        """Validate frame binding, observation invariants, and SHA-256 digests."""
         _check_prov(self)
         if not isinstance(self.frame, FrameIdentity):
             raise TypeError("frame must be FrameIdentity")
@@ -174,20 +178,18 @@ class TrackBSequenceExport:
     qualification: str = TRACK_B_QUALIFICATION
 
     def __post_init__(self) -> None:
+        """Validate sequence frames, asset binding, ordering, and manifest hash."""
         _check_prov(self)
         if not isinstance(self.source_asset, SourceAsset):
             raise TypeError("source_asset must be SourceAsset")
         if not isinstance(self.frames, tuple) or not self.frames:
             raise ValueError("frames must be non-empty tuple")
-        aw, ah, aid = (
-            self.source_asset.width_px,
-            self.source_asset.height_px,
-            self.source_asset.asset_id,
-        )
+        sa = self.source_asset
+        exp_meta = (sa.asset_id, sa.width_px, sa.height_px)
         for i, fx in enumerate(self.frames):
             if not isinstance(fx, TrackBFrameExport):
                 raise TypeError("frames items must be TrackBFrameExport")
-            if fx.frame.asset_id != aid or (fx.width_px, fx.height_px) != (aw, ah):
+            if (fx.frame.asset_id, fx.width_px, fx.height_px) != exp_meta:
                 raise ValueError(f"asset/dimension mismatch at {i}")
         validate_frame_sequence([f.frame for f in self.frames])
         _v.check_str(self.manifest_json, "manifest_json")
@@ -198,6 +200,7 @@ class TrackBSequenceExport:
 
 
 def _extract_body_contour(mask: np.ndarray) -> ContourBoundary:
+    """Extract the outer contour, area, perimeter, centroid, and bbox from a mask."""
     area = int(np.sum(mask))
     if area == 0:
         return ContourBoundary((), 0, 0.0, None, None)
@@ -223,9 +226,8 @@ def _extract_body_contour(mask: np.ndarray) -> ContourBoundary:
     return ContourBoundary(pts, area, perim, (cx, cy), bbox)
 
 
-def _fit_segment(
-    pts: np.ndarray, blur: float, occ: float
-) -> ShaftSegmentObservation | None:
+def _fit_segment(pts: np.ndarray, b: float, o: float) -> ShaftSegmentObservation | None:
+    """Fit a 2D PCA line segment and angular uncertainty to a shaft component."""
     n = int(pts.shape[0])
     mu = np.mean(pts, axis=0)
     ctr = pts - mu
@@ -241,7 +243,7 @@ def _fit_segment(
     if length <= 0.0:
         return None
     sp = math.sqrt(max(float(vals[0]), 0.0))
-    comb = math.atan2(1.0 + 2.0 * sp, max(length, 1.0)) + 0.5 * (blur + occ)
+    comb = math.atan2(1.0 + 2.0 * sp, max(length, 1.0)) + 0.5 * (b + o)
     raw = MAX_ANGULAR_UNCERTAINTY_RAD * (1.0 - math.exp(-comb))
     unc = min(max(raw, 1e-9), math.nextafter(MAX_ANGULAR_UNCERTAINTY_RAD, 0.0))
     s_xy = (float(mu[0] + t0 * vx), float(mu[1] + t0 * vy))

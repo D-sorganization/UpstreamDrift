@@ -18,6 +18,7 @@ pytestmark = pytest.mark.unit
 
 
 def _asset(w: int = 128, h: int = 128, aid: str = "a-1") -> SourceAsset:
+    """Create a synthetic SourceAsset fixture."""
     return SourceAsset(
         schema_version="shadow-tracker/source/1.0.0",
         asset_id=aid,
@@ -31,6 +32,7 @@ def _asset(w: int = 128, h: int = 128, aid: str = "a-1") -> SourceAsset:
 
 
 def _frame(aid: str = "a-1", fid: str = "f-1", pts: int = 0) -> FrameIdentity:
+    """Create a synthetic FrameIdentity fixture."""
     return FrameIdentity(
         schema_version="shadow-tracker/frame/1.1.0",
         asset_id=aid,
@@ -48,11 +50,13 @@ def _frame(aid: str = "a-1", fid: str = "f-1", pts: int = 0) -> FrameIdentity:
 
 
 def _ellipse(h: int, w: int, cx: float, cy: float, rx: float, ry: float) -> np.ndarray:
+    """Render a filled boolean ellipse mask."""
     yy, xx = np.ogrid[:h, :w]
     return np.asarray(((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 1.0, bool)
 
 
 def _line(h: int, w: int, x0: float, y0: float, x1: float, y1: float) -> np.ndarray:
+    """Render a 1-pixel boolean line segment mask."""
     m = np.zeros((h, w), dtype=bool)
     for t in np.linspace(0.0, 1.0, 256):
         m[round(y0 + t * (y1 - y0)), round(x0 + t * (x1 - x0))] = True
@@ -64,9 +68,8 @@ def test_clean_silhouette_and_shaft_recovery(ang: float) -> None:
     """Clean synthetic ellipse + shaft line recovers contour and shaft angle."""
     body = _ellipse(128, 128, 40.0, 64.0, 16.0, 30.0)
     dx, dy = 30.0 * math.cos(ang), 30.0 * math.sin(ang)
-    res = tb.extract_track_b_frame(
-        _frame(), body, _line(128, 128, 80 - dx, 64 - dy, 80 + dx, 64 + dy)
-    )
+    shaft = _line(128, 128, 80 - dx, 64 - dy, 80 + dx, 64 + dy)
+    res = tb.extract_track_b_frame(_frame(), body, shaft)
     bc = res.body_contour
     assert isinstance(bc, tb.ContourBoundary) and bc.area_px == int(np.sum(body))
     assert len(bc.points_xy) >= 20 and bc.perimeter_px > 50.0
@@ -98,12 +101,9 @@ def test_occlusion_blur_and_short_segment_uncertainty() -> None:
     assert part.occluded and len(part.visible_shaft_segments) == 2
     assert clean.angular_uncertainty_rad < part.angular_uncertainty_rad < math.pi / 2
     assert short.angular_uncertainty_rad > clean.angular_uncertainty_rad
-    u = [
-        ex(_frame(), body, full, motion_blur_score=v).angular_uncertainty_rad
-        for v in (0.0, 0.2, 0.5, 0.8, 1.0)
-    ]
-    assert all(p < c for p, c in zip(u[:-1], u[1:], strict=True))
-    assert all(0.0 < val < math.pi / 2.0 for val in u)
+    rs = [ex(_frame(), body, full, motion_blur_score=v) for v in (0.0, 0.3, 0.7, 1.0)]
+    u = [r.angular_uncertainty_rad for r in rs]
+    assert all(0.0 < p < c < math.pi / 2 for p, c in zip(u[:-1], u[1:], strict=True))
 
 
 def test_provenance_binding_manifest_determinism_and_immutability() -> None:
