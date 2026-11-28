@@ -229,6 +229,7 @@ class GolferPlayback:
 
     @property
     def view(self) -> str:
+        """Camera preset name the golfer is rendered from."""
         return self._view
 
     @view.setter
