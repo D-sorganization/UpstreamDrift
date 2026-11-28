@@ -1,0 +1,50 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\title{CC0 Local Face Detail for Golfer Candidates}
+\author{UpstreamDrift}
+\date{28 November 2026}
+\begin{document}
+\maketitle
+\section{Scope and Sources}
+This editable research note describes issue 15959, a visual-only extension of
+our hash-pinned CC0 MakeHuman head asset. The six bundled nose and bilateral
+cheek targets come from MakeHuman commit
+\texttt{3c701a8e52f09e69922e8b598d23be2d7dfc49e3}. Source URLs, individual
+hashes, derived asset hash and the CC0 license are recorded in
+\texttt{assets/head\_cc0/face\_detail\_provenance.json}; the upstream license
+explicitly includes bundled targets and modifiers.
+\section{Mapping and Limits}
+The builder verifies the pinned base OBJ, rederives the existing head exactly,
+and maps source vertex indices through the identical head cut. A source delta
+$(d_x,d_y,d_z)$ in MakeHuman decimetres becomes $(d_z,d_x,d_y)/L$ in canonical
+head lengths, with $L=2.60105$ dm. The original vertex and face order, neck cap
+and top landmark remain fixed. For $b\in[-1,1]$, the signed control selects
+the corresponding positive or negative target, weighted by $|b|$. Each cheek
+control applies the left and right targets together. Face, eye, mouth, hair and
+cap meshes are rebuilt against the resulting skin; they remain in the existing
+head coordinate frame. Skin-only changes do not alter masses, inertias, joints
+or the motion model. Zero weights leave the old output exactly unchanged.
+\par
+These are artistic shape controls, not measured facial geometry, a 3D facial
+reconstruction, or a guarantee of player recognition. Reference photographs
+are private inputs with their own permissions and often unknown lens, pose,
+era or expression. The current feature decals still use a neutral mouth; a
+smiling portrait cannot be reconstructed by these local targets. The separate
+head-morph warp remains available and its combinations need visual review.
+\section{Reproduction and Acceptance}
+Obtain the pinned base and six targets at the URLs in the provenance JSON;
+place them by basename in one input directory and run:
+\begin{verbatim}
+python assets/head_cc0/build_face_detail_asset.py INPUT_DIR
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl python -m pytest \
+ tests/unit/model_appearance/test_head_detail.py
+PYTHONPATH=.:vendor/ud-tools/src MUJOCO_GL=egl python \
+ scripts/render_cc0_face_detail.py --out OUTPUT_DIR
+\end{verbatim}
+The builder checks source SHA-256 and verifies all original head arrays before
+writing the 4 kB derived file. Tests cover schema bounds and identity, closed
+outward meshes, feature/headwear alignment and native mass, joint, $qM$, bias
+and acceleration equality. Compare native desktop and phone previews at the
+same camera; lighting omits shadows in dedicated face close-ups only.
+\end{document}

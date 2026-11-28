@@ -29,6 +29,7 @@ from src.shared.python.core.handedness import (
 )
 from src.shared.python.model_appearance.defaults import default_fields
 from src.shared.python.model_appearance.head_morph import LEGACY_MORPH_FIELDS, HeadMorph
+from src.shared.python.model_appearance.head_detail import HeadDetail
 
 SCHEMA_VERSION = "appearance-v1"
 SCHEMA_PATH = Path(__file__).with_name("appearance_v1.schema.json")
@@ -215,6 +216,7 @@ class HeadSettings:
     #: Artistic face shape controls, in the canonical CC0 head frame.
     morph: HeadMorph = field(default_factory=HeadMorph)
     facial_hair: str = "none"
+    detail: HeadDetail = field(default_factory=HeadDetail)
 
     def __post_init__(self) -> None:
         """Require a CC0 head whenever non-identity face morphs are set."""
@@ -222,6 +224,10 @@ class HeadSettings:
             raise ValueError("head morph must be a HeadMorph")
         if self.morph != HeadMorph() and self.model != "cc0_mesh":
             raise ValueError("head morph needs the cc0_mesh head model")
+        if not isinstance(self.detail, HeadDetail):
+            raise ValueError("head detail must be a HeadDetail")
+        if self.detail != HeadDetail() and self.model != "cc0_mesh":
+            raise ValueError("head detail needs the cc0_mesh head model")
         if self.facial_hair not in (
             "none",
             "moustache",
@@ -388,6 +394,7 @@ def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
         ratio,
         HeadMorph(**raw.get("morph", {})),
         str(raw.get("facial_hair", "none")),
+        HeadDetail(**raw.get("detail", {})),
     )
 
 
@@ -420,6 +427,10 @@ def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
             key: value
             for key, value in asdict(head.morph).items()
             if key in LEGACY_MORPH_FIELDS or value != 0
+        }
+    if head.detail != HeadDetail():
+        out["detail"] = {
+            key: value for key, value in asdict(head.detail).items() if value != 0
         }
     if head.headwear_material is not None:
         out["headwear_material"] = head.headwear_material
