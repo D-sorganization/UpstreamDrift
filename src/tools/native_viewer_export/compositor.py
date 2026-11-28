@@ -40,6 +40,7 @@ class HudLayout:
     panel_gap_px: int
 
     def __post_init__(self) -> None:
+        """Require non-negative integer pixel values throughout the layout."""
         values = [self.stroke_px, self.line_gap_px, self.edge_margin_px]
         values += [*self.label_origin_px, self.panel_gap_px]
         if not all(isinstance(v, int) and v >= 0 for v in values):
@@ -63,6 +64,7 @@ HUD_SEPARATOR = " | "
 
 
 def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    """Cached Pillow font for ``size``, loaded on first use."""
     font = _FONTS.get(size)
     if font is None:
         font = _FONTS.setdefault(size, ImageFont.load_default(size=size))
@@ -70,6 +72,7 @@ def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
 
 
 def _check_image(img: object) -> None:
+    """Raise ``ValueError`` unless ``img`` is uint8 with shape (H, W, 3)."""
     if not isinstance(img, np.ndarray) or img.dtype != np.uint8:
         raise ValueError("image must be a uint8 numpy array")
     if img.ndim != 3 or img.shape[2] != 3:
@@ -87,10 +90,12 @@ class GridGeometry:
 
     @property
     def height(self) -> int:
+        """Total pixel height of the grid."""
         return self.rows * self.tile_h
 
     @property
     def width(self) -> int:
+        """Total pixel width of the grid."""
         return self.cols * self.tile_w
 
     def origin(self, index: int) -> tuple[int, int]:
@@ -180,6 +185,7 @@ def hud_line_boxes(
 
 
 def _fits(text: str, width_px: int, size: int) -> bool:
+    """True when ``text`` fits between the edge margins of a frame."""
     margin = HUD_LAYOUT.edge_margin_px
     return text_box(text, (margin, 0), size)[2] <= width_px - margin
 
@@ -305,6 +311,7 @@ class HudInfo:
     extra_lines: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        """Require finite time, a positive speed and a string event caption."""
         if not math.isfinite(self.time_s):
             raise ValueError("time_s must be finite")
         if self.speed is not None and not (
@@ -408,10 +415,12 @@ Cells = str | Sequence[str]
 
 
 def _cells(value: Cells) -> tuple[str, ...]:
+    """``value`` as a tuple of cells; a str is a single cell."""
     return (value,) if isinstance(value, str) else tuple(value)
 
 
 def _column_widths(font: Any, lines: Sequence[tuple[str, Cells, bool]]) -> list[float]:
+    """Measured text width of each cell column over ``lines``."""
     rows = [_cells(v) for _, v, _ in lines]
     return [
         max(font.getlength(r[j]) for r in rows if len(r) > j)
@@ -512,6 +521,7 @@ def grid_text_panel_box(
 def _card_metrics(
     shape: tuple[int, ...], card: Any, position: str, grid: GridLayout | None = None
 ) -> tuple[tuple[int, int, int, int], int, list[tuple[str, str, bool]]]:
+    """Panel box, font size and lines of ``card`` in a frame of ``shape``."""
     lines = _card_lines(card)
     if grid is not None:
         return (*grid_text_panel_box(shape, _CARD_TITLE, lines, grid), lines)
@@ -607,6 +617,7 @@ KeyEntry = tuple[str, tuple[int, int, int]]
 
 
 def _key_lines(entries: Sequence[KeyEntry]) -> list[tuple[str, Cells, bool]]:
+    """Key lines indented for swatches; ``ValueError`` on a bad RGB triple."""
     for _, rgb in entries:
         if len(rgb) != 3 or not all(isinstance(c, int) and 0 <= c <= 255 for c in rgb):
             raise ValueError(f"key colour must be three 0-255 integers, got {rgb!r}")

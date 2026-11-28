@@ -153,6 +153,7 @@ class BodyKinematics:
     """Body frames and twists of a plant, through probe-point markers only."""
 
     def __init__(self, plant: Any, bodies: Sequence[str]) -> None:
+        """Ask the plant for IK of four probe markers on each of ``bodies``."""
         self.bodies = tuple(bodies)
         # _PROBES rows are ndarray views, typed as float64 by the pinned
         # numpy 2.2 stubs; they iterate as sequences on 2.3 stubs.
@@ -166,6 +167,7 @@ class BodyKinematics:
         self._linear: Any = None
 
     def _linearise(self, pose: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Marker positions and Jacobian of ``pose``, recomputed only on change."""
         if self._pose is None or not np.array_equal(pose, self._pose):
             linear = self.kin.marker_linearization(pose)
             shape = (len(self.bodies), 4, 3)
@@ -224,6 +226,7 @@ def _constraint(
     )
 
     def slide(k: int, pose: np.ndarray) -> np.ndarray:
+        """Tangential slide of each planted sphere, in plant-sigma units."""
         here = bodies.kin.sphere_ground_points(pose, lane.ground)
         rows = np.zeros((len(home), 3))
         for i, name in enumerate(sorted(home)):
@@ -233,6 +236,7 @@ def _constraint(
         return rows.ravel()
 
     def residual(k: int, pose: np.ndarray) -> np.ndarray:
+        """Weld, ground, sole-height and plant-slide rows of frame ``k``."""
         options = ConstraintOptions(
             ground=lane.ground,
             position_weight=1.0,
