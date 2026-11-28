@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -17,6 +17,7 @@ from src.shared.python.config.model_pack_manifest import (
     ModelPackEntry,
     ModelPackManifest,
     ProvenanceMetadata,
+    validate_golfer_pack_lock,
 )
 from src.shared.python.config.model_source_providers import (
     ResolvedModelSource,
@@ -26,6 +27,12 @@ from src.shared.python.config.model_source_providers import (
 )
 from src.shared.python.config.provider_catalog import iter_provider_manifest_specs
 from src.shared.python.core.contracts import ContractChecker, require
+
+if TYPE_CHECKING:
+    from src.shared.python.model_appearance.canonical_golfer_gate import (
+        GolferModelLock,
+        Scope,
+    )
 
 _DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
 _STRICT_TRUE_VALUES = {"1", "true", "yes", "on"}
@@ -146,6 +153,7 @@ class ModelConfig:
     embed_adapter: str | None = None
     exercise: str | None = None
     preset_params: dict[str, Any] | None = None
+    golfer_model_lock: GolferModelLock | None = None
 
 
 class ModelRegistry(ContractChecker):
@@ -334,6 +342,19 @@ class ModelRegistry(ContractChecker):
         """
         return [m for m in self.models.values() if m.type == model_type]
 
+    def _require_model(self, model_id: str) -> ModelConfig:
+        """Validate ``model_id`` and return the matching registered model."""
+        require(
+            isinstance(model_id, str) and bool(model_id.strip()),
+            "invalid model id",
+            model_id,
+        )
+        model = self.get_model(model_id)
+        require(model is not None, "model id not found", model_id)
+        if model is None:
+            raise ValueError(f"model id not found: {model_id!r}")
+        return model
+
     def resolve_model_source(
         self,
         model_id: str,
@@ -343,13 +364,7 @@ class ModelRegistry(ContractChecker):
         fallback_relative: str | Path | None = None,
     ) -> ResolvedModelSource:
         """Resolve canonical source paths for a registered model."""
-        require(
-            isinstance(model_id, str) and bool(model_id.strip()),
-            "invalid model id",
-            model_id,
-        )
-        model = self.get_model(model_id)
-        require(model is not None, "model id not found", model_id)
+        model = self._require_model(model_id)
         return resolve_model_source(
             model,
             default_root,
@@ -368,6 +383,25 @@ class ModelRegistry(ContractChecker):
             self.models.values(),
             default_root,
             approved_roots=approved_roots,
+        )
+
+    def validate_golfer_pack_lock(
+        self,
+        model_id: str,
+        spec: Mapping[str, Any] | None = None,
+        *,
+        controller: str | None = None,
+        solver: str | None = None,
+        scope: Scope = "optimization",
+    ) -> GolferModelLock | None:
+        """Validate ``golfer_model_lock`` for a registered model against ``spec``."""
+        model = self._require_model(model_id)
+        return validate_golfer_pack_lock(
+            model,
+            spec,
+            controller=controller,
+            solver=solver,
+            scope=scope,
         )
 
     def _build_model_config(
@@ -401,6 +435,7 @@ class ModelRegistry(ContractChecker):
             embed_adapter=entry.embed_adapter,
             exercise=entry.exercise,
             preset_params=entry.preset_params,
+            golfer_model_lock=entry.golfer_model_lock,
         )
 
     def _load_legacy_models(
