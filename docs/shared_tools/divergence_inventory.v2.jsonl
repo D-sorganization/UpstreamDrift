@@ -370,6 +370,7 @@
 {"path": "body_part_viz/skin_load_settings.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/theme.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_part_viz/urdf_bridge.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
+{"path": "body_part_viz/viewer_strobe_controls.py", "classification": "ud-only", "package": "body_part_viz", "spelling_only": false}
 {"path": "body_segment_parameters/__init__.py", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
 {"path": "body_segment_parameters/data/de_leva_1996_table4.json", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
 {"path": "body_segment_parameters/de_leva_1996.py", "classification": "ud-only", "package": "body_segment_parameters", "spelling_only": false}
