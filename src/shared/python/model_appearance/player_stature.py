@@ -79,15 +79,10 @@ def build_stature_calibrated(
     )
     from src.shared.python.model_appearance.player_frame_inertia import (
         apply_frame_inertia,
+        validate_frame_build,
     )
 
-    if (
-        isinstance(frame_build, bool)
-        or not isinstance(frame_build, (int, float))
-        or not math.isfinite(frame_build)
-        or abs(frame_build) > 1
-    ):
-        raise ValueError("frame_build must be finite and in [-1, 1]")
+    validate_frame_build(frame_build)
 
     lengths = {
         key: segment_parameters(stature_m, mass_kg, key).length_m

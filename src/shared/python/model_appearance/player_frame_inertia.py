@@ -28,8 +28,8 @@ TORSO_SOLIDS = {
 }
 
 
-def apply_frame_inertia(spec: Mapping[str, Any], frame_build: float) -> dict[str, Any]:
-    """Return a copied candidate with estimated torso inertias; reject unsupported frames."""
+def validate_frame_build(frame_build: float) -> None:
+    """Reject nonfinite, nonnumeric or unsupported frame estimates."""
     if (
         isinstance(frame_build, bool)
         or not isinstance(frame_build, (int, float))
@@ -37,6 +37,11 @@ def apply_frame_inertia(spec: Mapping[str, Any], frame_build: float) -> dict[str
         or abs(frame_build) > 1
     ):
         raise ValueError("frame_build must be finite and in [-1, 1]")
+
+
+def apply_frame_inertia(spec: Mapping[str, Any], frame_build: float) -> dict[str, Any]:
+    """Return a copied candidate with estimated torso inertias; reject unsupported frames."""
+    validate_frame_build(frame_build)
     result = copy.deepcopy(dict(spec))
     if frame_build == 0:
         return result
