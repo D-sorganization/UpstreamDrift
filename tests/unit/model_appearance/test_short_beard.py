@@ -73,8 +73,15 @@ def test_beard_leaves_the_lips_open_and_uses_shared_warp(facial_hair):
     before = {name: mesh for name, mesh, _ in plain}["beard_shell"]
     after = {name: mesh for name, mesh, _ in styled}["beard_shell"]
     vertices = before.vertices / 0.24
+    lip_half_width, lip_half_height = (
+        (0.055, 0.026) if facial_hair == "dense_short_beard" else (0.08, 0.035)
+    )
     assert not np.any(
-        np.hypot(vertices[:, 1] / 0.08, (vertices[:, 2] - 0.27) / 0.035) < 1
+        np.hypot(
+            vertices[:, 1] / lip_half_width,
+            (vertices[:, 2] - 0.27) / lip_half_height,
+        )
+        < 1
     )
     from src.shared.python.model_appearance.geometry import Mesh
 
@@ -142,7 +149,12 @@ def test_dense_short_beard_keeps_default_and_existing_stubble_geometry():
             np.testing.assert_array_equal(mesh.faces, variant_mesh.faces)
     stubble_shell = {name: mesh for name, mesh, _ in stubble}["beard_shell"]
     dense_shell = {name: mesh for name, mesh, _ in dense}["beard_shell"]
-    assert dense_shell.vertices[:, 2].max() > stubble_shell.vertices[:, 2].max()
+    assert dense_shell.vertices[:, 2].max() < stubble_shell.vertices[:, 2].max()
+    stubble_moustache = {name: mesh for name, mesh, _ in stubble}["moustache_l"]
+    dense_moustache = {name: mesh for name, mesh, _ in dense}["moustache_l"]
+    assert dense_moustache.vertices[:, 2].min() < stubble_moustache.vertices[:, 2].min()
+    outer_cheek = np.abs(dense_shell.vertices[:, 1] / 0.24) > 0.20
+    assert dense_shell.vertices[outer_cheek, 2].max() < 0.36 * 0.24
     dense_meshes = [
         (name, mesh, role)
         for name, mesh, role in dense
@@ -171,6 +183,9 @@ def test_dense_beard_material_is_darker_than_stubble_for_dark_hair():
 
     assert dense != stubble
     assert luminance(library.MATERIALS[dense].rgba[:3]) < luminance(
+        library.MATERIALS[stubble].rgba[:3]
+    )
+    assert luminance(library.MATERIALS[dense].rgba[:3]) > 0.55 * luminance(
         library.MATERIALS[stubble].rgba[:3]
     )
 

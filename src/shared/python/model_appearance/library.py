@@ -196,7 +196,7 @@ for _skin_name in (*SKIN_TONES, *defaults.skin_aliases()):
         MATERIALS[f"dense_beard_{_skin_name}_{_hair['id']}"] = Material(
             (
                 *(
-                    0.30 * s + 0.70 * h
+                    0.45 * s + 0.55 * h
                     for s, h in zip(_skin_rgb, _hair_rgb, strict=True)
                 ),
                 1.0,
