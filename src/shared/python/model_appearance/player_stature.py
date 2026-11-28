@@ -56,7 +56,7 @@ def neutral_visual_height(spec: Mapping[str, Any]) -> float:
 
 
 def build_stature_calibrated(
-    stature_m: float, mass_kg: float, club: str = "driver"
+    stature_m: float, mass_kg: float, club: str = "driver", *, frame_build: float = 0.0
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build current golfer with nominal mass, de Leva legs and calibrated trunk.
 
@@ -77,6 +77,12 @@ def build_stature_calibrated(
     from src.shared.python.model_appearance.canonical_golfer_gate import (
         require_canonical_golfer,
     )
+    from src.shared.python.model_appearance.player_frame_inertia import (
+        apply_frame_inertia,
+        validate_frame_build,
+    )
+
+    validate_frame_build(frame_build)
 
     lengths = {
         key: segment_parameters(stature_m, mass_kg, key).length_m
@@ -104,14 +110,15 @@ def build_stature_calibrated(
 
     scale = brentq(residual, 0.6, 1.2, xtol=1e-7, maxiter=32)
     built = build(scale)
+    document = apply_frame_inertia(built.document, frame_build)
     spec, _ = with_current_golfer_model(
-        *with_grip_revision(built.document, built.subject, None)
+        *with_grip_revision(document, built.subject, None)
     )
     require_canonical_golfer(spec)
     height = neutral_visual_height(spec)
     if abs(height - stature_m) > 0.0001:
         raise ValueError("current-model revision changed the calibrated stature")
-    return spec, {
+    receipt = {
         "trunk_scale": scale,
         "selected_leg_lengths_m": lengths,
         "neutral_visual_height_m": height,
@@ -119,3 +126,10 @@ def build_stature_calibrated(
         "iterations": count,
         "convention": "zero-q CC0 skin top to lowest procedural shoe sole; shoes included",
     }
+    if frame_build:
+        receipt["frame_inertia"] = {
+            "frame_build": frame_build,
+            "transverse_scale": 1 + 0.18 * frame_build,
+            "method": "affine torso second-moment estimate; fixed mass and COM",
+        }
+    return spec, receipt
