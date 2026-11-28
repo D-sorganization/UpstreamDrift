@@ -7,7 +7,7 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15848/#15853/#15854/#15909: Period hair, hats, cap export and sized-frame inertia; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
+- #15848/#15853/#15854/#15909/#15966: Period hair, hats, frame inertia and Watson's 1980 palette; see the [player model reference](docs/development/player-models.tex).
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
