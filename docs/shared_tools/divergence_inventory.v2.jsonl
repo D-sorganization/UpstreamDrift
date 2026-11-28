@@ -2323,6 +2323,7 @@
 {"path": "physics/contact_reaction_decomposition.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/dimple_geometry.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/divot_model.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
+{"path": "physics/energy_ledger_charts.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/energy_ledger_contract.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/energy_monitor.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
 {"path": "physics/equipment.py", "classification": "ud-only", "package": "physics", "spelling_only": false}
