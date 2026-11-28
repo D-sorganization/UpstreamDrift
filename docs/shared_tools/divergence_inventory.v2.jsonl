@@ -3817,6 +3817,7 @@
 {"path": "workspace/necromatcher_caption.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
 {"path": "workspace/necromatcher_capture.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
 {"path": "workspace/necromatcher_capture_identity.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
+{"path": "workspace/necromatcher_catalog_import.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
 {"path": "workspace/necromatcher_constraints.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
 {"path": "workspace/necromatcher_contacts.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
 {"path": "workspace/necromatcher_efforts.py", "classification": "ud-only", "package": "workspace", "spelling_only": false}
