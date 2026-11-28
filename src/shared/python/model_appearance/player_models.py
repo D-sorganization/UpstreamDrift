@@ -7,6 +7,7 @@ interpretations, not measured player anatomy or fitted historical motion.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,69 @@ def player_appearance(player: str) -> AppearanceDocument:
     return document_from_dict(player_profile(player)["appearance"])
 
 
+def frame_prior(profile: dict[str, Any]) -> dict[str, Any]:
+    """Resolve an explicit frame assumption and its non-physical provenance."""
+    setting = profile.get("frame_prior")
+    if setting is None:
+        return {"method": "unknown", "value": 0.0}
+    if not isinstance(setting, dict):
+        raise ValueError("frame_prior must be an object or null")
+    method = setting.get("method")
+    if method == "override":
+        value, reason = setting.get("value"), setting.get("rationale")
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or abs(value) > 1
+            or not isinstance(reason, str)
+            or not reason.strip()
+        ):
+            raise ValueError("frame override needs a bounded value and rationale")
+        return {"method": method, "value": float(value), "rationale": reason}
+    if method != "height_mass":
+        raise ValueError("unknown frame prior method")
+    height, mass = profile.get("stature_m"), profile.get("mass_kg")
+    if any(
+        isinstance(v, bool)
+        or not isinstance(v, (int, float))
+        or not math.isfinite(v)
+        or v <= 0
+        for v in (height, mass)
+    ):
+        raise ValueError("frame proxy needs finite positive stature and mass")
+    index, sources = setting.get("source_index"), profile.get("sources")
+    if (
+        isinstance(index, bool)
+        or not isinstance(index, int)
+        or not isinstance(sources, list)
+        or not 0 <= index < len(sources)
+        or not isinstance(sources[index], dict)
+        or not sources[index].get("url")
+    ):
+        raise ValueError("frame proxy needs an explicit source index")
+    height = float(profile["stature_m"])
+    mass = float(profile["mass_kg"])
+    try:
+        raw = math.sqrt((mass / 78.0) * (1.71 / height) ** 3)
+    except OverflowError as exc:
+        raise ValueError("frame proxy inputs are out of range") from exc
+    if not math.isfinite(raw):
+        raise ValueError("frame proxy inputs are out of range")
+    value = max(-1.0, min(1.0, (raw - 1.0) / 0.18))
+    return {
+        "method": method,
+        "value": value,
+        "raw_transverse_scale": raw,
+        "saturated": raw < 0.82 or raw > 1.18,
+        "source": sources[index],
+        "reference_stature_m": 1.71,
+        "reference_mass_kg": 78.0,
+        "formula": "sqrt((M/78)*(1.71/H)^3); b=clip((s-1)/0.18,-1,1)",
+        "assumption": "equal density and similar relative segment lengths; not measured girths",
+    }
+
+
 def build_player_spec(player: str, club: str = "driver") -> dict[str, Any]:
     """Build a newly sized current-model candidate, including the flexible shaft.
 
@@ -55,7 +119,7 @@ def build_player_spec(player: str, club: str = "driver") -> dict[str, Any]:
         profile["stature_m"],
         profile["mass_kg"],
         club,
-        frame_build=profile["appearance"].get("body_build", 0.0),
+        frame_build=frame_prior(profile)["value"],
     )
     spec["subject"]["neutral_visual_calibration"] = calibration
     return spec
@@ -122,6 +186,8 @@ def export_player(
         if base_spec
         else "published-dimension candidate; motion unqualified",
     }
+    if base_spec is None:
+        receipt["frame_prior"] = frame_prior(profile)
     if cap_style is not None:
         receipt["appearance_override"] = {
             "head.cap_style": doc.head.cap_style,
