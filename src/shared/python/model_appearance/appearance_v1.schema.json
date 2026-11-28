@@ -72,6 +72,13 @@
         "cap_brim": { "type": "number", "minimum": 0.1, "maximum": 0.8 },
         "sizing": { "enum": ["stature", "segment_length"] },
         "height_over_stature": { "type": "number", "minimum": 0.1, "maximum": 0.16 },
+        "detail": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "nose_curve": { "type": "number", "minimum": -1, "maximum": 1 },
+            "cheek_bones": { "type": "number", "minimum": -1, "maximum": 1 }
+          }
+        },
         "morph": {
           "type": "object", "additionalProperties": false,
           "properties": {

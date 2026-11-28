@@ -1,0 +1,17 @@
+{
+  "asset": "face_detail_cc0.npz",
+  "asset_sha256": "a9886b377ced4b63fa36f05a01021333778a228ec043bf279c90f496c5117b37",
+  "licence": "CC0-1.0",
+  "licence_file": "LICENSE.CC0.txt",
+  "source_commit": "3c701a8e52f09e69922e8b598d23be2d7dfc49e3",
+  "base_sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+  "derivation": "build_face_detail_asset.py; source vertex mapping and canonical head-length offsets",
+  "targets": [
+    {"name": "nose-curve-convex", "sha256": "3426e9a53c65962bc75b25aae04759a03e818d708bc5445ffc4dfb812497a7ca", "url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/targets/nose/nose-curve-convex.target"},
+    {"name": "nose-curve-concave", "sha256": "30dd70cfdf1ce1c77eabff12b49d238b05a3b36f95f2ba6f64d4b5b059292e58", "url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/targets/nose/nose-curve-concave.target"},
+    {"name": "l-cheek-bones-incr", "sha256": "244ffa39d2d2db94ff15130719346b4cae2236bf2a309c5682eac352da06be50", "url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/targets/cheek/l-cheek-bones-incr.target"},
+    {"name": "r-cheek-bones-incr", "sha256": "a393f67acce21568ab832091daadab267685d464492647cb0c4e8cb5af58c4c9", "url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/targets/cheek/r-cheek-bones-incr.target"},
+    {"name": "l-cheek-bones-decr", "sha256": "0da776725aabc2cbc602d805e50d0dfbc98b0519a0d65f21b7e6f133562e56f9", "url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/targets/cheek/l-cheek-bones-decr.target"},
+    {"name": "r-cheek-bones-decr", "sha256": "a336b46fe613d85763fb01ca79758039b15daef1930600e36dc420e799b683d4", "url": "https://github.com/makehumancommunity/makehuman/blob/3c701a8e52f09e69922e8b598d23be2d7dfc49e3/makehuman/data/targets/cheek/r-cheek-bones-decr.target"}
+  ]
+}

@@ -31,6 +31,7 @@ from numpy.typing import NDArray
 
 from src.shared.python.model_appearance import head_cap, head_features, head_hair
 from src.shared.python.model_appearance.geometry import Mesh
+from src.shared.python.model_appearance.head_detail import HeadDetail, apply_detail
 from src.shared.python.model_appearance.head_morph import HeadMorph
 from src.shared.python.model_appearance.schema import HeadSettings
 
@@ -233,6 +234,8 @@ def build_mesh_parts(
             " (a cap needs the parametric head)"
         )
     asset = _default_asset()
+    if settings is not None and settings.detail != HeadDetail():
+        asset = replace(asset, skin=apply_detail(asset.skin, settings.detail))
     out = [
         ("skin_mesh", Mesh(asset.skin.vertices * length_m, asset.skin.faces), "skin")
     ]
