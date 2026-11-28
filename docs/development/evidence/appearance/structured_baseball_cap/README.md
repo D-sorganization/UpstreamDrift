@@ -1,4 +1,4 @@
-# Structured baseball-cap render evidence
+# Structured Baseball-Cap Render Evidence
 
 These are neutral-view renders of the new opt-in cap style on an appearance-only
 candidate. The profile was rendered on the Tiger Woods fitted reference-skin
