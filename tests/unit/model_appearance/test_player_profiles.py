@@ -53,6 +53,7 @@ def test_public_catalog_ids_include_legacy_and_new_profiles():
         "dustin_johnson",
         "jack_nicklaus",
         "jon_rahm",
+        "mac_ogrady",
         "rory_mcilroy",
         "sam_snead",
         "sergio_garcia",

@@ -33,6 +33,26 @@ specification retains the fit's physical properties.
 python scripts/export_player_models.py --player rory_mcilroy jon_rahm \
   dustin_johnson sergio_garcia --output output/modern
 \end{verbatim}
+\section{Mac O'Grady Candidate}
+For the 1986-era O'Grady candidate, the contemporary PGA TOUR guide lists
+6 ft and 165 lb, converted to $1.8288$ m and $74.84274105$ kg. The 1984
+Tour guide reports 170 lb, so these are conflicting published priors rather
+than capture measurements. The 1984 portrait was inspected for face and hair;
+its grayscale image does not establish colors. The 1986 St Andrews image record
+was identified but its viewer was unavailable. Profile colors and detailed
+proportions remain authored interpretations, and the video date is unverified.
+Use the same head frame and bounded warp as the existing model. Neutral stature
+includes shoes and excludes headwear; the existing calibration and de Leva
+priors, physics separation, and validation requirements below also apply here.
+\begin{verbatim}
+python scripts/export_player_models.py --player mac_ogrady \
+  --output output/ogrady
+python scripts/export_player_models.py --player mac_ogrady \
+  --base-spec match.json --output output/ogrady-skin
+\end{verbatim}
+The first command constructs a sized candidate that needs a new motion fit;
+the second retains the supplied physical specification. Neither establishes
+historical swing, measured anatomy, or forward-dynamics qualification.
 \section{Construction and Compatibility}
 Segment lengths and inertias use the existing de Leva/OpenSim priors, with
 explicit stature-scaled thigh and shank targets on both legs (the template
