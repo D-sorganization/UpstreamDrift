@@ -239,6 +239,9 @@ def build_mesh_parts(
     if settings is not None:
         out += _feature_mesh_parts(asset.skin, length_m, settings)
     straw = settings is not None and settings.cap_style == "straw_hat"
+    structured_baseball = (
+        settings is not None and settings.cap_style == "baseball_cap_structured"
+    )
     flat_capped = settings is not None and settings.cap_style in (
         "flat_cap",
         "newsboy_cap",
@@ -247,7 +250,10 @@ def build_mesh_parts(
     capped = (
         straw
         or flat_capped
-        or (settings is not None and settings.cap_style == "baseball_cap")
+        or (
+            settings is not None
+            and settings.cap_style in ("baseball_cap", "baseball_cap_structured")
+        )
     )
     cap_crop = (
         head_cap.straw_hat_crop()
@@ -256,6 +262,8 @@ def build_mesh_parts(
         if newsboy
         else head_cap.flat_cap_crop()
         if flat_capped
+        else head_cap.structured_baseball_cap_crop()
+        if structured_baseball
         else head_cap.CapCrop()
     )
     if headwear == "hair":

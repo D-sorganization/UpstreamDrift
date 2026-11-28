@@ -89,6 +89,36 @@ def flat_cap_crop() -> CapCrop:
     )
 
 
+def structured_baseball_cap_crop() -> CapCrop:
+    """Return a lower baseball crown with a wide, clearly drooping bill.
+
+    This style is opt-in so existing baseball, flat and historical hats retain
+    their established silhouettes. Values are head-length proportions.
+    """
+    return CapCrop(
+        line=(
+            (0.0, 0.82),
+            (0.90, 0.77),
+            (1.80, 0.67),
+            (2.60, 0.60),
+            (math.pi, 0.57),
+        ),
+        offset=0.05,
+        brim_half_angle=1.0,
+        brim_forward=0.92,
+        brim_end_taper=0.36,
+        brim_droop=0.34,
+        brim_thickness=0.014,
+        front_overhang=0.035,
+        hair_under=HairCrop(
+            top_thickness=0.028,
+            fringe_thickness=0.0,
+            comb_amplitude=0.0,
+            heavy_side_gain=0.0,
+        ),
+    )
+
+
 def newsboy_cap_crop() -> CapCrop:
     """Return a fuller period crown over the same closely cropped hair."""
     return replace(flat_cap_crop(), offset=0.095, front_overhang=0.16)

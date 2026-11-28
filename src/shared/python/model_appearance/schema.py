@@ -148,7 +148,14 @@ HAIR_STYLES = (
 )
 HAIR_PARTS = ("left", "right", "none")
 EYE_COLORS = ("blue_grey", "hazel", "brown")
-CAP_STYLES = ("none", "baseball_cap", "flat_cap", "straw_hat", "newsboy_cap")
+CAP_STYLES = (
+    "none",
+    "baseball_cap",
+    "baseball_cap_structured",
+    "flat_cap",
+    "straw_hat",
+    "newsboy_cap",
+)
 CAP_BRIM_RANGE = (0.10, 0.80)  # brim length, head lengths
 DEFAULT_CAP_BRIM = 0.30
 #: ``stature``: menton to vertex is ``height_over_stature`` of the subject's
@@ -202,7 +209,7 @@ class HeadSettings:
     hair_part: str = "left"
     #: Iris colour: ``blue_grey`` (default), ``hazel`` or ``brown``.
     eye_color: str = "blue_grey"
-    #: ``none`` (default), ``baseball_cap`` or a low-profile ``flat_cap``.
+    #: ``none`` (default), baseball, structured baseball, flat or period hat.
     cap_style: str = "none"
     #: Library material of the cap (a colour); the brim shares it.
     cap_material: str = "cap_navy"
