@@ -263,6 +263,9 @@ def evaluate_markerless_scorecard(
     if not annotations:
         raise ValueError("annotations cannot be empty")
     g = gates or load_scorecard_gates()
+    unknown = sorted({a.phase for a in annotations} - set(g.required_phases))
+    if unknown:
+        raise ValueError(f"annotation phases outside required_phases: {unknown}")
     tpl = null_template or build_phase_aligned_null_template(g)
     if len({(a.frame_index, a.phase) for a in annotations}) != len(annotations):
         raise ValueError("Duplicate annotation frame/phase")
@@ -293,7 +296,12 @@ def evaluate_markerless_scorecard(
             reasons.extend(pr)
         p_res.append({"phase": phase, "coverage": cov, "passed": not pr})
     okp, oang = _pair_rmse(all_cand)
-    nkp, nang = _pair_rmse([(a, null_map[a.frame_index, a.phase]) for a in annotations])
+    # Candidate and null must be scored on one identical population: frames the
+    # candidate was never asked to predict inflate the baseline and can turn a
+    # candidate that merely re-emits the null pose into a false "passed".
+    nkp, nang = _pair_rmse(
+        [(a, null_map[(a.frame_index, a.phase)]) for a, _ in all_cand]
+    )
     margins = g.null_baseline_margins
     if okp is None or oang is None:
         reasons.append("no_covered_observations")
