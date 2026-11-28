@@ -1,0 +1,35 @@
+{
+  "reviewed_on": "2026-11-14",
+  "reviewer": "implementing agent, by opening the PNGs",
+  "subject": "the renderer, using the in-repo capsule hand as the only source",
+  "renderer_checks": {
+    "skin_shading_smooth": "pass: no facet glitter; hard block rims stay crisp through the crease angle",
+    "hand_fills_about_70_percent": "pass: measured fill 0.64 to 0.70 on the longer axis in all 42 frames",
+    "key_fill_rim_lights_no_headlight": "pass, with a limit: there are no cast shadows, so fingers lack a contact shadow on the grip",
+    "club_visible": "partial: grip rubber in every view; the steel shaft stub is in frame only in the eye view",
+    "lead_and_trail_mirror": "pass: the trail fingers curl the opposite way and the views keep their names for both hands",
+    "repeat_render_byte_identical": "pass on EGL"
+  },
+  "per_view_score_out_of_5": {
+    "palm": {"score": 4, "note": "fingers across the grip read clearly; flat without contact shadows; shaft out of frame"},
+    "back": {"score": 4, "note": "clean gradient across the dorsum; shaft out of frame"},
+    "thumb_side": {"score": 4, "note": "depth reads from the key and rim lights; shaft out of frame"},
+    "pinky_side": {"score": 4, "note": "same as thumb side"},
+    "butt": {"score": 3, "note": "framing is right; the butt cap is a flat near-black disc; shaft hidden behind the grip"},
+    "eye": {"score": 4, "note": "grip and shaft both visible; best single view"}
+  },
+  "capsule_anatomy_checklist": {
+    "separate_fingers_and_thumb": "pass",
+    "cupped_palm": "fail: the capsule palm is a curved block",
+    "knuckle_line": "fail: none modelled",
+    "fingers_wrap_the_grip": "pass",
+    "no_tubes_blobs_or_torn_triangles": "fail: the capsule hand is tubes by construction; no torn triangles",
+    "note": "these lines judge the capsule source, which is known to be crude, not the renderer"
+  },
+  "known_limits": [
+    "MuJoCo shadow maps showed acne and serrated edges at this scale, so shadows are off in settings",
+    "wrap and subsurface tint are only a warm ambient term in the MuJoCo engine",
+    "no pyrender engine",
+    "the matplotlib fallback is faceted and is not quality-bar evidence"
+  ]
+}
