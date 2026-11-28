@@ -8,7 +8,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from typing import Any, Final, Literal
+from typing import Any, Final, Literal, Protocol
 
 from . import _validation as _v
 
@@ -118,6 +118,25 @@ class PhaseAlignedNullTemplate:
         return tuple(out)
 
 
+class HeldoutAnnotationSet(Protocol):
+    """Protocol for a frozen held-out annotation set that may referee the gate."""
+
+    content_sha256: str
+    pinned_reference: dict[str, Any]
+
+    def to_records(self) -> tuple[FramePoseRecord, ...]:
+        """Return the annotation set as scorecard pose records."""
+
+    def scoreability_blockers(self) -> tuple[str, ...]:
+        """Return fail-closed reasons why this set may not referee a pass verdict."""
+
+    def assert_carries_signal(self, null_template: PhaseAlignedNullTemplate) -> None:
+        """Reject an annotation set that merely copies the null template poses."""
+
+    def assert_pins_match(self, gate_pins: dict[str, Any]) -> None:
+        """Reject an annotation set pinned to evidence other than the gate's."""
+
+
 @dataclass(frozen=True, slots=True)
 class ModelSpaceChecks:
     """Model-space 3D plausibility checks (not physical time or SI kinetics)."""
@@ -156,6 +175,7 @@ class MarkerlessScorecard:
     timebase: Literal["unverified"] = "unverified"
     physical_time_verified: Literal[False] = False
     qualification: Literal["image_observations_only"] = "image_observations_only"
+    heldout_set_sha256: str = ""
     content_sha256: str = ""
 
     def __post_init__(self) -> None:
@@ -170,6 +190,8 @@ class MarkerlessScorecard:
             raise ValueError("Passed scorecard cannot contain failure fields")
         if self.status == "below_gate" and not self.failure_reasons:
             raise ValueError("below_gate scorecard requires failure_reasons")
+        if self.status == "passed" and not self.heldout_set_sha256:
+            raise ValueError("A passed scorecard must cite a frozen held-out set")
         pl = self.to_payload_dict()
         raw = json.dumps(pl, sort_keys=True, allow_nan=False, separators=(",", ":"))
         digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -257,6 +279,7 @@ def evaluate_markerless_scorecard(
     gates: ScorecardGates | None = None,
     null_template: PhaseAlignedNullTemplate | None = None,
     model_space_checks: ModelSpaceChecks | None = None,
+    heldout: HeldoutAnnotationSet | None = None,
 ) -> MarkerlessScorecard:
     """Evaluate a candidate against frozen Tiger 2000 2D gates and null baseline."""
     _v.check_id(candidate_id, "candidate_id")
@@ -264,6 +287,17 @@ def evaluate_markerless_scorecard(
         raise ValueError("annotations cannot be empty")
     g = gates or load_scorecard_gates()
     tpl = null_template or build_phase_aligned_null_template(g)
+    blockers = (
+        ("heldout_annotations_missing",)
+        if heldout is None
+        else heldout.scoreability_blockers()
+    )
+    if heldout is not None:
+        heldout.assert_pins_match(g.pinned_reference)
+        heldout.assert_carries_signal(tpl)
+        frozen = {(r.frame_index, r.phase) for r in heldout.to_records()}
+        if frozen != {(a.frame_index, a.phase) for a in annotations}:
+            raise ValueError("annotations must be exactly the frozen held-out set")
     if len({(a.frame_index, a.phase) for a in annotations}) != len(annotations):
         raise ValueError("Duplicate annotation frame/phase")
     pred_map = {(p.frame_index, p.phase): p for p in predictions}
@@ -303,7 +337,7 @@ def evaluate_markerless_scorecard(
             reasons.append("null_baseline_keypoint_margin_not_met")
         if nang is None or (nang - oang) < margins["shaft_angle_deg"]:
             reasons.append("null_baseline_shaft_angle_margin_not_met")
-    uniq = tuple(dict.fromkeys(reasons))
+    uniq = tuple(dict.fromkeys((*blockers, *reasons)))
     status: ScorecardStatus = "below_gate" if (failing or uniq) else "passed"
     ok_3d = bool(model_space_checks and model_space_checks.all_passed)
     cls: MatchKind = "below_gate"
@@ -321,4 +355,5 @@ def evaluate_markerless_scorecard(
         uniq,
         model_space_checks,
         g.pinned_reference,
+        heldout_set_sha256="" if heldout is None else heldout.content_sha256,
     )
