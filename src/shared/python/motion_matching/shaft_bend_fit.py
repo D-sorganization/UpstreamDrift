@@ -53,6 +53,7 @@ class BendSettings:
     solver_tolerance: float
 
     def __post_init__(self) -> None:
+        """Require in-range shapes, non-negative weights and solver bounds."""
         weights = (self.smoothness_weight_m_per_rad, self.ridge_weight_m_per_rad)
         if not (
             self.shapes_per_plane in range(1, MAX_SHAPES + 1)
@@ -79,6 +80,7 @@ class ChainGeometry:
     bend_stiffness: Array
 
     def __post_init__(self) -> None:
+        """Require (N, 3) joints with increasing y and N stiffnesses."""
         points = self.joint_points_m
         if not (
             points.ndim == 2
@@ -97,6 +99,7 @@ class ChainGeometry:
 
     @property
     def n_joints(self) -> int:
+        """Count of joints in ``joint_points_m``, grip end to tip."""
         return len(self.joint_points_m)
 
 
@@ -164,10 +167,12 @@ def club_frame_targets(
         raise ValueError("need (k, m, 3) markers and at least 3 reference markers")
     ref = np.broadcast_to(reference_offsets, captured.shape)
     out = np.full_like(captured, np.nan)
+    # NDArray rows index as float64 scalars under the pinned numpy 2.2 stubs;
+    # correct on the numpy 2.3 stubs CI runners use (pyproject exclude note).
     for k, (points, local) in enumerate(zip(captured, ref, strict=True)):
-        if not np.all(np.isfinite(points[idx])):
+        if not np.all(np.isfinite(points[idx])):  # type: ignore[index]
             continue
-        a, b = local[idx], points[idx]
+        a, b = local[idx], points[idx]  # type: ignore[index]
         rot = kabsch_rotation(a - a.mean(0), b - b.mean(0))
         out[k] = (points - b.mean(0)) @ rot + a.mean(0)
     return out
@@ -272,11 +277,13 @@ def fit_shaft_bend(
         return np.stack([z[..., 1], z[..., 0] - z[..., 1]], axis=-1)
 
     def bend_of(x: Array) -> Array:
+        """Joint bends ``(k, N, 2)`` from amplitudes ``x`` under the shape basis."""
         return np.asarray(
             np.einsum("kps,sn->knp", amplitudes_of(x), basis), dtype=np.float64
         )
 
     def residuals(x: Array) -> Array:
+        """Marker error, smoothness and ridge rows for solver variables ``x``."""
         raw = amplitudes_of(x)
         amps = raw.reshape(frames, n_par)
         error = (_positions(geometry, bend_of(x), offsets) - goal) * valid[..., None]
