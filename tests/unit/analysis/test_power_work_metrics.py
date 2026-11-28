@@ -249,3 +249,49 @@ class TestPowerWorkGuards15343:
         assert (
             metrics.generation_duration + metrics.absorption_duration <= t_total + 1e-9
         )
+
+
+def _circle_cycle_instance(theta_0: float) -> PowerWorkMetricsMixin:
+    """One full 1 Hz circle of radius 1 rad, torque 20 N·m a quarter out of
+    phase (exact loop area pi*1*20 = 62.83 J), with the documented 0.03 deg
+    end-of-cycle angle jitter that #15864 must tolerate regardless of where
+    theta is zeroed."""
+    obj = _make_instance(n_samples=200)
+    phi = 2.0 * np.pi * obj.times
+    obj.joint_positions[:, 0] = theta_0 + np.sin(phi)
+    obj.joint_positions[-1, 0] += np.deg2rad(0.03)  # closure jitter
+    obj.joint_torques[:, 0] = 20.0 * np.cos(phi)
+    return obj
+
+
+@pytest.mark.unit
+class TestClosedAngleCycleOrigin15864:
+    """FC-012a-2: closed-angle detection must not depend on |angles[0]| (#15864)."""
+
+    @pytest.mark.parametrize("theta_0", [1.0, 0.0, -np.pi])
+    def test_cycle_is_closed_for_any_angle_origin(self, theta_0: float) -> None:
+        """Zeroing theta elsewhere must not decide whether the loop is closed.
+
+        FC-012a-2 (#15864): the old ``np.isclose(a0, aN, rtol)`` compared
+        against ``rtol*|angles[0]|``, so a trace starting at 0 rad failed
+        closure under 0.03 deg jitter while the same trace at 1 rad passed.
+        """
+        from src.shared.python.analysis.power_work_metrics import _closed_angle_cycle
+
+        obj = _circle_cycle_instance(theta_0)
+        assert _closed_angle_cycle(obj.joint_positions[:, 0])
+
+    def test_hysteresis_work_is_invariant_under_angle_origin_shift(self) -> None:
+        """The 62.82 J closed-cycle work is unchanged by the angle origin.
+
+        FC-012a-2 (#15864): shifting ``theta_0`` from 1.0 rad to 0.0 rad used
+        to silently drop the hysteresis loop to 0 J.
+        """
+        reference = _circle_cycle_instance(1.0).compute_joint_stiffness(0)
+        shifted = _circle_cycle_instance(0.0).compute_joint_stiffness(0)
+        assert reference is not None and shifted is not None
+        # Not a zero-vs-zero coincidence: the loop really is detected.
+        assert reference.hysteresis_area == pytest.approx(np.pi * 20.0, abs=0.1)
+        assert shifted.hysteresis_area == pytest.approx(
+            reference.hysteresis_area, abs=1e-9
+        )
