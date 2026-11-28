@@ -35,6 +35,7 @@ class ScorecardGates:
     pinned_reference: dict[str, Any]
 
     def __post_init__(self) -> None:
+        """Validate schema version, phase list, noise floors, and pinned reference."""
         _v.check_schema_version(self.schema_version, SCORECARD_GATES_SCHEMA_VERSION)
         phases = tuple(_v.check_str(p, "phase") for p in self.required_phases)
         if not phases or len(set(phases)) != len(phases):
@@ -58,6 +59,7 @@ class ScorecardGates:
             raise ValueError("pinned_reference qualification_floor mismatch")
 
     def ceiling(self, key: str) -> float:
+        """Return the noise-floor ceiling for ``key``."""
         return float(self.noise_floor_multiplier * self.annotator_noise_floors[key])
 
 
@@ -71,6 +73,7 @@ class FramePoseRecord:
     shaft_angle_deg: float
 
     def __post_init__(self) -> None:
+        """Validate frame index, phase name, shaft angle, and 2D keypoints."""
         if _v.check_int(self.frame_index, "frame_index") < 0:
             raise ValueError("frame_index must be >= 0")
         _v.check_str(self.phase, "phase")
@@ -126,11 +129,13 @@ class ModelSpaceChecks:
     ground_contact_ok: bool = False
 
     def __post_init__(self) -> None:
+        """Validate that all model-space check flags are booleans."""
         if not all(isinstance(v, bool) for v in asdict(self).values()):
             raise TypeError("ModelSpaceChecks flags must be bool")
 
     @property
     def all_passed(self) -> bool:
+        """Return True iff every model-space plausibility check passed."""
         return all(asdict(self).values())
 
 
@@ -154,6 +159,7 @@ class MarkerlessScorecard:
     content_sha256: str = ""
 
     def __post_init__(self) -> None:
+        """Validate scorecard invariants and compute or verify content_sha256."""
         _v.check_schema_version(self.schema_version, SCORECARD_SCHEMA_VERSION)
         _v.check_id(self.candidate_id, "candidate_id")
         if self.timebase != "unverified" or self.physical_time_verified is not False:
@@ -177,6 +183,7 @@ class MarkerlessScorecard:
         return {k: v for k, v in asdict(self).items() if k != "content_sha256"}
 
     def to_json(self) -> str:
+        """Serialize the scorecard as deterministic indented JSON."""
         return json.dumps(asdict(self), sort_keys=True, allow_nan=False, indent=2)
 
 
@@ -194,22 +201,19 @@ def build_phase_aligned_null_template(
     """Construct the phase-aligned static Tiger Woods null baseline template."""
     g = gates or load_scorecard_gates()
     specs = (
-        ("address", 625.0, 390.0, 595.0, 560.0, -58.0),
-        ("top", 685.0, 175.0, 540.0, 150.0, 15.0),
-        ("downswing", 640.0, 330.0, 720.0, 265.0, -32.0),
-        ("impact", 618.0, 388.0, 598.0, 558.0, -60.0),
-        ("finish", 575.0, 185.0, 705.0, 195.0, 145.0),
+        ("address", (625.0, 390.0), (595.0, 560.0), -58.0),
+        ("top", (685.0, 175.0), (540.0, 150.0), 15.0),
+        ("downswing", (640.0, 330.0), (720.0, 265.0), -32.0),
+        ("impact", (618.0, 388.0), (598.0, 558.0), -60.0),
+        ("finish", (575.0, 185.0), (705.0, 195.0), 145.0),
     )
-    poses = (
-        dict(phase_poses)
-        if phase_poses is not None
-        else {
-            p: FramePoseRecord(
-                0, p, {"left_wrist": (wx, wy), "club_head": (cx, cy)}, ang
-            )
-            for p, wx, wy, cx, cy, ang in specs
+    if phase_poses is not None:
+        poses = dict(phase_poses)
+    else:
+        poses = {
+            p: FramePoseRecord(0, p, {"left_wrist": w, "club_head": c}, ang)
+            for p, w, c, ang in specs
         }
-    )
     if [p for p in g.required_phases if p not in poses]:
         raise ValueError("Null template missing required phases")
     return PhaseAlignedNullTemplate(
@@ -220,6 +224,7 @@ def build_phase_aligned_null_template(
 def _pair_rmse(
     pairs: Sequence[tuple[FramePoseRecord, FramePoseRecord]],
 ) -> tuple[float | None, float | None]:
+    """Compute keypoint pixel RMSE and wrapped shaft-angle RMSE over record pairs."""
     if not pairs:
         return None, None
     kp_sq, ang_sq = list[float](), list[float]()
@@ -235,6 +240,7 @@ def _pair_rmse(
 def _ceil_reasons(
     kp_r: float | None, ang_r: float | None, g: ScorecardGates, pfx: str
 ) -> list[str]:
+    """Return prefixed failure reasons when RMSE metrics exceed gate ceilings."""
     out: list[str] = []
     if kp_r is not None and kp_r > g.ceiling("keypoint_rmse_px"):
         out.append(f"{pfx}keypoint_noise_ceiling_exceeded")
@@ -286,30 +292,23 @@ def evaluate_markerless_scorecard(
             failing.append(phase)
             reasons.extend(pr)
         p_res.append({"phase": phase, "coverage": cov, "passed": not pr})
-
     okp, oang = _pair_rmse(all_cand)
-    n_pairs = [(a, null_map[(a.frame_index, a.phase)]) for a in annotations]
-    nkp, nang = _pair_rmse(n_pairs)
-    kp_imp = nkp - okp if (nkp is not None and okp is not None) else None
-    ang_imp = nang - oang if (nang is not None and oang is not None) else None
+    nkp, nang = _pair_rmse([(a, null_map[a.frame_index, a.phase]) for a in annotations])
     margins = g.null_baseline_margins
     if okp is None or oang is None:
         reasons.append("no_covered_observations")
     else:
         reasons.extend(_ceil_reasons(okp, oang, g, "overall_"))
-        if kp_imp is None or kp_imp < margins["keypoint_rmse_px"]:
+        if nkp is None or (nkp - okp) < margins["keypoint_rmse_px"]:
             reasons.append("null_baseline_keypoint_margin_not_met")
-        if ang_imp is None or ang_imp < margins["shaft_angle_deg"]:
+        if nang is None or (nang - oang) < margins["shaft_angle_deg"]:
             reasons.append("null_baseline_shaft_angle_margin_not_met")
-
     uniq = tuple(dict.fromkeys(reasons))
     status: ScorecardStatus = "below_gate" if (failing or uniq) else "passed"
     ok_3d = bool(model_space_checks and model_space_checks.all_passed)
-    cls: MatchKind = (
-        "below_gate"
-        if status == "below_gate"
-        else ("kinematic_3d_plausible" if ok_3d else "kinematic_2d_match")
-    )
+    cls: MatchKind = "below_gate"
+    if status != "below_gate":
+        cls = "kinematic_3d_plausible" if ok_3d else "kinematic_2d_match"
     m = {"kp_px": okp, "ang_deg": oang, "null_kp_px": nkp, "null_ang_deg": nang}
     return MarkerlessScorecard(
         SCORECARD_SCHEMA_VERSION,

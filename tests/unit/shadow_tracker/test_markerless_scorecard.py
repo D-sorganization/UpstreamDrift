@@ -19,6 +19,7 @@ def _sample(
     kp_e: float = 0.0,
     ang_e: float = 0.0,
 ) -> tuple[list[ms.PhaseAnnotation], list[ms.CandidateFramePrediction]]:
+    """Build synthetic annotations and predictions offset from the null template."""
     tpl = ms.build_phase_aligned_null_template()
     anns: list[ms.PhaseAnnotation] = []
     preds: list[ms.CandidateFramePrediction] = []
@@ -36,6 +37,7 @@ def _sample(
 
 
 def _assert_unverified(sc: ms.MarkerlessScorecard) -> None:
+    """Assert that a scorecard retains unverified physical timebase flags."""
     assert sc.timebase == "unverified"
     assert sc.physical_time_verified is False
     assert sc.qualification == "image_observations_only"
@@ -56,10 +58,7 @@ def test_load_scorecard_gates_and_pinned_metadata() -> None:
 
 def test_known_offsets_fail_1_5x_noise_floor_ceiling() -> None:
     """Offsets exceeding 1.5x annotator noise floor fail closed."""
-    for kp_e, ang_e, frag in (
-        (13.0, 1.0, "keypoint_noise"),
-        (1.0, 7.0, "shaft_angle_noise"),
-    ):
+    for kp_e, ang_e, frag in ((13.0, 1.0, "keypoint"), (1.0, 7.0, "shaft_angle")):
         anns, preds = _sample(kp_e=kp_e, ang_e=ang_e)
         sc = ms.evaluate_markerless_scorecard("c-n", anns, preds)
         assert sc.status == "below_gate" and sc.match_classification == "below_gate"
@@ -73,8 +72,7 @@ def test_missing_and_low_coverage_phases_fail_closed() -> None:
     sc = ms.evaluate_markerless_scorecard("c-cov", anns, preds[:-2])
     assert sc.status == "below_gate"
     assert {"impact", "finish"}.issubset(sc.failing_phases)
-    assert any("impact" in r for r in sc.failure_reasons)
-    assert any("finish" in r for r in sc.failure_reasons)
+    assert all(any(p in r for r in sc.failure_reasons) for p in ("impact", "finish"))
 
 
 def test_candidate_must_beat_phase_aligned_null_template_by_margin() -> None:
