@@ -19,6 +19,8 @@ pytestmark = pytest.mark.unit
 
 
 def _make(torque: np.ndarray, velocity: np.ndarray, times: np.ndarray):
+    """Concrete mixin instance carrying one joint's torque/velocity/time series."""
+
     class _Concrete(PowerWorkMetricsMixin):
         pass
 
@@ -34,6 +36,7 @@ def _make(torque: np.ndarray, velocity: np.ndarray, times: np.ndarray):
 
 
 def test_work_single_sign_change_segment() -> None:
+    """A +1 to -1 W segment splits its 1 s span into two 0.25 J triangles."""
     # power goes +1 -> -1 over 1 s: crossing at 0.5 s, each triangle = 0.25 J
     obj = _make(np.array([1.0, -1.0]), np.ones(2), np.array([0.0, 1.0]))
     result = obj.compute_work_metrics(0)
@@ -44,6 +47,7 @@ def test_work_single_sign_change_segment() -> None:
 
 
 def test_work_uneven_crossing_position() -> None:
+    """Crossing at 1.5 s of a +3 to -1 W ramp yields 2.25 J and -0.25 J."""
     # power +3 -> -1 over 2 s: crossing at 1.5 s
     # positive = 0.5*1.5*3 = 2.25, negative = -(0.5*0.5*1) = -0.25
     obj = _make(np.array([3.0, -1.0]), np.ones(2), np.array([0.0, 2.0]))
@@ -55,6 +59,7 @@ def test_work_uneven_crossing_position() -> None:
 
 
 def test_work_without_sign_change_is_plain_trapezoid() -> None:
+    """A same-sign segment keeps the plain trapezoid area with no split."""
     obj = _make(np.array([1.0, 3.0, 2.0]), np.ones(3), np.array([0.0, 1.0, 2.0]))
     result = obj.compute_work_metrics(0)
     assert result is not None
@@ -63,6 +68,7 @@ def test_work_without_sign_change_is_plain_trapezoid() -> None:
 
 
 def test_impulse_single_sign_change_segment() -> None:
+    """Torque +2 to -2 N m over 1 s splits into +/-0.5 N m s impulse triangles."""
     obj = _make(np.array([2.0, -2.0]), np.ones(2), np.array([0.0, 1.0]))
     result = obj.compute_impulse_metrics("torque", 0)
     assert result is not None
@@ -72,6 +78,7 @@ def test_impulse_single_sign_change_segment() -> None:
 
 
 def test_exact_zero_sample_does_not_split() -> None:
+    """A sample landing exactly on zero must not create a spurious split."""
     # power 1, 0, -1 on a 1 s grid: pos = 0.5, neg = -0.5 exactly
     obj = _make(np.array([1.0, 0.0, -1.0]), np.ones(3), np.array([0.0, 1.0, 2.0]))
     result = obj.compute_work_metrics(0)

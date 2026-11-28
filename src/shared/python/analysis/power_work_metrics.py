@@ -81,6 +81,7 @@ def _integrate_power_net(power: np.ndarray, times: np.ndarray) -> float:
 
 
 def _ensure_joint_power_metrics(result: JointPowerMetrics, t_total: float) -> None:
+    """Fail fast when a JointPowerMetrics result breaks its physical invariants."""
     ensure(
         result.peak_generation >= 0,
         "peak generation must be non-negative",
