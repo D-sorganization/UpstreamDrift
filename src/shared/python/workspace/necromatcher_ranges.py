@@ -108,7 +108,7 @@ def _xml_coordinates(xml: str, order: tuple[str, ...], units: tuple[str, ...]) -
 
 
 def export_bound_native_xml(definition_bytes: bytes) -> str:
-    """Rebuild exact MJCF from a definition with optional embedded appearance.
+    """Rebuild exact MJCF from a definition with optional explicit appearance.
 
     Appearance is opt-in in the definition itself; absent means the legacy
     physics-only export. No sidecars are read and malformed appearances fail.
@@ -120,7 +120,12 @@ def export_bound_native_xml(definition_bytes: bytes) -> str:
     definition = json.loads(definition_bytes)
     if not isinstance(definition, dict):
         raise ValueError("Native definition must be an object")
-    return export_full_body_mjcf(definition_bytes)[0]
+    if "appearance" not in definition:
+        return export_full_body_mjcf(definition_bytes)[0]
+    from src.shared.python.model_appearance import document_from_dict
+
+    appearance = document_from_dict(definition["appearance"])
+    return export_full_body_mjcf(definition_bytes, appearance=appearance)[0]
 
 
 def extract_authored_bounds(
