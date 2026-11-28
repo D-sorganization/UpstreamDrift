@@ -22,7 +22,13 @@ def _closed_angle_cycle(
     """True when the sampled angle trace ends where it started (a closed loop)."""
     if len(angles) < 2:
         return False
-    return bool(np.isclose(float(angles[0]), float(angles[-1]), rtol=rtol, atol=atol))
+    # Scale the relative tolerance by the loop's own excursion (peak-to-peak),
+    # not by the absolute value of the final sample. The latter makes the check
+    # depend on where the angle origin sits, so a physically closed loop near the
+    # origin can be misclassified as open (issue #15864).
+    return bool(
+        abs(float(angles[0]) - float(angles[-1])) <= atol + rtol * float(np.ptp(angles))
+    )
 
 
 def _hysteresis_loop_area(angles: np.ndarray, torques: np.ndarray) -> float:

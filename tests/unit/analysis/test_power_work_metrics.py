@@ -33,11 +33,13 @@ def _make_instance(n_samples: int = 50, n_joints: int = 3) -> PowerWorkMetricsMi
 
 class TestComputeWorkMetrics:
     def test_power_work_metrics_returns_dict(self) -> None:
+        """``compute_work_metrics`` returns a dict for a valid joint index."""
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert isinstance(result, dict)
 
     def test_power_work_metrics_has_expected_keys(self) -> None:
+        """The work-metrics dict exposes positive, negative and net work."""
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert result is not None
@@ -46,30 +48,35 @@ class TestComputeWorkMetrics:
         assert "net_work" in result
 
     def test_positive_work_non_negative(self) -> None:
+        """Accumulated positive work is never negative."""
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert result is not None
         assert result["positive_work"] >= 0.0
 
     def test_negative_work_non_positive(self) -> None:
+        """Accumulated negative work is never positive."""
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert result is not None
         assert result["negative_work"] <= 0.0
 
     def test_net_work_finite(self) -> None:
+        """Net work is finite for sinusoidal joint motion."""
         obj = _make_instance()
         result = obj.compute_work_metrics(0)
         assert result is not None
         assert np.isfinite(result["net_work"])
 
     def test_power_work_metrics_out_of_range_returns_none(self) -> None:
+        """A joint index beyond the available joints returns ``None``."""
         obj = _make_instance(n_joints=2)
         result = obj.compute_work_metrics(5)
         assert result is None
 
     @pytest.mark.unit
     def test_caching_returns_defensive_copies(self) -> None:
+        """Cached results are copies, so caller mutation cannot poison later reads."""
         obj = _make_instance()
         result1 = obj.compute_work_metrics(0)
         result2 = obj.compute_work_metrics(0)
@@ -82,23 +89,27 @@ class TestComputeWorkMetrics:
 
 class TestComputeJointPowerMetrics:
     def test_returns_object(self) -> None:
+        """``compute_joint_power_metrics`` returns a result for a valid joint."""
         obj = _make_instance()
         result = obj.compute_joint_power_metrics(0)
         assert result is not None
 
     def test_peak_generation_non_negative(self) -> None:
+        """Peak generation power is never negative."""
         obj = _make_instance()
         result = obj.compute_joint_power_metrics(0)
         assert result is not None
         assert result.peak_generation >= 0.0
 
     def test_peak_absorption_non_positive(self) -> None:
+        """Peak absorption power is never positive."""
         obj = _make_instance()
         result = obj.compute_joint_power_metrics(0)
         assert result is not None
         assert result.peak_absorption <= 0.0
 
     def test_power_work_metrics_durations_non_negative(self) -> None:
+        """Generation and absorption durations are both non-negative."""
         obj = _make_instance()
         result = obj.compute_joint_power_metrics(0)
         assert result is not None
@@ -106,12 +117,14 @@ class TestComputeJointPowerMetrics:
         assert result.absorption_duration >= 0.0
 
     def test_net_work_finite(self) -> None:
+        """Net work reported by the joint power metrics is finite."""
         obj = _make_instance()
         result = obj.compute_joint_power_metrics(0)
         assert result is not None
         assert np.isfinite(result.net_work)
 
     def test_power_work_metrics_out_of_range_returns_none(self) -> None:
+        """An out-of-range joint index yields ``None`` from the power metrics."""
         obj = _make_instance(n_joints=2)
         result = obj.compute_joint_power_metrics(5)
         assert result is None
@@ -119,35 +132,41 @@ class TestComputeJointPowerMetrics:
 
 class TestComputeImpulseMetrics:
     def test_returns_object_for_torque(self) -> None:
+        """``compute_impulse_metrics`` returns a result for the torque type."""
         obj = _make_instance()
         result = obj.compute_impulse_metrics("torque", 0)
         assert result is not None
 
     def test_net_impulse_finite(self) -> None:
+        """Net impulse is finite for sinusoidal torque."""
         obj = _make_instance()
         result = obj.compute_impulse_metrics("torque", 0)
         assert result is not None
         assert np.isfinite(result.net_impulse)
 
     def test_positive_impulse_non_negative(self) -> None:
+        """Positive impulse accumulation is never negative."""
         obj = _make_instance()
         result = obj.compute_impulse_metrics("torque", 0)
         assert result is not None
         assert result.positive_impulse >= 0.0
 
     def test_negative_impulse_non_positive(self) -> None:
+        """Negative impulse accumulation is never positive."""
         obj = _make_instance()
         result = obj.compute_impulse_metrics("torque", 0)
         assert result is not None
         assert result.negative_impulse <= 0.0
 
     def test_force_without_ground_forces_returns_none(self) -> None:
+        """Force impulse is unavailable without ground forces, so it returns ``None``."""
         obj = _make_instance()
         # ground_forces is None
         result = obj.compute_impulse_metrics("force", 0)
         assert result is None
 
     def test_unknown_type_returns_none(self) -> None:
+        """An unrecognised impulse type returns ``None``."""
         obj = _make_instance()
         result = obj.compute_impulse_metrics("unknown", 0)
         assert result is None
@@ -155,21 +174,25 @@ class TestComputeImpulseMetrics:
 
 class TestComputePhaseSpacePathLength:
     def test_power_work_metrics_returns_float(self) -> None:
+        """Phase-space path length is returned as a float."""
         obj = _make_instance()
         result = obj.compute_phase_space_path_length(0)
         assert isinstance(result, float)
 
     def test_non_negative(self) -> None:
+        """Phase-space path length is never negative."""
         obj = _make_instance()
         result = obj.compute_phase_space_path_length(0)
         assert result >= 0.0
 
     def test_out_of_range_returns_zero(self) -> None:
+        """An out-of-range joint index yields a path length of zero."""
         obj = _make_instance(n_joints=2)
         result = obj.compute_phase_space_path_length(5)
         assert result == 0.0
 
     def test_nonzero_for_sinusoidal_motion(self) -> None:
+        """Sinusoidal joint motion traces a non-zero phase-space path."""
         obj = _make_instance(n_samples=100)
         result = obj.compute_phase_space_path_length(0)
         assert result > 0.0
@@ -177,23 +200,27 @@ class TestComputePhaseSpacePathLength:
 
 class TestComputeJointStiffness:
     def test_returns_object(self) -> None:
+        """``compute_joint_stiffness`` returns a result for a valid joint."""
         obj = _make_instance()
         result = obj.compute_joint_stiffness(0)
         assert result is not None
 
     def test_has_stiffness_attribute(self) -> None:
+        """The fitted stiffness attribute is present and finite."""
         obj = _make_instance()
         result = obj.compute_joint_stiffness(0)
         assert result is not None
         assert np.isfinite(result.stiffness)
 
     def test_r_squared_in_0_1(self) -> None:
+        """The stiffness fit reports an R-squared inside the valid range."""
         obj = _make_instance()
         result = obj.compute_joint_stiffness(0)
         assert result is not None
         assert 0.0 <= result.r_squared <= 1.0
 
     def test_power_work_metrics_out_of_range_returns_none(self) -> None:
+        """An out-of-range joint index yields ``None`` from the stiffness fit."""
         obj = _make_instance(n_joints=2)
         result = obj.compute_joint_stiffness(5)
         assert result is None
@@ -201,22 +228,26 @@ class TestComputeJointStiffness:
 
 class TestComputeDynamicStiffness:
     def test_power_work_metrics_returns_tuple_of_three(self) -> None:
+        """Dynamic stiffness returns the times, stiffness and R-squared triple."""
         obj = _make_instance(n_samples=100)
         result = obj.compute_dynamic_stiffness(0, window_size=10)
         assert len(result) == 3
 
     def test_arrays_same_length(self) -> None:
+        """The three dynamic-stiffness arrays share one length."""
         obj = _make_instance(n_samples=100)
         times, stiffness, r2 = obj.compute_dynamic_stiffness(0, window_size=10)
         assert len(times) == len(stiffness) == len(r2)
 
     def test_finite_stiffness_values(self) -> None:
+        """Every computed dynamic stiffness value is finite."""
         obj = _make_instance(n_samples=100)
         _, stiffness, _ = obj.compute_dynamic_stiffness(0, window_size=10)
         if len(stiffness) > 0:
             assert np.all(np.isfinite(stiffness))
 
     def test_power_work_metrics_out_of_range_returns_empty(self) -> None:
+        """An out-of-range joint index yields empty dynamic-stiffness arrays."""
         obj = _make_instance(n_joints=2)
         times, stiffness, r2 = obj.compute_dynamic_stiffness(5)
         assert len(times) == 0
@@ -227,6 +258,7 @@ class TestPowerWorkGuards15343:
     """FC-012 guards for hysteresis, power durations, and work-metrics cache (#15343)."""
 
     def test_open_hookean_cycle_reports_no_hysteresis(self) -> None:
+        """An open Hookean cycle stores no hysteresis area (FC-012, #15343)."""
         obj = _make_instance(n_samples=50)
         theta = np.linspace(0.0, np.pi, len(obj.times))
         k = 10.0
@@ -237,6 +269,7 @@ class TestPowerWorkGuards15343:
         assert metrics.hysteresis_area == pytest.approx(0.0, abs=1e-6)
 
     def test_power_durations_respect_total_interval(self) -> None:
+        """Generation and absorption durations never exceed the signal interval (#15343)."""
         obj = _make_instance(n_samples=100)
         obj.dt = 0.5
         obj.joint_torques[:, 0] = 1.0
@@ -249,3 +282,47 @@ class TestPowerWorkGuards15343:
         assert (
             metrics.generation_duration + metrics.absorption_duration <= t_total + 1e-9
         )
+
+
+@pytest.mark.unit
+class TestClosedAngleCycleOriginInvariance15864:
+    """Hysteresis area of a closed loop must not depend on the angle origin (#15864).
+
+    A closed ellipse in angle–torque space stores π·A·B = 20π J of hysteresis work.
+    Shifting the whole trace by a constant angle offset (an origin shift) is
+    physically meaningless, so the reported area must be identical. The current
+    ``np.isclose(angles[0], angles[-1], ...)`` check scales its relative tolerance
+    by ``|angles[-1]|``, which breaks this invariance.
+    """
+
+    @staticmethod
+    def _closed_ellipse(
+        theta_0: float, n_samples: int = 200
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Closed ellipse loop: angle = theta_0 + A·sin(φ), torque = B·cos(φ)."""
+        a = 5.0  # rad semi-axis
+        b = 4.0  # N·m semi-axis
+        phi = np.linspace(0.0, 2.0 * np.pi, n_samples)
+        angles = theta_0 + a * np.sin(phi)
+        torques = b * np.cos(phi)
+        # Small numerical closure residual (~0.03 deg) at the seam.
+        angles[-1] += 0.03 * np.pi / 180.0
+        return angles, torques
+
+    def test_hysteresis_area_invariant_under_angle_origin_shift(self) -> None:
+        """Loop hysteresis area is unchanged by a constant angle-origin shift (#15864)."""
+        obj_at_origin = _make_instance(n_samples=200)
+        obj_at_origin.joint_positions[:, 0], obj_at_origin.joint_torques[:, 0] = (
+            self._closed_ellipse(0.0)
+        )
+        obj_shifted = _make_instance(n_samples=200)
+        obj_shifted.joint_positions[:, 0], obj_shifted.joint_torques[:, 0] = (
+            self._closed_ellipse(1.0)
+        )
+
+        area_at_origin = obj_at_origin.compute_joint_stiffness(0).hysteresis_area
+        area_shifted = obj_shifted.compute_joint_stiffness(0).hysteresis_area
+
+        # Physical work of the loop is π·A·B = 20π ≈ 62.83 J regardless of origin.
+        assert area_at_origin == pytest.approx(np.pi * 5.0 * 4.0, rel=1e-2)
+        assert area_shifted == pytest.approx(area_at_origin, rel=1e-9)
