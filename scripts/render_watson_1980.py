@@ -36,7 +36,6 @@ def main() -> None:
     before = copy.deepcopy(current)
     before.pop("body_build")
     before["materials"]["polo_white"]["base_color"] = [0.18, 0.29, 0.42, 1.0]
-    before["materials"]["shoe_leather"]["base_color"] = [0.06, 0.06, 0.07, 1.0]
     with tempfile.TemporaryDirectory() as temporary:
         folder = Path(temporary)
         for label, data in (("before", before), ("after", current)):

@@ -226,14 +226,14 @@
         },
         {
           "url": "https://collections.st-andrews.ac.uk/item/tom-watson-celebrates-as-he-wins-the-1980-open-championship-at-muirfield/360029",
-          "values": "Color photograph shows blue top, dark trousers and light shoes.",
+          "values": "Color photograph shows blue top and dark trousers; shoes are obscured.",
           "era": "20 July 1980 Open; appearance reference, not a segment measurement."
         }
       ],
       "limitations": [
         "Listed dimensions are historical roster values; segment proportions and inertias are estimated rather than individually measured.",
         "Facial features, coloring, hair and clothing are stylized interpretations; the video does not qualify a physical motion fit.",
-        "The 1980 photo shows a long-sleeved sweater; the short-sleeved model, colors and visual build are approximate. Hair color is illustrative."
+        "The 1980 photo shows a long-sleeved sweater; the short-sleeved model, colors and visual build are approximate. Hair and shoe colors are illustrative; the shoes are obscured in the 1980 photo."
       ],
       "appearance": {
         "schema_version": "appearance-v1",
@@ -262,7 +262,7 @@
             }
           },
           "shoe_leather": {
-            "base_color": [0.9, 0.9, 0.87, 1.0],
+            "base_color": [0.06, 0.06, 0.07, 1.0],
             "roughness": 0.35,
             "metallic": 0.0
           }

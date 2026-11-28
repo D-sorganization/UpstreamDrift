@@ -23,9 +23,9 @@ def test_watson_visual_palette_and_source():
         1.0,
     ]
     assert appearance["materials"]["shoe_leather"]["base_color"] == [
-        0.9,
-        0.9,
-        0.87,
+        0.06,
+        0.06,
+        0.07,
         1.0,
     ]
     assert any(
@@ -34,6 +34,10 @@ def test_watson_visual_palette_and_source():
     )
     assert any(
         "sweater" in entry.lower() and "short" in entry.lower()
+        for entry in profile["limitations"]
+    )
+    assert any(
+        "shoes" in entry.lower() and "obscured" in entry.lower()
         for entry in profile["limitations"]
     )
     assert profile["frame_prior"] == {"method": "height_mass", "source_index": 0}
