@@ -90,10 +90,12 @@ class _ScaledPixmapLabel(QLabel):
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
 
     def set_source(self, pixmap: QPixmap) -> None:
+        """Take ``pixmap`` as the frame to scale into the label."""
         self._source = pixmap
         self._rescale()
 
     def resizeEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
+        """Rescale to the new label shape and report the resize."""
         super().resizeEvent(event)
         self._rescale()
         self.resized.emit()
@@ -291,6 +293,7 @@ class ResultsPlaybackPanel(QWidget):
 
     @property
     def current_frame(self) -> int:
+        """Frame index the timeline is on."""
         return self.session.current_frame
 
     def current_image(self) -> np.ndarray:
@@ -308,7 +311,16 @@ class ResultsPlaybackPanel(QWidget):
         time_s = float(self._pose.time_s[index])
         view = self._playback.view
         paint = self.ball_overlay.paint
-        return paint(rgb, view, time_s, layout, flight=flight, aim=aim, depth_m=depth)
+        return paint(
+            rgb,
+            view,
+            time_s,
+            layout,
+            flight=flight,
+            aim=aim,
+            depth_m=depth,
+            lookat_m=self._playback.lookat_m,
+        )
 
     def _sync_aim(self) -> None:
         """The aim line ends where the ball finishes: it needs the flight."""

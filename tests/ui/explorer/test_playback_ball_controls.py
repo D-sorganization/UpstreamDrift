@@ -26,6 +26,11 @@ from src.shared.python.motion_matching.same_input.bundle import (  # noqa: E402
     InputBundle,
 )
 from src.tools.model_explorer.default_match import DEMO_BUNDLE  # noqa: E402
+from src.tools.model_explorer.playback_ball_overlay import ShotLayout  # noqa: E402
+from src.tools.model_explorer.playback_view import (  # noqa: E402
+    DEFAULT_LOOKAT_M,
+    playback_lookat,
+)
 from src.tools.model_explorer.results_playback_panel import (  # noqa: E402
     ResultsPlaybackPanel,
 )
@@ -36,6 +41,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.ui]
 STRIDE = 40
 REASON = "the upstream_physics Rust flight wheel is missing or out of date"
 WAIT_S = 120.0
+#: a ball-to-feet anchor that pulls a behind view off the preset look-at
+ANCHOR = (0.35, -0.25, 0.0)
 
 
 def _require_offscreen_gl() -> None:
@@ -96,3 +103,37 @@ def test_ball_at_address_draws_and_hides(panel: Any) -> None:
     with_ball = panel.current_image()
     panel.set_ball_visible(False)
     assert not np.array_equal(with_ball, panel.current_image())
+
+
+def _flown_layout() -> ShotLayout:
+    """A layout with a flight, so the panel reaches its projection step."""
+    return ShotLayout("draw", None, object(), 0.0, "stub")
+
+
+def test_overlay_is_projected_with_the_camera_lookat(
+    panel: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Ball flight and aim line use the camera's look-at, anchor included (#15538).
+
+    :mod:`playback_ball_overlay` projects with whatever ``lookat_m`` it is
+    given; behind views aim the camera at the ball-to-feet anchor, so a panel
+    that leaves the argument out draws the overlay at the preset look-at while
+    the golfer is rendered at the shifted one.
+    """
+    calls: list[dict[str, Any]] = []
+
+    def paint(rgb: Any, *args: Any, **kwargs: Any) -> Any:
+        calls.append(kwargs)
+        return rgb
+
+    playback = panel._playback
+    monkeypatch.setattr(panel.ball_overlay, "paint", paint)
+    monkeypatch.setattr(panel, "_shot_layout", lambda: _flown_layout())
+    monkeypatch.setattr(panel.flight_check, "isChecked", lambda: True)
+    monkeypatch.setattr(playback, "view", "down_the_line")
+    monkeypatch.setattr(playback, "behind_anchor_m", ANCHOR)
+    panel.current_image()
+    assert calls, "the panel never projected the ball overlay"
+    lookat = tuple(calls[0]["lookat_m"])
+    assert lookat == pytest.approx(playback_lookat("down_the_line", ANCHOR))
+    assert lookat != DEFAULT_LOOKAT_M, "the behind-view anchor was ignored"
