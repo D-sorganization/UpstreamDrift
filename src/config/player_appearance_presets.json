@@ -223,22 +223,28 @@
           "url": "https://www.youtube.com/watch?v=dWe9rqS8xJE",
           "values": "Public golf footage for appearance and motion reference.",
           "era": "1982 Open film; 1984 guide is a nearby-era roster listing; presentation timing is not a calibrated capture clock."
+        },
+        {
+          "url": "https://collections.st-andrews.ac.uk/item/tom-watson-celebrates-as-he-wins-the-1980-open-championship-at-muirfield/360029",
+          "values": "Color photograph shows blue top and dark trousers; shoes are obscured.",
+          "era": "20 July 1980 Open; appearance reference, not a segment measurement."
         }
       ],
       "limitations": [
         "Listed dimensions are historical roster values; segment proportions and inertias are estimated rather than individually measured.",
         "Facial features, coloring, hair and clothing are stylized interpretations; the video does not qualify a physical motion fit.",
-        "Hair and clothing colors are illustrative, not independently verified for a single captured frame."
+        "The 1980 photo shows a long-sleeved sweater; the short-sleeved model, colors and visual build are approximate. Hair and shoe colors are illustrative; the shoes are obscured in the 1980 photo."
       ],
       "appearance": {
         "schema_version": "appearance-v1",
         "name": "tom_watson_stylized",
+        "body_build": -0.25,
         "skin_tone": "skin_2",
         "clothing": "golf_polo_trousers",
         "club_finish": "satin_steel",
         "materials": {
           "polo_white": {
-            "base_color": [0.18, 0.29, 0.42, 1.0],
+            "base_color": [0.25, 0.43, 0.65, 1.0],
             "roughness": 0.85,
             "metallic": 0.0,
             "texture": {
