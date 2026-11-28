@@ -65,6 +65,7 @@ class MainWidget(
     """Embeddable launch-monitor data-management and analysis workspace."""
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        """Build an empty project and the analysis workspace."""
         super().__init__(parent)
         self.setWindowTitle("Launch Monitor Analytics")
         self.project = LaunchMonitorProject("Untitled Launch Monitor Study")
@@ -77,6 +78,7 @@ class MainWidget(
         self._refresh_all()
 
     def is_dirty(self) -> bool:
+        """Return whether the project has unsaved changes."""
         return self._dirty
 
     def import_file(self, path: str | Path, options: ImportOptions | None = None):  # noqa: ANN201
@@ -142,6 +144,7 @@ class MainWidget(
         return added
 
     def _on_load_private_corpus(self) -> None:
+        """Load the private corpus and report the result in the status bar."""
         previous = QtWidgets.QApplication.overrideCursor()
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
         try:
@@ -167,12 +170,14 @@ class MainWidget(
         )
 
     def save_project(self, path: str | Path) -> Path:
+        """Write the project and clear the dirty flag."""
         saved = self.project.save(path)
         self._dirty = False
         self.status_label.setText(f"Saved project to {saved}.")
         return saved
 
     def load_project(self, path: str | Path) -> None:
+        """Replace the workspace with a saved project."""
         self.project = LaunchMonitorProject.load(path)
         self.analysis_frame = self.project.combined_shots()
         self._dirty = False
@@ -182,6 +187,7 @@ class MainWidget(
         )
 
     def clear_project(self) -> None:
+        """Replace the workspace with a new empty project."""
         self.project = LaunchMonitorProject("Untitled Launch Monitor Study")
         self.analysis_frame = pd.DataFrame()
         self._dirty = False
@@ -190,6 +196,7 @@ class MainWidget(
         self.status_label.setText("New empty project. Import launch-monitor exports.")
 
     def _refresh_all(self) -> None:
+        """Rebuild the session views, metric choices, and project report."""
         self._refresh_session_tree()
         self.data_table.set_frame(self.analysis_frame)
         self.flexible_analysis.set_frame(self.analysis_frame)
@@ -230,6 +237,7 @@ class MainWidget(
 
     @staticmethod
     def _set_preferred_combo(combo: QtWidgets.QComboBox, value: str) -> None:
+        """Select ``value`` when the combo contains it."""
         index = combo.findText(value)
         if index >= 0:
             combo.setCurrentIndex(index)
@@ -260,6 +268,7 @@ class MainWidget(
         return f"{text} — {self.project.name}"
 
     def _refresh_session_tree(self) -> None:
+        """Rebuild the session tree from the current project."""
         self.session_tree.clear()
         for session in self.project.sessions:
             item = QtWidgets.QTreeWidgetItem(
@@ -276,6 +285,7 @@ class MainWidget(
         self.session_tree.resizeColumnToContents(0)
 
     def _refresh_report(self) -> None:
+        """Rewrite the project report from the current sessions."""
         warnings = [
             warning
             for session in self.project.sessions
@@ -324,6 +334,7 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
     """Standalone window wrapper for :class:`MainWidget`."""
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        """Host the analysis workspace in a standalone window."""
         super().__init__(parent)
         self.setWindowTitle("Launch Monitor Analytics")
         self.resize(1440, 900)
@@ -331,7 +342,13 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.main_widget)
         self._build_menu()
 
+    def closeEvent(self, event: QtGui.QCloseEvent | None) -> None:
+        """Use the embedded workspace's worker cleanup on standalone close."""
+        self.main_widget.cleanup()
+        super().closeEvent(event)
+
     def _build_menu(self) -> None:
+        """Add the file and help menus."""
         menu_bar = self.menuBar()
         assert menu_bar is not None
         file_menu = menu_bar.addMenu("&File")
@@ -362,6 +379,7 @@ class LaunchMonitorAnalyticsWindow(QtWidgets.QMainWindow):
         )
 
     def _show_about(self) -> None:
+        """Show the workbench description and its non-causal boundary."""
         QtWidgets.QMessageBox.about(
             self,
             "About Launch Monitor Analytics",
