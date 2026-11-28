@@ -42,6 +42,23 @@ for inspection, not inferred motion. Posed head-to-shoe height is not the
 same as erect anatomical stature. A bounded trunk calibration now matches
 the declared neutral shoe-to-head convention; see \texttt{player-stature.tex}
 for the equations, actual native checks and anatomical interpretation limits.
+\section{Visual Body Build}
+The optional appearance field \texttt{body\_build} is a dimensionless artistic
+control in $[-1,1]$, with zero reproducing the original fitted skin exactly.
+For hip-centred fitted coordinates $(x,y,z)$ in metres, neck height $H$ and
+positive half-shoulder spacing $S$, set $h$ to a smoothstep window from
+$-0.14H$ to $0.10H$ and from $0.72H$ down to zero at $H$. Set $l$ to one
+at $|y|\le0.8S$, falling smoothly to zero at $1.7S$. The transverse map is
+$(x,y,z)\mapsto(sx,sy,z)$, where $s=1+0.18\,bhl$. The neck and extremities
+therefore stay anchored and body, shirt and trousers share the same surface
+change before clothing offsets. The skeletal landmark locations, weights,
+faces and native rigid-body properties stay fixed. This control is not a
+measured body composition or a prediction from listed mass; render checks
+are required for each pose and outfit, especially arm/torso overlap.
+Reproduce the topology and native dynamics tests with:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_body_build.py
+\end{verbatim}
 \section{Cap Style Override}
 The batch exporter accepts \texttt{--cap-style} from the live \texttt{CAP\_STYLES} schema choices. This changes only the appearance
 sidecar; the profile remains unchanged and the receipt records an explicit
@@ -61,23 +78,6 @@ The second command becomes accepted when the independent hat-style change adds
 \texttt{newsboy\_cap} to the schema choices and the Nelson profile is present.
 The exporter reads those choices from \texttt{CAP\_STYLES} rather than
 maintaining a second command-line list.
-\section{Visual Body Build}
-The optional appearance field \texttt{body\_build} is a dimensionless artistic
-control in $[-1,1]$, with zero reproducing the original fitted skin exactly.
-For hip-centred fitted coordinates $(x,y,z)$ in metres, neck height $H$ and
-positive half-shoulder spacing $S$, set $h$ to a smoothstep window from
-$-0.14H$ to $0.10H$ and from $0.72H$ down to zero at $H$. Set $l$ to one
-at $|y|\le0.8S$, falling smoothly to zero at $1.7S$. The transverse map is
-$(x,y,z)\mapsto(sx,sy,z)$, where $s=1+0.18\,bhl$. The neck and extremities
-therefore stay anchored and body, shirt and trousers share the same surface
-change before clothing offsets. The skeletal landmark locations, weights,
-faces and native rigid-body properties stay fixed. This control is not a
-measured body composition or a prediction from listed mass; render checks
-are required for each pose and outfit, especially arm/torso overlap.
-Reproduce the topology and native dynamics tests with:
-\begin{verbatim}
-PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_body_build.py
-\end{verbatim}
 \section{Reproduction and Acceptance}
 From the repository root, initialize the pinned Tools submodule and set
 \texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.
