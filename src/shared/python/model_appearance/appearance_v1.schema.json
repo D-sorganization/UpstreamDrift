@@ -65,7 +65,7 @@
         "model": { "enum": ["parametric", "cc0_mesh"] },
         "hair_style": { "enum": ["short_crop", "dome", "side_swept", "swept_back", "slick_part", "receding_crop", "tousled_wave"] },
         "hair_part": { "enum": ["left", "right", "none"] },
-        "facial_hair": { "enum": ["none", "moustache", "short_beard"] },
+        "facial_hair": { "enum": ["none", "moustache", "short_beard", "dense_short_beard"] },
         "eye_color": { "enum": ["blue_grey", "hazel", "brown"] },
         "cap_style": { "enum": ["none", "baseball_cap", "flat_cap", "straw_hat", "newsboy_cap"] },
         "cap_material": { "$ref": "#/$defs/name" },
