@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -17,6 +17,7 @@ from src.shared.python.config.model_pack_manifest import (
     ModelPackEntry,
     ModelPackManifest,
     ProvenanceMetadata,
+    validate_golfer_pack_lock,
 )
 from src.shared.python.config.model_source_providers import (
     ResolvedModelSource,
@@ -26,6 +27,10 @@ from src.shared.python.config.model_source_providers import (
 )
 from src.shared.python.config.provider_catalog import iter_provider_manifest_specs
 from src.shared.python.core.contracts import ContractChecker, require
+from src.shared.python.model_appearance.canonical_golfer_gate import (
+    GolferModelLock,
+    Scope,
+)
 
 _DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
 _STRICT_TRUE_VALUES = {"1", "true", "yes", "on"}
@@ -146,6 +151,7 @@ class ModelConfig:
     embed_adapter: str | None = None
     exercise: str | None = None
     preset_params: dict[str, Any] | None = None
+    golfer_model_lock: GolferModelLock | None = None
 
 
 class ModelRegistry(ContractChecker):
@@ -370,6 +376,32 @@ class ModelRegistry(ContractChecker):
             approved_roots=approved_roots,
         )
 
+    def validate_golfer_pack_lock(
+        self,
+        model_id: str,
+        spec: Mapping[str, Any] | None = None,
+        *,
+        controller: str | None = None,
+        solver: str | None = None,
+        scope: Scope = "optimization",
+    ) -> GolferModelLock | None:
+        """Validate ``golfer_model_lock`` for a registered model against ``spec``."""
+        require(
+            isinstance(model_id, str) and bool(model_id.strip()),
+            "invalid model id",
+            model_id,
+        )
+        model = self.get_model(model_id)
+        if model is None:
+            raise ValueError(f"model id not found: {model_id!r}")
+        return validate_golfer_pack_lock(
+            model,
+            spec,
+            controller=controller,
+            solver=solver,
+            scope=scope,
+        )
+
     def _build_model_config(
         self,
         entry: ModelPackEntry,
@@ -401,6 +433,7 @@ class ModelRegistry(ContractChecker):
             embed_adapter=entry.embed_adapter,
             exercise=entry.exercise,
             preset_params=entry.preset_params,
+            golfer_model_lock=entry.golfer_model_lock,
         )
 
     def _load_legacy_models(

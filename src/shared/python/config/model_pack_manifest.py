@@ -7,7 +7,7 @@ and future external provider repositories without changing launcher callers.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,17 @@ import yaml
 
 from src.shared.python.config.maturity_scale import validate_level
 from src.shared.python.contracts import ContractChecker, ensure, require
+from src.shared.python.model_appearance.canonical_golfer_gate import (
+    GolferModelLock,
+    NonCanonicalGolferError,
+    Scope,
+    lock_for_spec,
+    require_canonical_golfer,
+    verify_lock,
+)
+from src.shared.python.model_appearance.golfer_model_versions import (
+    current_golfer_model,
+)
 
 _CAPABILITY_ALIASES = {
     "inverse-kinematics": "ik",
@@ -83,7 +94,7 @@ def _v1_exercise_to_model(
         "capabilities": capabilities,
         **{
             key: exercise[key]
-            for key in ("launcher", "identity", "tags")
+            for key in ("launcher", "identity", "tags", "golfer_model_lock")
             if key in exercise
         },
     }
@@ -550,6 +561,7 @@ class _EntryMetadata:
     exchange_artifacts: tuple[ExchangeArtifact, ...]
     provenance: ProvenanceMetadata | None
     launcher: LauncherPresentationMetadata | None
+    golfer_model_lock: GolferModelLock | None = None
 
 
 def _parse_entry_metadata(data: dict[str, Any]) -> _EntryMetadata:
@@ -583,7 +595,23 @@ def _parse_entry_metadata(data: dict[str, Any]) -> _EntryMetadata:
         if launcher_raw is not None
         else None
     )
-    return _EntryMetadata(identity, exchange_artifacts, provenance, launcher)
+    lock_raw = data.get("golfer_model_lock")
+    if lock_raw is None:
+        golfer_model_lock = None
+    elif isinstance(lock_raw, GolferModelLock):
+        golfer_model_lock = lock_raw
+    else:
+        require(
+            isinstance(lock_raw, Mapping),
+            "golfer_model_lock must be a mapping when provided",
+            lock_raw,
+        )
+        golfer_model_lock = GolferModelLock.from_dict(
+            lock_raw if isinstance(lock_raw, dict) else dict(lock_raw)
+        )
+    return _EntryMetadata(
+        identity, exchange_artifacts, provenance, launcher, golfer_model_lock
+    )
 
 
 @dataclass(frozen=True)
@@ -613,6 +641,7 @@ class ModelPackEntry:
     embed_adapter: str | None = None
     exercise: str | None = None
     preset_params: dict[str, Any] = field(default_factory=dict)
+    golfer_model_lock: GolferModelLock | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ModelPackEntry:
@@ -665,6 +694,7 @@ class ModelPackEntry:
                 if isinstance(data.get("preset_params"), dict)
                 else {}
             ),
+            golfer_model_lock=nested.golfer_model_lock,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -709,6 +739,8 @@ class ModelPackEntry:
             data["hidden_owner"] = self.hidden_owner
         if self.embed_adapter:
             data["embed_adapter"] = self.embed_adapter
+        if self.golfer_model_lock is not None:
+            data["golfer_model_lock"] = self.golfer_model_lock.to_dict()
         return data
 
 
@@ -890,3 +922,72 @@ def group_entries_by_canonical_id(
         )
         for canonical_id, items in sorted(grouped.items())
     }
+
+
+def _verify_lock_identity(lock: GolferModelLock) -> None:
+    """Verify a lock's identity fields against the current golfer model."""
+    current = current_golfer_model()
+    checks = (
+        ("registry_version", lock.registry_version, current.version),
+        (
+            "hand_visual_backend",
+            lock.hand_visual_backend,
+            current.hand_visual_backend,
+        ),
+        (
+            "body_visual_backend",
+            lock.body_visual_backend,
+            current.body_visual_backend,
+        ),
+        (
+            "spec_revision",
+            lock.spec_revision,
+            current.spec_revision_configuration,
+        ),
+    )
+    for field_name, have, want in checks:
+        if have != want:
+            raise NonCanonicalGolferError(
+                field_name,
+                f"recorded {have!r} does not match current model {want!r}",
+            )
+
+
+def validate_golfer_pack_lock(
+    entry: ModelPackEntry | Any,
+    spec: Mapping[str, Any] | None = None,
+    *,
+    controller: str | None = None,
+    solver: str | None = None,
+    scope: Scope = "optimization",
+) -> GolferModelLock | None:
+    """Validate an entry's ``golfer_model_lock`` against ``spec`` when canonical.
+
+    Non-golfer packs with no ``spec`` and no ``golfer_model_lock`` return ``None``.
+    When ``spec`` is provided, it must pass the canonical golfer gate and
+    ``entry.golfer_model_lock`` must match ``lock_for_spec(spec, ...)``.
+    """
+    lock: GolferModelLock | None = getattr(entry, "golfer_model_lock", None)
+    if spec is None:
+        if lock is not None:
+            _verify_lock_identity(lock)
+        return lock
+
+    require_canonical_golfer(spec)
+    if lock is None:
+        entry_id = getattr(entry, "id", "<unknown>")
+        raise NonCanonicalGolferError(
+            "golfer_model_lock",
+            f"golfer pack {entry_id!r} on the current registry model must "
+            "declare a golfer_model_lock",
+        )
+    verify_scope: Scope = (
+        "allocation" if controller is None and solver is None else scope
+    )
+    expected = lock_for_spec(
+        spec,
+        controller=controller if controller is not None else lock.controller_hash,
+        solver=solver if solver is not None else lock.solver_hash,
+    )
+    verify_lock(lock, expected, scope=verify_scope)
+    return lock
