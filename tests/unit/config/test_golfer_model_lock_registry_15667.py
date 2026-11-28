@@ -38,10 +38,8 @@ SPEC = json.loads(
 )
 KP, KD = np.full(3, 200.0), np.full(3, 20.0)
 KNOTS = np.array([0.0, 0.0, 0.0, 0.125, 0.25, 0.25, 0.25])
-CONTROL = {"hold": "zoh"}
-INTEGRATOR = {"name": "rk4", "dt": 0.05}
-CTRL_HASH = controller_hash(KP, KD, KNOTS, CONTROL)
-SOLVER_HASH = solver_hash(INTEGRATOR)
+CTRL_HASH = controller_hash(KP, KD, KNOTS, {"hold": "zoh"})
+SOLVER_HASH = solver_hash({"name": "rk4", "dt": 0.05})
 
 
 def _canonical_spec() -> dict[str, Any]:
@@ -56,16 +54,12 @@ def _canonical_spec() -> dict[str, Any]:
 def _make_lock(spec: dict[str, Any] | None = None) -> GolferModelLock:
     """Build a valid GolferModelLock for the given canonical spec."""
     return lock_for_spec(
-        spec or _canonical_spec(),
-        controller=CTRL_HASH,
-        solver=SOLVER_HASH,
+        spec or _canonical_spec(), controller=CTRL_HASH, solver=SOLVER_HASH
     )
 
 
 def _entry_dict(
-    model_id: str = "canonical_golfer",
-    *,
-    golfer_model_lock: dict[str, str] | None = None,
+    model_id: str = "canonical_golfer", lock: dict[str, str] | None = None
 ) -> dict[str, Any]:
     """Construct a minimal ModelPackEntry payload."""
     payload: dict[str, Any] = {
@@ -75,9 +69,26 @@ def _entry_dict(
         "type": "mjcf",
         "path": "packs/mujoco/golfer.xml",
     }
-    if golfer_model_lock is not None:
-        payload["golfer_model_lock"] = golfer_model_lock
+    if lock is not None:
+        payload["golfer_model_lock"] = lock
     return payload
+
+
+def _locked_entry() -> tuple[dict[str, Any], GolferModelLock, ModelPackEntry]:
+    """Build a canonical spec, lock, and parsed ModelPackEntry."""
+    spec = _canonical_spec()
+    lock = _make_lock(spec)
+    entry = ModelPackEntry.from_dict(_entry_dict("canonical_golfer", lock.to_dict()))
+    return spec, lock, entry
+
+
+def _local_registry(tmp_path: Path, *entries: ModelPackEntry) -> ModelRegistry:
+    """Write entries to a temporary models.yaml and load a local-only ModelRegistry."""
+    cfg = tmp_path / "models.yaml"
+    cfg.write_text(
+        yaml.safe_dump({"models": [e.to_dict() for e in entries]}), encoding="utf-8"
+    )
+    return ModelRegistry(cfg, discovery_mode="local-only")
 
 
 class TestModelPackEntryGolferModelLock:
@@ -86,17 +97,14 @@ class TestModelPackEntryGolferModelLock:
     def test_from_dict_parses_and_serializes_golfer_model_lock(self) -> None:
         """ModelPackEntry parses golfer_model_lock via GolferModelLock.from_dict."""
         lock = _make_lock()
-        entry = ModelPackEntry.from_dict(_entry_dict(golfer_model_lock=lock.to_dict()))
-
+        entry = ModelPackEntry.from_dict(_entry_dict(lock=lock.to_dict()))
         assert entry.golfer_model_lock == lock
         assert isinstance(entry.golfer_model_lock, GolferModelLock)
-        serialized = entry.to_dict()
-        assert serialized["golfer_model_lock"] == lock.to_dict()
+        assert entry.to_dict()["golfer_model_lock"] == lock.to_dict()
 
     def test_non_golfer_pack_without_lock_is_unaffected(self) -> None:
         """Non-golfer entries without golfer_model_lock remain None and omit key."""
         entry = ModelPackEntry.from_dict(_entry_dict("pendulum_swing"))
-
         assert entry.golfer_model_lock is None
         assert "golfer_model_lock" not in entry.to_dict()
 
@@ -105,27 +113,22 @@ class TestModelPackEntryGolferModelLock:
         [
             "not-a-mapping",
             {"plant_hash": "a" * 64},
-            {
-                "registry_version": "",
-                "hand_visual_backend": "skinned_human",
-                "body_visual_backend": "skinned_cc0",
-                "spec_revision": "skinned_hand_wrists",
-                "plant_hash": "a" * 64,
-                "controller_hash": "b" * 64,
-                "solver_hash": "c" * 64,
-            },
+            {**_make_lock().to_dict(), "registry_version": ""},
         ],
     )
     def test_from_dict_rejects_malformed_golfer_model_lock(self, bad_lock: Any) -> None:
         """Malformed golfer_model_lock payloads fail closed with ValueError."""
-        payload = _entry_dict()
-        payload["golfer_model_lock"] = bad_lock
         with pytest.raises(ValueError):
-            ModelPackEntry.from_dict(payload)
+            ModelPackEntry.from_dict(_entry_dict(lock=bad_lock))
 
     def test_v1_provider_manifest_preserves_golfer_model_lock(self) -> None:
         """Provider model_pack/v1 exercises forward golfer_model_lock."""
         lock = _make_lock()
+        ex = {
+            "id": "golfer_driver",
+            "path": "golfer/driver.xml",
+            "golfer_model_lock": lock.to_dict(),
+        }
         manifest = ModelPackManifest.from_dict(
             {
                 "schema": "model_pack/v1",
@@ -134,16 +137,9 @@ class TestModelPackEntryGolferModelLock:
                 "engine": "mujoco",
                 "format": "mjcf",
                 "models_root": "models",
-                "exercises": [
-                    {
-                        "id": "golfer_driver",
-                        "path": "golfer/driver.xml",
-                        "golfer_model_lock": lock.to_dict(),
-                    }
-                ],
+                "exercises": [ex],
             }
         )
-
         assert len(manifest.models) == 1
         assert manifest.models[0].golfer_model_lock == lock
 
@@ -167,57 +163,40 @@ class TestModelRegistryGolferModelLock:
     ) -> None:
         """ModelRegistry surfaces golfer_model_lock for local and provider entries."""
         lock = _make_lock()
-        config_path = tmp_path / "src" / "config" / "models.yaml"
-        config_path.parent.mkdir(parents=True)
-        config_path.write_text(
-            yaml.safe_dump(
-                {
-                    "models": [
-                        _entry_dict("local_golfer", golfer_model_lock=lock.to_dict()),
-                        _entry_dict("non_golfer"),
-                    ]
-                }
-            ),
-            encoding="utf-8",
-        )
+        cfg = tmp_path / "src" / "config" / "models.yaml"
+        cfg.parent.mkdir(parents=True)
+        local_models = [
+            _entry_dict("local_golfer", lock.to_dict()),
+            _entry_dict("non_golfer"),
+        ]
+        cfg.write_text(yaml.safe_dump({"models": local_models}), encoding="utf-8")
 
         provider_root = tmp_path / "providers" / "MuJoCo_Models"
         provider_root.mkdir(parents=True)
+        pack_doc = {
+            "manifest_version": "1.0.0",
+            "pack_id": "mujoco-models",
+            "pack_name": "MuJoCo Models",
+            "provider": "mujoco_models",
+            "models": [_entry_dict("provider_golfer", lock.to_dict())],
+        }
         (provider_root / "model_pack.yaml").write_text(
-            yaml.safe_dump(
-                {
-                    "manifest_version": "1.0.0",
-                    "pack_id": "mujoco-models",
-                    "pack_name": "MuJoCo Models",
-                    "provider": "mujoco_models",
-                    "models": [
-                        _entry_dict("provider_golfer", golfer_model_lock=lock.to_dict())
-                    ],
-                }
-            ),
-            encoding="utf-8",
+            yaml.safe_dump(pack_doc), encoding="utf-8"
         )
 
-        with patch.dict(
-            "os.environ",
-            {
-                "UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root),
-                "UPSTREAM_DRIFT_DISCOVERY_MODE": "hybrid",
-            },
-            clear=False,
-        ):
-            registry = ModelRegistry(config_path)
+        env = {
+            "UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root),
+            "UPSTREAM_DRIFT_DISCOVERY_MODE": "hybrid",
+        }
+        with patch.dict("os.environ", env, clear=False):
+            registry = ModelRegistry(cfg)
 
         local_golfer = registry.get_model("local_golfer")
         non_golfer = registry.get_model("non_golfer")
         provider_golfer = registry.get_model("provider_golfer")
-
-        assert local_golfer is not None
-        assert local_golfer.golfer_model_lock == lock
-        assert non_golfer is not None
-        assert non_golfer.golfer_model_lock is None
-        assert provider_golfer is not None
-        assert provider_golfer.golfer_model_lock == lock
+        assert local_golfer is not None and local_golfer.golfer_model_lock == lock
+        assert non_golfer is not None and non_golfer.golfer_model_lock is None
+        assert provider_golfer is not None and provider_golfer.golfer_model_lock == lock
 
 
 class TestValidateGolferPackLock:
@@ -227,12 +206,7 @@ class TestValidateGolferPackLock:
         self, tmp_path: Path
     ) -> None:
         """Matching lock passes for both ModelPackEntry and ModelRegistry."""
-        spec = _canonical_spec()
-        lock = _make_lock(spec)
-        entry = ModelPackEntry.from_dict(
-            _entry_dict("canonical_golfer", golfer_model_lock=lock.to_dict())
-        )
-
+        spec, lock, entry = _locked_entry()
         assert validate_golfer_pack_lock(entry, spec=spec) == lock
         assert (
             validate_golfer_pack_lock(
@@ -240,18 +214,10 @@ class TestValidateGolferPackLock:
             )
             == lock
         )
-
-        config_path = tmp_path / "models.yaml"
-        config_path.write_text(
-            yaml.safe_dump({"models": [entry.to_dict()]}), encoding="utf-8"
-        )
-        registry = ModelRegistry(config_path, discovery_mode="local-only")
+        registry = _local_registry(tmp_path, entry)
         assert (
             registry.validate_golfer_pack_lock(
-                "canonical_golfer",
-                spec=spec,
-                controller=CTRL_HASH,
-                solver=SOLVER_HASH,
+                "canonical_golfer", spec=spec, controller=CTRL_HASH, solver=SOLVER_HASH
             )
             == lock
         )
@@ -262,27 +228,17 @@ class TestValidateGolferPackLock:
         """Current-registry golfer pack without golfer_model_lock fails closed."""
         spec = _canonical_spec()
         entry = ModelPackEntry.from_dict(_entry_dict("unlocked_golfer"))
-
         with pytest.raises(NonCanonicalGolferError) as exc_info:
             validate_golfer_pack_lock(entry, spec=spec)
         assert isinstance(exc_info.value, ValueError)
 
-        config_path = tmp_path / "models.yaml"
-        config_path.write_text(
-            yaml.safe_dump({"models": [entry.to_dict()]}), encoding="utf-8"
-        )
-        registry = ModelRegistry(config_path, discovery_mode="local-only")
+        registry = _local_registry(tmp_path, entry)
         with pytest.raises(NonCanonicalGolferError):
             registry.validate_golfer_pack_lock("unlocked_golfer", spec=spec)
 
     def test_validate_golfer_pack_lock_fails_on_plant_mismatch(self) -> None:
         """Changed dynamics fail closed with NonCanonicalGolferError naming plant_hash."""
-        spec = _canonical_spec()
-        lock = _make_lock(spec)
-        entry = ModelPackEntry.from_dict(
-            _entry_dict("canonical_golfer", golfer_model_lock=lock.to_dict())
-        )
-
+        _, _, entry = _locked_entry()
         mutated_spec = _canonical_spec()
         mutated_spec["subject"]["mass_kg"] += 1.0
         with pytest.raises(NonCanonicalGolferError) as exc_info:
@@ -293,32 +249,23 @@ class TestValidateGolferPackLock:
         self,
     ) -> None:
         """Mismatched controller hash or registry version fails closed."""
-        spec = _canonical_spec()
-        lock = _make_lock(spec)
-        entry = ModelPackEntry.from_dict(
-            _entry_dict("canonical_golfer", golfer_model_lock=lock.to_dict())
-        )
-
+        spec, lock, entry = _locked_entry()
         with pytest.raises(NonCanonicalGolferError) as ctrl_exc:
             validate_golfer_pack_lock(
                 entry, spec=spec, controller="0" * 64, solver=SOLVER_HASH
             )
         assert ctrl_exc.value.part == "controller_hash"
 
-        stale_lock = replace(lock, registry_version="legacy_v0")
-        stale_entry = replace(entry, golfer_model_lock=stale_lock)
+        stale_entry = replace(
+            entry, golfer_model_lock=replace(lock, registry_version="legacy_v0")
+        )
         with pytest.raises(NonCanonicalGolferError) as ver_exc:
             validate_golfer_pack_lock(stale_entry, spec=spec)
         assert ver_exc.value.part == "registry_version"
 
     def test_validate_golfer_pack_lock_fails_on_non_canonical_spec(self) -> None:
         """A deprecated/non-canonical spec is refused by validate_golfer_pack_lock."""
-        spec = _canonical_spec()
-        lock = _make_lock(spec)
-        entry = ModelPackEntry.from_dict(
-            _entry_dict("canonical_golfer", golfer_model_lock=lock.to_dict())
-        )
-
+        _, _, entry = _locked_entry()
         legacy_spec = _canonical_spec()
         legacy_spec["subject"]["body_visual_backend"] = "loft"
         with pytest.raises(NonCanonicalGolferError) as exc_info:
