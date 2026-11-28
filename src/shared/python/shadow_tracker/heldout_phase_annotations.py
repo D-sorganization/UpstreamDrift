@@ -128,11 +128,24 @@ class HeldoutFrameAnnotation:
     shaft_angle_deg: float
 
     def __post_init__(self) -> None:
-        """Validate the frame identity and image digest."""
+        """Validate the frame identity, image digest, and canonical 2D pose."""
         if _v.check_int(self.frame_index, "frame_index") < 0:
             raise ValueError("frame_index must be >= 0")
         _v.check_str(self.phase, "phase")
         _v.check_sha256(self.frame_sha256, "frame_sha256")
+        _v.check_float(self.shaft_angle_deg, "shaft_angle_deg")
+        if not self.keypoints_px:
+            raise ValueError("keypoints_px must be a non-empty mapping")
+        cleaned = {}
+        for name, xy in self.keypoints_px.items():
+            if not isinstance(xy, (tuple, list)) or len(xy) != 2:
+                raise ValueError(f"keypoints_px[{name}] must be a (x, y) pair")
+            cleaned[_v.check_str(name, "kp")] = (
+                _v.check_float(xy[0], f"{name}.x"),
+                _v.check_float(xy[1], f"{name}.y"),
+            )
+        object.__setattr__(self, "keypoints_px", cleaned)
+        object.__setattr__(self, "shaft_angle_deg", float(self.shaft_angle_deg))
 
 
 @dataclass(frozen=True, slots=True)
@@ -214,6 +227,10 @@ class HeldoutPhaseAnnotations:
             blockers.append("annotator_noise_floor_unmeasured")
         if not self.independence.is_independent:
             blockers.append("heldout_annotations_not_independent")
+        if self.frames and set(self.required_phases) - {r.phase for r in self.frames}:
+            blockers.append("heldout_phase_coverage_incomplete")
+        if self.review.reviewer and self.review.reviewer == self.annotator:
+            blockers.append("heldout_review_not_independent")
         return tuple(blockers)
 
     def verify_frame_map(self, frame_map: dict[int, str]) -> None:
@@ -254,10 +271,11 @@ def _content_hash(payload: dict[str, Any]) -> str:
 
 
 def assert_pins_match(gate_pins: dict[str, Any], heldout_pins: dict[str, Any]) -> None:
-    """Fail closed when the gate config and held-out set pin different evidence."""
+    """Fail closed when the gate config and held-out set disagree on any shared pin."""
     for key in SHARED_PIN_KEYS:
-        if key not in gate_pins or key not in heldout_pins:
-            continue
+        for side, pins in (("gate", gate_pins), ("held-out", heldout_pins)):
+            if key not in pins:
+                raise ValueError(f"{side} pinned_reference is missing {key}")
         if gate_pins[key] != heldout_pins[key]:
             raise ValueError(
                 f"held-out pinned_reference.{key} disagrees with the gate config"
