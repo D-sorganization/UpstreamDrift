@@ -11,7 +11,7 @@
 \begin{document}
 \maketitle
 
-\section{Purpose and evidence}
+\section{Purpose and Evidence}
 This note defines the visual-only \texttt{tousled\_wave} style for the CC0
 head's existing scalp shell. The source-inspired target is the full-volume,
 short wavy hair visible in the contemporary PGA TOUR portraits of Mac O'Grady
@@ -29,7 +29,7 @@ The source images are retained as local research material only; neither image
 is copied into this repository. Grayscale tone does not establish natural hair
 color, and the headshots do not support a body-build inference.
 
-\section{Coordinates and inputs}
+\section{Coordinates and Inputs}
 All length inputs are in head-length units, with the existing CC0 head's neck
 plane at $z=0$ and vertex at $z=1$. In the canonical frame, $x$ points toward
 the face, $y$ points to the subject's left, and $z$ points upward. The existing
@@ -80,7 +80,7 @@ parting depth and heavy-side gain are zero. The hairline receives a bounded
 0.006 head-length sinusoidal variation over the front arc; it is subtle and
 does not change the closed rim. \texttt{tousled\_wave} remains nearly symmetric. Its top remains below $z=1.09$ in the unit-head geometry.
 
-\section{Closed-shell construction and invariants}
+\section{Closed-Shell Construction and Invariants}
 For each scalp point, the existing mesh builder evaluates the nonnegative
 total thickness and offsets the outer surface along $\mathbf{n}_i$. It keeps
 the hidden inner surface at the configured skin clearance and zips the shared
@@ -95,7 +95,7 @@ alter that fallback. Appearance has no effect on the native body, joint,
 contact, or dynamics arrays; the native MuJoCo regression compares those
 arrays and forward-dynamics quantities across all named styles.
 
-\section{Limits and reproduction}
+\section{Limits and Reproduction}
 The portrait references motivate the broad silhouette (fuller crown and
 wavy/tousled ridges) only. This is not a reconstruction of any named player's
 individual hair or a measured historical hairstyle. Colors remain an artistic
