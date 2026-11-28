@@ -229,6 +229,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 830 | `src/research/deformable/objects.py` |
 | 830 | `src/shared/python/motion_pipeline/preprocessing/gap_fill.py` |
 | 827 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py` |
+| 827 | `src/shared/python/model_appearance/hand_backends/shadow_solver.py` |
 | 822 | `src/engines/physics_engines/mujoco/python/grip_lab_adapter.py` |
 | 822 | `src/shared/python/gui_pkg/help_system.py` |
 | 822 | `src/tools/capture_rig/layout_editor.py` |
