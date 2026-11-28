@@ -2699,6 +2699,7 @@
 {"path": "shadow_tracker/segmentation.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/service.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/source_records.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/track_a_pose_pipeline.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "sidekick/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/__main__.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
