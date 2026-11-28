@@ -1,3 +1,8 @@
-## Source-Guided Modern Golfer Appearance
-
-Updated four modern golfer outfit palettes and conservative appearance-only body-build settings from selected edited footage. Capture dates remain uncertain, stripe patterns are not modeled, values are not derived from roster dimensions, and the models do not claim portrait likeness. Physical frame and dynamics are unchanged.
+---
+issue: 15967
+summary: "Refine source-guided modern golfer palettes and appearance-only builds"
+dl_state: "in_review"
+next_step: "Review the native before/after appearance previews and merge the scoped palette/build changes"
+branch: "feat/15967-modern-appearance"
+paths: "src/config/player_appearance_presets.json,tests/unit/model_appearance/test_modern_golfer_profiles.py"
+---
