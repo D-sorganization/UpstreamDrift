@@ -61,6 +61,34 @@ The second command becomes accepted when the independent hat-style change adds
 \texttt{newsboy\_cap} to the schema choices and the Nelson profile is present.
 The exporter reads those choices from \texttt{CAP\_STYLES} rather than
 maintaining a second command-line list.
+\section{Sized-Candidate Frame Inertia Estimate}
+The sized-candidate builder accepts a dimensionless \texttt{frame\_build}
+$b\in[-1,1]$, taken from the catalog appearance's \texttt{body\_build}; it
+is zero when absent; catalog use requires appearance schema support for that
+field. Direct sized-builder use is independent. Existing fitted specs supplied for appearance-only export
+are not rebuilt or changed. For nonzero $b$, three de Leva trunk solids
+(pelvis, middle and upper trunk) receive an estimated change in transverse
+mass distribution, while segment mass and COM remain fixed. In each supported
+upright body frame, with identity solid placement, let
+\[ C=\tfrac{1}{2}\operatorname{tr}(I)\,\mathbf{1}-I,\quad
+ A=\operatorname{diag}(1+0.18b,1+0.18b,1),\quad
+ C'=ACA^T,\quad I'=\operatorname{tr}(C')\mathbf{1}-C'. \]
+Here $I$ is the original COM inertia (kg m$^2$) and $C$ the integrated second
+moment. Positive-definite $C$ and invertible $A$ ensure positive principal
+second moments and strict inertia triangle inequalities. Missing or rotated
+supported solids, a nonvertical body axis, and nonphysical initial tensors
+raise an error. Geometry, segment mass, COM, joint axes and other segments
+remain unchanged; the export recomputes its upper-body hash and records the
+build and scale in the calibration receipt. The scale is a bounded heuristic
+consistent with the visual control's maximum amplitude, not the integral of
+its taper and not a measured body composition or individual inertia. De Leva
+population averages and published total mass remain priors; no subject-specific
+segment scans or distribution data are established. Changed dynamics require
+refitting captured motion. Reproduce the mass, positivity and native inertia
+matrix tests with:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_player_frame_inertia.py
+\end{verbatim}
 \section{Reproduction and Acceptance}
 From the repository root, initialize the pinned Tools submodule and set
 \texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.

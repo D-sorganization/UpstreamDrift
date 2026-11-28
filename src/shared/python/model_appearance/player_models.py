@@ -52,7 +52,10 @@ def build_player_spec(player: str, club: str = "driver") -> dict[str, Any]:
 
     profile = player_profile(player)
     spec, calibration = build_stature_calibrated(
-        profile["stature_m"], profile["mass_kg"], club
+        profile["stature_m"],
+        profile["mass_kg"],
+        club,
+        frame_build=profile["appearance"].get("body_build", 0.0),
     )
     spec["subject"]["neutral_visual_calibration"] = calibration
     return spec
