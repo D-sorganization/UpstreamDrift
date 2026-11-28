@@ -99,7 +99,12 @@ def test_catalog_build_forwarding(monkeypatch):
     """Forward catalog build only when making a newly sized candidate."""
     from src.shared.python.model_appearance import player_models, player_stature
 
-    profile = {"stature_m": 1.8, "mass_kg": 80.0, "appearance": {"body_build": 0.6}}
+    profile = {
+        "stature_m": 1.8,
+        "mass_kg": 80.0,
+        "appearance": {"body_build": -0.2},
+        "frame_prior": {"method": "override", "value": 0.6, "rationale": "test"},
+    }
     monkeypatch.setattr(player_models, "player_profile", lambda _: profile)
     seen = {}
 
