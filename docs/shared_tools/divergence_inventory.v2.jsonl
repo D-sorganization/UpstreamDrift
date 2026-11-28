@@ -2370,6 +2370,7 @@
 {"path": "playback/__init__.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "playback/bidirectional_overlay.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "playback/camera_perspective.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
+{"path": "playback/overlay_geometry_schema.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "plot_engine/__init__.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
 {"path": "plot_engine/contour.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
 {"path": "plot_engine/matplotlib_renderer.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
