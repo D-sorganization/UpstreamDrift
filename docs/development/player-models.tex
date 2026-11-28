@@ -127,10 +127,11 @@ upright body frame, with identity solid placement, let
  C'=ACA^T,\quad I'=\operatorname{tr}(C')\mathbf{1}-C'. \]
 Here $I$ is the original COM inertia (kg m$^2$) and $C$ the integrated second
 moment. Positive-definite $C$ and invertible $A$ ensure positive principal
-second moments and strict inertia triangle inequalities. Missing or rotated
-supported solids, a nonvertical body axis, and nonphysical initial tensors
-raise an error. Geometry, segment mass, COM, joint axes and other segments
-remain unchanged; the export recomputes its upper-body hash and records the
+second moments and strict inertia triangle inequalities. Missing torso solids,
+nonidentity torso placements, a nonvertical torso axis, and nonphysical initial
+tensors raise an error. The additional upper-arm, forearm, thigh and shank estimate is
+documented in \texttt{player-limb-inertia.tex}. Geometry, segment mass, COM,
+joint axes and unlisted segments remain unchanged; the export recomputes its upper-body hash and records the
 build and scale in the calibration receipt. The scale is a bounded heuristic
 consistent with the visual control's maximum amplitude, not the integral of
 its taper and not a measured body composition or individual inertia. De Leva

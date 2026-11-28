@@ -130,6 +130,6 @@ def build_stature_calibrated(
         receipt["frame_inertia"] = {
             "frame_build": frame_build,
             "transverse_scale": 1 + 0.18 * frame_build,
-            "method": "affine torso second-moment estimate; fixed mass and COM",
+            "method": "affine torso and limb second-moment estimate; fixed mass and COM",
         }
     return spec, receipt
