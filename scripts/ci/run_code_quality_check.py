@@ -7,7 +7,7 @@ import argparse
 import os
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CHECKER = REPO_ROOT / "src/tools/code_quality_check.py"
@@ -48,8 +48,24 @@ def diff_base_for_event(
     return None
 
 
+def is_product_python(path: str) -> bool:
+    """Return whether ``path`` is product Python rather than the test corpus.
+
+    The tests embed the banned strings they assert on. A review diff that
+    touches those files must not treat the corpus as product code.
+
+    Preconditions: ``path`` is a string.
+    """
+    if not isinstance(path, str):
+        raise TypeError("changed path must be a string")
+    normalized = path.replace("\\", "/")
+    if not normalized.endswith(".py"):
+        return False
+    return "tests" not in PurePosixPath(normalized).parts
+
+
 def python_paths(changed_paths: list[str]) -> list[str]:
-    """Return Python paths from ``changed_paths``.
+    """Return product Python paths from ``changed_paths``.
 
     Preconditions: ``changed_paths`` is a list of strings.
     """
@@ -57,9 +73,7 @@ def python_paths(changed_paths: list[str]) -> list[str]:
         raise TypeError("changed_paths must be a list")
     selected: list[str] = []
     for path in changed_paths:
-        if not isinstance(path, str):
-            raise TypeError("changed path must be a string")
-        if path.endswith(".py"):
+        if is_product_python(path):
             selected.append(path)
     return selected
 
@@ -90,7 +104,7 @@ def changed_python_files(base: str) -> list[str]:
     )
     if completed.returncode != 0:
         raise RuntimeError(completed.stderr.strip() or "git diff failed")
-    return [line for line in completed.stdout.splitlines() if line.endswith(".py")]
+    return [line for line in completed.stdout.splitlines() if is_product_python(line)]
 
 
 def run_checker(paths: list[str] | None, checker: Path | None = None) -> int:

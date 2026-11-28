@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{amsmath}
 \usepackage{hyperref}
 \title{Tiger Woods and Ben Hogan: Compatible Player Model Candidates}
 \author{UpstreamDrift}
@@ -20,6 +21,69 @@ exactly 1.7272 metres and 68.0388555 kilograms; the PGA retrospective lists
 145 pounds (65.77089365 kilograms). These are conflicting published values,
 not confidence intervals. Full URLs and era notes are retained in
 \texttt{src/config/player\_appearance\_presets.json}.
+\section{Contemporary Player Candidates}
+The catalog adds McIlroy (5 ft 10 in, 160 lb), Rahm (6 ft 2 in, 220 lb),
+Johnson (6 ft 4 in, 190 lb), and Garc\'ia (5 ft 10 in, 180 lb) using published
+PGA TOUR roster values. Each cited biography may describe an unspecified date;
+units are converted to SI without implying capture-specific body measurements.
+Faces, colors and clothing are illustrative; beard and build-specific features
+are tracked separately. The common calibration, body frames and compatibility
+rules below apply. A sized candidate needs a new fit, whereas a supplied base
+specification retains the fit's physical properties.
+\begin{verbatim}
+python scripts/export_player_models.py --player rory_mcilroy jon_rahm \
+  dustin_johnson sergio_garcia --output output/modern
+\end{verbatim}
+\section{Additional Historical Candidates}
+Schlee and Miller are modeled with the 1973 TOUR guide priors of 6 ft 3 in /
+170 lb and 6 ft 2 in / 170 lb respectively. Trevino's 1973 guide lists 5 ft
+7 in / 185 lb; the 1971 TOUR guide lists 180 lb. These are era-specific
+roster figures, not capture-specific measurements. A 1987 Moe Norman feature
+reports 5 ft 8 in; an 80 kg mass is an unmeasured provisional modeling estimate,
+not a sourced weight. His build and the other players' faces, hair and clothing
+are artistic candidates. The underlying body and inertia priors, coordinate
+frames and validation limits are described below.
+\begin{verbatim}
+python scripts/export_player_models.py --player moe_norman john_schlee \
+  johnny_miller lee_trevino --output output/historic
+\end{verbatim}
+Sized models require new fitting; an existing base specification retains its
+physics. Source videos and uploader attributions do not establish clock timing
+or independently measured segment anatomy.
+\section{Classic Golfer Candidates}
+Watson uses the 1984 PGA TOUR guide prior of 5 ft 9 in and 160 lb, near the
+1982 Open footage; later profiles list 175 lb. Norman's 1986 guide lists 6 ft
+1 in and 185 lb; Knudson's 1971 guide lists 5 ft 10 in and 160 lb. Sources
+are historical roster values, not frame-specific measurements. Heads, clothing
+and Norman's light broad-brimmed hat are stylized; colors and garment details
+are not exact reproductions. Shared head frames, stature calibration, segment
+priors and validation limitations in this reference apply to these candidates.
+\begin{verbatim}
+python scripts/export_player_models.py --player tom_watson \
+  greg_norman_1986 george_knudson --output output/classic
+\end{verbatim}
+Sized candidates require new motion fits; a supplied base retains existing
+physical parameters. No captured motion or individual inertia is inferred.
+\section{Mac O'Grady Candidate}
+For the 1986-era O'Grady candidate, the contemporary PGA TOUR guide lists
+6 ft and 165 lb, converted to $1.8288$ m and $74.84274105$ kg. The 1984
+Tour guide reports 170 lb, so these are conflicting published priors rather
+than capture measurements. The 1984 portrait was inspected for face and hair;
+its grayscale image does not establish colors. The 1986 St Andrews image record
+was identified but its viewer was unavailable. Profile colors and detailed
+proportions remain authored interpretations, and the video date is unverified.
+Use the same head frame and bounded warp as the existing model. Neutral stature
+includes shoes and excludes headwear; the existing calibration and de Leva
+priors, physics separation, and validation requirements below also apply here.
+\begin{verbatim}
+python scripts/export_player_models.py --player mac_ogrady \
+  --output output/ogrady
+python scripts/export_player_models.py --player mac_ogrady \
+  --base-spec match.json --output output/ogrady-skin
+\end{verbatim}
+The first command constructs a sized candidate that needs a new motion fit;
+the second retains the supplied physical specification. Neither establishes
+historical swing, measured anatomy, or forward-dynamics qualification.
 \section{Construction and Compatibility}
 Segment lengths and inertias use the existing de Leva/OpenSim priors, with
 explicit stature-scaled thigh and shank targets on both legs (the template
@@ -42,6 +106,23 @@ for inspection, not inferred motion. Posed head-to-shoe height is not the
 same as erect anatomical stature. A bounded trunk calibration now matches
 the declared neutral shoe-to-head convention; see \texttt{player-stature.tex}
 for the equations, actual native checks and anatomical interpretation limits.
+\section{Visual Body Build}
+The optional appearance field \texttt{body\_build} is a dimensionless artistic
+control in $[-1,1]$, with zero reproducing the original fitted skin exactly.
+For hip-centred fitted coordinates $(x,y,z)$ in metres, neck height $H$ and
+positive half-shoulder spacing $S$, set $h$ to a smoothstep window from
+$-0.14H$ to $0.10H$ and from $0.72H$ down to zero at $H$. Set $l$ to one
+at $|y|\le0.8S$, falling smoothly to zero at $1.7S$. The transverse map is
+$(x,y,z)\mapsto(sx,sy,z)$, where $s=1+0.18\,bhl$. The neck and extremities
+therefore stay anchored and body, shirt and trousers share the same surface
+change before clothing offsets. The skeletal landmark locations, weights,
+faces and native rigid-body properties stay fixed. This control is not a
+measured body composition or a prediction from listed mass; render checks
+are required for each pose and outfit, especially arm/torso overlap.
+Reproduce the topology and native dynamics tests with:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_body_build.py
+\end{verbatim}
 \section{Cap Style Override}
 The batch exporter accepts \texttt{--cap-style} from the live \texttt{CAP\_STYLES} schema choices. This changes only the appearance
 sidecar; the profile remains unchanged and the receipt records an explicit
@@ -61,6 +142,56 @@ The second command becomes accepted when the independent hat-style change adds
 \texttt{newsboy\_cap} to the schema choices and the Nelson profile is present.
 The exporter reads those choices from \texttt{CAP\_STYLES} rather than
 maintaining a second command-line list.
+\section{Sized-Candidate Frame Inertia Estimate}
+The sized-candidate builder accepts a dimensionless \texttt{frame\_build}
+$b\in[-1,1]$, set by the catalog's explicit physical \texttt{frame\_prior}; it
+is zero when unknown. The separate visual \texttt{body\_build} does not set
+the physical prior. Direct sized-builder use remains independent. Existing fitted specs supplied for appearance-only export
+are not rebuilt or changed. For nonzero $b$, three de Leva trunk solids
+(pelvis, middle and upper trunk) receive an estimated change in transverse
+mass distribution, while segment mass and COM remain fixed. In each supported
+upright body frame, with identity solid placement, let
+\[ C=\tfrac{1}{2}\operatorname{tr}(I)\,\mathbf{1}-I,\quad
+ A=\operatorname{diag}(1+0.18b,1+0.18b,1),\quad
+ C'=ACA^T,\quad I'=\operatorname{tr}(C')\mathbf{1}-C'. \]
+Here $I$ is the original COM inertia (kg m$^2$) and $C$ the integrated second
+moment. Positive-definite $C$ and invertible $A$ ensure positive principal
+second moments and strict inertia triangle inequalities. Missing torso solids,
+nonidentity torso placements, a nonvertical torso axis, and nonphysical initial
+tensors raise an error. The additional upper-arm, forearm, thigh and shank estimate is
+documented in \texttt{player-limb-inertia.tex}. Geometry, segment mass, COM,
+joint axes and unlisted segments remain unchanged; the export recomputes its upper-body hash and records the
+build and scale in the calibration receipt. The scale is a bounded heuristic
+consistent with the visual control's maximum amplitude, not the integral of
+its taper and not a measured body composition or individual inertia. De Leva
+population averages and published total mass remain priors; no subject-specific
+segment scans or distribution data are established. Changed dynamics require
+refitting captured motion. Reproduce the mass, positivity and native inertia
+matrix tests with:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_player_frame_inertia.py
+\end{verbatim}
+\subsection{Source-Attributed Frame Prior}
+An opt-in \texttt{height\_mass} prior selects a profile source and assumes
+equal average density and geometrically similar proportions relative to
+$H_0=1.71$ m and $M_0=78$ kg. For listed height $H$ and mass $M$, the
+transverse scale and bounded input are
+\[s=\sqrt{(M/M_0)(H_0/H)^3},\quad b=\operatorname{clip}((s-1)/0.18,-1,1).\]
+The source and era, raw scale, bound saturation and model assumption are
+recorded in the export receipt. A numeric \texttt{override} requires a
+written rationale; an absent prior means unknown, not a measured zero.
+Listed dimensions may not match the depicted era; composition, segment girths
+and subject-specific inertias are unmeasured. Bounds and alternatives such as
+$b\pm0.25$ are illustrative sensitivity cases, not confidence intervals.
+The tapered visual shape and uniform transverse inertia transforms have
+different geometry even when their parameters happen to be equal.
+For the historical candidates, O'Grady, Watson, Greg Norman, Knudson,
+Schlee, Miller and Trevino opt in using the selected dated roster source in
+their profile. The 1984 O'Grady and 1971 Trevino alternatives remain recorded
+as conflicting published values. The resulting bounded estimate uses the
+range $[-1,1]$; source values do not establish capture-specific girth or
+composition. Moe Norman's 80 kg is provisional and unsourced, so his
+physical frame prior remains explicitly unknown and defaults to zero.
 \section{Reproduction and Acceptance}
 From the repository root, initialize the pinned Tools submodule and set
 \texttt{PYTHONPATH=.:vendor/ud-tools/src} and \texttt{MUJOCO\_GL=egl} on Linux.

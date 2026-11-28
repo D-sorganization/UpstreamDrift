@@ -2754,6 +2754,7 @@ Rows dated up to 2026-10-24 (about 1,800 of them), the per-pull-request sections
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-11-27 | #15850 | Add WP-0 F0 reference baseline documents and test record for BunkerShot3D gaps (docs/bunkershot3d/baselines/) |
 | 2026-11-15 | #15118 | Desktop UI sends the launcher capability token on backend API requests through one shared fetch helper |
 | 2026-11-15 | #15116 | Local API app applies the shared allowed-host policy |
 | 2026-11-15 | #15114 | Fail closed on per-crate maturin build errors in Dockerfile and enforce in check_dockerfile_contracts.py. |

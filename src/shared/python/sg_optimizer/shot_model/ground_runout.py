@@ -58,6 +58,7 @@ _ASSUMED = "Assumed prior; unmeasured turf, no primary citation"
 
 
 def _p(value: float, why: str) -> ParameterRecord:
+    """Wrap an assumed parameter value with its rationale as a ``ParameterRecord``."""
     return ParameterRecord(value, "assumption", _ASSUMED, why)
 
 
@@ -69,6 +70,7 @@ def load_bounce_settings() -> dict[str, Any]:
 
 
 def _cited() -> dict[str, ParameterRecord]:
+    """Return the cited first-bounce coefficients from ``runout_bounce.json``."""
     raw = load_bounce_settings()
     src = raw["source"]
     cite = (
@@ -100,6 +102,11 @@ _MIN_SLOPE_MULT = 0.05
 #: Green-side skills land on the green or in sand, outside this fairway-turf model:
 #: they keep carry in rest mode (listed in the hashed provenance) until a green model.
 CARRY_ONLY_SKILLS: tuple[str, ...] = ("pitch", "chip", "bunker")
+#: Penner (2002) eq. (8) is a linear fit to one green impact (15.4 deg at 18.6 m/s,
+#: 44.4 deg from vertical), so a tilt past this bound is extrapolation, not physics:
+#: the rebound is clamped here and every affected row is reported by
+#: ``Rebound.tilt_clamped`` (#15861).
+TILT_C_DOMAIN_MAX_RAD = np.pi / 4
 
 
 @dataclass(frozen=True)
@@ -110,12 +117,19 @@ class Rebound:
     vz: NDArray[np.float64]
     mu_c: NDArray[np.float64]  # eq. (4)
     e: NDArray[np.float64]  # eq. (5)
-    rolling: NDArray[np.bool_]  # mu >= mu_c: eq. (3), else eq. (2)
+    rolling: NDArray[np.bool_]  # mu >= |mu_c|: eq. (3), else eq. (2)
+    tilt_clamped: NDArray[np.bool_]  # eq. (8) past TILT_C_DOMAIN_MAX_RAD: extrapolated
 
 
 def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
     """Rebound of a ball landing at ``horizontal`` and ``down`` (> 0) m/s with
-    ``spin`` rad/s of backspin, by Penner (2002) eqs. (2)-(8)."""
+    ``spin`` rad/s of backspin, by Penner (2002) eqs. (2)-(8).
+
+    Out of domain: eq. (8) is a linear fit to the single green impact Penner
+    measured, so a tilt past ``TILT_C_DOMAIN_MAX_RAD`` is bounded there and every
+    such row is reported by ``Rebound.tilt_clamped`` -- the rebound stays physical,
+    but it is no longer one Penner fitted (#15861).
+    """
     h, d, w = np.broadcast_arrays(
         *(np.asarray(a, float) for a in (horizontal, down, spin))
     )
@@ -128,6 +142,8 @@ def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
         * (np.hypot(h, d) / p["theta_c_ref_speed_mps"])
         * (phi / p["theta_c_ref_angle_deg"])
     )  # eq. (8)
+    tilt_clamped = tc > TILT_C_DOMAIN_MAX_RAD
+    tc = np.minimum(tc, TILT_C_DOMAIN_MAX_RAD)
     c, s = np.cos(tc), np.sin(tc)
     vix, viy = h * c - d * s, h * s + d * c  # eq. (6)
     e = np.where(
@@ -139,14 +155,16 @@ def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
     )  # eq. (5)
     rw = p["ball_radius_m"] * w
     mu_c = 2.0 * (vix + rw) / (7.0 * (1.0 + e) * viy)  # eq. (4)
-    rolling = p["friction_mu"] >= mu_c
+    rolling = p["friction_mu"] >= np.abs(mu_c)
     vrx = np.where(
         rolling,
         5.0 / 7.0 * vix - 2.0 / 7.0 * rw,
-        vix - p["friction_mu"] * viy * (1 + e),
+        vix - np.sign(mu_c) * p["friction_mu"] * viy * (1 + e),
     )  # eqs. (3a), (2a)
     vry = e * viy  # eqs. (3b), (2b)
-    return Rebound(vrx * c - vry * s, vrx * s + vry * c, mu_c, e, rolling)  # eq. (7)
+    return Rebound(  # eq. (7)
+        vrx * c - vry * s, vrx * s + vry * c, mu_c, e, rolling, tilt_clamped
+    )
 
 
 def first_hop_m(horizontal: Any, down: Any, spin: Any) -> NDArray[np.float64]:
@@ -185,6 +203,7 @@ class SlopeAwareGround:
     def __call__(
         self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
     ) -> NDArray[np.float64]:
+        """Map landing states ``(n, 6)`` to resting offsets ``(n, 2)`` yards."""
         require(
             landing.ndim == 2 and landing.shape[1] == len(LANDING_COLUMNS),
             f"landing state needs columns {LANDING_COLUMNS}",
