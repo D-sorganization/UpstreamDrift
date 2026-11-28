@@ -1,0 +1,62 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{url}
+\title{Declared Motion-Limit Audit for Null-Space Exploration}
+\author{UpstreamDrift Research Notes}
+\date{2026-11-23}
+\begin{document}
+\maketitle
+\section{Scope and Input Authority}
+This separate editable research reference supports issue 15494, slices B/D.
+It is not the canonical engineering manual or a new allocation solver.
+The calculation is implemented in
+\path{scripts/research/nullspace_motion_limits.py}.
+Input is a complete caller-selected angular history $q_{ij}$ at strictly
+increasing times $t_i$ in seconds. Each named coordinate is in unwrapped
+radians in the declared model's coordinate order and sign convention.
+The audit does not convert frames, unwrap angles, infer anatomy, or choose
+which arm, wrist, trunk, or lower-body coordinates must be present.
+The caller declares constant lower/upper limits $l_j<u_j$ in radians,
+positive speed limits $v_j$ in radians/second, a source string for these
+model-specific priors, and an interior margin $d\geq0$ in radians.
+The source is retained verbatim; its scientific validity is not verified.
+Optional dimensionless rows $A_k$ and bounds $b_k$ in radians declare
+coupled posture restrictions $A_kq\leq b_k$; neither input may be missing.
+There is no subject-specific default, calibration, or clinical safety claim.
+\section{Calculation and Between-Sample Meaning}
+Assume $q(t)$ is piecewise linear between the supplied knots. Define
+\begin{align*}
+ r_{ij}&=\min(q_{ij}-l_j,u_j-q_{ij})-d,\\
+ s_{ij}&=v_j-\left|\frac{q_{i+1,j}-q_{ij}}{t_{i+1}-t_i}\right|,\\
+ c_{ik}&=\frac{b_k-A_kq_i}{\lVert A_k\rVert_2}-d.
+\end{align*}
+ROM and coupled margins are radians; speed margins are radians/second.
+Normalizing the coupled rows makes their interior distance independent of
+positive row rescaling. Zero rows and empty effective ROM intervals are rejected.
+Every affine posture inequality attains its worst value at a segment endpoint;
+segment speed is constant. Thus these checks cover the declared interpolant
+between knots. They do not cover a spline, engine replay, acceleration at knots,
+time-varying limits, nonlinear anatomy, or omitted coordinates.
+\section{Report and Acceptance Controls}
+The report retains the timebase, names, units, source, priors and interpolation.
+It lists every negative margin with its sample or segment and axis index,
+the per-axis minimum, and each constraint family's narrowest location.
+Zero margin passes; no tolerance is silently added and no violation is clipped.
+Coupled posture is null if undeclared; this is not a coupled-posture pass.
+The aggregate only means that all supplied limits hold. Replay and physiological
+feasibility remain explicitly false. Strict JSON contains no NaN or infinity;
+invalid shapes, nonfinite channels and overflowing arithmetic raise ValueError.
+\section{Reproduction and Limitations}
+Run \texttt{python -m pytest} on\\
+\path{tests/unit/loop_nullspace/test_motion_limits.py}\\
+with \texttt{-m unit -q -p no:xvfb} from the repository root after initializing
+the pinned Tools submodule. The tests are synthetic algebraic controls,
+not admitted golfer data: nonuniform timing gives peak speeds $(1,0.5)$;
+ROM minima are $(0.5,0.25)$. A fast segment violates speed despite admissible
+positions. For $A=(1,1)$ and $b=0.5$, pose $(0.2,0.5)$ violates coupled
+posture despite passing individual ROM. Further controls cover boundary
+margins, positive row rescaling, invalid declarations and numerical overflow.
+No physical swing, measured ROM, contact mode, closure, torque capacity,
+ground-load policy, forward replay or panel-ready video is qualified here.
+\end{document}
