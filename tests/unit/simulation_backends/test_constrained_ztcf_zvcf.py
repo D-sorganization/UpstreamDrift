@@ -188,6 +188,21 @@ def test_dependence_labels_follow_nsx00(planar) -> None:
     assert report.hypotheses["per_actuator"]
 
 
+def test_counterfactual_report_reaction_split_sums_to_full_reaction(planar) -> None:
+    """reaction_ztcf + reaction_zvcf must equal the full reaction under tau (#15860).
+
+    Owner decision #14497: gravity is counted once, in the drift.  So
+    ``reaction_zvcf`` must be the tau-only KKT reaction (no bias, no closure drift),
+    not the zero-velocity zero-torque reaction which re-introduces gravity.
+    """
+    s, provider = planar
+    tau = s.S.T @ np.array([1.0, -2.0, 0.5, 0.3, 1.7])
+    report = constrained_counterfactual_report(provider, s.q, s.v, tau)
+    _, lam_full = constrained_acceleration_at(provider, s.q, s.v, tau)
+    total = report.reaction_ztcf + report.reaction_zvcf
+    assert _scaled(total - lam_full, np.max(np.abs(lam_full))) < TOL
+
+
 def test_total_is_invariant_and_per_actuator_is_family_dependent(planar) -> None:
     """Across NSX-15 family members: total P_c S^T tau is fixed, shares move."""
     s, provider = planar
@@ -267,6 +282,8 @@ SPEC_PATH = EVIDENCE / "full_body_spec_hipcal_scaled.json"
 def pin_case():
     """Build the Pinocchio adapter and closure-projected state for the anthro model."""
     pin = pytest.importorskip("pinocchio")
+    if not hasattr(pin, "Model"):
+        pytest.skip("pinocchio stub has no Model")
     from src.engines.physics_engines.pinocchio.python.force_adapter import (
         PinocchioForceAdapter,
     )
@@ -303,6 +320,8 @@ def test_pinocchio_ztcf_zvcf_match_constraint_dynamics(pin_case) -> None:
     from src.shared.python.loop_nullspace.provider import AdapterConstrainedProvider
 
     pin, adapter, q, v = pin_case
+    if not hasattr(pin, "Model"):
+        pytest.skip("pinocchio stub has no Model")
     provider = AdapterConstrainedProvider(adapter)
     assert isinstance(provider, ConstrainedEquationsOfMotionProvider)
     zeros = np.zeros(adapter.nv)
@@ -334,6 +353,8 @@ def test_pinocchio_report_splits_invariant_from_family_dependent(pin_case) -> No
     from src.shared.python.loop_nullspace.provider import AdapterConstrainedProvider
 
     pin, adapter, q, v = pin_case
+    if not hasattr(pin, "Model"):
+        pytest.skip("pinocchio stub has no Model")
     provider = AdapterConstrainedProvider(adapter)
     rng = np.random.default_rng(12570)
     tau = np.zeros(adapter.nv)

@@ -83,6 +83,27 @@ def _require_constrained(provider: Any) -> None:
         )
 
 
+def _measured_load(
+    provider: ConstrainedEquationsOfMotionProvider,
+    q: ArrayLike,
+    v: ArrayLike,
+    tau: ArrayLike,
+) -> tuple[Array, Array, Array, int, Array]:
+    """Return validated ``(q, v, mass, n, tau)`` for one constrained evaluation.
+
+    Preconditions: ``provider`` is constrained (``TypeError``); ``q`` and ``v``
+    are finite and ``tau`` is a finite generalised load of length ``n``
+    (``ValueError``).
+    """
+    _require_constrained(provider)
+    q_arr = _state("q", q)
+    v_arr = _state("v", v)
+    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
+    n = mass.shape[0]
+    tau_arr = _state("tau", tau, n)
+    return q_arr, v_arr, mass, n, tau_arr
+
+
 def constrained_acceleration_at(
     provider: ConstrainedEquationsOfMotionProvider,
     q: ArrayLike,
@@ -95,12 +116,7 @@ def constrained_acceleration_at(
     generalised load (``S^T tau_a``).  Raises ``TypeError`` for a provider
     without closure rows and ``ValueError`` for malformed state.
     """
-    _require_constrained(provider)
-    q_arr = _state("q", q)
-    v_arr = _state("v", v)
-    mass = np.asarray(provider.mass_matrix(q_arr), dtype=np.float64)
-    n = mass.shape[0]
-    tau_arr = _state("tau", tau, n)
+    q_arr, v_arr, mass, _, tau_arr = _measured_load(provider, q, v, tau)
     return constrained_acceleration(
         mass,
         provider.bias_forces(q_arr, v_arr),
@@ -235,16 +251,16 @@ def constrained_counterfactual_report(
     columns use the same ``(q, v)`` and ZTCF baseline as ``control_total``.  The
     reactions are re-solved, so no quantity assumes a held ``lambda``.
     """
-    _require_constrained(provider)
-    q_arr = _state("q", q)
-    v_arr = _state("v", v)
-    n = np.asarray(provider.mass_matrix(q_arr)).shape[0]
-    tau_arr = _state("tau", tau, n)
+    q_arr, v_arr, mass, n, tau_arr = _measured_load(provider, q, v, tau)
     zeros = np.zeros(n)
     ztcf, lam0 = constrained_acceleration_at(provider, q_arr, v_arr, zeros)
-    zvcf, lam00 = constrained_acceleration_at(provider, q_arr, zeros, zeros)
+    zvcf, _ = constrained_acceleration_at(provider, q_arr, zeros, zeros)
     full, _ = constrained_acceleration_at(provider, q_arr, v_arr, tau_arr)
     control_total = full - ztcf
+    jacobian = np.asarray(provider.closure_jacobian(q_arr), dtype=np.float64)
+    _, lam_control = constrained_acceleration(
+        mass, zeros, tau_arr, jacobian, np.zeros(jacobian.shape[0])
+    )
     columns = [
         constrained_acceleration_at(provider, q_arr, v_arr, tau_arr[i] * np.eye(n)[i])[
             0
@@ -265,7 +281,7 @@ def constrained_counterfactual_report(
         control_total=control_total,
         per_actuator=np.stack(columns, axis=1),
         reaction_ztcf=lam0,
-        reaction_zvcf=lam00,
+        reaction_zvcf=lam_control,
         dependence=dependence,
         hypotheses={
             "per_actuator": (_PER_ACTUATOR_HYPOTHESIS,),
