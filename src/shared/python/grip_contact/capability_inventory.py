@@ -157,6 +157,9 @@ class GripCapabilityInventory:
     force_limit_enforcement: Mapping[str, Mapping[str, bool]] = field(
         default_factory=dict
     )
+    #: engine -> consumes the HRG-GB5 procedural frozen grip template as data.
+    #: An absent engine does not (fail closed); nothing is wired as collision or mass yet.
+    frozen_template_engines: Mapping[str, bool] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate inventory-level schema."""
@@ -171,6 +174,19 @@ class GripCapabilityInventory:
                     f"force_limit_enforcement[{engine!r}] must map "
                     f"{FORCE_LIMIT_MECHANISMS} to bool, got {dict(flags)!r}"
                 )
+        for engine, consumes in self.frozen_template_engines.items():
+            if not isinstance(engine, str) or not engine.strip():
+                raise ValueError(
+                    "frozen_template_engines keys must be non-empty strings"
+                )
+            if not isinstance(consumes, bool):
+                raise ValueError(
+                    f"frozen_template_engines[{engine!r}] must be a bool, got {consumes!r}"
+                )
+
+    def consumes_frozen_template(self, engine: str) -> bool:
+        """Whether ``engine`` consumes the frozen grip template (absent engine: no)."""
+        return bool(self.frozen_template_engines.get(engine, False))
 
     def enforces_grip_force_limit(self, engine: str, mechanism: str) -> bool:
         """Whether ``engine`` enforces a finite limit on ``mechanism`` (absent: no)."""
@@ -322,6 +338,9 @@ def load_grip_capability_inventory(
         force_limit_enforcement={
             str(e): dict(flags)
             for e, flags in data.get("force_limit_enforcement", {}).items()
+        },
+        frozen_template_engines={
+            str(e): bool(v) for e, v in data.get("frozen_template_engines", {}).items()
         },
     )
 
