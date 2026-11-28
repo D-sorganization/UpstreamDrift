@@ -20,6 +20,12 @@ from src.shared.python.force_overlay.glyphs import (
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.grip_contact.palm_thumb import PALM_THUMB_LABEL
 from src.tools.native_viewer_export.arrow_style import load_arrow_style
+from src.tools.native_viewer_export.overlay_interpolation import (
+    FlickerSuppressionConfig,
+    HysteresisState,
+    resolve_following_fn,
+    step_feed_glyphs,
+)
 
 
 STANDARD_GRAVITY_M_S2 = 9.80665
@@ -115,32 +121,43 @@ class OverlayFeed:
     extra_legend: str = ""
     #: ``(text, RGB)`` naming each extra arrow colour (#15150 Track Z, Z3b)
     colour_key: tuple[tuple[str, tuple[int, int, int]], ...] = ()
+    #: Enable continuous time interpolation + Butterworth smoothing + hysteresis
+    smooth: bool = True
+    #: Optional override for flicker suppression parameters (#15788)
+    flicker_config: FlickerSuppressionConfig | None = None
     _frames: dict[int, Any] = field(
         default_factory=dict, init=False, repr=False, compare=False
     )
+    _hyst: tuple[dict[str, HysteresisState], dict[int, GlyphSet], list[int]] = field(
+        default_factory=lambda: ({}, {}, [-1]), init=False, repr=False, compare=False
+    )
 
     def _frame(self, index: int) -> Any:
+        """Return cached frame at ``index``."""
         if index not in self._frames:
             self._frames[index] = self.frame_at(index)
         return self._frames[index]
 
-    def following(self, swing: Any, source_index: Callable[[int], int]) -> OverlayFeed:
-        """This feed for the frames of ``swing``, a re-sampling of its source (#15150).
-
-        Frame ``k`` reads the source frame ``source_index(k)`` (forces are not
-        interpolated); ellipsoids are evaluated at the pose of ``swing`` state
-        ``k``, so they sit on the body that frame shows. Raises ``ValueError``
-        when the feed has ellipsoids it cannot evaluate at another swing.
-        """
+    def following(
+        self,
+        swing: Any,
+        source_index: Callable[[int], int],
+        *,
+        smooth: bool | None = None,
+    ) -> OverlayFeed:
+        """This feed for frames of ``swing``, a resampling of its source (#15150)."""
+        use_smooth = self.smooth if smooth is None else bool(smooth)
         source, arrows_at = self.frame_at, self.extra_arrows
+        frame_fn, cfg = resolve_following_fn(
+            source, source_index, swing, self.flicker_config, use_smooth
+        )
+        ea = None if arrows_at is None else (lambda i: arrows_at(source_index(int(i))))
         feed = replace(
             self,
-            frame_at=lambda i: source(source_index(int(i))),
-            extra_arrows=(
-                None
-                if arrows_at is None
-                else (lambda i: arrows_at(source_index(int(i))))
-            ),
+            frame_at=frame_fn,
+            extra_arrows=ea,
+            smooth=use_smooth,
+            flicker_config=cfg,
         )
         if self.hand_ellipsoids is None and self.hand_hud_lines is None:
             return feed
@@ -158,6 +175,7 @@ class OverlayFeed:
         """This feed repeating frame ``last`` (glyphs and HUD) at every later index."""
 
         def clamp(fn: Any) -> Any:
+            """Clamp index ``i`` to at most ``last``."""
             return None if fn is None else (lambda i: fn(min(int(i), last)))
 
         return replace(
@@ -169,7 +187,8 @@ class OverlayFeed:
             extra_arrows=clamp(self.extra_arrows),
         )
 
-    def glyphs_at(self, index: int) -> GlyphSet:
+    def _raw_glyphs_at(self, index: int, style: ForceGlyphStyle) -> GlyphSet:
+        """Build raw ``GlyphSet`` at ``index`` with ``style`` without hysteresis."""
         build = self.build
         if build is None:
             from src.shared.python.force_overlay.glyphs import build_glyphs
@@ -192,7 +211,7 @@ class OverlayFeed:
             )
         if allocated and self.show_palm_thumb:
             frame = replace(frame, wrenches=(*frame.wrenches, *allocated))
-        gs = build(frame, self.style)
+        gs = build(frame, style)
         if self.extra_arrows is not None:
             extra = self.extra_arrows(index)
             arcs = tuple(g for g in extra if isinstance(g, TorqueArcGlyph))
@@ -209,6 +228,13 @@ class OverlayFeed:
             if extra_e:
                 gs = replace(gs, ellipsoids=(*gs.ellipsoids, *extra_e))
         return gs
+
+    def glyphs_at(self, index: int) -> GlyphSet:
+        """Return ``GlyphSet`` at ``index``, applying hysteresis ramp when active."""
+        cfg = self.flicker_config
+        if not self.smooth or cfg is None or not cfg.smooth:
+            return self._raw_glyphs_at(index, self.style)
+        return step_feed_glyphs(self._raw_glyphs_at, index, self.style, cfg, self._hyst)
 
     def hud_lines_at(self, index: int) -> tuple[str, ...]:
         """HUD capability/mobility text lines at frame ``index`` (HCM-3, #14004),
@@ -243,6 +269,7 @@ class OverlayFeed:
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
+        """Build legend text for ``glyphs``, noting allocated contact forces."""
         if glyphs is None:
             return ""
         text = legend_text(glyphs)
