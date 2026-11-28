@@ -19,10 +19,17 @@ from src.shared.python.core.contracts import ensure
 def _closed_angle_cycle(
     angles: np.ndarray, *, rtol: float = 1e-3, atol: float = 1e-6
 ) -> bool:
-    """True when the sampled angle trace ends where it started (a closed loop)."""
+    """True when the sampled angle trace ends where it started (a closed loop).
+
+    The closure tolerance scales with the trace's angular excursion, not with
+    ``|angles[0]|``: re-zeroing theta (shifting the whole trace by a constant)
+    must not decide whether the cycle counts as closed (#15864).
+    """
     if len(angles) < 2:
         return False
-    return bool(np.isclose(float(angles[0]), float(angles[-1]), rtol=rtol, atol=atol))
+    excursion = float(np.ptp(angles))
+    gap = abs(float(angles[-1]) - float(angles[0]))
+    return bool(gap <= max(atol, rtol * excursion))
 
 
 def _hysteresis_loop_area(angles: np.ndarray, torques: np.ndarray) -> float:
@@ -54,6 +61,7 @@ def _bound_overlapping_durations(
 
 
 def _integrate_power_net(power: np.ndarray, dt: float) -> float:
+    """Trapezoidal integral of the sampled power signal, across numpy versions."""
     if hasattr(np, "trapezoid"):
         return float(np.trapezoid(power, dx=dt))
     trapz_func = getattr(np, "trapz")  # noqa: B009
@@ -61,6 +69,7 @@ def _integrate_power_net(power: np.ndarray, dt: float) -> float:
 
 
 def _ensure_joint_power_metrics(result: JointPowerMetrics, t_total: float) -> None:
+    """Fail fast when a JointPowerMetrics result breaks its physical invariants."""
     ensure(
         result.peak_generation >= 0,
         "peak generation must be non-negative",
