@@ -11,7 +11,7 @@ from src.shared.python.model_appearance import (
 from src.shared.python.model_appearance import head_hair, head_mesh
 
 pytestmark = pytest.mark.unit
-STYLES = ("side_swept", "swept_back", "slick_part", "receding_crop")
+STYLES = ("side_swept", "swept_back", "slick_part", "receding_crop", "tousled_wave")
 
 
 def _parts(style, cap="none"):
@@ -152,7 +152,70 @@ def test_full_styles_keep_crown_below_pompadour_height():
     from src.shared.python.model_appearance import head_hair_styles
 
     skin = head_mesh._default_asset().skin
-    for style in ("side_swept", "swept_back"):
+    for style in ("side_swept", "swept_back", "tousled_wave"):
         vertices = head_hair_styles.build_hair_style(skin, "left", style).vertices
         assert vertices[:, 2].max() < 1.09
         assert vertices[:, 2].min() < 0.30
+
+
+def test_tousled_wave_is_schema_validated_and_roundtrips():
+    """Expose the wavy style through the public appearance schema."""
+    doc = document_from_dict(
+        {"schema_version": "appearance-v1", "head": {"hair_style": "tousled_wave"}}
+    )
+    restored = document_from_dict(document_to_dict(doc))
+    assert restored.head.hair_style == "tousled_wave"
+
+
+def test_tousled_wave_bends_ridges_on_a_closed_scalp():
+    """Add a wavy phase to the CC0 scalp while keeping its shell watertight."""
+    from dataclasses import replace
+
+    skin = head_mesh._default_asset().skin
+    base = replace(
+        head_hair.load_hair_crop(), comb_amplitude=0.015, comb_wavelength=0.10
+    )
+    straight = head_hair.build_short_crop(
+        skin, "none", replace(base, wave_bend=0.0, wave_wavelength=0.24)
+    )
+    wave = head_hair.build_short_crop(
+        skin, "none", replace(base, wave_bend=0.45, wave_wavelength=0.24)
+    )
+    assert not np.array_equal(straight.vertices, wave.vertices)
+    edges = np.concatenate(
+        (wave.faces[:, [0, 1]], wave.faces[:, [1, 2]], wave.faces[:, [2, 0]])
+    )
+    assert sorted(map(tuple, edges)) == sorted(map(tuple, edges[:, ::-1]))
+    assert np.isfinite(wave.vertices).all() and wave.volume() > 0
+
+
+def test_tousled_wave_softens_the_front_hairline():
+    """The front boundary gets a small undulation, within head-length limits."""
+    from dataclasses import replace
+
+    angles = np.linspace(-0.8, 0.8, 81)
+    base = head_hair.load_hair_crop()
+    straight = head_hair.hairline_height(base, angles)
+    wave = head_hair.hairline_height(replace(base, hairline_waviness=0.006), angles)
+    delta = wave - straight
+    assert np.max(np.abs(delta)) <= 0.006
+    assert np.ptp(delta) > 0.005
+
+
+def test_wave_parameters_are_bounded():
+    """Reject non-finite and excessive ridge warps before creating hair geometry."""
+    from dataclasses import replace
+
+    skin = head_mesh._default_asset().skin
+    crop = head_hair.load_hair_crop()
+    for changes in (
+        {"wave_bend": -0.01},
+        {"wave_bend": 0.76},
+        {"wave_bend": float("nan")},
+        {"wave_wavelength": 0.079},
+        {"wave_wavelength": 1.01},
+        {"hairline_waviness": 0.016},
+        {"hairline_waviness": float("nan")},
+    ):
+        with pytest.raises(ValueError, match="hair wave|hairline waviness"):
+            head_hair.build_short_crop(skin, crop=replace(crop, **changes))
