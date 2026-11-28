@@ -8,7 +8,7 @@ import json
 import math
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -103,6 +103,11 @@ def _validate_id(value: object, *, label: str) -> str:
     if low in MUTABLE_REFS or "/" in value or "\\" in value or ".json" in low:
         raise MutableReferenceError(f"{label} {value!r} cannot be mutable")
     return value
+
+
+def _empty_metrics() -> Mapping[str, float]:
+    """Return an empty immutable metrics mapping."""
+    return MappingProxyType({})
 
 
 def _freeze_metrics(metrics: Mapping[str, float]) -> Mapping[str, float]:
@@ -203,7 +208,7 @@ class MatchArtifact:
     model_sha256: str
     subject_sha256: str
     trajectory_ref: str
-    metrics: Mapping[str, float] = MappingProxyType({})
+    metrics: Mapping[str, float] = field(default_factory=_empty_metrics)
     content_sha256: str = ""
     schema_version: str = SCHEMA_VERSION
 
