@@ -1,7 +1,9 @@
 """Safe, hash-bound import of sized catalog golfer models."""
 
+import hashlib
 import json
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 
@@ -18,6 +20,24 @@ def candidate_dir(tmp_path_factory):
     """Build one real source-attributed catalog export for persistence tests."""
     output = tmp_path_factory.mktemp("catalog-candidate") / "tiger_woods"
     export_player("tiger_woods", output)
+    return output
+
+
+@pytest.fixture(scope="module")
+def trusted_reference_bytes():
+    """Read the exact fitted Tiger baseline shipped in the model archive."""
+    archive = Path(__file__).resolve().parents[3] / "assets/player_models/player-models.zip"
+    with ZipFile(archive) as source:
+        return source.read("reference-skins/tiger_woods/model.json")
+
+
+@pytest.fixture(scope="module")
+def reference_skin_dir(tmp_path_factory, trusted_reference_bytes):
+    """Export a new player's appearance against a shared fitted baseline."""
+    source = tmp_path_factory.mktemp("reference-baseline") / "model.json"
+    source.write_bytes(trusted_reference_bytes)
+    output = tmp_path_factory.mktemp("reference-skin") / "rory_mcilroy"
+    export_player("rory_mcilroy", output, base_spec=source)
     return output
 
 
@@ -84,6 +104,72 @@ def test_invalid_export_leaves_library_byte_identical(candidate_dir, tmp_path):
 
     assert (root / "project.json").read_bytes() == before
     assert not (root / "assets").exists()
+    assert library.players() == []
+
+
+def test_reference_skin_retains_trusted_physics_and_baseline_bytes(
+    candidate_dir, reference_skin_dir, trusted_reference_bytes, tmp_path
+):
+    """Store a distinct skin candidate bound to the exact shipped baseline."""
+    root = tmp_path / "chosen-library"
+    library = NecromatcherLibrary.create(root)
+    sized = import_catalog_model(library, "tiger_woods", candidate_dir)
+    skin = import_catalog_model(
+        library,
+        "rory_mcilroy",
+        reference_skin_dir,
+        reference_baseline=trusted_reference_bytes,
+        reference_baseline_id="player-models.zip:reference-skins/tiger_woods/model.json",
+    )
+
+    assert sized.model_id != skin.model_id
+    assert sized.mode == "sized_candidate"
+    assert skin.mode == "appearance_only"
+    model = library.load_asset(skin.model_id)
+    assert model.metadata["candidate_mode"] == "appearance_only"
+    assert model.metadata["reference_baseline_id"] == (
+        "player-models.zip:reference-skins/tiger_woods/model.json"
+    )
+    assert model.metadata["reference_baseline_sha256"] == (
+        "sha256:" + hashlib.sha256(trusted_reference_bytes).hexdigest()
+    )
+    assert library.load_reference_baseline(skin.model_id) == trusted_reference_bytes
+
+    spec = json.loads((reference_skin_dir / "model.json").read_bytes())
+    baseline = json.loads(trusted_reference_bytes)
+    visual = json.loads(library.load_model_definition(skin.model_id))
+    visual.pop("appearance")
+    assert spec == baseline == visual
+    assert skin.physics_spec_sha256 == model.metadata["physics_spec_sha256"]
+    assert skin.model_version == model.metadata["model_version"]
+    binding = load_native_model_binding(
+        library,
+        skin.model_id,
+        library.load_model_definition(skin.model_id),
+        tuple(model.metadata["coordinate_units"]),
+    )
+    assert binding.model_hash == model.metadata["hash"]
+
+
+def test_reference_skin_rejects_mismatched_explicit_baseline(
+    reference_skin_dir, trusted_reference_bytes, tmp_path
+):
+    """Reject a caller baseline whose physical specification differs."""
+    baseline = json.loads(trusted_reference_bytes)
+    baseline["coordinate_order"] = ["not_a_catalog_coordinate"]
+    library = NecromatcherLibrary.create(tmp_path / "chosen-library")
+    before = (library.root / "project.json").read_bytes()
+
+    with pytest.raises(ValueError, match="differs from the trusted reference baseline"):
+        import_catalog_model(
+            library,
+            "rory_mcilroy",
+            reference_skin_dir,
+            reference_baseline=json.dumps(baseline).encode(),
+            reference_baseline_id="caller:deliberately-mismatched-baseline",
+        )
+
+    assert (library.root / "project.json").read_bytes() == before
     assert library.players() == []
 
 

@@ -116,8 +116,44 @@ def test_duplicate_bundle_members_are_rejected_before_writing(tmp_path):
     args["bundle"] = duplicate.getvalue()
     project_before = (library.root / "project.json").read_bytes()
 
-    with pytest.raises(ValueError, match="one visual JSON and one receipt"):
+    with pytest.raises(ValueError, match="members do not match"):
         _register_bundle(library, args)
 
     assert (library.root / "project.json").read_bytes() == project_before
     assert not (library.root / "assets").exists()
+
+
+def test_reference_baseline_bytes_are_retained_and_hash_checked(tmp_path):
+    """Persist an exact trusted baseline only for appearance-only candidates."""
+    library = NecromatcherLibrary.create(tmp_path / "library")
+    args = _bundle_args()
+    baseline = b'{"best_fit":"reference"}'
+    visual = b'{"coordinate_order":["root_x"]}'
+    receipt = b'{"source":"catalog"}'
+    buffer = io.BytesIO()
+    with ZipFile(buffer, "w", compression=ZIP_STORED) as archive:
+        for name, payload in (
+            ("model.visual.json", visual),
+            ("receipt.json", receipt),
+            ("reference-baseline.json", baseline),
+        ):
+            info = ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = ZIP_STORED
+            archive.writestr(info, payload)
+    args.update(
+        bundle=buffer.getvalue(),
+        candidate_mode="appearance_only",
+        reference_baseline_id="reference archive member",
+        reference_baseline_sha256=sha256(baseline).hexdigest(),
+    )
+    _register_bundle(library, args)
+    assert library.load_reference_baseline(args["model_id"]) == baseline
+    model = library.load_asset(args["model_id"])
+    assert model.metadata["candidate_mode"] == "appearance_only"
+    assert model.metadata["reference_baseline_id"] == "reference archive member"
+
+    sized_library = NecromatcherLibrary.create(tmp_path / "sized-library")
+    invalid = _bundle_args()
+    invalid.update(reference_baseline_id="unbound baseline")
+    with pytest.raises(ValueError, match="must not claim"):
+        _register_bundle(sized_library, invalid)

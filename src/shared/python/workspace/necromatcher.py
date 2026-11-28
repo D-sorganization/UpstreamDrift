@@ -80,6 +80,9 @@ class CatalogModelBundle:
     source_profile_sha256: str
     physics_spec_sha256: str
     model_version: str
+    candidate_mode: str = "sized_candidate"
+    reference_baseline_id: str | None = None
+    reference_baseline_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -124,6 +127,18 @@ def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str
     )
     if any(not isinstance(value, str) or len(value) != 64 for value in hashes):
         raise ValueError("Catalog model requires exact source and physics hashes")
+    if bundle.candidate_mode not in {"sized_candidate", "appearance_only"}:
+        raise ValueError("Unsupported catalog candidate mode")
+    if bundle.candidate_mode == "appearance_only":
+        if (
+            not isinstance(bundle.reference_baseline_id, str)
+            or not bundle.reference_baseline_id.strip()
+            or not isinstance(bundle.reference_baseline_sha256, str)
+            or len(bundle.reference_baseline_sha256) != 64
+        ):
+            raise ValueError("Appearance-only bundle needs a trusted reference baseline")
+    elif bundle.reference_baseline_id is not None or bundle.reference_baseline_sha256 is not None:
+        raise ValueError("Sized candidates must not claim a reference-skin baseline")
     for identifier in (
         bundle.player_id,
         bundle.session_id,
@@ -138,20 +153,25 @@ def _validate_catalog_model_bundle(bundle: CatalogModelBundle) -> tuple[str, str
 
     visual_hash = "sha256:" + bundle.visual_sha256
     source_hash = "sha256:" + bundle.source_manifest_sha256
+    expected_members = {"model.visual.json", "receipt.json"}
+    if bundle.candidate_mode == "appearance_only":
+        expected_members.add("reference-baseline.json")
     try:
         with ZipFile(io.BytesIO(bundle.bundle)) as archive:
             members = archive.namelist()
-            if len(members) != 2 or set(members) != {
-                "model.visual.json",
-                "receipt.json",
-            }:
+            if len(members) != len(expected_members) or set(members) != expected_members:
                 raise ValueError(
-                    "Catalog bundle must contain one visual JSON and one receipt"
+                    "Catalog bundle members do not match its candidate mode"
                 )
             if _catalog_digest(archive.read("model.visual.json")) != visual_hash:
                 raise ValueError("Catalog visual definition hash mismatch")
             if _catalog_digest(archive.read("receipt.json")) != source_hash:
                 raise ValueError("Catalog source manifest hash mismatch")
+            if bundle.candidate_mode == "appearance_only":
+                if _catalog_digest(archive.read("reference-baseline.json")) != (
+                    "sha256:" + bundle.reference_baseline_sha256
+                ):
+                    raise ValueError("Catalog reference baseline hash mismatch")
     except (KeyError, OSError, BadZipFile) as exc:
         raise ValueError("Catalog model bundle is malformed") from exc
     return _catalog_digest(bundle.model_xml), visual_hash, source_hash
@@ -168,24 +188,40 @@ def _build_catalog_bundle_plan(bundle: CatalogModelBundle) -> _CatalogBundlePlan
         "coordinate_units": list(bundle.coordinate_units),
         "qualification": "unqualified_candidate",
         "model_version": bundle.model_version,
+        "candidate_mode": bundle.candidate_mode,
         "bundle_asset_id": bundle.bundle_asset_id,
         "visual_definition_sha256": visual_hash,
         "source_manifest_sha256": source_hash,
         "source_profile_sha256": bundle.source_profile_sha256,
         "physics_spec_sha256": bundle.physics_spec_sha256,
     }
+    if bundle.reference_baseline_id is not None:
+        model_metadata["reference_baseline_id"] = bundle.reference_baseline_id
+        model_metadata["reference_baseline_sha256"] = (
+            "sha256:" + str(bundle.reference_baseline_sha256)
+        )
     bundle_metadata = {
         "schema": "necromatcher/native-model-bundle/1",
         "model_id": bundle.model_id,
         "hash": _catalog_digest(bundle.bundle),
         "visual_definition_sha256": visual_hash,
         "source_manifest_sha256": source_hash,
+        "candidate_mode": bundle.candidate_mode,
     }
+    if bundle.reference_baseline_id is not None:
+        bundle_metadata["reference_baseline_id"] = bundle.reference_baseline_id
+        bundle_metadata["reference_baseline_sha256"] = (
+            "sha256:" + str(bundle.reference_baseline_sha256)
+        )
     return _CatalogBundlePlan(
         bundle,
         {"catalog_profile_sha256": bundle.source_profile_sha256},
         {
-            "kind": "sized_catalog_candidate",
+            "kind": (
+                "sized_catalog_candidate"
+                if bundle.candidate_mode == "sized_candidate"
+                else "appearance_only_reference_skin"
+            ),
             "model_version": bundle.model_version,
             "source_manifest_sha256": source_hash,
             "source_profile_sha256": bundle.source_profile_sha256,
@@ -483,6 +519,13 @@ class NecromatcherLibrary:
         """Return the exact hash-verified source receipt bound to a catalog model."""
         return self._catalog_bundle_member(model_id, "receipt.json")
 
+    def load_reference_baseline(self, model_id: str) -> bytes:
+        """Return exact trusted reference bytes bound to an appearance-only model."""
+        model = self.load_asset(model_id)
+        if model.metadata.get("candidate_mode") != "appearance_only":
+            raise ValueError("Catalog model has no reference-skin baseline")
+        return self._catalog_bundle_member(model_id, "reference-baseline.json")
+
     def _catalog_bundle_member(self, model_id: str, member: str) -> bytes:
         model = self.load_asset(model_id)
         bundle_id = model.metadata.get("bundle_asset_id")
@@ -499,12 +542,16 @@ class NecromatcherLibrary:
                 content = archive.read(member)
         except (KeyError, OSError, BadZipFile) as exc:
             raise ValueError("Catalog bundle member is missing") from exc
-        key = (
-            "visual_definition_sha256"
-            if member == "model.visual.json"
-            else "source_manifest_sha256"
-        )
-        if bundle.metadata.get(key) != "sha256:" + hashlib.sha256(content).hexdigest():
+        keys = {
+            "model.visual.json": "visual_definition_sha256",
+            "receipt.json": "source_manifest_sha256",
+            "reference-baseline.json": "reference_baseline_sha256",
+        }
+        key = keys.get(member)
+        expected = bundle.metadata.get(key) if key else None
+        if member == "reference-baseline.json" and expected is None:
+            raise ValueError("Catalog model has no reference-skin baseline")
+        if expected != _catalog_digest(content):
             raise ValueError("Catalog bundle member hash verification failed")
         return content
 
