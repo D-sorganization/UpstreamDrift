@@ -159,6 +159,22 @@ def test_code_quality_runner_preserves_checker_status(
     assert result.returncode == status, result.stderr
 
 
+def test_python_paths_skip_the_test_corpus() -> None:
+    """Changed test modules are not product inputs to the quality checker.
+
+    The test corpus embeds the banned strings it asserts on. Scanning those
+    files fails a review diff that only touched the tests.
+    """
+    runner = _load_module("run_code_quality_check_product_paths", QUALITY_RUNNER)
+    assert runner.python_paths(
+        [
+            "src/tools/model_explorer/gui.py",
+            "tests/tools/test_code_quality_check.py",
+            "README.md",
+        ]
+    ) == ["src/tools/model_explorer/gui.py"]
+
+
 def test_review_events_diff_and_other_events_audit_the_tree() -> None:
     """Pull requests and merge groups diff; other events keep the full audit."""
     runner = _load_module("run_code_quality_check_15765", QUALITY_RUNNER)
