@@ -61,6 +61,7 @@ def _bound_overlapping_durations(
 
 
 def _integrate_power_net(power: np.ndarray, dt: float) -> float:
+    """Trapezoidal integral of the sampled power signal, across numpy versions."""
     if hasattr(np, "trapezoid"):
         return float(np.trapezoid(power, dx=dt))
     trapz_func = getattr(np, "trapz")  # noqa: B009
@@ -68,6 +69,7 @@ def _integrate_power_net(power: np.ndarray, dt: float) -> float:
 
 
 def _ensure_joint_power_metrics(result: JointPowerMetrics, t_total: float) -> None:
+    """Fail fast when a JointPowerMetrics result breaks its physical invariants."""
     ensure(
         result.peak_generation >= 0,
         "peak generation must be non-negative",
