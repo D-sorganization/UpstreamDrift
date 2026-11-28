@@ -1,5 +1,18 @@
 # Development Log Archive — 2026
 
+### DL-#12723 · NSX-94: Commit Cross-Engine Co-Contraction Trade-Off Evidence JSON and Validation Harness
+
+- **State:** shipped
+- **Shipped:** 2026-11-13
+- **Owner:** unassigned
+- **Issue:** #12723
+- **Branch:** cursor/nsx94-tradeoff-report-3f62
+- **PR:** #15067
+- **Paths:** see #15067
+- **Started:** 2026-11-14
+- **Last verified:** 2026-11-14 (`90bfee5b`; collated from changes/12723-nsx-94-commit-cross-engine-co-contractio.md)
+- **Summary:** NSX-94: commit cross-engine co-contraction trade-off evidence JSON and validation harness
+
 ### DL-#15045 · Hill F_V Zero Beyond Vmax; Exponential Activation Substeps for Mocap Dt
 
 - **State:** shipped

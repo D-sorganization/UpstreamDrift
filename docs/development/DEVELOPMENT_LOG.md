@@ -135,19 +135,6 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-11-14 (`01c67c54`; collated from changes/15014-urdf-mjcf-converter-preserves-joint-and.md)
 - **Summary:** Fix Dempster/Zatsiorsky segment mass expansion and C3D export placeholder (part a)
 
-### DL-#12723 · NSX-94: Commit Cross-Engine Co-Contraction Trade-Off Evidence JSON and Validation Harness
-
-- **State:** shipped
-- **Shipped:** 2026-11-13
-- **Owner:** unassigned
-- **Issue:** #12723
-- **Branch:** cursor/nsx94-tradeoff-report-3f62
-- **PR:** #15067
-- **Paths:** see #15067
-- **Started:** 2026-11-14
-- **Last verified:** 2026-11-14 (`90bfee5b`; collated from changes/12723-nsx-94-commit-cross-engine-co-contractio.md)
-- **Summary:** NSX-94: commit cross-engine co-contraction trade-off evidence JSON and validation harness
-
 ### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
 
 - **Next step:** Coordinate the separately tracked engine deliveries in #11165–#11169 and cross-engine comparison #11170; keep this parent active until its scoped acceptance is met.
