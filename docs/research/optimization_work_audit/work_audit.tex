@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Sampled Total-Applied Joint Work Audit}
+\author{UpstreamDrift}
+\begin{document}
+\maketitle
+\section{Inputs and Assumptions}
+For joint $j$, aligned SI samples at strictly increasing finite times $t_i$
+provide applied torque $\tau_{ij}$ in N m and velocity $v_{ij}$ in rad/s.
+Torque includes feedback and saturation. The joint ordering, coordinate signs
+and frames must match. Compute $P_{ij}=\tau_{ij}v_{ij}$ in W and reconstruct
+$P_j(t)$ linearly on each sample interval. This does not assume separately
+linear torque and velocity, certify control hold semantics, or capture impulses.
+\section{Work and Sign Separation}
+Report, separately per joint,
+\[
+ W_j=\int P_j(t)\,dt,\quad
+ W_j^+=\int\max(P_j(t),0)\,dt,\quad
+ W_j^-=\int\min(P_j(t),0)\,dt.
+\]
+For endpoints $a,b$ over duration $h$, signed area is $h(a+b)/2$.
+If both are nonnegative the positive area is the same; if both are
+nonpositive it is zero. For opposite signs the exact positive triangle is
+\[
+ A^+=\frac{h}{2}\frac{\max(a,b)^2}{|a|+|b|}.
+\]
+Sum intervals and report $W_j^-=W_j-W_j^+$ and $\sum_j W_j^+$.
+Thus positive work is accumulated before joint or temporal cancellation.
+\section{Acceptance and Limits}
+For $P=(2,-2)$ over two seconds, signed work is zero, positive work is
+one joule and negative work is minus one joule. Unequal crossings and
+nonuniform sample times are tested independently. Linear-power refinement
+preserves each integral. Invalid dimensions, nonfinite inputs, nonincreasing
+time and nonfinite derived power or work must raise errors.
+The implementation is \texttt{scripts/audit\_optimization\_work.py}.
+The README gives exact reproduction commands. Sampling and model uncertainty,
+missing impulses, clinical safety and replay qualification remain outside this
+audit; no optimization improvement or real-golfer acceptance is claimed.
+\end{document}
