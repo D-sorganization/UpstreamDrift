@@ -15,7 +15,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "h264", "codec_type": "video", "width": 352, "height": 200, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "30.063367", "size": "788139"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "First 30 seconds of user-upload titled “Mac O’Grady 1986 Instruction Video”; the upload’s 1986 date/provenance is unverified. Very low quality. Opening segment may include introduction rather than complete swing. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "First 30 seconds of user-upload titled “Mac O’Grady 1986 Instruction Video”; the upload’s 1986 date/provenance is unverified. Very low quality. Opening segment may include introduction rather than complete swing. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": "00:00:00-00:00:30",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     },
     {
       "player": "Mac O’Grady (modern short reference)",
@@ -26,7 +30,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "29.651882", "size": "1246380"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "30-second modern slow-motion swing, not 1980s appearance. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "30-second modern slow-motion swing, not 1980s appearance. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 480,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Rory McIlroy",
@@ -37,7 +45,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 854, "height": 480, "r_frame_rate": "25/1"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "536.334512", "size": "22748466"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "Modern swing footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "Modern swing footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 480,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Jon Rahm",
@@ -48,7 +60,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 854, "height": 480, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "1427.957551", "size": "45775279"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "Shared analysis video includes Rory and Rahm; modern footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "Shared analysis video includes Rory and Rahm; modern footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 480,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Dustin Johnson",
@@ -59,7 +75,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "635.158639", "size": "33366834"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "Modern slow-motion footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "Modern slow-motion footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 480,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Sergio Garcia",
@@ -70,7 +90,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 854, "height": 480, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "231.828027", "size": "12838190"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "Modern swing tracer/analysis footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "Modern swing tracer/analysis footage. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 480,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Tom Watson",
@@ -81,7 +105,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "25/1"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "3049.383764", "size": "122638564"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "Full 1982 Open official film, 50m49s. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "Full 1982 Open official film, 50m49s. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 480,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Greg Norman circa 1986",
@@ -92,7 +120,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "h264", "codec_type": "video", "width": 400, "height": 300, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "75.697052", "size": "3447307"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "Full 76-second official R&A retrospective highlight from the 1986 Open; source identity/date confirmed by title and verified R&A uploader. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "Full 76-second official R&A retrospective highlight from the 1986 Open; source identity/date confirmed by title and verified R&A uploader. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": null,
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Greg Norman circa 1986 (official film excerpt)",
@@ -103,7 +135,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "25/1"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "30.000181", "size": "1409524"}},
       "acquisition": "downloaded",
       "error": null,
-      "limitations": "First 30 seconds of full official 1986 Open film; initial shot shows a golfer with Norman’s recognizable blond hair and bag but does not confirm identity by itself. Full film attempt stopped due large size. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared."
+      "limitations": "First 30 seconds of full official 1986 Open film; initial shot shows a golfer with Norman’s recognizable blond hair and bag but does not confirm identity by itself. Full film attempt stopped due large size. Downloaded solely to requested private directory for review; source rights and redistribution were not cleared.",
+      "source_section": "00:00:00-00:00:30",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     },
     {
       "player": "Moe Norman",
@@ -114,7 +150,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 480, "height": 360, "r_frame_rate": "30/1"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "60.000363", "size": "2909072"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "First 60 seconds of a 1994 teaching video. Uploader says it was filmed by PGA of America and shared with permission; this provenance/permission is attributed to uploader and unverified. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "First 60 seconds of a 1994 teaching video. Uploader says it was filmed by PGA of America and shared with permission; this provenance/permission is attributed to uploader and unverified. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": "00:00:00-00:01:00",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     },
     {
       "player": "George Knudson",
@@ -125,7 +165,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 480, "height": 360, "r_frame_rate": "30/1"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "30.016009", "size": "1325325"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "30-second segment from video titled “George Knudson - The Swing Motion - 1986”; sampled frame shows a golf swing. Upload date is 2025; 1986 source date and identity are not independently verified. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "30-second segment from video titled “George Knudson - The Swing Motion - 1986”; sampled frame shows a golf swing. Upload date is 2025; 1986 source date and identity are not independently verified. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": "00:00:35-00:01:05",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     },
     {
       "player": "George Knudson (opening sample)",
@@ -136,7 +180,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 480, "height": 360, "r_frame_rate": "30/1"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "60.000363", "size": "2440609"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "First 60 seconds of the video titled “George Knudson - The Swing Motion - 1986”; contains title/introduction and a golf image. Period date/identity not independently verified. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "First 60 seconds of the video titled “George Knudson - The Swing Motion - 1986”; contains title/introduction and a golf image. Period date/identity not independently verified. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": "00:00:00-00:01:00",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     },
     {
       "player": "John Schlee (uploader-attributed instructional sample)",
@@ -147,7 +195,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 480, "height": 360, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "60.026000", "size": "2002688"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "First 60 seconds of upload titled “PGA Tour winner John Schlee shares his private lessons from Ben Hogan and Impact Position. Part 1.” Sample frame shows an instructional golfer; identity is attributed to uploader, not independently verified. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "First 60 seconds of upload titled “PGA Tour winner John Schlee shares his private lessons from Ben Hogan and Impact Position. Part 1.” Sample frame shows an instructional golfer; identity is attributed to uploader, not independently verified. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": "00:00:00-00:01:00",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     },
     {
       "player": "John Schlee (1973 U.S. Open context; visual identity unconfirmed)",
@@ -158,7 +210,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "314.560726", "size": "14623529"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "Full 5m15s official 1973 U.S. Open highlights. USGA description and final-round leaderboard name Schlee as runner-up; sampled frames clearly show Miller and leaderboard, but do not visually establish which moving golfer is Schlee. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "Full 5m15s official 1973 U.S. Open highlights. USGA description and final-round leaderboard name Schlee as runner-up; sampled frames clearly show Miller and leaderboard, but do not visually establish which moving golfer is Schlee. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": null,
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Johnny Miller (1973 U.S. Open)",
@@ -169,7 +225,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "vp9", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "30000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "314.560726", "size": "14623529"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "Full 5m15s official 1973 U.S. Open highlights. Sampled frames visibly show Miller, and the USGA identifies his championship-record final-round 63. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "Full 5m15s official 1973 U.S. Open highlights. Sampled frames visibly show Miller, and the USGA identifies his championship-record final-round 63. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": null,
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp selected streams merged/remuxed to mp4"
     },
     {
       "player": "Lee Trevino",
@@ -180,7 +240,11 @@
       "ffprobe": {"video": [{"index": 0, "codec_name": "av1", "codec_type": "video", "width": 640, "height": 360, "r_frame_rate": "24000/1001"}], "audio": [{"index": 1, "codec_name": "aac", "codec_type": "audio", "r_frame_rate": "0/0"}], "container": {"format_name": "mov,mp4,m4a,3gp,3g2,mj2", "duration": "60.006000", "size": "2015389"}},
       "acquisition": "downloaded_clip",
       "error": null,
-      "limitations": "60-second segment (00:30–01:30) of the 1971 U.S. Open retrospective; sampled frame visibly includes Trevino in period footage. Rights/licensing were not independently verified; retained only in the requested private directory."
+      "limitations": "60-second segment (00:30–01:30) of the 1971 U.S. Open retrospective; sampled frame visibly includes Trevino in period footage. Rights/licensing were not independently verified; retained only in the requested private directory.",
+      "source_section": "00:00:30-00:01:30",
+      "height_limit_px": 360,
+      "selected_format_ids": "not recorded at acquisition",
+      "processing": "yt-dlp section via ffmpeg"
     }
   ]
 }
