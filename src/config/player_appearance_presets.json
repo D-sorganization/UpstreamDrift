@@ -207,6 +207,372 @@
         "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_dark_brown", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "right", "eye_color": "brown", "cap_style": "baseball_cap", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": -0.04, "jaw": 0.03, "nose": 0.11, "mouth": -0.08, "eyes": 0.08}},
         "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
       }
+    },
+    "moe_norman": {
+      "display_name": "Moe Norman",
+      "stature_m": 1.7272,
+      "mass_kg": 80.0,
+      "sources": [
+        {
+          "url": "https://moenorman.org/2016/12/18/canadian-golfer-moe-different-strokes/",
+          "values": "1987 profile says 5 ft 8 in; no reliable weight located",
+          "era": "Later-life reference, 1994 attribution per uploader; actual mass unknown."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=r5LEelOEbQg",
+          "values": "Public footage for appearance and motion reference.",
+          "era": "Later-life reference, 1994 attribution per uploader; actual mass unknown; recording lineage and speed may be uncertain."
+        }
+      ],
+      "limitations": [
+        "The 80 kg mass is an unmeasured provisional modeling estimate, not a sourced weight; the 1987 height is a reported approximation and may not characterize later-life footage.",
+        "Listed dimensions and historical photos do not establish capture-specific segment measurements; segment inertia is estimated.",
+        "Face, grooming and clothing are stylized approximations; video presentation time is not a calibrated motion clock."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "moe_norman_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.73, 0.74, 0.66, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.17, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_grey",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "baseball_cap",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": 0.12,
+            "jaw": 0.08,
+            "nose": 0.08,
+            "mouth": 0.01,
+            "eyes": 0.0
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "john_schlee": {
+      "display_name": "John Schlee",
+      "stature_m": 1.905,
+      "mass_kg": 77.1107029,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
+          "values": "6 ft 3 in; 170 lb",
+          "era": "1973 guide; instructional video identity/date rely on uploader."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=Ccay_dm2jEk",
+          "values": "Public footage for appearance and motion reference.",
+          "era": "1973 guide; instructional video identity/date rely on uploader; recording lineage and speed may be uncertain."
+        }
+      ],
+      "limitations": [
+        "Listed dimensions and historical photos do not establish capture-specific segment measurements; segment inertia is estimated.",
+        "Face, grooming and clothing are stylized approximations; video presentation time is not a calibrated motion clock.",
+        "The instructional clip is uploader-attributed; Schlee was not visually confirmed in the sampled 1973 USGA highlights. Curly hair remains a pending shared appearance feature."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "john_schlee_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.77, 0.73, 0.64, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.17, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "swept_back",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.08,
+            "jaw": -0.05,
+            "nose": 0.08,
+            "mouth": -0.02,
+            "eyes": 0.0
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "johnny_miller": {
+      "display_name": "Johnny Miller",
+      "stature_m": 1.8796,
+      "mass_kg": 77.1107029,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
+          "values": "6 ft 2 in; 170 lb",
+          "era": "1973 TOUR guide and 1973 USGA championship highlights."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=tEKM5JppNYg",
+          "values": "Public footage for appearance and motion reference.",
+          "era": "1973 TOUR guide and 1973 USGA championship highlights; recording lineage and speed may be uncertain."
+        }
+      ],
+      "limitations": [
+        "Listed dimensions and historical photos do not establish capture-specific segment measurements; segment inertia is estimated.",
+        "Face, grooming and clothing are stylized approximations; video presentation time is not a calibrated motion clock."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "johnny_miller_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.67, 0.18, 0.15, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.17, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_blond",
+          "model": "cc0_mesh",
+          "hair_style": "side_swept",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.04,
+            "jaw": -0.02,
+            "nose": 0.07,
+            "mouth": -0.02,
+            "eyes": 0.01
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "lee_trevino": {
+      "display_name": "Lee Trevino",
+      "stature_m": 1.7018,
+      "mass_kg": 83.91458845,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1973_pgatour.pdf",
+          "values": "5 ft 7 in; 185 lb",
+          "era": "1973 guide near the 1971 USGA video; later biography lists 180 lb."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=efk2GL7goRg",
+          "values": "Public footage for appearance and motion reference.",
+          "era": "1973 guide near the 1971 USGA video; later biography lists 180 lb; recording lineage and speed may be uncertain."
+        }
+      ],
+      "limitations": [
+        "Listed dimensions and historical photos do not establish capture-specific segment measurements; segment inertia is estimated.",
+        "Face, grooming and clothing are stylized approximations; video presentation time is not a calibrated motion clock."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "lee_trevino_stylized",
+        "skin_tone": "skin_3",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.7, 0.7, 0.62, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.16, 0.17, 0.17, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_black",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "left",
+          "eye_color": "brown",
+          "cap_style": "baseball_cap",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": 0.08,
+            "jaw": 0.1,
+            "nose": 0.06,
+            "mouth": 0.03,
+            "eyes": 0.0
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
     }
   }
 }
