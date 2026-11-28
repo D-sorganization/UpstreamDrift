@@ -11,6 +11,7 @@ from dataclasses import dataclass, field, replace
 import math
 from typing import Any
 
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.force_overlay.conversions import restrict_frame
 from src.shared.python.force_overlay.glyphs import (
     ForceGlyphStyle,
@@ -28,7 +29,7 @@ from src.tools.native_viewer_export.overlay_interpolation import (
 )
 
 
-STANDARD_GRAVITY_M_S2 = 9.80665
+STANDARD_GRAVITY_M_S2 = GRAVITY_FLOAT
 BODY_WEIGHT_ARROW_M = 0.5
 #: HUD note on states whose section loads are blanked around ball contact
 CONTACT_BLACKOUT_NOTE = (

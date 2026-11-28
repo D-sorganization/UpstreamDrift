@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.force_overlay import contracts as fc
 from src.shared.python.force_overlay import glyphs as fg
 from src.tools.native_viewer_export import overlay_feed as of
@@ -134,3 +135,11 @@ def test_liftoff_gap_blackout_and_raw_smooth_false_toggle() -> None:
     raw = fd.following(sw, near.__getitem__, smooth=False)
     for k, idx in enumerate(near):
         assert raw.glyphs_at(k) == fg.build_glyphs(rf[idx], style)
+
+
+def test_gravity_scaling_uses_shared_constant() -> None:
+    """Body-weight arrow scaling reads the cross-engine gravity source, not a local literal."""
+    assert of.STANDARD_GRAVITY_M_S2 == GRAVITY_FLOAT
+    assert isinstance(of.STANDARD_GRAVITY_M_S2, float)
+    style = of.default_glyph_style(80.0)
+    assert style.reference_force_n == pytest.approx(80.0 * GRAVITY_FLOAT)
