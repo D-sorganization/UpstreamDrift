@@ -1,0 +1,35 @@
+{
+  "schema_version": "markerless-scorecard-gates/1.0.0",
+  "required_phases": ["address", "top", "downswing", "impact", "finish"],
+  "annotator_noise_floors": {
+    "keypoint_rmse_px": 8.0,
+    "shaft_angle_deg": 4.0
+  },
+  "noise_floor_multiplier": 1.5,
+  "min_phase_coverage": 0.8,
+  "null_baseline_margins": {
+    "keypoint_rmse_px": 2.0,
+    "shaft_angle_deg": 1.5
+  },
+  "pinned_reference": {
+    "epic_issue": 15814,
+    "scorecard_issue": 15837,
+    "video_id": "9i7ok4rVkVM",
+    "source_url": "https://www.youtube.com/watch?v=9i7ok4rVkVM",
+    "source_sha256": "6e2893fbcaa8daa45bb2d5e979eeff12e2f57f5c697962d95eb6c48c04219934",
+    "frame_map_sha256": "614864cf8897802b452b211671ba764da6a17475d9d0dff2fcf6f59409bff66a",
+    "dimensions_px": [1280, 720],
+    "timebase": [1, 30000],
+    "candidate_window_source_indices": [1080, 1500],
+    "player_id": "tiger_woods",
+    "model_archive": "assets/player_models/player-models.zip",
+    "model_archive_sha256": "b53c8069a9905fcc0b6fa2da87545197425a98ed51b97ef1cba0580788b44216",
+    "model_xml_entry": "sized/tiger_woods/model.xml",
+    "model_xml_sha256": "c4e88c17c82b9b344e7a0c0f87eb40c79ef21923220417ece157696ccf2bba61",
+    "model_visual_entry": "sized/tiger_woods/model.visual.json",
+    "model_visual_sha256": "9f224c19c7229c449d8a6237e4844499cff7ddfb44615ab30de924a5c79311b7",
+    "timebase_status": "unverified",
+    "physical_time_verified": false,
+    "qualification_floor": "image_observations_only"
+  }
+}

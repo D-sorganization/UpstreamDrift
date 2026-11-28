@@ -1639,6 +1639,7 @@
 {"path": "motion_matching/club_only/ambiguity.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/body_candidates.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/calibration_and_phase.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_only/canonical_v2_trial.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/constrained_ik.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/control_replay.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/fast_matching.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2695,11 +2696,13 @@
 {"path": "shadow_tracker/historical_capture.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/ingestion.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/initialization.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/markerless_scorecard.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/mask_records.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/projection.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/segmentation.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/service.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "shadow_tracker/source_records.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
+{"path": "shadow_tracker/track_b_observation_export.py", "classification": "ud-only", "package": "shadow_tracker", "spelling_only": false}
 {"path": "sidekick/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/__main__.py", "classification": "tools-only", "package": "sidekick", "spelling_only": false}
 {"path": "sidekick/agent/__init__.py", "classification": "identical", "package": "sidekick", "spelling_only": false}
