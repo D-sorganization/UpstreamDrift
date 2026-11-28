@@ -18,6 +18,7 @@ PROFILES = {
     "bobby_jones": (1.7272, 74.84274105),
     "sam_snead": (1.8034, 86.1825503),
     "byron_nelson": (1.8542, 79.37866475),
+    "mac_ogrady": (1.8288, 74.84274105),
 }
 
 
@@ -53,6 +54,7 @@ def test_public_catalog_ids_include_legacy_and_new_profiles():
         "george_knudson",
         "greg_norman_1986",
         "jack_nicklaus",
+        "mac_ogrady",
         "sam_snead",
         "seve_ballesteros",
         "tiger_woods",
@@ -97,3 +99,17 @@ def test_seve_profile_keeps_the_reviewed_dark_side_part_visible():
     assert head["hair_part"] == "left"
     assert head["headwear_material"] == "hair_dark_brown"
     assert shirt[:3] == [0.10, 0.16, 0.29]
+
+
+def test_mac_ogrady_profile_uses_period_dimensions_and_cautious_visuals():
+    """Record the 1986 Tour-guide values and avoid treating the portrait as color evidence."""
+    profile = player_profile("mac_ogrady")
+    assert (profile["stature_m"], profile["mass_kg"]) == (1.8288, 74.84274105)
+    assert any("1986_pgatour.pdf" in source["url"] for source in profile["sources"])
+    assert any("1984_pgatour.pdf" in source["url"] for source in profile["sources"])
+    assert any("viewer was inaccessible" in note for note in profile["limitations"])
+    head = player_appearance("mac_ogrady").head
+    assert head.hair_style == "swept_back"
+    assert head.cap_style == "none"
+    assert head.morph.face_length == 0.10
+    assert head.morph.jaw < 0 and head.morph.nose_length > 0

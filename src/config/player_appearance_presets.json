@@ -483,6 +483,136 @@
           "model": "procedural"
         }
       }
+    },
+    "mac_ogrady": {
+      "display_name": "Mac O'Grady",
+      "stature_m": 1.8288,
+      "mass_kg": 74.84274105,
+      "sources": [
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1986_pgatour.pdf",
+          "values": "1986 PGA TOUR Guide: 6 ft; 165 lb.",
+          "era": "Contemporary official PGA TOUR guide; a published player-profile prior, not a measurement tied to the photo frame."
+        },
+        {
+          "url": "https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/1984_pgatour.pdf",
+          "values": "Earlier PGA TOUR guide profile lists 6 ft; 170 lb (alternate published value, not selected).",
+          "era": "1984 guide; values differ from 1986 and are retained as source uncertainty."
+        },
+        {
+          "url": "https://collections.st-andrews.ac.uk/item/mac-ogrady-preparing-to-hit-from-the-tee-during-the-1986-masters/545195",
+          "values": "University of St Andrews catalog record for photograph of Mac O'Grady preparing to hit from the tee during the 1986 Masters; photographer Lawrence Levy.",
+          "era": "10–13 April 1986. The catalog record is accessible; its image viewer is restricted in this environment, so no color or clothing claim is taken from the image."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=f6ZM1DcmLAE",
+          "values": "Video titled 'Mac O'Grady 1986 Instruction Video'.",
+          "era": "Uploader-claimed 1986 instruction video; historical period attribution is not independently verified."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=bUfWcG5sOZY",
+          "values": "Video titled 'Explanation of the 1986-87 Mac O'Grady MORAD swing'.",
+          "era": "Published 2021; explanatory video about the mid-1980s swing model, not direct evidence for clothing or build."
+        }
+      ],
+      "limitations": [
+        "Selected dimensions convert the 1986 PGA TOUR Guide listing of 6 ft and 165 lb; an earlier 1984 PGA TOUR Guide lists 6 ft and 170 lb. Neither source ties those values to the exact 1986 photo date.",
+        "The inspected 1984 PGA TOUR Guide portrait is a black-and-white head-and-shoulders photograph. It supports thick tousled curls, a long narrow face and nose, narrow chin, strong brow and thin lips; hair color, exact facial proportions and 1986 clothing are uncertain. The St Andrews catalog confirms an archival 1986 Masters photograph, but its viewer was inaccessible here.",
+        "The muted light polo and dark trousers are neutral illustrative styling, not an asserted 1986 outfit. Hair color, skin swatch, face morph and body proportions remain artistic approximations rather than measured likeness."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "mac_ogrady_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [
+              0.64,
+              0.68,
+              0.7,
+              1.0
+            ],
+            "roughness": 0.85,
+            "metallic": 0.0
+          },
+          "trousers_charcoal": {
+            "base_color": [
+              0.15,
+              0.17,
+              0.19,
+              1.0
+            ],
+            "roughness": 0.9,
+            "metallic": 0.0
+          },
+          "shoe_leather": {
+            "base_color": [
+              0.2,
+              0.18,
+              0.17,
+              1.0
+            ],
+            "roughness": 0.45,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [
+            0.3,
+            0.5,
+            0.78
+          ],
+          "sky_bottom": [
+            0.88,
+            0.92,
+            0.96
+          ],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "swept_back",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.06,
+            "jaw": -0.05,
+            "nose": 0.06,
+            "mouth": -0.06,
+            "eyes": -0.03,
+            "cheeks": -0.02,
+            "chin": 0.05,
+            "brow": 0.05,
+            "nose_width": -0.03,
+            "nose_bridge": 0.03,
+            "nose_length": 0.06,
+            "eye_opening": -0.02,
+            "face_length": 0.1
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
     }
   }
 }
