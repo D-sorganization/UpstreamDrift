@@ -79,9 +79,11 @@ class WristBlend:
 
     def centred(self, centre: Array) -> Array:
         """``centre`` (off the wrist joint) pulled within the allowed shift."""
-        return centre * min(1.0, self.max_centre_shift_m / np.linalg.norm(centre))
+        reach = float(self.max_centre_shift_m / np.linalg.norm(centre))
+        return centre * min(1.0, reach)
 
     def __post_init__(self) -> None:
+        """Require rim_scale in [1, 1.5] and positive blend length and shift."""
         if not 1.0 <= self.rim_scale <= 1.5:
             raise ValueError(f"rim_scale must be in [1, 1.5], got {self.rim_scale}")
         if not (math.isfinite(self.length_m) and self.length_m > 0.0):
@@ -118,6 +120,7 @@ class WristSleeve:
     scale: float
 
     def __post_init__(self) -> None:
+        """Keep the seam, lap, inset and cap lip inside their millimetre bands."""
         if not 0.0 < self.seam_m <= 0.03:
             raise ValueError(f"seam_m must be in (0, 0.03], got {self.seam_m}")
         if not 0.0 <= self.lap_m <= 0.005:
@@ -155,6 +158,7 @@ class WristBall:
     steps: int
 
     def __post_init__(self) -> None:
+        """Require wrist angles in (0, 90] degrees and 1 to 12 pose steps."""
         angles = (self.flexion_deg, self.deviation_deg)
         if not (all(0.0 < a <= 90.0 for a in angles) and 1 <= self.steps <= 12):
             raise ValueError(
@@ -215,6 +219,7 @@ class TrailSeat:
     knuckle_abduction_deg: tuple[tuple[str, float], ...] = ()
 
     def __post_init__(self) -> None:
+        """Require finite seat angles and a cross angle under 90 degrees."""
         angles = (
             self.club_cross_angle_deg,
             self.wrist_extension_deg,
@@ -314,6 +319,7 @@ def seat_settings(seat: TrailSeat) -> SkinnedHumanSettings:
 
 
 def _check_grip(grip: GripPose | None) -> None:
+    """Raise ``TypeError`` unless ``grip`` is a GripPose or None."""
     if grip is not None and not isinstance(grip, GripPose):
         raise TypeError(f"grip must be a GripPose or None, got {type(grip).__name__}")
 

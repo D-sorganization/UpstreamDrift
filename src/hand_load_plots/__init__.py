@@ -50,6 +50,7 @@ class StrategyLoads:
     midhands_moment_nm: Mapping[str, np.ndarray]
 
     def __post_init__(self) -> None:
+        """Reject unknown strategy/evidence and size all series to force_left_n."""
         if self.strategy_id not in _IDS:
             raise ValueError(f"unknown strategy_id {self.strategy_id!r}")
         if self.evidence not in _EVIDENCE:
@@ -81,6 +82,7 @@ class HandLoadPlotInput:
     strategies: tuple[StrategyLoads, ...]
 
     def __post_init__(self) -> None:
+        """Validate time, strategies, hex provenance and the objective claims."""
         time = _floats(self.time_s, "time_s")
         if time.ndim != 1 or time.size < 2 or not np.isfinite(time).all():
             raise ValueError("time_s must be a finite vector of length >= 2")
@@ -133,11 +135,13 @@ def plot_invariant_dashboard(record: HandLoadPlotInput) -> Figure:
 
 
 def _ordered(record: HandLoadPlotInput) -> tuple[StrategyLoads, ...]:
+    """Return the two strategies in baseline, min_squared_force order."""
     by_id = {item.strategy_id: item for item in record.strategies}
     return tuple(by_id[name] for name in _IDS)
 
 
 def _stamp(fig: Figure, record: HandLoadPlotInput) -> None:
+    """Title the objective and pin the evidence badge and provenance footer."""
     fig.suptitle(f"Objective: {record.objective}")
     badge = " ".join(dict.fromkeys(item.evidence for item in _ordered(record)))
     footer = f"Provenance: git {record.git_sha} | data {record.data_hash}"
@@ -169,6 +173,7 @@ def _draw(
     color: str,
     style: str,
 ) -> None:
+    """Plot the series magnitude, or an UNAVAILABLE note when none is finite."""
     drawn = _magnitude(values)
     if not np.isfinite(drawn).any():
         axis.text(
@@ -185,6 +190,7 @@ def _draw(
 
 
 def _invariants(axis: Axes, record: HandLoadPlotInput, kind: str) -> None:
+    """Draw each midhands component for both strategies in one panel."""
     attr = "midhands_force_n" if kind == "force" else "midhands_moment_nm"
     for part, color in _PART_COLOR.items():
         for strategy in _ordered(record):
@@ -201,6 +207,7 @@ def _invariants(axis: Axes, record: HandLoadPlotInput, kind: str) -> None:
 
 
 def _hands(axis: Axes, record: HandLoadPlotInput, side: str) -> None:
+    """Draw one hand's force for both strategies in one panel."""
     attr = "force_left_n" if side == "LH" else "force_right_n"
     for strategy in _ordered(record):
         _draw(
@@ -214,6 +221,7 @@ def _hands(axis: Axes, record: HandLoadPlotInput, side: str) -> None:
 
 
 def _floats(values: object, name: str) -> np.ndarray:
+    """Coerce to float64, rejecting values that are not numeric."""
     try:
         return np.asarray(values, dtype=np.float64)
     except (TypeError, ValueError) as exc:
@@ -221,6 +229,7 @@ def _floats(values: object, name: str) -> np.ndarray:
 
 
 def _shaped(values: object, shape: tuple[int, ...], name: str) -> np.ndarray:
+    """Coerce to float64 and require an exact shape, returning a copy."""
     arr = _floats(values, name)
     if arr.shape != shape:
         raise ValueError(f"{name} must have shape {shape}, got {arr.shape}")
@@ -228,9 +237,10 @@ def _shaped(values: object, shape: tuple[int, ...], name: str) -> np.ndarray:
 
 
 def _channels(values: object, n: int, *, force: bool) -> Mapping[str, np.ndarray]:
+    """Copy the three component channels, rejecting missing or misshapen ones."""
     if not isinstance(values, Mapping):
         raise TypeError("midhands channels must be a mapping")
-    allowed = {(n, 3)} if force else {(n,), (n, 3)}
+    allowed: set[tuple[int, ...]] = {(n, 3)} if force else {(n,), (n, 3)}
     copied: dict[str, np.ndarray] = {}
     for part in COMPONENTS:
         if part not in values:
@@ -243,12 +253,14 @@ def _channels(values: object, n: int, *, force: bool) -> Mapping[str, np.ndarray
 
 
 def _token(value: object, pattern: re.Pattern[str], name: str) -> str:
+    """Return a hex token that matches the pattern, else raise."""
     if not isinstance(value, str) or pattern.fullmatch(value) is None:
         raise ValueError(f"{name} must be a hex string")
     return value
 
 
 def _objective(value: object) -> str:
+    """Strip the objective and reject banned claims about energy or optimality."""
     if not isinstance(value, str) or not value.strip():
         raise ValueError("objective must be a non-empty string")
     banned = ("wasted energy", "biological optimality")
@@ -258,6 +270,7 @@ def _objective(value: object) -> str:
 
 
 def _check_strategies(strategies: tuple[StrategyLoads, ...], n: int) -> None:
+    """Require both strategies, each as long as time_s."""
     if sorted(item.strategy_id for item in strategies) != sorted(_IDS):
         raise ValueError("strategies must be baseline and min_squared_force")
     if any(item.force_left_n.shape[0] != n for item in strategies):
@@ -265,6 +278,7 @@ def _check_strategies(strategies: tuple[StrategyLoads, ...], n: int) -> None:
 
 
 def _from_mapping(item: Mapping[str, Any], n: int) -> StrategyLoads:
+    """Build a StrategyLoads from raw fields, absent series filled with NaN."""
     forces = item.get("midhands_force_n") or {}
     moments = item.get("midhands_moment_nm") or {}
     return StrategyLoads(
@@ -278,6 +292,7 @@ def _from_mapping(item: Mapping[str, Any], n: int) -> StrategyLoads:
 
 
 def _gap(mapping: Mapping[str, Any], key: str, shape: tuple[int, ...]) -> np.ndarray:
+    """Return the shaped series, or a NaN array when the key is absent."""
     raw = mapping.get(key)
     if raw is None:
         return np.full(shape, np.nan)
