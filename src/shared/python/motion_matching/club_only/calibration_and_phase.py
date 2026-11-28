@@ -21,6 +21,7 @@ _SLOPE_EPS = 1.0e-12
 
 
 def _finite(name: str, value: float) -> float:
+    """Convert ``value`` to float and reject NaN or infinity."""
     val = float(value)
     if not math.isfinite(val):
         raise ValueError(f"{name} must be finite, got {value!r}")
@@ -30,6 +31,7 @@ def _finite(name: str, value: float) -> float:
 def _freeze_vec(
     arr: NDArray[np.floating], shape: tuple[int, ...], name: str
 ) -> NDArray[np.float64]:
+    """Copy ``arr`` into a finite, read-only float64 array of ``shape``."""
     out = np.array(arr, dtype=np.float64, copy=True)
     if out.shape != shape or not np.all(np.isfinite(out)):
         raise ValueError(f"{name} must be finite with shape {shape}")
@@ -38,6 +40,7 @@ def _freeze_vec(
 
 
 def _check_so3(rot: NDArray[np.float64]) -> None:
+    """Verify ``rot`` is a proper 3x3 rotation matrix in SO(3)."""
     if not np.allclose(rot @ rot.T, np.eye(3), atol=_SO3_TOL):
         raise ValueError("marker_to_club_rotation must be orthogonal")
     det = float(np.linalg.det(rot))
@@ -48,6 +51,7 @@ def _check_so3(rot: NDArray[np.float64]) -> None:
 def _check_phase_bounds(
     phi_top: float, phi_impact: float, slope_min: float, slope_max: float
 ) -> tuple[float, float, float, float]:
+    """Validate ordered phase anchors in (0, 1) and positive slope bounds."""
     p_top, p_imp = _finite("phi_top", phi_top), _finite("phi_impact", phi_impact)
     s_min, s_max = _finite("slope_min", slope_min), _finite("slope_max", slope_max)
     if not (0.0 < p_top < p_imp < 1.0):
@@ -55,6 +59,44 @@ def _check_phase_bounds(
     if s_min <= 0.0 or s_min > s_max:
         raise ValueError("slope bounds must satisfy 0 < slope_min <= slope_max")
     return p_top, p_imp, s_min, s_max
+
+
+def _validate_club_fields(obj: ClubCalibrationSpec | ClubCalibration) -> None:
+    """Validate club identifier, geometry scalars, and bounded hand offsets."""
+    if not obj.club_id:
+        raise ValueError("club_id must be a non-empty string")
+    if _finite("length_m", obj.length_m) <= 0.0:
+        raise ValueError("length_m must be > 0")
+    if not (0.0 < _finite("lie_angle_deg", obj.lie_angle_deg) < 90.0):
+        raise ValueError("lie_angle_deg must be in (0, 90)")
+    cap = _finite("max_hand_offset_m", obj.max_hand_offset_m)
+    lead = _finite("lead_hand_offset_m", obj.lead_hand_offset_m)
+    trail = _finite("trail_hand_offset_m", obj.trail_hand_offset_m)
+    if cap <= 0.0 or abs(lead) > cap or abs(trail) > cap or lead == trail:
+        raise ValueError(f"hand_offset bounds violated (cap={cap})")
+
+
+@dataclass(frozen=True)
+class ClubCalibrationSpec:
+    """Club dimensions, hand-offset bounds, and held-out validation gates."""
+
+    club_id: str
+    length_m: float
+    lie_angle_deg: float
+    lead_hand_offset_m: float = 0.04
+    trail_hand_offset_m: float = -0.04
+    max_hand_offset_m: float = 0.15
+    max_held_out_rmse_m: float = 0.005
+    max_held_out_point_error_m: float | None = None
+
+    def __post_init__(self) -> None:
+        """Validate club spec fields and held-out error thresholds."""
+        _validate_club_fields(self)
+        if _finite("max_held_out_rmse_m", self.max_held_out_rmse_m) <= 0.0:
+            raise ValueError("max_held_out_rmse_m must be > 0")
+        pt_err = self.max_held_out_point_error_m
+        if pt_err is not None and _finite("max_held_out_point_error_m", pt_err) <= 0.0:
+            raise ValueError("max_held_out_point_error_m must be > 0")
 
 
 @dataclass(frozen=True)
@@ -74,49 +116,31 @@ class ClubCalibration:
     calibration_hash: str
 
     def __post_init__(self) -> None:
-        if not self.club_id or not self.calibration_hash:
-            raise ValueError("club_id and calibration_hash must be non-empty")
-        if _finite("length_m", self.length_m) <= 0.0:
-            raise ValueError("length_m must be > 0")
-        if not (0.0 < _finite("lie_angle_deg", self.lie_angle_deg) < 90.0):
-            raise ValueError("lie_angle_deg must be in (0, 90)")
+        """Freeze SE(3) arrays and enforce scalar, SO(3), and held-out bounds."""
+        if not self.calibration_hash:
+            raise ValueError("calibration_hash must be non-empty")
+        _validate_club_fields(self)
         rot = _freeze_vec(self.marker_to_club_rotation, (3, 3), "rotation")
         _check_so3(rot)
         trans = _freeze_vec(self.marker_to_club_translation_m, (3,), "translation")
         object.__setattr__(self, "marker_to_club_rotation", rot)
         object.__setattr__(self, "marker_to_club_translation_m", trans)
-        cap = _finite("max_hand_offset_m", self.max_hand_offset_m)
-        lead = _finite("lead_hand_offset_m", self.lead_hand_offset_m)
-        trail = _finite("trail_hand_offset_m", self.trail_hand_offset_m)
-        if cap <= 0.0 or abs(lead) > cap or abs(trail) > cap or lead == trail:
-            raise ValueError(f"hand_offset bounds violated (cap={cap})")
         rmse = _finite("held_out_rmse_m", self.held_out_rmse_m)
         max_e = _finite("held_out_max_m", self.held_out_max_m)
         if rmse < 0.0 or max_e < rmse - _SLOPE_EPS:
             raise ValueError("held-out error metrics must be >= 0 with max >= rmse")
 
 
-@precondition(
-    lambda club_id, *a, **kw: isinstance(club_id, str) and bool(club_id),
-    "club_id must be a non-empty string",
-)
+@precondition(lambda spec, *a, **kw: isinstance(spec, ClubCalibrationSpec), "bad spec")
 @postcondition(lambda r: isinstance(r, ClubCalibration), "must return ClubCalibration")
 def calibrate_and_validate_club(
-    club_id: str,
+    spec: ClubCalibrationSpec,
     marker_points_m: NDArray[np.floating],
     club_points_m: NDArray[np.floating],
     calib_frame_indices: Sequence[int],
     held_out_frame_indices: Sequence[int],
-    *,
-    length_m: float,
-    lie_angle_deg: float,
-    lead_hand_offset_m: float = 0.04,
-    trail_hand_offset_m: float = -0.04,
-    max_hand_offset_m: float = 0.15,
-    max_held_out_rmse_m: float = 0.005,
-    max_held_out_point_error_m: float | None = None,
 ) -> ClubCalibration:
-    """Fit marker-to-club SE(3) via Kabsch SVD and validate on disjoint held-out frames."""
+    """Fit marker-to-club SE(3) via Kabsch SVD and validate on held-out frames."""
     m_arr = np.asarray(marker_points_m, dtype=np.float64)
     c_arr = np.asarray(club_points_m, dtype=np.float64)
     if m_arr.ndim != 3 or m_arr.shape[2] != 3 or m_arr.shape[1] < 3:
@@ -146,33 +170,24 @@ def calibrate_and_validate_club(
 
     errs = np.linalg.norm((held_m @ rot.T + trans) - held_c, axis=1)
     rmse_m, max_err_m = float(np.sqrt(np.mean(errs**2))), float(np.max(errs))
-    rmse_ceil = _finite("max_held_out_rmse_m", max_held_out_rmse_m)
-    if rmse_ceil <= 0.0 or rmse_m > rmse_ceil:
-        raise ValueError(f"held-out RMSE {rmse_m:.5f} m exceeds {rmse_ceil:.5f} m")
-    if max_held_out_point_error_m is not None:
-        max_ceil = _finite("max_held_out_point_error_m", max_held_out_point_error_m)
-        if max_err_m > max_ceil:
-            raise ValueError(f"held-out max {max_err_m:.5f} m exceeds {max_ceil:.5f} m")
+    if rmse_m > spec.max_held_out_rmse_m:
+        ceil = spec.max_held_out_rmse_m
+        raise ValueError(f"held-out RMSE {rmse_m:.5f} m > {ceil:.5f} m")
+    pt_ceil = spec.max_held_out_point_error_m
+    if pt_ceil is not None and max_err_m > pt_ceil:
+        raise ValueError(f"held-out max {max_err_m:.5f} m > {pt_ceil:.5f} m")
 
-    tail = (
-        float(lead_hand_offset_m),
-        float(trail_hand_offset_m),
-        float(max_hand_offset_m),
-        rmse_m,
-        max_err_m,
-    )
-    l_m, lie_d = float(length_m), float(lie_angle_deg)
-    raw = json.dumps(
-        {
-            "id": club_id,
-            "r": np.round(rot, 9).tolist(),
-            "t": np.round(trans, 9).tolist(),
-            "s": [round(x, 9) for x in (l_m, lie_d, *tail)],
-        },
-        sort_keys=True,
-    )
-    digest = hashlib.sha256(raw.encode()).hexdigest()
-    return ClubCalibration(club_id, l_m, lie_d, rot, trans, *tail, digest)
+    l_m, lie_d = float(spec.length_m), float(spec.lie_angle_deg)
+    lead, trail = float(spec.lead_hand_offset_m), float(spec.trail_hand_offset_m)
+    tail = (lead, trail, float(spec.max_hand_offset_m), rmse_m, max_err_m)
+    d: dict[str, object] = {
+        "id": spec.club_id,
+        "r": np.round(rot, 9).tolist(),
+        "t": np.round(trans, 9).tolist(),
+        "s": [round(x, 9) for x in (l_m, lie_d, *tail)],
+    }
+    digest = hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()
+    return ClubCalibration(spec.club_id, l_m, lie_d, rot, trans, *tail, digest)
 
 
 @dataclass(frozen=True)
@@ -185,13 +200,13 @@ class PhaseAnchorInterval:
     label: str = ""
 
     def __post_init__(self) -> None:
+        """Validate interval ordering and optional nominal timestamp."""
         lo, hi = _finite("t_min_s", self.t_min_s), _finite("t_max_s", self.t_max_s)
         if lo > hi:
             raise ValueError(f"t_min_s={lo} > t_max_s={hi}")
-        if self.nominal_s is not None and not (
-            lo <= _finite("nominal_s", self.nominal_s) <= hi
-        ):
-            raise ValueError(f"nominal_s={self.nominal_s} outside [{lo}, {hi}]")
+        nom = self.nominal_s
+        if nom is not None and not (lo <= _finite("nominal_s", nom) <= hi):
+            raise ValueError(f"nominal_s={nom} outside [{lo}, {hi}]")
 
     @property
     def target_s(self) -> float:
@@ -208,6 +223,7 @@ def _solve_interval_anchors(
     slope_min: float,
     slope_max: float,
 ) -> tuple[float, float, float, float]:
+    """Propagate slope bounds across anchor intervals and select feasible times."""
     p_top, p_imp, s_min, s_max = _check_phase_bounds(
         phi_top, phi_impact, slope_min, slope_max
     )
@@ -245,6 +261,7 @@ class PhaseAlignmentMap:
     slope_max: float = 5.0
 
     def __post_init__(self) -> None:
+        """Validate strict event timestamp monotonicity and segment slope bounds."""
         raw = (self.t_address_s, self.t_top_s, self.t_impact_s, self.t_finish_s)
         times = tuple(_finite(f"t_{i}", t) for i, t in enumerate(raw))
         p_top, p_imp, s_min, s_max = _check_phase_bounds(
@@ -282,12 +299,8 @@ class PhaseAlignmentMap:
     @postcondition(lambda r: 0.0 <= r[0] <= 1.0 and r[1] > 0.0, "phi in [0,1]")
     def evaluate_phase(self, t_s: float) -> tuple[float, float]:
         """Return ``(phi, dphi_dt)`` at physical time ``t_s``."""
-        ta, tt, ti, tf = (
-            self.t_address_s,
-            self.t_top_s,
-            self.t_impact_s,
-            self.t_finish_s,
-        )
+        ta, tt = self.t_address_s, self.t_top_s
+        ti, tf = self.t_impact_s, self.t_finish_s
         t = float(t_s)
         if t < ta - _SLOPE_EPS or t > tf + _SLOPE_EPS:
             raise ValueError(f"t_s={t} outside [{ta}, {tf}]")
@@ -309,17 +322,12 @@ class PhaseAlignmentMap:
     ) -> NDArray[np.float64]:
         """Interpolate ``q_tour(phi(t_s))``, preserving physical time vs. phase."""
         phi, _ = self.evaluate_phase(t_s)
-        g, q = (
-            np.asarray(phase_grid, dtype=np.float64),
-            np.asarray(q_tour_grid, dtype=np.float64),
-        )
-        if (
-            g.ndim != 1
-            or g.size < 2
-            or not np.all(np.isfinite(g))
-            or np.any(np.diff(g) <= 0.0)
-        ):
-            raise ValueError("phase_grid must be strictly increasing finite 1D (>= 2)")
+        g = np.asarray(phase_grid, dtype=np.float64)
+        q = np.asarray(q_tour_grid, dtype=np.float64)
+        if g.ndim != 1 or g.size < 2 or not np.all(np.isfinite(g)):
+            raise ValueError("phase_grid must be finite 1D (>= 2)")
+        if np.any(np.diff(g) <= 0.0):
+            raise ValueError("phase_grid must be strictly increasing")
         if phi < g[0] - _SLOPE_EPS or phi > g[-1] + _SLOPE_EPS:
             raise ValueError("phi(t_s) outside phase_grid span")
         if q.shape[0] != g.size or q.ndim not in (1, 2) or not np.all(np.isfinite(q)):
@@ -336,9 +344,6 @@ class PhaseAlignmentMap:
     ) -> NDArray[np.float64]:
         """Query tour prior knots at ``phi(t_s)`` (uniform ``[0, 1]`` grid if omitted)."""
         knots = np.asarray(q_tour_knots, dtype=np.float64)
-        grid = (
-            np.linspace(0.0, 1.0, knots.shape[0], dtype=np.float64)
-            if phase_grid is None
-            else phase_grid
-        )
-        return self.evaluate_tour_prior(t_s, grid, knots)
+        if phase_grid is None:
+            phase_grid = np.linspace(0.0, 1.0, knots.shape[0], dtype=np.float64)
+        return self.evaluate_tour_prior(t_s, phase_grid, knots)
