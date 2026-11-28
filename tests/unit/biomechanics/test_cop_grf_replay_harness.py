@@ -28,6 +28,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_simulation_output_fields_and_no_zerofill():
+    """Carries the extension fields through and keeps an unavailable channel value-free."""
     ch_avail = _channel((1.0, 2.0, 3.0), "N")
     ch_unavail = _missing("sensor offline", "m")
     
@@ -70,6 +71,7 @@ def test_simulation_output_fields_and_no_zerofill():
 
 
 def test_polygon_geometry_and_bos_margin():
+    """Reports containment and the signed distance used for the BOS margin."""
     hull = [(0.0, 0.0), (0.2, 0.0), (0.2, 0.1), (0.0, 0.1)]
     # inside
     assert point_in_polygon_2d((0.1, 0.05), hull) is True
@@ -117,6 +119,7 @@ def test_pressure_centroid_vs_wrench_cop_reproduces_excursion():
 
 
 def test_replay_harness_captures_first_excursion_and_chatter_window():
+    """Records the first out-of-hull CoP excursion and the first state-oscillation window."""
     harness = ReplayHarness(
         foot_hulls={
             "left": [(0.0, -0.05), (0.2, -0.05), (0.2, 0.05), (0.0, 0.05)],
@@ -157,4 +160,52 @@ def test_replay_harness_captures_first_excursion_and_chatter_window():
     assert chatter_window is not None
     assert chatter_window["start_frame"] in {"frame_0005", "frame_0006"}
     assert len(chatter_window["transitions"]) >= 2
+
+
+def test_wrench_cop_at_ground_origin_keeps_the_legacy_numbers():
+    """Pins the CoP unchanged when the moment origin already sits on the ground plane."""
+    c1 = ContactPointRecord(
+        contact_id="c1", body_id="calcn_l", foot="left",
+        point=(0.05, 0.0, 0.0), force_n=(20.0, 4.0, 300.0), torque_nm=(0.0, 12.0, 1.0)
+    )
+    c2 = ContactPointRecord(
+        contact_id="c2", body_id="toes_l", foot="left",
+        point=(0.15, 0.02, 0.0), force_n=(-5.0, 2.0, 100.0), torque_nm=(0.0, -3.0, 0.5)
+    )
+    net_f, net_m, cop = compute_wrench_cop([c1, c2], origin=(0.0, 0.0, 0.0), ground_z=0.0, min_fz=5.0)
+    assert net_f == pytest.approx((15.0, 6.0, 400.0))
+    assert net_m == pytest.approx((2.0, -21.0, 2.1))
+    # k = origin[2] - ground_z = 0, so transporting O -> G is the identity: c = O + (n x M_O)/Fz.
+    assert cop == pytest.approx((0.0525, 0.005, 0.0))
+
+
+def test_wrench_cop_transports_moment_from_raised_origin_to_ground():
+    """Moments about an origin above the ground plane are transported to ground_z first (#15859)."""
+    contact = ContactPointRecord(
+        contact_id="c1", body_id="calcn_l", foot="left",
+        point=(0.5, 0.0, 0.2), force_n=(10.0, 0.0, 100.0)
+    )
+    net_f, net_m, cop = compute_wrench_cop([contact], origin=(0.0, 0.0, 0.1), ground_z=0.0, min_fz=5.0)
+    assert net_f == pytest.approx((10.0, 0.0, 100.0))
+    # The returned wrench stays about O: M_O = (p - O) x F = (0.5, 0, 0.1) x (10, 0, 100) = (0, -49, 0).
+    assert net_m == pytest.approx((0.0, -49.0, 0.0))
+    # M_G = M_O + (O - G) x F with O - G = (0, 0, k), k = origin[2] - ground_z = 0.1, and
+    # (0, 0, k) x (Fx, Fy, Fz) = (-k*Fy, k*Fx, 0), so M_G = (M_x - k*Fy, M_y + k*Fx, M_z) = (0, -48, 0).
+    # cx = ox - M_G_y/Fz = 0.48, which is where the line of action crosses z = 0:
+    # 0.5 - (0.2 - 0) * 10 / 100 = 0.48. Without the transport the answer is 0.49, off by k*Fx/Fz.
+    assert cop == pytest.approx((0.48, 0.0, 0.0))
+
+
+def test_wrench_cop_ignores_heights_for_purely_vertical_loads():
+    """A vertical-only resultant puts the CoP at the Fz-weighted XY regardless of pz and oz (#15859)."""
+    c1 = ContactPointRecord(
+        contact_id="heel", body_id="calcn_l", foot="left", point=(0.05, 0.0, 0.0), force_n=(0.0, 0.0, 300.0)
+    )
+    c2 = ContactPointRecord(
+        contact_id="toe", body_id="toes_l", foot="left", point=(0.15, 0.02, 0.06), force_n=(0.0, 0.0, 100.0)
+    )
+    for oz in (0.0, 0.1, -0.2):
+        _, _, cop = compute_wrench_cop([c1, c2], origin=(0.02, -0.01, oz), ground_z=0.0, min_fz=5.0)
+        # Fx = Fy = 0 kills the transport term, leaving (0.05*300 + 0.15*100)/400, (0.02*100)/400.
+        assert cop == pytest.approx((0.075, 0.005, 0.0))
 # fmt: on
