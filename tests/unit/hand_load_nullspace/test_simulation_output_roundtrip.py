@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
 import json
+import math
 import pytest
 import numpy as np
 
@@ -17,11 +18,49 @@ from src.shared.python.hand_load_nullspace.simulation_output import (
     deserialize_simulation_output,
     SCHEMA_VERSION,
 )
+from src.shared.python.hand_load_nullspace.solver import HandLoadProblem, solve
 
 pytestmark = pytest.mark.unit
 
+_GROUND_WRENCH = ((0.0, 2.0, 60.0), (0.0, -2.0, 0.0), (0.0, 0.0, 0.0))
+
+
+def _hand_problem(**overrides) -> HandLoadProblem:
+    """Build the two-hand problem the SimulationOutput builder is called with."""
+    base = {
+        "p_l": (0.0, 0.0, 0.0), "p_r": (0.0, 0.0, 0.2), "force_n": (10.0, 0.0, 40.0),
+        "moment_nm": (0.0, 2.0, 0.0), "couple_policy": "fixed",
+    }
+    base.update(overrides)
+    return HandLoadProblem(**base)
+
+
+def _built(**biomech) -> SimulationOutput:
+    """Run the builder against a ground wrench heavy enough to yield an available CoP."""
+    problem = _hand_problem()
+    return simulation_output(
+        problem, solve(problem), frame="world", time_s=0.05,
+        ground=_GROUND_WRENCH, lineage=("match-1", "", "", ""), **biomech,
+    )
+
+
+def _minimal_output(**overrides) -> SimulationOutput:
+    """Construct a valid SimulationOutput, overriding only the fields a test is about."""
+    ch = Channel("available", "N", (1.0, 2.0, 3.0))
+    base = {
+        "schema_version": SCHEMA_VERSION, "frame": "frame_001", "time_s": 0.01,
+        "load_kind": "total", "replay_badge": "allocation-only",
+        "net_force_n": ch, "midhands_moment_nm": ch, "f_l_n": ch, "f_r_n": ch,
+        "m_l_nm": ch, "m_r_nm": ch, "ground_force_n": ch, "ground_moment_nm": ch,
+        "cop_m": Channel("UNAVAILABLE", "m", None, "F_z < 5 N"),
+        "contact_state": "left_only", "bos_valid": True,
+    }
+    base.update(overrides)
+    return SimulationOutput(**base)
+
 
 def test_simulation_output_immutability():
+    """Neither the output nor its channels can be mutated after construction."""
     ch = Channel("available", "N", (1.0, 2.0, 3.0))
     out = SimulationOutput(
         schema_version=SCHEMA_VERSION,
@@ -38,6 +77,7 @@ def test_simulation_output_immutability():
         ground_force_n=ch,
         ground_moment_nm=ch,
         cop_m=Channel("UNAVAILABLE", "m", None, "F_z < 5 N"),
+        bos_valid=False,
     )
     with pytest.raises(Exception) as excinfo:
         setattr(out, "time_s", 0.02)  # noqa: B010
@@ -49,6 +89,7 @@ def test_simulation_output_immutability():
 
 
 def test_simulation_output_serialization_round_trip():
+    """to_dict/to_json and from_dict/from_json reproduce every populated field."""
     ch_avail = Channel("available", "N", (10.0, 20.0, 30.0))
     ch_unavail = Channel("UNAVAILABLE", "m", None, "CoP UNAVAILABLE: F_z < 5 N")
     out = SimulationOutput(
@@ -114,6 +155,7 @@ def test_simulation_output_serialization_round_trip():
 
 
 def test_serialization_fails_on_unsupported_version():
+    """An unknown schema_version is refused instead of being coerced into the current one."""
     data = {
         "schema_version": "simulation-output/999",
         "frame": "f1",
@@ -135,6 +177,7 @@ def test_serialization_fails_on_unsupported_version():
 
 
 def test_dynamics_query_protocol_and_default_implementation():
+    """The provider-backed query satisfies the protocol and forwards finite state to each provider."""
     q = np.array([0.1, 0.2, 0.3])
     qdot = np.array([0.0, 0.5, -0.2])
     M_val = np.eye(3) * 2.5
@@ -157,6 +200,7 @@ def test_dynamics_query_protocol_and_default_implementation():
 
 
 def test_dynamics_query_preconditions():
+    """Non-finite generalized state is refused before any provider is called."""
     dq = DefaultDynamicsQuery(
         mass_matrix_fn=lambda q: np.eye(2),
         bias_forces_fn=lambda q, qdot: np.zeros(2),
@@ -166,4 +210,63 @@ def test_dynamics_query_preconditions():
         dq.mass_matrix(np.array([np.nan, 0.0]))
     with pytest.raises(ValueError, match="qdot must contain finite values"):
         dq.bias_forces(np.array([0.0, 0.0]), np.array([np.inf, 1.0]))
+
+
+def test_flight_builder_yields_nan_cop_and_no_valid_bos():
+    """Flight has no ground contact, so the builder must not publish a CoP position or a valid BOS (#15859)."""
+    out = _built(contact_state="flight", bos_valid=True)
+    assert out.contact_state == "flight"
+    assert out.bos_valid is False
+    assert out.cop_m.availability == "available"
+    assert out.cop_m.values is not None
+    assert all(math.isnan(value) for value in out.cop_m.values)
+
+    # Non-flight behaviour is untouched: the same ground wrench keeps the solved, finite CoP.
+    stance = _built(contact_state="left_only", bos_valid=True)
+    assert stance.bos_valid is True
+    assert stance.cop_m.values == pytest.approx((2.0 / 60.0, 0.0, 0.0))
+
+
+def test_non_flight_builder_keeps_reported_bos_valid():
+    """The builder only rewrites the BOS claim for flight frames (#15859)."""
+    assert _built(contact_state="right_only", bos_valid=False).bos_valid is False
+    assert _built(contact_state="left_only", bos_valid=True).bos_valid is True
+
+
+def test_simulation_output_refuses_non_finite_scalars():
+    """bos_margin_m and gate_alpha describe measured state and must never carry NaN or inf (#15859)."""
+    with pytest.raises(ValueError, match="bos_margin_m must be finite"):
+        _minimal_output(bos_margin_m=float("nan"))
+    with pytest.raises(ValueError, match="bos_margin_m must be finite"):
+        _minimal_output(bos_margin_m=float("inf"))
+    with pytest.raises(ValueError, match="gate_alpha must be finite"):
+        _minimal_output(gate_alpha=float("nan"))
+    with pytest.raises(ValueError, match="gate_alpha must be finite"):
+        _minimal_output(gate_alpha=float("inf"))
+
+
+def test_simulation_output_refuses_flight_with_valid_bos():
+    """A flight frame claiming a valid base of support is self-contradictory and fails closed (#15859)."""
+    with pytest.raises(ValueError, match="flight requires bos_valid false"):
+        _minimal_output(contact_state="flight", bos_valid=True)
+    assert _minimal_output(contact_state="flight", bos_valid=False).bos_valid is False
+
+
+def test_from_dict_derives_missing_bos_valid_from_contact_state():
+    """A payload that omits bos_valid must not default to valid while claiming flight (#15859)."""
+    payload = _minimal_output(contact_state="left_only").to_dict()
+    payload.pop("bos_valid")
+    payload["contact_state"] = "left_only"
+    assert SimulationOutput.from_dict(payload).bos_valid is True
+    payload["contact_state"] = "flight"
+    assert SimulationOutput.from_dict(payload).bos_valid is False
+
+
+def test_from_dict_refuses_explicit_flight_with_valid_bos():
+    """An explicit bos_valid true next to contact_state flight is refused, not coerced (#15859)."""
+    payload = _minimal_output(contact_state="left_only").to_dict()
+    payload["contact_state"] = "flight"
+    payload["bos_valid"] = True
+    with pytest.raises(ValueError, match="flight requires bos_valid false"):
+        SimulationOutput.from_dict(payload)
 # fmt: on
