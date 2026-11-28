@@ -15,6 +15,7 @@ pytestmark = pytest.mark.unit
 
 
 def _inputs() -> dict:
+    """Two-sample fixture: rotating grip frames carrying equal net wrenches."""
     # Moving and rotating geometry; wrench components remain in grip axes.
     rotations = (np.eye(3), np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]]))
     frames = tuple(
@@ -42,6 +43,7 @@ def _inputs() -> dict:
 
 
 def test_changed_hand_split_preserves_net_wrench() -> None:
+    """A different hand split under equal net wrenches is equivalent, not replay-proof."""
     inputs = _inputs()
     assert not np.allclose(inputs["baseline"], inputs["candidate"])
     report = compare_hand_wrench_histories(**inputs)
@@ -56,6 +58,7 @@ def test_changed_hand_split_preserves_net_wrench() -> None:
 
 
 def test_equal_opposite_forces_can_change_net_moment() -> None:
+    """Equal opposite force deltas net to zero force yet still shift the moment."""
     inputs = _inputs()
     candidate = np.array(inputs["baseline"])
     candidate[1, 1] += 3.0
@@ -72,6 +75,7 @@ def test_equal_opposite_forces_can_change_net_moment() -> None:
 
 
 def test_force_and_moment_use_separate_dimensional_tolerances() -> None:
+    """Force and moment tolerances gate their own components independently."""
     inputs = _inputs()
     candidate = np.array(inputs["baseline"])
     candidate[0, 0] += 0.5  # Axial force: no extra moment.
@@ -103,6 +107,7 @@ def test_force_and_moment_use_separate_dimensional_tolerances() -> None:
     ],
 )
 def test_invalid_or_missing_inputs_are_rejected(key: str, value: object) -> None:
+    """Malformed times, histories, geometry or tolerances raise rather than pass."""
     inputs = _inputs()
     inputs[key] = value
     with pytest.raises((ValueError, TypeError)):
@@ -110,6 +115,7 @@ def test_invalid_or_missing_inputs_are_rejected(key: str, value: object) -> None
 
 
 def test_inconsistent_reference_geometry_is_rejected() -> None:
+    """Lead and trail points that no longer bracket a midpoint are rejected."""
     inputs = _inputs()
     inputs["trail_points_world_m"][1] += [0, 0, 0.1]
     with pytest.raises(ValueError, match="midpoint"):
@@ -117,6 +123,7 @@ def test_inconsistent_reference_geometry_is_rejected() -> None:
 
 
 def test_identical_histories_accept_zero_tolerances_without_mutating_inputs() -> None:
+    """Zero tolerances still accept identical histories and leave inputs unmutated."""
     inputs = _inputs()
     baseline = np.array(inputs["baseline"])
     inputs.update(candidate=baseline.copy(), force_atol_n=0, moment_atol_nm=0)
@@ -126,6 +133,7 @@ def test_identical_histories_accept_zero_tolerances_without_mutating_inputs() ->
 
 
 def test_vector_norm_exceedance_is_not_hidden_by_componentwise_comparison() -> None:
+    """Within-atol components still fail once their vector norm exceeds atol."""
     inputs = _inputs()
     candidate = np.array(inputs["baseline"])
     candidate[0, :2] += 0.4
