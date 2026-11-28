@@ -114,3 +114,35 @@ def test_crossing_weights_survive_finite_dynamic_range(
     assert actual_positive == pytest.approx(positive, rel=1e-14, abs=0.0)
     assert actual_negative == pytest.approx(negative, rel=1e-14, abs=0.0)
     assert actual_net == pytest.approx(positive + negative, rel=1e-14)
+
+
+@pytest.mark.unit
+class TestZeroCrossingDurations15863:
+    """FC-012a-1: gen/abs durations split at the interpolated crossing (#15863)."""
+
+    def test_probe_straddle_splits_durations_at_the_crossing(self) -> None:
+        """``t=[0,1,2,3], P=[0,0,+900,-100]``: 1.9 s + 0.1 s, one second idle.
+
+        Whole-segment OR reporting (the #15343-era behaviour) claimed
+        ``[2.0 s, 1.0 s]`` with zero idle — a 10x absorption error.
+        """
+        obj = _make(
+            np.array([0.0, 0.0, 900.0, -100.0]),
+            np.ones(4),
+            np.array([0.0, 1.0, 2.0, 3.0]),
+        )
+        metrics = obj.compute_joint_power_metrics(0)
+        assert metrics is not None
+        assert metrics.generation_duration == pytest.approx(1.9, abs=1e-9)
+        assert metrics.absorption_duration == pytest.approx(0.1, abs=1e-9)
+
+    def test_net_work_follows_sample_times_not_the_scalar_dt(self) -> None:
+        """On a non-uniform grid net work integrates over ``np.diff(times)``."""
+        obj = _make(
+            np.array([1.0, 3.0, 3.0]),
+            np.ones(3),
+            np.array([0.0, 1.0, 3.0]),
+        )
+        metrics = obj.compute_joint_power_metrics(0)
+        assert metrics is not None
+        assert metrics.net_work == pytest.approx(8.0, abs=1e-9)
