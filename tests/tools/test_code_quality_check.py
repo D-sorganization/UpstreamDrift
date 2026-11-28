@@ -174,6 +174,45 @@ def test_check_ast_issues_with_docstring() -> None:
     assert not any("missing docstring" in i[1] for i in issues)
 
 
+@pytest.mark.unit
+def test_docstring_rule_matches_public_api_only() -> None:
+    """Private helpers, nested functions, and tests are not docstring failures.
+
+    CI and the local checker share this rule. Public sync and async functions,
+    and public methods, still fail closed when the docstring is missing.
+    """
+    content = (
+        "def public_api():\n"
+        "    def nested():\n"
+        "        return 1\n"
+        "    return nested()\n"
+        "\n"
+        "def _helper():\n"
+        "    return 1\n"
+        "\n"
+        "def test_example():\n"
+        "    return 1\n"
+        "\n"
+        "async def public_async():\n"
+        "    return 1\n"
+        "\n"
+        "class Box:\n"
+        "    def open(self):\n"
+        "        return 1\n"
+        "\n"
+        "    def _latch(self):\n"
+        "        return 0\n"
+    )
+    messages = [issue[1] for issue in check_ast_issues(content, Path("sample.py"))]
+    assert any("public_api" in message for message in messages)
+    assert any("public_async" in message for message in messages)
+    assert any("'open'" in message for message in messages)
+    assert not any("nested" in message for message in messages)
+    assert not any("_helper" in message for message in messages)
+    assert not any("_latch" in message for message in messages)
+    assert not any("test_example" in message for message in messages)
+
+
 def test_check_ast_issues_syntax_error() -> None:
     content = "def :"
     issues = check_ast_issues(content, Path("bad.py"))

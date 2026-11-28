@@ -191,6 +191,48 @@ def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str
     return issues
 
 
+def _requires_docstring(name: str) -> bool:
+    """Return whether ``name`` is a public API that must document itself.
+
+    Private helpers (``_name`` and dunder names) and ``test_*`` functions are
+    outside the gate. Local review and CI use this same predicate.
+
+    Preconditions: ``name`` is a non-empty string.
+    """
+    if not isinstance(name, str) or not name:
+        raise ValueError("name must be a non-empty string")
+    return not name.startswith("_") and not name.startswith("test_")
+
+
+def _missing_public_docstrings(tree: ast.AST) -> list[tuple[int, str]]:
+    """Return ``(lineno, name)`` for public functions that lack a docstring.
+
+    Nested functions are skipped. Sync and async functions are treated alike.
+    """
+    found: list[tuple[int, str]] = []
+
+    def visit(node: ast.AST, *, nested: bool) -> None:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if (
+                not nested
+                and _requires_docstring(node.name)
+                and not ast.get_docstring(node)
+            ):
+                found.append((node.lineno, node.name))
+            for child in ast.iter_child_nodes(node):
+                visit(child, nested=True)
+            return
+        if isinstance(node, ast.ClassDef):
+            for child in ast.iter_child_nodes(node):
+                visit(child, nested=nested)
+            return
+        for child in ast.iter_child_nodes(node):
+            visit(child, nested=nested)
+
+    visit(tree, nested=False)
+    return found
+
+
 def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]:
     """Check AST for quality issues."""
     if content is None:
@@ -212,24 +254,8 @@ def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]
         return issues
     try:
         tree = ast.parse(content)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                if not ast.get_docstring(node):
-                    issues.append(
-                        (node.lineno, f"Function '{node.name}' missing docstring", ""),
-                    )
-                if not node.returns and node.name != "__init__":
-                    pass
-                    # Relaxed: We let MyPy handle missing return checks,
-                    # as this stricter check might block valid quick scripts.
-                    # Uncomment to enforce:
-                    # issues.append(
-                    #     (
-                    #         node.lineno,
-                    #         f"Function '{node.name}' missing return type hint",
-                    #         "",
-                    #     )
-                    # )
+        for lineno, name in _missing_public_docstrings(tree):
+            issues.append((lineno, f"Function '{name}' missing docstring", ""))
     except SyntaxError as e:
         issues.append((0, f"Syntax error: {e}", ""))
     return issues
