@@ -48,6 +48,7 @@ def test_pre_push_hook_keeps_pytest_failure_and_gives_repair_guidance(
     invocation: list[list[str]] = []
 
     def failed_pytest(args: list[str], *, check: bool) -> subprocess.CompletedProcess:
+        """failed pytest."""
         invocation.append(args)
         assert check is False
         return subprocess.CompletedProcess(args, returncode=1)
@@ -419,6 +420,19 @@ class TestCIEnvironmentCompatibility:
 
         assert 'pip install -e ".[jaxsim]"' in workflow
         assert "tests/cross_engine/test_jaxsim_vs_pinocchio.py" in workflow
+
+    def test_cross_engine_equivalence_job_names_contact_free_gate(self) -> None:
+        """Issue #15245: the heavy job must name the contact-free gate explicitly."""
+        workflow = (
+            REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+        ).read_text(encoding="utf-8")
+
+        assert "Run contact-free cross-engine equivalence and parity tests" in workflow
+        assert "contact-free gravity-only" in workflow
+        assert "tests/motion_matching/test_cross_engine_equivalence.py" in workflow
+        run_idx = workflow.index("Run contact-free cross-engine equivalence")
+        pytest_block = workflow[run_idx : run_idx + 900]
+        assert "test_cross_engine_equivalence_helpers.py" not in pytest_block
 
     def test_cross_engine_equivalence_hardens_against_skipped_parity(self) -> None:
         """The required parity gate must fail when JaxSim parity is all-skipped.
@@ -1998,6 +2012,7 @@ class TestReleaseAttestationRetry:
 
     @staticmethod
     def _protected_main_steps() -> list[dict[str, Any]]:
+        """protected main steps."""
         workflow = yaml.safe_load(
             (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(
                 encoding="utf-8"
@@ -2006,6 +2021,7 @@ class TestReleaseAttestationRetry:
         return workflow["jobs"]["companion-protected-main"]["steps"]
 
     def test_each_attestation_has_one_bounded_retry(self) -> None:
+        """test each attestation has one bounded retry."""
         steps = self._protected_main_steps()
         attest_indexes = [
             index
@@ -2031,6 +2047,7 @@ class TestReleaseAttestationRetry:
             assert "sleep" in pause["run"]
 
     def test_record_reads_attestation_from_either_attempt(self) -> None:
+        """test record reads attestation from either attempt."""
         steps = self._protected_main_steps()
         record = next(
             step
@@ -2049,6 +2066,7 @@ class TestPyprojectTomlConsistency:
 
     @staticmethod
     def _load_pyproject() -> dict[str, Any]:
+        """load pyproject."""
         try:
             import tomllib  # Python 3.11+
         except ImportError:
@@ -2117,6 +2135,7 @@ class TestPyprojectTomlConsistency:
         data = self._load_pyproject()
 
         def _dist_name(requirement: str) -> str:
+            """dist name."""
             return (
                 requirement.split("[", 1)[0].split(">", 1)[0].split("=", 1)[0].lower()
             )

@@ -138,3 +138,24 @@ If you are unsure where a new test belongs:
 - If it compares multiple engines numerically, it belongs in the cross-engine suite.
 
 The goal is not just more tests; it is clearer signal about what passed and why.
+
+## Cross-Engine CI Claim Matrix
+
+This table maps **documented acceptance claims** to the workflow jobs that
+execute them. It is authoritative over informal module docstrings when they
+disagree (issue #15245, finding F-UD-013).
+
+| Claim | Spec / issue | CI workflow | Job | Primary test module |
+| --- | --- | --- | --- | --- |
+| Contact-free gravity-only grip agreement (≤ 5 mm among installed engines) | #4249, #7048 | `cross-engine-equivalence.yml` | `equivalence` | `tests/motion_matching/test_cross_engine_equivalence.py` |
+| JaxSim ↔ Pinocchio free-body dynamics parity | #6881, #14290 | `cross-engine-equivalence.yml` | `equivalence` | `tests/cross_engine/test_jaxsim_vs_pinocchio.py` |
+| Flex-shaft / forward-sim JaxSim hooks | — | `cross-engine-equivalence.yml` | `equivalence` | `tests/cross_engine/test_flex_shaft_parity.py`, `test_jaxsim_forward_sim.py` |
+| Impact-parameter adapter conformance | — | `cross-engine-equivalence.yml` | `equivalence` | `tests/unit/impact_parameters/test_adapters.py` |
+| Canonical Core adapter validation | CC-8 | `cross-engine-equivalence.yml` | `canonical-conformance-gate` | `tests/integration/test_cross_engine_validation.py`, `tests/integration/cross_engine/**` |
+| Per-engine force-overlay parity | #11346 | `cross-engine-equivalence.yml` | `force-overlay-parity` | `tests/integration/cross_engine/test_force_overlay_parity.py` |
+| Coefficient / metric helper smoke (no CI gate) | #4096 helpers | _not scheduled_ | — | `tests/cross_engine/test_cross_engine_equivalence_helpers.py` |
+| Actuated `theta_truth` §2.2 forward-sim 5 mm gate (full six-engine campaign) | `CROSS_ENGINE_PARITY_SPEC.md` §2.2 | _not authorized in #15245_ | — | _planned / epic #13789_ |
+
+Helper tests under `tests/cross_engine/test_cross_engine_equivalence_helpers.py`
+must not be mistaken for the gravity-only gate. The workflow does not execute
+them today.
