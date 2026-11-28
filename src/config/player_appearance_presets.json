@@ -491,6 +491,7 @@
       "display_name": "Rory McIlroy",
       "stature_m": 1.778,
       "mass_kg": 72.5747792,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://www.pgatour.com/player/28237/rory-mcilroy/bio",
@@ -506,7 +507,7 @@
       "limitations": [
         "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
         "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
-        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900."
+        "Physical frame uses the equal-density, geometrically-similar proxy recorded in the sized receipt; it is a bounded modeling assumption, not measured girth or footage-era anatomy. Visual body build remains independent; appearance-only refinement is tracked separately under #15900."
       ],
       "appearance": {
         "schema_version": "appearance-v1",
@@ -583,6 +584,7 @@
       "display_name": "Jon Rahm",
       "stature_m": 1.8796,
       "mass_kg": 99.7903214,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://www.pgatour.com/player/46970/jon-rahm/bio",
@@ -598,7 +600,7 @@
       "limitations": [
         "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
         "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
-        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900.",
+        "Physical frame uses the equal-density, geometrically-similar proxy recorded in the sized receipt; it is a bounded modeling assumption, not measured girth or footage-era anatomy. Visual body build remains independent; appearance-only refinement is tracked separately under #15900.",
         "His commonly seen short beard is not yet reconstructed; optional facial hair is tracked under #15903."
       ],
       "appearance": {
@@ -676,6 +678,7 @@
       "display_name": "Dustin Johnson",
       "stature_m": 1.9304,
       "mass_kg": 86.1825503,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://www.pgatour.com/player/30925/dustin-johnson/bio",
@@ -691,7 +694,7 @@
       "limitations": [
         "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
         "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
-        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900."
+        "Physical frame uses the equal-density, geometrically-similar proxy recorded in the sized receipt; it is a bounded modeling assumption, not measured girth or footage-era anatomy. Visual body build remains independent; appearance-only refinement is tracked separately under #15900."
       ],
       "appearance": {
         "schema_version": "appearance-v1",
@@ -768,6 +771,7 @@
       "display_name": "Sergio García",
       "stature_m": 1.778,
       "mass_kg": 81.6466266,
+      "frame_prior": {"method": "height_mass", "source_index": 0},
       "sources": [
         {
           "url": "https://www.pgatour.com/player/21209/sergio-garcia/bio",
@@ -783,7 +787,7 @@
       "limitations": [
         "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
         "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
-        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900."
+        "Physical frame uses the equal-density, geometrically-similar proxy recorded in the sized receipt; it is a bounded modeling assumption, not measured girth or footage-era anatomy. Visual body build remains independent; appearance-only refinement is tracked separately under #15900."
       ],
       "appearance": {
         "schema_version": "appearance-v1",
