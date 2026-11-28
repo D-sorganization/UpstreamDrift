@@ -207,6 +207,375 @@
         "head": {"enabled": true, "headwear": "hair", "headwear_material": "hair_dark_brown", "model": "cc0_mesh", "hair_style": "short_crop", "hair_part": "right", "eye_color": "brown", "cap_style": "baseball_cap", "cap_material": "cap_white", "cap_brim": 0.3, "sizing": "stature", "height_over_stature": 0.132, "morph": {"width": -0.04, "jaw": 0.03, "nose": 0.11, "mouth": -0.08, "eyes": 0.08}},
         "body_model": "ellipsoid", "ball": {"enabled": false, "source": "address_geometry"}, "glove": "none", "handedness": "right", "foot": {"model": "procedural"}
       }
+    },
+    "rory_mcilroy": {
+      "display_name": "Rory McIlroy",
+      "stature_m": 1.778,
+      "mass_kg": 72.5747792,
+      "sources": [
+        {
+          "url": "https://www.pgatour.com/player/28237/rory-mcilroy/bio",
+          "values": "PGA TOUR profile, 5 ft 10 in and 160 lb.",
+          "era": "Contemporary profile; measurement date and applicability to any footage frame are unknown."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=JfKSVRV1vTA",
+          "values": "Public golf footage for pose and appearance review.",
+          "era": "Published video; edited presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
+        "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
+        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "rory_mcilroy_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.14, 0.18, 0.23, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.1, 0.12, 0.15, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "side_swept",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.02,
+            "jaw": 0.02,
+            "nose": 0.04,
+            "mouth": -0.02,
+            "eyes": 0.01
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "jon_rahm": {
+      "display_name": "Jon Rahm",
+      "stature_m": 1.8796,
+      "mass_kg": 99.7903214,
+      "sources": [
+        {
+          "url": "https://www.pgatour.com/player/46970/jon-rahm/bio",
+          "values": "PGA TOUR profile, 6 ft 2 in and 220 lb.",
+          "era": "Contemporary profile; measurement date and applicability to any footage frame are unknown."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=xNXF3u7fuVI",
+          "values": "Public golf footage for pose and appearance review.",
+          "era": "Published video; edited presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
+        "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
+        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900.",
+        "His commonly seen short beard is not yet reconstructed; optional facial hair is tracked under #15903."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "jon_rahm_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.2, 0.24, 0.3, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.1, 0.12, 0.15, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": 0.11,
+            "jaw": 0.11,
+            "nose": 0.08,
+            "mouth": 0.02,
+            "eyes": -0.02
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "dustin_johnson": {
+      "display_name": "Dustin Johnson",
+      "stature_m": 1.9304,
+      "mass_kg": 86.1825503,
+      "sources": [
+        {
+          "url": "https://www.pgatour.com/player/30925/dustin-johnson/bio",
+          "values": "PGA TOUR profile, 6 ft 4 in and 190 lb.",
+          "era": "Contemporary profile; measurement date and applicability to any footage frame are unknown."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=G_3NcKrZNdk",
+          "values": "Public golf footage for pose and appearance review.",
+          "era": "Published video; edited presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
+        "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
+        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "dustin_johnson_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.78, 0.78, 0.75, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.1, 0.12, 0.15, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": -0.04,
+            "jaw": 0.08,
+            "nose": 0.08,
+            "mouth": 0.01,
+            "eyes": -0.04
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
+    },
+    "sergio_garcia": {
+      "display_name": "Sergio García",
+      "stature_m": 1.778,
+      "mass_kg": 81.6466266,
+      "sources": [
+        {
+          "url": "https://www.pgatour.com/player/21209/sergio-garcia/bio",
+          "values": "PGA TOUR profile, 5 ft 10 in and 180 lb.",
+          "era": "Contemporary profile; measurement date and applicability to any footage frame are unknown."
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=e2Bojr03bOQ",
+          "values": "Public golf footage for pose and appearance review.",
+          "era": "Published video; edited presentation timing is not a calibrated capture clock."
+        }
+      ],
+      "limitations": [
+        "Published Tour profile dimensions are roster values with unspecified measurement date; they do not establish a particular video capture’s body measurements.",
+        "Face, skin color, grooming and clothing are stylized approximations; reference footage may depict a cap, beard, patterns or attire not reconstructed.",
+        "Current base fit does not derive individual muscular or stocky shape from mass; appearance-only build adjustment is tracked separately under #15900."
+      ],
+      "appearance": {
+        "schema_version": "appearance-v1",
+        "name": "sergio_garcia_stylized",
+        "skin_tone": "skin_2",
+        "clothing": "golf_polo_trousers",
+        "club_finish": "satin_steel",
+        "materials": {
+          "polo_white": {
+            "base_color": [0.44, 0.2, 0.31, 1.0],
+            "roughness": 0.85,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.04
+            }
+          },
+          "trousers_charcoal": {
+            "base_color": [0.1, 0.12, 0.15, 1.0],
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "texture": {
+              "kind": "noise",
+              "noise": 0.05
+            }
+          },
+          "shoe_leather": {
+            "base_color": [0.06, 0.06, 0.07, 1.0],
+            "roughness": 0.35,
+            "metallic": 0.0
+          }
+        },
+        "segments": [],
+        "environment": {
+          "ground_material": "turf",
+          "sky_top": [0.3, 0.5, 0.78],
+          "sky_bottom": [0.88, 0.92, 0.96],
+          "lighting": "studio"
+        },
+        "head": {
+          "enabled": true,
+          "headwear": "hair",
+          "headwear_material": "hair_dark_brown",
+          "model": "cc0_mesh",
+          "hair_style": "short_crop",
+          "hair_part": "none",
+          "eye_color": "brown",
+          "cap_style": "none",
+          "cap_material": "cap_white",
+          "cap_brim": 0.3,
+          "sizing": "stature",
+          "height_over_stature": 0.132,
+          "morph": {
+            "width": 0.02,
+            "jaw": 0.04,
+            "nose": 0.09,
+            "mouth": -0.02,
+            "eyes": 0.02
+          }
+        },
+        "body_model": "ellipsoid",
+        "ball": {
+          "enabled": false,
+          "source": "address_geometry"
+        },
+        "glove": "none",
+        "handedness": "right",
+        "foot": {
+          "model": "procedural"
+        }
+      }
     }
   }
 }
