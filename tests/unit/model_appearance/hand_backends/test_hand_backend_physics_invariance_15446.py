@@ -62,6 +62,7 @@ PHYSICS_ARRAY_FIELDS = (
 
 
 def _spec_with_backend(backend: str | None) -> dict:
+    """The full-body driver spec, optionally pinning ``subject.hand_visual_backend``."""
     spec = json.loads(FULL_BODY.read_text(encoding="utf-8"))
     if backend is not None:
         spec["subject"]["hand_visual_backend"] = backend
@@ -69,11 +70,13 @@ def _spec_with_backend(backend: str | None) -> dict:
 
 
 def _export(mujoco, spec: dict, **kwargs):
+    """Export ``spec`` through the flagship MJCF builder and compile it."""
     xml, _meta = exporter.export_full_body_mjcf(json.dumps(spec).encode(), **kwargs)
     return mujoco.MjModel.from_xml_string(xml), xml
 
 
 def _rollout(mujoco, model, steps: int = 12):
+    """Deterministic stepped trace from a seeded, mildly displaced rest state."""
     data = mujoco.MjData(model)
     rng = np.random.default_rng(7)
     data.qpos[:] = rng.normal(scale=0.02, size=model.nq)
@@ -94,12 +97,14 @@ def _rollout(mujoco, model, steps: int = 12):
 
 
 def _geom_name(model, index: int) -> str:
+    """Name of compiled geom ``index``, or ``''`` when it has none."""
     import mujoco
 
     return mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, index) or ""
 
 
 def _geom_names(model) -> set[str]:
+    """The set of named geoms in a compiled model."""
     return {name for name in (_geom_name(model, i) for i in range(model.ngeom)) if name}
 
 
@@ -123,6 +128,7 @@ def colliding_visual_geoms(model, baseline_names: set[str]) -> list[str]:
 
 
 def _visual_hand_indices(model) -> list[int]:
+    """Indices of geoms whose names mark them as hand visuals."""
     return [i for i in range(model.ngeom) if "hand" in _geom_name(model, i)]
 
 
@@ -130,6 +136,7 @@ def _visual_hand_indices(model) -> list[int]:
 
 
 def test_visual_default_class_declares_the_invariance_policy() -> None:
+    """One ``default class="visual"`` carries contype/conaffinity/group/mass."""
     xml, _ = exporter.export_full_body_mjcf(
         json.dumps(_spec_with_backend(None)).encode(), visual=True
     )
@@ -154,6 +161,7 @@ def test_visual_default_class_declares_the_invariance_policy() -> None:
 
 
 def test_injected_visual_geoms_never_collide() -> None:
+    """Every geom the visual layer adds compiles non-colliding, in any group."""
     mujoco = pytest.importorskip("mujoco")
     spec = _spec_with_backend(None)
     plain, _ = _export(mujoco, spec)
@@ -163,6 +171,7 @@ def test_injected_visual_geoms_never_collide() -> None:
 
 
 def test_hand_mesh_geoms_are_present_and_noncolliding() -> None:
+    """Hand visuals exist in the compiled model and collide with nothing."""
     mujoco = pytest.importorskip("mujoco")
     visual, _ = _export(mujoco, _spec_with_backend(None), visual=True)
     hands = _visual_hand_indices(visual)
@@ -176,6 +185,7 @@ def test_hand_mesh_geoms_are_present_and_noncolliding() -> None:
 
 
 def test_flagship_export_keeps_contacts_disabled() -> None:
+    """The flagship export keeps ``contact="disable"`` and reports zero contacts."""
     mujoco = pytest.importorskip("mujoco")
     model, xml = _export(mujoco, _spec_with_backend(None), visual=True)
     body = xml if isinstance(xml, bytes) else xml.encode()
@@ -192,6 +202,7 @@ def test_flagship_export_keeps_contacts_disabled() -> None:
 
 
 def test_explicit_capsule_backend_compiles_to_the_default_model() -> None:
+    """Asking for ``capsule`` explicitly builds exactly the implicit default."""
     mujoco = pytest.importorskip("mujoco")
     default, _ = _export(mujoco, _spec_with_backend(None), visual=True)
     explicit, _ = _export(mujoco, _spec_with_backend("capsule"), visual=True)
@@ -217,6 +228,8 @@ def backend_pair():
 @pytest.mark.timeout(600)
 @pytest.mark.xdist_group("skinned_hand_backends")
 def test_backend_switch_preserves_compiled_physics(backend_pair) -> None:
+    """capsule -> skinned_human leaves compiled physics bit-identical, qacc and
+    internal wrenches matched within the documented tolerances."""
     mujoco, capsule, skinned = backend_pair
     assert skinned.nbody == capsule.nbody
     assert skinned.nq == capsule.nq and skinned.nv == capsule.nv
