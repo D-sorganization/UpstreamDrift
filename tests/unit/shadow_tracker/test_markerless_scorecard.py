@@ -54,7 +54,7 @@ def _heldout(
         review=ho.AnnotationReview(
             method="independent_human_annotation_on_pinned_decoded_frames",
             second_pass_required=True,
-            reviewer="fixture-annotator",
+            reviewer="fixture-reviewer",
             completed_at="2026-11-28",
         ),
     )
