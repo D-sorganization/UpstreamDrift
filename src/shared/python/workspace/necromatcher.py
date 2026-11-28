@@ -184,7 +184,7 @@ def _build_catalog_bundle_plan(bundle: CatalogModelBundle) -> _CatalogBundlePlan
     xml_hash, visual_hash, source_hash, baseline_hash = _validate_catalog_model_bundle(
         bundle
     )
-    model_metadata = {
+    model_metadata: dict[str, Any] = {
         "schema": "necromatcher/native-model/1",
         "hash": xml_hash,
         "engine": "mujoco",
