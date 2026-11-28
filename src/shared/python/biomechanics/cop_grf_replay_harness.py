@@ -160,6 +160,29 @@ def compute_wrench_cop(
     )
 
 
+def _convex_hull_2d(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Andrew's monotone chain: returns CCW convex hull vertices (no duplicates)."""
+    pts = sorted(set(points))
+    if len(pts) < 3:
+        return list(pts)
+
+    def _cross(o: tuple[float, float], a: tuple[float, float], b: tuple[float, float]) -> float:
+        """Return the 2D cross product of vectors (a - o) and (b - o)."""
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    lower: list[tuple[float, float]] = []
+    for p in pts:
+        while len(lower) >= 2 and _cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    upper: list[tuple[float, float]] = []
+    for p in reversed(pts):
+        while len(upper) >= 2 and _cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
 def detect_chatter(
     transitions: Sequence[tuple[str, float, str]], min_oscillations: int = 2
 ) -> bool:
@@ -179,7 +202,7 @@ class ReplayHarness:
         ground_z: float = 0.0,
         initial_state: str = "stance",
     ) -> None:
-        """Store the hulls, hysteresis thresholds, dwell time and ground height for replay."""
+        """Configure foot hulls, hysteresis thresholds, dwell timing, and ground plane."""
         self.foot_hulls = dict(foot_hulls)
         self.engage_threshold_n = engage_threshold_n
         self.release_threshold_n = release_threshold_n
@@ -189,6 +212,8 @@ class ReplayHarness:
         self._state = initial_state
         self._last_state_change_time = 0.0
         self._transitions: list[tuple[str, float, str]] = []
+        self._pending_state: str | None = None
+        self._pending_since: float = 0.0
 
     def record_frame(
         self,
@@ -197,7 +222,7 @@ class ReplayHarness:
         source_ref: str,
         contacts: Sequence[ContactPointRecord],
     ) -> FrameReplayRecord:
-        """Compute the frame wrench, CoPs, gate alpha and BOS state, then append the record."""
+        """Record one replay frame, advancing state, gate alpha, and BoS excursion flags."""
         net_f, net_m, cop_w = compute_wrench_cop(
             contacts, origin=(0.0, 0.0, self.ground_z), ground_z=self.ground_z, min_fz=self.release_threshold_n
         )
@@ -205,16 +230,26 @@ class ReplayHarness:
 
         raw_fz = net_f[2]
         old_state = self._state
-        new_state = old_state
+        # Determine candidate: None means hysteresis band (no zone change)
         if raw_fz >= self.engage_threshold_n:
-            new_state = "stance"
+            candidate: str | None = "stance"
         elif raw_fz < self.release_threshold_n:
-            new_state = "flight"
+            candidate = "flight"
+        else:
+            candidate = None
 
-        if new_state != old_state:
-            self._transitions.append((frame_id, time_s, f"{old_state}->{new_state}"))
-            self._state = new_state
-            self._last_state_change_time = time_s
+        # Option A dwell: hysteresis band leaves pending untouched; return to current zone clears it
+        if candidate is not None and candidate != old_state:
+            if self._pending_state != candidate:
+                self._pending_state = candidate
+                self._pending_since = time_s
+            elif time_s - self._pending_since >= self.dwell_time_s:
+                self._transitions.append((frame_id, time_s, f"{old_state}->{candidate}"))
+                self._state = candidate
+                self._last_state_change_time = time_s
+                self._pending_state = None
+        elif candidate == old_state:
+            self._pending_state = None
 
         # Gate alpha calculation
         if raw_fz <= self.release_threshold_n:
@@ -224,17 +259,29 @@ class ReplayHarness:
         else:
             alpha = (raw_fz - self.release_threshold_n) / (self.engage_threshold_n - self.release_threshold_n)
 
-        # Base of support check against active foot hulls
+        # Base of support check against combined convex hull of active foot polygons
         bos_valid = True
         bos_margin = 0.0
         is_excursion = False
         if cop_w is not None and self.foot_hulls:
-            # Check combined or individual foot hull
-            all_hulls = list(self.foot_hulls.values())
-            margins = [signed_distance_to_polygon_2d(cop_w[:2], h) for h in all_hulls]
-            best_margin = max(margins)
-            bos_margin = best_margin
-            if best_margin < 0.0:
+            # Gate on aggregated per-foot normal load: a foot whose load is split across
+            # contacts is loaded even when no single contact clears the threshold.
+            fz_by_foot: dict[str, float] = {}
+            for c in contacts:
+                if c.foot in self.foot_hulls:
+                    fz_by_foot[c.foot] = fz_by_foot.get(c.foot, 0.0) + float(c.force_n[2])
+            active_feet = {
+                foot for foot, foot_fz in fz_by_foot.items()
+                if foot_fz >= self.release_threshold_n
+            }
+            if not active_feet:
+                active_feet = set(self.foot_hulls.keys())
+            hull_verts: list[tuple[float, float]] = []
+            for foot in active_feet:
+                hull_verts.extend(self.foot_hulls[foot])
+            combined_hull = _convex_hull_2d(hull_verts)
+            bos_margin = signed_distance_to_polygon_2d(cop_w[:2], combined_hull)
+            if bos_margin < 0.0:
                 bos_valid = False
                 is_excursion = True
 
@@ -256,7 +303,7 @@ class ReplayHarness:
         return rec
 
     def get_first_excursion(self) -> dict[str, Any] | None:
-        """Return the earliest frame whose wrench CoP left every foot hull, with its contacts."""
+        """Return the first recorded CoP excursion outside the base of support, or None."""
         for r in self.records:
             if r.is_excursion:
                 return {
@@ -283,7 +330,7 @@ class ReplayHarness:
         return None
 
     def get_first_chatter_window(self) -> dict[str, Any] | None:
-        """Return the first frame window holding at least two contact-state transitions."""
+        """Return the first chatter window spanning recorded state transitions, or None."""
         if len(self._transitions) >= 2:
             return {
                 "start_frame": self._transitions[0][0],
