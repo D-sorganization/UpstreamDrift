@@ -30,6 +30,7 @@ _CTRL = {
 
 @lru_cache(maxsize=1)
 def _tiger() -> dict[str, Any]:
+    """Return cached canonical Tiger Woods player specification."""
     return build_player_spec("tiger_woods")
 
 
@@ -40,6 +41,7 @@ def _run(
     mid: str = "full_body_mujoco",
     mut: tuple[str, str, Any] | None = None,
 ) -> cv2.CanonicalV2TrialResult:
+    """Execute a canonical-v2 trial against an observation fixture."""
     spec = copy.deepcopy(_tiger())
     if mut is not None:
         spec[mut[0]][mut[1]] = mut[2]
@@ -56,32 +58,30 @@ def _run(
         observation=obs,
         prediction=pred,
         controller=_CTRL,
-        target_model_id=mid,
+        config=cv2.CanonicalV2TrialConfig(target_model_id=mid),
     )
 
 
 def _assert_contract(
     res: cv2.CanonicalV2TrialResult, obs: obs_m.ClubObservation, *, ok: bool, mid: str
 ) -> None:
+    """Assert canonical-v2 result invariants and G1 qualification coupling."""
     assert isinstance(res, cv2.CanonicalV2TrialResult)
-    assert res.schema == cv2.CANONICAL_V2_TRIAL_SCHEMA
-    assert res.trial_id == "TW_ProV1"
-    assert res.target_model_id == mid
-    assert (res.qualified, res.native_g1_pass, res.claims_native_qualification) == (
-        ok,
-    ) * 3
-    assert (len(res.blockers) == 0) is ok
+    assert res.schema == cv2.CANONICAL_V2_TRIAL_SCHEMA and res.trial_id == "TW_ProV1"
+    assert res.target_model_id == mid and (len(res.blockers) == 0) is ok
+    assert (res.qualified, res.native_g1_pass) == (ok, ok)
+    assert res.claims_native_qualification is ok
     g1.validate_native_g1_claim_contract(
         native_g1_pass=res.native_g1_pass,
         claims_native_qualification=res.claims_native_qualification,
         qualification_blockers=res.blockers,
     )
     n = obs.native_time_s.shape[0]
-    assert res.position_error_m.shape == (n,)
-    assert res.orientation_error_rad.shape == (n,)
+    assert res.position_error_m.shape == res.orientation_error_rad.shape == (n,)
 
 
 def test_non_canonical_golfer_spec_raises_before_trial() -> None:
+    """Reject non-canonical golfer visual, revision, or shaft overrides."""
     obs = obs_m.build_calibrated_observation_fixture("TW_ProV1")
     for sec, key, val, part in (
         ("subject", "hand_visual_backend", "capsule", "capsule"),
@@ -97,12 +97,16 @@ def test_non_canonical_golfer_spec_raises_before_trial() -> None:
 def test_threshold_fixture_loads_deterministically_with_sha256_pin(
     tmp_path: Path,
 ) -> None:
+    """Verify threshold fixture SHA-256 pinning and positivity checks."""
     first = cv2.load_canonical_v2_thresholds()
     assert isinstance(first, cv2.CanonicalV2Thresholds)
     assert first == cv2.load_canonical_v2_thresholds()
     assert first.schema_version == cv2.THRESHOLDS_SCHEMA
-    assert first.content_sha256 == cv2.EXPECTED_THRESHOLDS_SHA256
-    assert (first.governing_issue, first.panel_id) == (15787, "th_18425773591c")
+    assert (first.content_sha256, first.governing_issue, first.panel_id) == (
+        cv2.EXPECTED_THRESHOLDS_SHA256,
+        15787,
+        "th_18425773591c",
+    )
     raw = json.loads(cv2.DEFAULT_THRESHOLDS_PATH.read_text(encoding="utf-8"))
     for fname, val, msg, pin in (
         ("mut.json", 0.099, "SHA-256", False),
@@ -118,6 +122,7 @@ def test_threshold_fixture_loads_deterministically_with_sha256_pin(
 
 
 def test_failed_tw_prov1_trial_preserves_full_residuals_and_blockers() -> None:
+    """Preserve per-frame residuals and blocker lists on failed trials."""
     obs = obs_m.build_calibrated_observation_fixture("TW_ProV1")
     res = _run(obs, dx=0.25, mid="full_body_mujoco_tiger_woods")
     _assert_contract(res, obs, ok=False, mid="full_body_mujoco_tiger_woods")
@@ -128,6 +133,7 @@ def test_failed_tw_prov1_trial_preserves_full_residuals_and_blockers() -> None:
 
 
 def test_passing_synthetic_tw_prov1_trial_qualifies_honestly() -> None:
+    """Qualify zero-residual synthetic TW_ProV1 trial with no blockers."""
     obs = obs_m.build_calibrated_observation_fixture("TW_ProV1")
     res = _run(obs)
     _assert_contract(res, obs, ok=True, mid="full_body_mujoco")
@@ -138,6 +144,7 @@ def test_passing_synthetic_tw_prov1_trial_qualifies_honestly() -> None:
 def test_private_workbook_loading_without_capture_data_dir_fails_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Fail closed when loading TW_ProV1 workbook without CAPTURE_DATA_DIR."""
     monkeypatch.delenv("CAPTURE_DATA_DIR", raising=False)
     with pytest.raises(FileNotFoundError, match="CAPTURE_DATA_DIR"):
         cv2.load_tw_prov1_via_capture_dir()

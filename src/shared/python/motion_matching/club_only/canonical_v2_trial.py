@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -18,14 +18,12 @@ from src.shared.python.contracts import precondition
 from src.shared.python.core.vector_math import row_euclidean_norm
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.model_appearance import canonical_golfer_gate as gg
-from src.shared.python.motion_matching.club_only import (
-    acceptance as acc,
-    ambiguity as amb,
-    native_g1_gates as g1,
-    observation as obs_m,
-    profiles,
-    workbook_identity as wi,
-)
+import src.shared.python.motion_matching.club_only.acceptance as acc
+import src.shared.python.motion_matching.club_only.ambiguity as amb
+import src.shared.python.motion_matching.club_only.native_g1_gates as g1
+import src.shared.python.motion_matching.club_only.observation as obs_m
+import src.shared.python.motion_matching.club_only.profiles as profiles
+import src.shared.python.motion_matching.club_only.workbook_identity as wi
 from src.shared.python.motion_matching.club_target import QUAT_NORM_TOL
 
 CANONICAL_V2_TRIAL_SCHEMA = "club-only-canonical-v2-trial/1.0.0"
@@ -62,9 +60,11 @@ _LIMITS = {
     "phase_error_s": "max_phase_error_s",
 }
 _REQ_KEYS = frozenset(_LIMITS.values()) | {"min_native_coverage_fraction"}
+_MODEL_ALIASES = frozenset({"tiger_woods", "full_body_mujoco_tiger_woods"})
 
 
 def _num(name: str, val: object, *, pos: bool) -> float:
+    """Validate and coerce a finite scalar threshold or metric value."""
     if isinstance(val, bool) or not isinstance(val, (int, float)):
         raise ValueError(f"{name} must be finite number, got {val!r}")
     x = float(val)
@@ -85,6 +85,7 @@ class CanonicalV2Thresholds:
     tolerances: Mapping[str, float]
 
     def __post_init__(self) -> None:
+        """Validate schema version, digest, and tolerance ordering invariants."""
         if self.schema_version != THRESHOLDS_SCHEMA or len(self.content_sha256) != 64:
             raise ValueError("invalid threshold schema_version or content_sha256")
         if _REQ_KEYS - set(self.tolerances):
@@ -96,6 +97,16 @@ class CanonicalV2Thresholds:
             if clean[f"{p}_rmse_{u}"] > clean[f"{p}_max_{u}"]:
                 raise ValueError(f"{p}_rmse_{u} must be <= {p}_max_{u}")
         object.__setattr__(self, "tolerances", MappingProxyType(clean))
+
+
+@dataclass(frozen=True)
+class CanonicalV2TrialConfig:
+    """Optional configuration parameters for canonical-v2 trial execution."""
+
+    trial_id: str = DEFAULT_TRIAL_ID
+    target_model_id: str = DEFAULT_TARGET_MODEL_ID
+    thresholds: CanonicalV2Thresholds | None = None
+    extra_blockers: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -117,6 +128,7 @@ class CanonicalV2TrialResult:
     acceptance_verdict: acc.ClubOnlyAcceptanceVerdict
 
     def __post_init__(self) -> None:
+        """Enforce schema, G1 claim contract, and immutable blockers tuple."""
         if (
             self.schema != CANONICAL_V2_TRIAL_SCHEMA
             or self.qualified != self.native_g1_pass
@@ -157,12 +169,48 @@ def load_canonical_v2_thresholds(
 def _arr(
     val: ArrayLike, shape: tuple[int, ...], *, unit_quat: bool = False
 ) -> NDArray[np.float64]:
+    """Validate finite float64 array shape and optional unit-quaternion norm."""
     a = np.asarray(val, dtype=np.float64)
     if a.shape != shape or not np.all(np.isfinite(a)):
         raise ValueError(f"array must be finite with shape {shape}, got {a.shape}")
     if unit_quat and np.any(np.abs(row_euclidean_norm(a) - 1.0) > QUAT_NORM_TOL):
         raise ValueError("quaternion array must be unit norm")
     return a
+
+
+def _compute_trial_residuals(
+    obs: obs_m.ClubObservation, pred: Mapping[str, ArrayLike], dyn: Mapping[str, Any]
+) -> tuple[NDArray[np.float64], NDArray[np.float64], dict[str, float]]:
+    """Compute per-frame position/orientation residuals and summary statistics."""
+    n, ori = int(obs.native_time_s.shape[0]), obs_m.orientation_residual_so3
+    gp = row_euclidean_norm(_arr(pred["grip_xyz_m"], (n, 3)) - obs.mid_hands_xyz)
+    cp = row_euclidean_norm(_arr(pred["clubhead_xyz_m"], (n, 3)) - obs.face_xyz)
+    gr = ori(_arr(pred["grip_quat_wxyz"], (n, 4), unit_quat=True), obs.mid_hands_quat)
+    cr = ori(_arr(pred["clubhead_quat_wxyz"], (n, 4), unit_quat=True), obs.face_quat)
+    rc = pred.get("grip_closure_residual_m")
+    clos = np.zeros(n, dtype=np.float64) if rc is None else _arr(rc, (n,))
+    if np.any(clos < 0.0):
+        raise ValueError("grip_closure_residual_m must be >= 0")
+    pe, re = np.maximum(gp, cp), np.maximum(gr, cr)
+    cov = _num("coverage", dyn.get("native_coverage_fraction", 1.0), pos=False)
+    s: dict[str, float] = {"native_coverage_fraction": cov}
+    s.update({k: _num(k, dyn.get(k, 0.0), pos=False) for k in _DYN})
+    for opt in ("speed_error_m_s", "phase_error_s"):
+        if opt in dyn:
+            s[opt] = _num(opt, dyn[opt], pos=False)
+    for k, a in (
+        ("grip_position_m", gp),
+        ("grip_orientation_rad", gr),
+        ("clubhead_position_m", cp),
+        ("clubhead_orientation_rad", cr),
+        ("grip_closure_m", clos),
+        ("position_error_m", pe),
+        ("orientation_error_rad", re),
+    ):
+        stem, unit = k.rsplit("_", 1)
+        s[f"{stem}_rmse_{unit}"] = float(np.sqrt(np.mean(np.square(a))))
+        s[f"{stem}_max_{unit}"] = float(np.max(a))
+    return pe, re, s
 
 
 @precondition(lambda spec, **_: isinstance(spec, Mapping), "spec must be a mapping")
@@ -172,122 +220,65 @@ def run_canonical_v2_trial(
     observation: obs_m.ClubObservation,
     prediction: Mapping[str, ArrayLike],
     controller: Mapping[str, Any],
-    trial_id: str = DEFAULT_TRIAL_ID,
-    target_model_id: str = DEFAULT_TARGET_MODEL_ID,
-    thresholds: CanonicalV2Thresholds | None = None,
     dynamic_metrics: Mapping[str, Any] | None = None,
-    extra_blockers: Sequence[str] = (),
+    config: CanonicalV2TrialConfig | None = None,
 ) -> CanonicalV2TrialResult:
     """Evaluate a canonical-v2 trial while enforcing #15659 and preserving residuals."""
+    cfg, c = config or CanonicalV2TrialConfig(), controller
+    tid, mid = cfg.trial_id, cfg.target_model_id
     gg.require_canonical_golfer(spec)
-    ch = gg.controller_hash(
-        controller["kp"], controller["kd"], controller["knots"], controller["control"]
-    )
-    lock = gg.lock_for_spec(
-        spec, controller=ch, solver=gg.solver_hash(controller["integrator"])
-    )
-    if not trial_id or observation.trial_id != trial_id or not target_model_id.strip():
+    ch = gg.controller_hash(c["kp"], c["kd"], c["knots"], c["control"])
+    lock = gg.lock_for_spec(spec, controller=ch, solver=gg.solver_hash(c["integrator"]))
+    if not tid or observation.trial_id != tid or not mid.strip():
         raise ValueError("invalid trial_id or target_model_id")
-    aliases = {"tiger_woods", "full_body_mujoco_tiger_woods"}
-    prof = profiles.get_club_only_profile(
-        DEFAULT_TARGET_MODEL_ID if target_model_id in aliases else target_model_id
-    )
+    p_id = DEFAULT_TARGET_MODEL_ID if mid in _MODEL_ALIASES else mid
+    prof = profiles.get_club_only_profile(p_id)
     if not prof.preserves_full_body_g3:
-        raise ValueError(f"full-body model required, got {target_model_id!r}")
-    d, o, p = dynamic_metrics or {}, observation, prediction
-    cov = _num("coverage", d.get("native_coverage_fraction", 1.0), pos=False)
-    th = thresholds or load_canonical_v2_thresholds()
-    n = int(o.native_time_s.shape[0])
-    gp = row_euclidean_norm(_arr(p["grip_xyz_m"], (n, 3)) - o.mid_hands_xyz)
-    cp = row_euclidean_norm(_arr(p["clubhead_xyz_m"], (n, 3)) - o.face_xyz)
-    gr = obs_m.orientation_residual_so3(
-        _arr(p["grip_quat_wxyz"], (n, 4), unit_quat=True), o.mid_hands_quat
-    )
-    cr = obs_m.orientation_residual_so3(
-        _arr(p["clubhead_quat_wxyz"], (n, 4), unit_quat=True), o.face_quat
-    )
-    rc = p.get("grip_closure_residual_m")
-    clos = np.zeros(n, dtype=np.float64) if rc is None else _arr(rc, (n,))
-    if np.any(clos < 0.0):
-        raise ValueError("grip_closure_residual_m must be >= 0")
-    pe, re = np.maximum(gp, cp), np.maximum(gr, cr)
-
-    s: dict[str, float] = {
-        "native_coverage_fraction": cov,
-        **{k: _num(k, d.get(k, 0.0), pos=False) for k in _DYN},
-    }
-    for opt in ("speed_error_m_s", "phase_error_s"):
-        if opt in d:
-            s[opt] = _num(opt, d[opt], pos=False)
-    for k, a in {
-        "grip_position_m": gp,
-        "grip_orientation_rad": gr,
-        "clubhead_position_m": cp,
-        "clubhead_orientation_rad": cr,
-        "grip_closure_m": clos,
-        "position_error_m": pe,
-        "orientation_error_rad": re,
-    }.items():
-        stem, unit = k.rsplit("_", 1)
-        s[f"{stem}_rmse_{unit}"] = float(np.sqrt(np.mean(np.square(a))))
-        s[f"{stem}_max_{unit}"] = float(np.max(a))
-
+        raise ValueError(f"full-body model required, got {mid!r}")
+    dyn = dynamic_metrics or {}
+    th = cfg.thresholds or load_canonical_v2_thresholds()
+    pe, re, s = _compute_trial_residuals(observation, prediction, dyn)
     g_r, c_r = s["grip_position_rmse_m"], s["clubhead_position_rmse_m"]
+    g_o, c_o = s["grip_orientation_rmse_rad"], s["clubhead_orientation_rmse_rad"]
+    cov, clos = s["native_coverage_fraction"], s["grip_closure_max_m"]
+    spd, phs = s.get("speed_error_m_s"), s.get("phase_error_s")
     rep = acc.ClubOnlyResidualReport(
-        g_r,
-        c_r,
-        s["grip_orientation_rmse_rad"],
-        s["clubhead_orientation_rmse_rad"],
-        cov,
-        s.get("speed_error_m_s"),
-        s.get("phase_error_s"),
-        {"closure_residual_m": s["grip_closure_max_m"]},
+        g_r, c_r, g_o, c_o, cov, spd, phs, {"closure_residual_m": clos}
     )
+    cf = bool(dyn.get("contact_feasible", True))
     cand = amb.CandidateScore(
-        f"{target_model_id}:{trial_id}",
-        max(g_r, c_r),
-        1.0,
-        lock.plant_hash,
-        s["grip_closure_max_m"],
-        bool(d.get("contact_feasible", True)),
-        False,
+        f"{mid}:{tid}", max(g_r, c_r), 1.0, lock.plant_hash, clos, cf, False
     )
     verd = acc.evaluate_club_only_acceptance(
         rep,
         (cand,),
         prof,
-        body_markers_present=bool(d.get("body_markers_present", True)),
+        body_markers_present=bool(dyn.get("body_markers_present", True)),
         force_labels_synthetic=True,
-        torque_replay_validated=bool(d.get("torque_replay_validated", True)),
-        kinematic_preview_ok=bool(d.get("kinematic_preview_ok", True)),
+        torque_replay_validated=bool(dyn.get("torque_replay_validated", True)),
+        kinematic_preview_ok=bool(dyn.get("kinematic_preview_ok", True)),
     )
-
     tols = th.tolerances
     blockers = [f"acceptance_gate_failed:{g.name}" for g in verd.gates if not g.passed]
     blockers.extend(
         f"threshold_exceeded:{m}" for m, t in _LIMITS.items() if s.get(m, 0.0) > tols[t]
     )
-    if cov < tols["min_native_coverage_fraction"]:
+    if s["native_coverage_fraction"] < tols["min_native_coverage_fraction"]:
         blockers.append("threshold_below:native_coverage_fraction")
     if verd.statuses.scientific != "qualified":
         blockers.append(f"scientific_status:{verd.statuses.scientific}")
-    blockers = list(dict.fromkeys(blockers + [b for b in extra_blockers if b]))
-    ok = not blockers
-    g1.validate_native_g1_claim_contract(
-        native_g1_pass=ok,
-        claims_native_qualification=ok,
-        qualification_blockers=blockers,
-    )
+    b_tup = tuple(dict.fromkeys(blockers + [b for b in cfg.extra_blockers if b]))
+    ok = not b_tup
     return CanonicalV2TrialResult(
         CANONICAL_V2_TRIAL_SCHEMA,
-        trial_id,
-        target_model_id,
+        tid,
+        mid,
         lock,
         th,
         ok,
         ok,
         ok,
-        tuple(blockers),
+        b_tup,
         pe,
         re,
         s,
