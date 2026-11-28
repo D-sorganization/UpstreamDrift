@@ -7,13 +7,14 @@ detail of a finished slice to the archive instead of growing this file.
 
 ## Must-Read Pointers
 
-- #15848/#15853/#15854: Period hair, straw/snap-brim hats and cap export options; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
+- #15848/#15853/#15854/#15909: Period hair, hats, cap export and sized-frame inertia; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
 
 - `AGENTS.md`, `CLAUDE.md`: binding policy, discovery workflow and the shared-infrastructure directory.
 - `docs/development/DEVELOPMENT_LOG.md`: one `DL-#<issue>` state row per feature. `docs/development/HANDOFF.md`: canonical fleet handoff.
 - `SPEC.md`: architecture contract; the change log is written by the fragment collate step, one row per PR.
 - `scripts/config/design_manual_governance.json` and `manuals/upstreamdrift/calculation-registry.json`: design-manual authority.
 - `docs/development/AGENT_HANDOFF_ARCHIVE.md`: full detail, branches and verification commands for every slice listed below.
+- #15900: Visual-only golfer body build; see the [player model reference](docs/development/player-models.tex) and linked issue receipts.
 
 ## Gate Commands
 
@@ -52,7 +53,6 @@ detail of a finished slice to the archive instead of growing this file.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
 
 ## Active Epics and Slices (One Line Each; Detail in the Archive)
-
 
 - Simulation Backends GUI E2E #15703: `codex-ct-1/15703-gui-e2e` uses MuJoCo CPU-only mode on Windows and handles optional backend import runtime failures; the focused four-worker suite passes.
 - Output I/O #15189: `fix/async-save-io-errors` reports filesystem failures through async/background save callbacks and default logging; regression tests preserve the original future exception. Review through Barb's pipeline.
@@ -110,7 +110,7 @@ Golf Chain Visualisation, Epic #11706 (GCV):
 - Native export backends, quarter-speed variants, impact time, high-FPS schedule GCV-14: #11720; MyoSuite v3 export worker #11997.
 - ClubheadSeries adapters GCV-16 #11722; impact parameters panel GCV-17 #11723; ground reaction manual slice GCV-18 #11724.
 - Clubhead speed timing GCV-20: #11767; MyoSuite hip retarget #12052; right knee flexes negative like the left #12057.
-- Visual flat-cap appearance #15822 adds a low-profile CC0 headwear style; the crown geometry stays in the appearance layer.
+- Visual flat-cap #15822 and short beard #15903 are appearance-only; see [short beard geometry](docs/development/full_body_models/appearance_reference/short_beard.tex).
 
 Open Swing Visualisation grip and gaze (OSV, Epic #11726):
 
@@ -146,4 +146,4 @@ Motion matching and tour baselines:
 - Hip-calibrated receipt provenance #10271; GolfSwingVisualizer MATLAB consolidation #9225; docs-consistency cross-repo paths #10743.
 - Tiger 2000 and Ben Hogan baselines: see the archive section of that name.
 
-- #15821: Neutral shoe-to-head stature calibration uses bounded trunk scaling; see `docs/development/player-stature.tex`. New anatomy requires motion refitting.
+- #15821/#15919: Stature and limb-inertia calibration are sized-candidate estimates; see [limb inertia](docs/development/player-limb-inertia.tex). New anatomy requires refitting.

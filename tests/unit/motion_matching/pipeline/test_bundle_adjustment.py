@@ -42,6 +42,7 @@ def chain(pose: np.ndarray) -> np.ndarray:
 
 
 def observe(poses: np.ndarray, offsets: np.ndarray, bodies: np.ndarray) -> np.ndarray:
+    """Predicted marker positions of ``bodies`` for the given poses and offsets."""
     frames = np.array([chain(pose)[bodies] for pose in poses])
     return np.einsum("kmij,mj->kmi", frames[..., :3, :3], offsets) + frames[..., :3, 3]
 
@@ -101,6 +102,7 @@ def test_recovers_known_offsets_and_poses_from_noisy_frames() -> None:
 
 
 def test_one_frame_is_refused() -> None:
+    """A single frame cannot separate offset from pose and is refused."""
     prob, _, _ = problem(n_frames=1)
     with pytest.raises(ValueError, match="at least 2 frames"):
         solve_bundle(prob, BundleSettings())
@@ -111,6 +113,7 @@ def test_one_frame_is_refused() -> None:
 
 
 def test_prior_holds_an_unobserved_marker_and_reports_it() -> None:
+    """A zero-sigma prior holds an unobserved marker at its seed."""
     prob, _, _ = problem()
     valid = prob.valid.copy()
     valid[:, 1] = False
@@ -127,6 +130,7 @@ def test_prior_holds_an_unobserved_marker_and_reports_it() -> None:
 
 
 def test_offset_pinned_at_a_bound_is_reported() -> None:
+    """Offsets parked on a bound are reported in on_bound."""
     shift = np.zeros((6, 3))
     shift[1, 0] = 5.0 * PRIOR_SIGMA_M  # truth lies beyond the 3-sigma bound
     prob, _, _ = problem(shift=shift)
@@ -169,12 +173,14 @@ def test_gauge_direction_is_reported_weak_and_left_at_the_prior() -> None:
     ],
 )
 def test_contract_violations_raise(changes, error, message) -> None:
+    """Ill-formed problems and settings fail closed at check."""
     prob, _, _ = problem(**changes)
     with pytest.raises(error, match=message):
         solve_bundle(prob, BundleSettings())
 
 
 def test_caller_pose_jacobian_gives_the_same_fit() -> None:
+    """A supplied body_jacobian matches differenced-pose results."""
     prob, _, _ = problem()
     settings = BundleSettings(marker_sigma_m=NOISE_M)
     exact = solve_bundle(
@@ -202,6 +208,7 @@ def test_constraint_keeps_the_loop_closed_and_fixes_the_gauge() -> None:
 
 
 def test_zero_sigma_holds_a_marker_and_equal_bounds_hold_a_coordinate() -> None:
+    """Zero sigma pins a marker; equal pose bounds pin a coordinate."""
     prob, _, _ = problem()
     sigmas = prob.offset_sigmas.copy()
     sigmas[4] = 0.0
@@ -221,11 +228,13 @@ def test_zero_sigma_holds_a_marker_and_equal_bounds_hold_a_coordinate() -> None:
 
 @pytest.mark.slow
 def test_converges_at_the_size_of_the_driver_fit_within_budget() -> None:
+    """The driver-fit-sized probe converges inside the time budget."""
     hinges, n_frames, markers = PROBE
     rng = np.random.default_rng(0)
     axes = rng.integers(0, 3, hinges)
 
     def serial(pose: np.ndarray) -> np.ndarray:
+        """Serial hinge-chain fk for the probe's joints."""
         frames, world = np.empty((hinges, 4, 4)), np.eye(4)
         for i, (axis, angle) in enumerate(zip(axes, pose, strict=True)):
             a, b = (axis + 1) % 3, (axis + 2) % 3
@@ -263,6 +272,7 @@ def test_converges_at_the_size_of_the_driver_fit_within_budget() -> None:
 
 
 def test_offset_reach_caps_the_bound_and_progress_is_logged(caplog) -> None:
+    """offset_reach caps the bound and progress reaches the log."""
     shift = np.zeros_like(SEEDS)
     shift[0, 0] = 0.030
     prob, _, _ = problem(shift=shift, offset_reach=np.full(SEEDS.shape, 0.004))
@@ -276,6 +286,7 @@ def test_offset_reach_caps_the_bound_and_progress_is_logged(caplog) -> None:
 
 
 def test_a_marker_weight_scales_its_residual_and_shields_the_fit() -> None:
+    """Marker weights scale residuals and shield the fit."""
     prob, truth, poses = problem()
     wild = np.array(prob.observations)
     wild[:, 0] += np.random.default_rng(1).normal(0.0, 0.02, wild[:, 0].shape)
@@ -296,6 +307,7 @@ class TestFc011BundleGuards15345:
     """FC-011 edge cases for bundle_adjustment (#15345)."""
 
     def test_no_weak_directions_returns_empty_without_error(self) -> None:
+        """No weak direction means empty output, not an error."""
         info = np.diag([2.0, 3.0, 4.0])
         owners = np.array([0, 0, 0])
         settings = BundleSettings(weak_information_ratio=1.0)
@@ -303,6 +315,7 @@ class TestFc011BundleGuards15345:
         assert weak == () and ratios == ()
 
     def test_check_requires_at_least_one_valid_observation(self) -> None:
+        """check rejects a problem with no valid observations."""
         prob, _, _ = problem()
         invalid = dataclasses.replace(
             prob, valid=np.zeros(prob.valid.shape, dtype=bool)
@@ -311,6 +324,7 @@ class TestFc011BundleGuards15345:
             invalid.check(BundleSettings())
 
     def test_check_requires_a_free_offset_component(self) -> None:
+        """check rejects a problem with no free offset component."""
         prob, _, _ = problem()
         held = dataclasses.replace(
             prob, offset_sigmas=np.zeros_like(prob.offset_sigmas)
@@ -319,6 +333,7 @@ class TestFc011BundleGuards15345:
             held.check(BundleSettings())
 
     def test_check_requires_active_pose_prior_when_provided(self) -> None:
+        """An active pose prior needs a finite positive sigma somewhere."""
         prob, _, poses = problem()
         inactive = dataclasses.replace(
             prob,
@@ -328,6 +343,7 @@ class TestFc011BundleGuards15345:
             inactive.check(BundleSettings())
 
     def test_solve_refuses_problem_with_no_valid_observations(self) -> None:
+        """solve_bundle refuses an all-invalid problem."""
         prob, _, _ = problem()
         invalid = dataclasses.replace(
             prob, valid=np.zeros(prob.valid.shape, dtype=bool)
@@ -336,11 +352,13 @@ class TestFc011BundleGuards15345:
             solve_bundle(invalid, BundleSettings())
 
     def test_inward_fd_steps_toward_the_box_interior(self) -> None:
+        """Differencing steps inward at the box edge."""
         lower, upper = np.array([0.0, -1.0]), np.array([1.0, 0.0])
         pose = upper.copy()
         touched: list[np.ndarray] = []
 
         def sampler(q: np.ndarray) -> float:
+            """Pose-sum probe that records every point sampled."""
             touched.append(q.copy())
             return float(q.sum())
 
@@ -351,6 +369,7 @@ class TestFc011BundleGuards15345:
         assert touched[2][1] == pytest.approx(upper[1] - step)
 
     def test_result_is_never_converged_with_non_finite_rms(self) -> None:
+        """A non-finite rms never counts as converged."""
         prob, _, _ = problem()
         prob.check(BundleSettings())
         result = solve_bundle(prob, BundleSettings(marker_sigma_m=NOISE_M))
@@ -363,6 +382,7 @@ def translating_problem(n_q: int = 1) -> BundleProblem:
     """Two frames with one translating body and otherwise inert coordinates."""
 
     def fk(pose: np.ndarray) -> np.ndarray:
+        """Body frame of the single translating body at this pose."""
         frames = np.eye(4)[None].copy()
         frames[0, 0, 3] = pose[0]
         return frames
@@ -381,6 +401,7 @@ def translating_problem(n_q: int = 1) -> BundleProblem:
 
 @pytest.mark.parametrize("fixed", [False, True])
 def test_all_bound_poses_solve_and_report_offset_information(fixed: bool) -> None:
+    """Fully bound poses solve; offset information reflects the pinning."""
     prob = translating_problem()
     if fixed:
         prob = dataclasses.replace(prob, pose_bounds=(np.zeros(1), np.zeros(1)))
@@ -396,6 +417,7 @@ def test_all_bound_poses_solve_and_report_offset_information(fixed: bool) -> Non
 
 @pytest.mark.parametrize("position", [0.0, 1e-5, 1.0])
 def test_inward_pose_tangent_removes_translation_information(position: float) -> None:
+    """An inward pose tangent drops translation information."""
     prob = translating_problem(n_q=2)
     poses = np.tile([position, 0.5], (2, 1))
     information = ba._offset_information(
@@ -406,6 +428,7 @@ def test_inward_pose_tangent_removes_translation_information(position: float) ->
 
 @pytest.mark.parametrize("fraction", [0.0, 0.5, 1.0])
 def test_fd_probes_respect_fixed_and_narrow_boxes(fraction: float) -> None:
+    """Forward-difference probes stay inside the pose box."""
     lower = np.zeros(2)
     upper = np.array([0.0, 1e-8])
     pose = upper * fraction
@@ -413,6 +436,7 @@ def test_fd_probes_respect_fixed_and_narrow_boxes(fraction: float) -> None:
     calls = {"fk": 0, "constraint": 0}
 
     def checked_fk(q: np.ndarray) -> np.ndarray:
+        """fk asserting the probed pose lies within the box."""
         assert np.all((lower <= q) & (q <= upper))
         calls["fk"] += 1
         frames = np.eye(4)[None].copy()
@@ -420,6 +444,7 @@ def test_fd_probes_respect_fixed_and_narrow_boxes(fraction: float) -> None:
         return frames
 
     def checked_constraint(k: int, q: np.ndarray) -> np.ndarray:
+        """Constraint asserting the probed pose lies within the box."""
         assert np.all((lower <= q) & (q <= upper))
         calls["constraint"] += 1
         return np.array([q.sum()])
@@ -433,6 +458,7 @@ def test_fd_probes_respect_fixed_and_narrow_boxes(fraction: float) -> None:
 
 @pytest.mark.parametrize("sigma", [-np.inf, np.inf])
 def test_mixed_pose_prior_requires_positive_sigmas(sigma: float) -> None:
+    """Mixed pose-prior sigmas must stay positive, inf allowed."""
     prob = translating_problem(n_q=2)
     sigmas = np.tile([1.0, sigma], (2, 1))
     prob = dataclasses.replace(prob, pose_prior=(prob.pose_start, sigmas))
@@ -441,3 +467,49 @@ def test_mixed_pose_prior_requires_positive_sigmas(sigma: float) -> None:
             prob.check(BundleSettings())
     else:
         prob.check(BundleSettings())
+
+
+@pytest.mark.unit
+class TestInputGuards15862:
+    """FC-011 follow-up (#15862): fail closed on NaN prior means and bad body indices."""
+
+    def test_nan_pose_prior_mean_is_refused(self) -> None:
+        """A NaN prior mean must raise, not return the seeds as converged."""
+        prob = translating_problem(n_q=2)
+        mean = prob.pose_start.copy()
+        mean[1, 0] = np.nan
+        prob = dataclasses.replace(prob, pose_prior=(mean, np.full(mean.shape, 1.0)))
+        with pytest.raises(ValueError, match="pose_prior mean"):
+            solve_bundle(prob, BundleSettings())
+
+    @pytest.mark.parametrize(
+        "bodies",
+        [
+            pytest.param(np.array([0, -1]), id="negative-wraps"),
+            pytest.param(np.array([0, 1]), id="beyond-body-count"),
+            pytest.param(np.array([0.0, 0.5]), id="non-integer"),
+        ],
+    )
+    def test_invalid_marker_bodies_are_refused(self, bodies: np.ndarray) -> None:
+        """Indices must be integers naming real bodies; ``-1`` silently wrapped."""
+        observations = np.zeros((2, len(bodies), 3))
+        prob = dataclasses.replace(
+            translating_problem(n_q=1),
+            marker_bodies=bodies,
+            observations=observations,
+            valid=np.ones((2, len(bodies)), bool),
+            offset_seeds=np.zeros((len(bodies), 3)),
+            offset_sigmas=np.full((len(bodies), 3), 0.01),
+        )
+        match = (
+            "marker_bodies must be an integer"
+            if bodies.dtype.kind == "f"
+            else "marker_bodies must index"
+        )
+        with pytest.raises(ValueError, match=match):
+            solve_bundle(prob, BundleSettings())
+
+    def test_converged_result_has_finite_pose_prior_chi2(self) -> None:
+        """The postcondition the guards exist to protect: no NaN chi2 on convergence."""
+        result = solve_bundle(translating_problem(), BundleSettings())
+        assert not result.converged or np.isfinite(result.pose_prior_chi2)

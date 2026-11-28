@@ -32,35 +32,56 @@ def _hysteresis_loop_area(angles: np.ndarray, torques: np.ndarray) -> float:
     return float(0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))))
 
 
-def _power_active_duration(times: np.ndarray, active: np.ndarray) -> float:
-    """Time span where ``active`` is true on the piecewise-linear time grid."""
-    if len(times) < 2 or not np.any(active):
-        return 0.0
-    step_dt = np.diff(times)
-    if len(active) != len(times):
-        raise ValueError("active mask must match times length")
-    segment_active = active[:-1] | active[1:]
-    return float(step_dt[segment_active].sum())
+def _power_sign_durations(times: np.ndarray, power: np.ndarray) -> tuple[float, float]:
+    """Seconds of positive and negative power on the piecewise-linear trace.
+
+    FC-012a-1 (#15863): a segment whose endpoints straddle zero is split at the
+    interpolated crossing instead of counting the whole segment for both signs;
+    zero-power spans are idle for both. The durations therefore sum to at most
+    the trace length without any post-hoc overlap scaling.
+    """
+    t = np.asarray(times, dtype=float)
+    p = np.asarray(power, dtype=float)
+    n = min(len(t), len(p))
+    if n < 2:
+        return 0.0, 0.0
+    t, p = t[:n], p[:n]
+    dt = np.diff(t)
+    p0, p1 = p[:-1], p[1:]
+    gen = np.zeros(len(dt))
+    absorb = np.zeros(len(dt))
+
+    both_pos = (p0 > 0) & (p1 > 0)
+    both_neg = (p0 < 0) & (p1 < 0)
+    zero_to_pos = ((p0 == 0) & (p1 > 0)) | ((p0 > 0) & (p1 == 0))
+    zero_to_neg = ((p0 == 0) & (p1 < 0)) | ((p0 < 0) & (p1 == 0))
+    gen[both_pos | zero_to_pos] += dt[both_pos | zero_to_pos]
+    absorb[both_neg | zero_to_neg] += dt[both_neg | zero_to_neg]
+
+    down = (p0 > 0) & (p1 < 0)
+    if np.any(down):
+        w = p0[down] / (p0[down] - p1[down])
+        gen[down] += w * dt[down]
+        absorb[down] += (1.0 - w) * dt[down]
+    up = (p0 < 0) & (p1 > 0)
+    if np.any(up):
+        w = -p0[up] / (p1[up] - p0[up])
+        gen[up] += w * dt[up]
+        absorb[up] += (1.0 - w) * dt[up]
+
+    return float(gen.sum()), float(absorb.sum())
 
 
-def _bound_overlapping_durations(
-    gen_dur: float, abs_dur: float, t_total: float
-) -> tuple[float, float]:
-    """Scale gen/abs durations when OR-segment overlap exceeds ``t_total``."""
-    if t_total > 0.0 and gen_dur + abs_dur > t_total:
-        scale = t_total / (gen_dur + abs_dur)
-        return gen_dur * scale, abs_dur * scale
-    return gen_dur, abs_dur
-
-
-def _integrate_power_net(power: np.ndarray, dt: float) -> float:
+def _integrate_power_net(power: np.ndarray, times: np.ndarray) -> float:
+    """Net work: trapezoid over the sample times, not a scalar dt (#15863)."""
     if hasattr(np, "trapezoid"):
-        return float(np.trapezoid(power, dx=dt))
+        return float(np.trapezoid(power, x=times))
     trapz_func = getattr(np, "trapz")  # noqa: B009
-    return float(trapz_func(power, dx=dt))
+    return float(trapz_func(power, x=times))
 
 
 def _ensure_joint_power_metrics(result: JointPowerMetrics, t_total: float) -> None:
+    """Fail fast when a JointPowerMetrics result breaks its physical invariants."""
     ensure(
         result.peak_generation >= 0,
         "peak generation must be non-negative",
@@ -267,7 +288,6 @@ class PowerWorkMetricsMixin:
         torque = torque[:n_samples]
         velocity = velocity[:n_samples]
         times = self.times[:n_samples]
-        dt = self.dt
 
         power = torque * velocity
         t_total = float(times[-1] - times[0]) if len(times) >= 2 else 0.0
@@ -275,20 +295,18 @@ class PowerWorkMetricsMixin:
         gen_indices = power > 0
         peak_gen = float(np.max(power)) if np.any(gen_indices) else 0.0
         avg_gen = float(np.mean(power[gen_indices])) if np.any(gen_indices) else 0.0
-        gen_dur = _power_active_duration(times, gen_indices)
 
         abs_indices = power < 0
         peak_abs = float(np.min(power)) if np.any(abs_indices) else 0.0
         avg_abs = float(np.mean(power[abs_indices])) if np.any(abs_indices) else 0.0
-        abs_dur = _power_active_duration(times, abs_indices)
-        gen_dur, abs_dur = _bound_overlapping_durations(gen_dur, abs_dur, t_total)
+        gen_dur, abs_dur = _power_sign_durations(times, power)
 
         result = JointPowerMetrics(
             peak_generation=peak_gen,
             peak_absorption=peak_abs,
             avg_generation=avg_gen,
             avg_absorption=avg_abs,
-            net_work=_integrate_power_net(power, dt),
+            net_work=_integrate_power_net(power, times),
             generation_duration=gen_dur,
             absorption_duration=abs_dur,
         )

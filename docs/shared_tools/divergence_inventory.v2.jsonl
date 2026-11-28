@@ -306,6 +306,7 @@
 {"path": "biomechanics/swing_comparison.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_analysis.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_plane_visualization.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
+{"path": "biomechanics/swing_planes_quiver.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/swing_posture_metrics.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/transactional_muscle_replay.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
 {"path": "biomechanics/x_factor_literature.py", "classification": "ud-only", "package": "biomechanics", "spelling_only": false}
@@ -1492,6 +1493,7 @@
 {"path": "model_appearance/mesh_io.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/neck.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/pelvis_width.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
+{"path": "model_appearance/player_frame_inertia.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/player_models.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/player_stature.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
 {"path": "model_appearance/schema.py", "classification": "ud-only", "package": "model_appearance", "spelling_only": false}
@@ -1638,6 +1640,8 @@
 {"path": "motion_matching/club_only/adapters.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/ambiguity.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/body_candidates.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_only/calibration_and_phase.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/club_only/canonical_v2_matrix.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/canonical_v2_trial.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/constrained_ik.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/club_only/control_replay.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -1791,6 +1795,7 @@
 {"path": "motion_matching/inverse_timestep/model.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse_timestep/predict.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/inverse_timestep/training.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
+{"path": "motion_matching/isolated_joint_kinematics.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/jax_contact.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/jobs/__init__.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
 {"path": "motion_matching/jobs/benchmarks.py", "classification": "ud-only", "package": "motion_matching", "spelling_only": false}
@@ -2371,6 +2376,7 @@
 {"path": "playback/bidirectional_overlay.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "playback/camera_perspective.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "playback/overlay_geometry_schema.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
+{"path": "playback/quiver_profiling_fixture.py", "classification": "ud-only", "package": "playback", "spelling_only": false}
 {"path": "plot_engine/__init__.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
 {"path": "plot_engine/contour.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}
 {"path": "plot_engine/matplotlib_renderer.py", "classification": "tools-only", "package": "plot_engine", "spelling_only": false}

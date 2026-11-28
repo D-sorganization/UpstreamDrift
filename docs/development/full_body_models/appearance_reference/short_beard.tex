@@ -1,0 +1,30 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section*{Short Beard Visual Geometry}
+The optional \texttt{short\_beard} style draws on the actual CC0 head skin,
+not on the mass or collision model. An official LIV Golf team portrait of Jon
+Rahm (\texttt{https://www.livgolf.com/legion-xiii}, accessed 2026-11-27)
+shows a close-cropped beard and moustache; the procedural result is a stylized
+interpretation, not a measured face or exact texture.
+
+The head mesh uses dimensionless head-length coordinates, $x$ forward, $y$
+lateral, $z$ upward. With $a=|y|$ and $t=\operatorname{clip}((a-0.09)/0.14,0,1)$,
+the cheek boundary is $z<0.295+0.085t^2(3-2t)$. The skin is locally subdivided and clipped at the boundary, requiring
+$x>0.13+0.10u^2(3-2u)$, $u=\operatorname{clip}((a-0.20)/0.12,0,1)$,
+$z>0.075$ and an elliptical lip opening
+$(y/0.09)^2+((z-0.27)/0.045)^2>1$. The shell's inward surface is offset
+$0.0004$ head lengths along vertex normals; the outward surface adds $0.003$,
+except the $0.001$ rim. Boundary walls and a reversed inner layer close the
+mesh. Two existing tapered moustache strips sit above the lip. The shell uses an opaque swatch mixed from 75\% skin and 25\% hair color
+to suggest closely cropped hair; the moustache uses the same shade. Skin, moustache, beard and cap are subject to
+the same optional head morph, so the ornament follows the base head.
+
+The coarse skin triangles limit boundary fidelity and the uniform material is
+not individual stubble; facial hair is visual only. Rendering must be checked
+for each selected face, hair color and pose. Reproduce the closedness,
+orientation, lip-clearance, schema and native physics checks with:
+\begin{verbatim}
+PYTHONPATH=.:vendor/ud-tools/src python -m pytest tests/unit/model_appearance/test_short_beard.py
+\end{verbatim}
+\end{document}

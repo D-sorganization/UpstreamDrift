@@ -207,6 +207,7 @@ def attach_body_skin(
     profile = spec.get("subject", {}).get("body_skin_profile")
     fitting = fit.load_fit_settings(profile=profile)
     fitted = fit.fit_body_skin(skin, export.subject_lengths(frames), fitting)
+    fitted = fit.shape_body_build(fitted, doc.body_build)
     binds = export.bind_poses(frames, fitted)
     turns = spec_turns(spec, roles, frames, settings.bind_pose)
     rings = wrist_rings(spec, club, roles, binds, turns)
