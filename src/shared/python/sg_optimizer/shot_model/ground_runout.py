@@ -58,6 +58,7 @@ _ASSUMED = "Assumed prior; unmeasured turf, no primary citation"
 
 
 def _p(value: float, why: str) -> ParameterRecord:
+    """Wrap an assumed parameter value with its rationale as a ``ParameterRecord``."""
     return ParameterRecord(value, "assumption", _ASSUMED, why)
 
 
@@ -69,6 +70,7 @@ def load_bounce_settings() -> dict[str, Any]:
 
 
 def _cited() -> dict[str, ParameterRecord]:
+    """Return the cited first-bounce coefficients from ``runout_bounce.json``."""
     raw = load_bounce_settings()
     src = raw["source"]
     cite = (
@@ -110,7 +112,7 @@ class Rebound:
     vz: NDArray[np.float64]
     mu_c: NDArray[np.float64]  # eq. (4)
     e: NDArray[np.float64]  # eq. (5)
-    rolling: NDArray[np.bool_]  # mu >= mu_c: eq. (3), else eq. (2)
+    rolling: NDArray[np.bool_]  # mu >= |mu_c|: eq. (3), else eq. (2)
 
 
 def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
@@ -128,6 +130,9 @@ def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
         * (np.hypot(h, d) / p["theta_c_ref_speed_mps"])
         * (phi / p["theta_c_ref_angle_deg"])
     )  # eq. (8)
+    tc = np.minimum(
+        tc, np.pi / 4
+    )  # calibrated at 15.4 deg; extrapolation past 45 deg is unphysical
     c, s = np.cos(tc), np.sin(tc)
     vix, viy = h * c - d * s, h * s + d * c  # eq. (6)
     e = np.where(
@@ -139,11 +144,11 @@ def penner_rebound(horizontal: Any, down: Any, spin: Any) -> Rebound:
     )  # eq. (5)
     rw = p["ball_radius_m"] * w
     mu_c = 2.0 * (vix + rw) / (7.0 * (1.0 + e) * viy)  # eq. (4)
-    rolling = p["friction_mu"] >= mu_c
+    rolling = p["friction_mu"] >= np.abs(mu_c)
     vrx = np.where(
         rolling,
         5.0 / 7.0 * vix - 2.0 / 7.0 * rw,
-        vix - p["friction_mu"] * viy * (1 + e),
+        vix - np.sign(mu_c) * p["friction_mu"] * viy * (1 + e),
     )  # eqs. (3a), (2a)
     vry = e * viy  # eqs. (3b), (2b)
     return Rebound(vrx * c - vry * s, vrx * s + vry * c, mu_c, e, rolling)  # eq. (7)
@@ -185,6 +190,7 @@ class SlopeAwareGround:
     def __call__(
         self, landing: NDArray[np.float64], lie: str, slope: str, skill: str
     ) -> NDArray[np.float64]:
+        """Map landing states ``(n, 6)`` to resting offsets ``(n, 2)`` yards."""
         require(
             landing.ndim == 2 and landing.shape[1] == len(LANDING_COLUMNS),
             f"landing state needs columns {LANDING_COLUMNS}",

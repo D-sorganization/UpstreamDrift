@@ -4,6 +4,12 @@ Renders a same-input swing in each physics engine's own viewer and writes mp4
 clips: one per camera view (face-on, down-the-line, overhead, oblique) plus a
 labelled 2x2 clip, with force and torque overlays.
 
+New users: start with the [Quick Start](../../../docs/user_guide/native_viewer_export.md)
+(recipes and the limit of each display) and the
+[help page](../../../docs/help/native_viewer_export.md) (what each display means on a
+kinematic replay). This README is the full flag reference. The exporter has no
+launcher tile yet; the in-app help entry comes with the exporter dialog (#15150 G11).
+
 | Engine    | Native viewer      | Capture                            | Overlay                             |
 | --------- | ------------------ | ---------------------------------- | ----------------------------------- |
 | Drake     | MeshCat            | Headless Chromium (SwiftShader)    | 3D glyphs via `DrakeMeshcatSink`    |
